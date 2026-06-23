@@ -1,0 +1,4 @@
+allowBuilds:
+  culori: false
+  sharp: true
+  unrs-resolver: true
