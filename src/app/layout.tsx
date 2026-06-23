@@ -1,22 +1,22 @@
 import type { Metadata } from 'next';
-import { Open_Sans, Playfair_Display } from 'next/font/google';
+import { Lora, Nunito } from 'next/font/google';
 
 import './globals.css';
 
-const playfair = Playfair_Display({
+const lora = Lora({
   subsets: ['latin'],
-  variable: '--font-playfair',
+  variable: '--font-lora',
   display: 'swap',
 });
 
-const openSans = Open_Sans({
+const nunito = Nunito({
   subsets: ['latin'],
-  variable: '--font-open-sans',
+  variable: '--font-nunito',
   display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: 'Palette & Type Tool',
+  title: 'Craftie',
   description:
     'Generate color palettes, validate WCAG accessibility, and explore font pairings.',
 };
@@ -27,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${playfair.variable} ${openSans.variable}`}>
+    <html lang="es" className={`${lora.variable} ${nunito.variable}`}>
       <body>{children}</body>
     </html>
   );

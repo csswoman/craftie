@@ -10,7 +10,7 @@ Diseñadores, desarrolladores y creadores que construyen sistemas visuales (pale
 
 ## Product Purpose
 
-Palette & Type Tool ayuda a generar paletas de color coherentes, evaluar contraste WCAG, recomendar combinaciones tipográficas y exportar guías de marca ligeras. El flujo guía en cinco pasos: inspiración → selección de color → accesibilidad → tipografía → guardar/exportar.
+Craftie ayuda a generar paletas de color coherentes, evaluar contraste WCAG, recomendar combinaciones tipográficas y exportar guías de marca ligeras. El flujo guía en cinco pasos: inspiración → selección de color → accesibilidad → tipografía → guardar/exportar.
 
 Éxito = decisiones de diseño claras, comprobables y exportables, sin abrumar con jerga innecesaria.
 

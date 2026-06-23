@@ -1,6 +1,8 @@
 import { converter } from 'culori';
 
 import type { ExtractedColor } from './imageExtractor';
+import { namePalette } from './naming';
+import { normalizeHex } from './normalizeHex';
 import {
   sortSelectedColors,
   validateSelection,
@@ -87,17 +89,25 @@ export function buildSelectableColorsFromExtracted(extracted: ExtractedColor[]):
   for (const group of GROUP_ORDER) {
     const sorted = [...grouped[group]].sort((left, right) => right.prominence - left.prominence);
 
-    sorted.forEach((color, index) => {
+    sorted.forEach((color) => {
       catalog.push({
         id: `image-${group}-${color.hex.slice(1)}`,
-        name: `${GROUP_LABELS[group]} ${index + 1}`,
+        name: '',
         hex: color.hex,
         group,
       });
     });
   }
 
-  return catalog;
+  const names = namePalette(
+    catalog.map((color) => ({ hex: color.hex })),
+    { style: 'creative' },
+  );
+
+  return catalog.map((color) => ({
+    ...color,
+    name: names.get(normalizeHex(color.hex)) ?? GROUP_LABELS[color.group],
+  }));
 }
 
 function uniqueSelectable(colors: SelectableColor[]): SelectableColor[] {

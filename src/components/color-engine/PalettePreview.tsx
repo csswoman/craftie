@@ -1,25 +1,10 @@
 'use client';
 
+import { useMemo } from 'react';
+
 import type { GeneratedPalette } from '@lib/color/formulas';
 import { summarizeOklch } from '@lib/color/formatOklch';
-
-const ROLE_LABELS: Record<keyof GeneratedPalette, string> = {
-  primary: 'Primario',
-  accent: 'Acento',
-  surface: 'Superficie',
-  onSurface: 'Sobre superficie',
-  neutralLight: 'Neutro claro',
-  neutralDark: 'Neutro oscuro',
-};
-
-const ROLE_ORDER: (keyof GeneratedPalette)[] = [
-  'primary',
-  'accent',
-  'surface',
-  'onSurface',
-  'neutralLight',
-  'neutralDark',
-];
+import { buildGeneratedPaletteColumns } from '@lib/color/paletteDisplay';
 
 interface PalettePreviewProps {
   palette: GeneratedPalette | null;
@@ -28,6 +13,10 @@ interface PalettePreviewProps {
 
 export function PalettePreview({ palette, variant = 'default' }: PalettePreviewProps) {
   const isEmbedded = variant === 'embedded';
+  const columns = useMemo(
+    () => (palette ? buildGeneratedPaletteColumns(palette) : []),
+    [palette],
+  );
 
   return (
     <section
@@ -42,27 +31,26 @@ export function PalettePreview({ palette, variant = 'default' }: PalettePreviewP
         </p>
       ) : (
         <ul className="mt-4 flex flex-col gap-3">
-          {ROLE_ORDER.map((role) => {
-            const hex = palette[role];
-
-            return (
-              <li
-                key={role}
-                className="flex items-center gap-4 rounded-md border border-border bg-surface p-3"
-              >
-                <div
-                  className="h-12 w-12 shrink-0 rounded-md border border-border"
-                  style={{ backgroundColor: hex }}
-                  aria-hidden="true"
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="text-[0.8125rem] font-medium text-muted">{ROLE_LABELS[role]}</p>
-                  <p className="font-mono text-[0.9375rem] font-semibold text-ink">{hex}</p>
-                  <p className="mt-0.5 text-[0.8125rem] text-muted">{summarizeOklch(hex)}</p>
-                </div>
-              </li>
-            );
-          })}
+          {columns.map((column) => (
+            <li
+              key={column.id}
+              className="flex items-center gap-4 rounded-md border border-border bg-surface p-3"
+            >
+              <div
+                className="h-12 w-12 shrink-0 rounded-md border border-border"
+                style={{ backgroundColor: column.hex }}
+                aria-hidden="true"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-[0.9375rem] font-semibold text-ink">{column.name}</p>
+                <p className="font-mono text-[0.9375rem] font-semibold text-ink">{column.hex.toUpperCase()}</p>
+                {column.roleLabel ? (
+                  <p className="mt-0.5 text-[0.8125rem] font-medium text-muted">{column.roleLabel}</p>
+                ) : null}
+                <p className="mt-0.5 text-[0.8125rem] text-muted">{summarizeOklch(column.hex)}</p>
+              </div>
+            </li>
+          ))}
         </ul>
       )}
     </section>

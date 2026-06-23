@@ -38,7 +38,7 @@ export function SiteHeader({
         }`}
       >
         <Link href="/" className="font-display text-lg font-semibold text-ink">
-          Palette &amp; Type
+          Craftie
         </Link>
 
         <nav aria-label="Principal">

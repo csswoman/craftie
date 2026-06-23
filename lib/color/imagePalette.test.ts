@@ -26,6 +26,7 @@ describe('imagePalette', () => {
     expect(catalog.some((color) => color.group === 'bold')).toBe(true);
     expect(catalog.some((color) => color.group === 'dark-neutral')).toBe(true);
     expect(catalog.length).toBeGreaterThanOrEqual(4);
+    expect(catalog.every((color) => !/^(Claro|Intenso|Oscuro) \d+$/.test(color.name))).toBe(true);
   });
 
   it('creates a valid default selection from an image catalog', () => {

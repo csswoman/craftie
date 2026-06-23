@@ -2,7 +2,7 @@
 
 ## Vision
 
-Palette & Type Tool is a personal web application for generating color palettes, validating accessibility, recommending font pairings, and exporting lightweight brand guides.
+Craftie is a personal web application for generating color palettes, validating accessibility, recommending font pairings, and exporting lightweight brand guides.
 
 The project is inspired by the general workflow used in professional branding and color tools, but it is not intended to replicate any commercial product. All color harmony rules, font pairing recommendations, design styles, and generation logic are original and curated specifically for this project.
 

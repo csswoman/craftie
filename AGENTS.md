@@ -2,7 +2,7 @@
 
 ## Project
 
-Palette & Type Tool is a web app for:
+Craftie is a web app for:
 
 - Color palette generation
 - WCAG accessibility validation

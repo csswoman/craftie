@@ -1,5 +1,6 @@
 'use client';
 
+import { GROUP_DISPLAY_LABELS } from '@lib/color/naming';
 import type { SelectableColor } from '@lib/color/selectableColors';
 import { prefersLightSelectionRing } from '@lib/color/readableText';
 
@@ -11,11 +12,13 @@ export type ColorSwatchProps = {
 
 export function ColorSwatch({ color, selected, onSelect }: ColorSwatchProps) {
   const useLightRing = prefersLightSelectionRing(color.hex);
+  const roleLabel = GROUP_DISPLAY_LABELS[color.group];
+  const accessibleLabel = `${color.name}, ${color.hex}, ${roleLabel}`;
 
   return (
     <button
       type="button"
-      aria-label={`${color.name}: ${color.hex}`}
+      aria-label={accessibleLabel}
       aria-pressed={selected}
       onClick={() => onSelect(color)}
       className={`h-10 w-10 rounded-md border border-border transition-[box-shadow,transform] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
@@ -26,7 +29,7 @@ export function ColorSwatch({ color, selected, onSelect }: ColorSwatchProps) {
           : ''
       }`}
       style={{ backgroundColor: color.hex }}
-      title={color.name}
+      title={`${color.name} · ${color.hex}`}
     />
   );
 }

@@ -15,6 +15,10 @@ import {
 import { replaceSeeds, validateSeedsForGeneration } from '@lib/color/seeds';
 import { DESIGN_STYLES, type DesignStyle } from '@lib/styles/presets';
 import { getRecommendedPairings, type FontPair } from '@lib/typography/pairings';
+import { buildBrandKit, serializeBrandKit } from '@lib/export/brandKit';
+import { downloadTextFile } from '@lib/export/download';
+import { generateDesignMd } from '@lib/export/generateDesignMd';
+import { isLayoutView, type StudioView } from '@lib/export/studioViews';
 
 import { ColorSelectionPanel } from '@/components/color/ColorSelectionPanel';
 import { PaletteCanvas, type PaletteCanvasMode } from '@/components/color/PaletteCanvas';
@@ -24,14 +28,20 @@ import { GenerateButton } from '@/components/color-engine/GenerateButton';
 import { ImageUploader } from '@/components/color-engine/ImageUploader';
 import { PalettePreview } from '@/components/color-engine/PalettePreview';
 import { StyleGallery } from '@/components/color-engine/StyleGallery';
-import { SiteHeader, type WorkspaceTab } from '@/components/layout/SiteHeader';
-import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
+import { StudioCanvas } from '@/components/layout/StudioCanvas';
+import { StudioStatusBar } from '@/components/layout/StudioStatusBar';
+import { WorkspaceHeader } from '@/components/layout/WorkspaceHeader';
 import { PairingList } from '@/components/font-pairing/PairingList';
-import { TypographyPreview } from '@/components/font-pairing/TypographyPreview';
+import { StyleGuideView } from '@/components/style-guide/StyleGuideView';
+import {
+  ColorsView,
+  LayoutPreview,
+  TypeScaleView,
+} from '@/components/style-guide/StudioViews';
 import { ToolsSidebar, type ToolSection } from '@/components/color/ToolsSidebar';
 
 export function SelectColorsWorkspace() {
-  const [workspaceTab, setWorkspaceTab] = useState<WorkspaceTab>('colors');
+  const [studioView, setStudioView] = useState<StudioView>('style-guide');
   const [paletteCatalog, setPaletteCatalog] = useState<SelectableColor[]>([]);
   const [selectedColors, setSelectedColors] = useState<SelectableColor[]>([]);
   const [catalogSource, setCatalogSource] = useState<'none' | 'curated' | 'image'>('none');
@@ -135,37 +145,55 @@ export function SelectColorsWorkspace() {
     const nextPalette = generatePalette(seedResult.seeds);
     setGeneratedPalette(nextPalette);
     setCanvasMode('generated');
+    setStudioView('style-guide');
     setInspectorSection('accessibility');
     setRightPanelOpen(true);
   }
 
+  function handleExportDesignMd() {
+    if (!generatedPalette) return;
+    const content = generateDesignMd({ palette: generatedPalette, pairing: selectedPairing });
+    downloadTextFile('DESIGN.md', content, 'text/markdown;charset=utf-8');
+  }
+
+  function handleExportBrandKit() {
+    if (!generatedPalette) return;
+    const kit = buildBrandKit(generatedPalette, selectedPairing);
+    downloadTextFile('brand-kit.json', serializeBrandKit(kit), 'application/json;charset=utf-8');
+  }
+
   const isReviewPhase = generatedPalette !== null;
-  const showColorsRightPanel = workspaceTab === 'colors';
-  const mobileRightPanelAvailable =
-    isImageExtracting || paletteCatalog.length > 0 || generatedPalette !== null;
+  const showSelectionPanel =
+    !isReviewPhase && (isImageExtracting || paletteCatalog.length > 0);
+  const showInspectorPanel =
+    isReviewPhase && !isLayoutView(studioView) && studioView !== 'colors';
+  const mobileRightPanelAvailable = showSelectionPanel || showInspectorPanel;
+
+  const mainContent = renderMainContent({
+    generatedPalette,
+    studioView,
+    canvasMode,
+    setCanvasMode,
+    selectedColors,
+    isImageExtracting,
+    selectedPairing,
+  });
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <SiteHeader
-        activePath="/select-colors"
-        compact
-        workspaceTab={workspaceTab}
-        onWorkspaceTabChange={setWorkspaceTab}
+    <div className="flex min-h-screen flex-col pb-20">
+      <WorkspaceHeader
+        activeView={studioView}
+        onViewChange={setStudioView}
+        canExport={isReviewPhase}
+        onExportDesignMd={handleExportDesignMd}
+        onExportBrandKit={handleExportBrandKit}
       />
 
-      <WorkspaceShell
-        showRightPanel={showColorsRightPanel}
-        mobileRightPanelAvailable={mobileRightPanelAvailable}
+      <StudioCanvas
+        showRightPanel={showSelectionPanel || showInspectorPanel}
         rightPanelOpen={rightPanelOpen}
-        onRightPanelToggle={() => setRightPanelOpen((open) => !open)}
-        rightPanelAriaLabel={isReviewPhase ? 'Revisión de paleta' : 'Selección de colores'}
-        rightPanelToggleLabels={
-          isReviewPhase
-            ? { open: 'Ocultar revisión', closed: 'Mostrar revisión' }
-            : { open: 'Ocultar colores', closed: 'Mostrar colores' }
-        }
         sidebar={
-          workspaceTab === 'colors' ? (
+          <div className="flex min-h-0 flex-1 flex-col">
             <ToolsSidebar
               activeSection={toolSection}
               onSectionChange={setToolSection}
@@ -190,8 +218,8 @@ export function SelectColorsWorkspace() {
               generatePanel={
                 <div className="space-y-4">
                   <p className="text-[0.8125rem] leading-relaxed text-muted">
-                    Calcula roles semánticos a partir de tu selección y revisa accesibilidad en el
-                    inspector.
+                    Calcula roles semánticos a partir de tu selección y abre la guía de estilo al
+                    generar.
                   </p>
                   <GenerateButton onClick={handleGenerate} />
                   {error ? (
@@ -203,51 +231,33 @@ export function SelectColorsWorkspace() {
                 </div>
               }
             />
-          ) : (
-            <div className="min-h-0 flex-1 overflow-y-auto p-4">
-              <h2 className="text-[0.9375rem] font-semibold text-ink">Parejas tipográficas</h2>
-              <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">
-                Pares curados según el estado de ánimo del estilo elegido. La vista previa usa tu
-                paleta generada.
-              </p>
-              <div className="mt-4">
-                <PairingList
-                  pairings={recommendedPairings}
-                  selectedPairing={selectedPairing}
-                  onSelectPairing={setSelectedPairing}
-                />
+            {isReviewPhase ? (
+              <div className="shrink-0 border-t border-border p-4">
+                <h2 className="text-[0.8125rem] font-semibold text-ink">Tipografía</h2>
+                <p className="mt-1 text-[0.75rem] leading-relaxed text-muted">
+                  Pares sugeridos según el estilo elegido.
+                </p>
+                <div className="mt-3">
+                  <PairingList
+                    pairings={recommendedPairings}
+                    selectedPairing={selectedPairing}
+                    onSelectPairing={setSelectedPairing}
+                  />
+                </div>
               </div>
-            </div>
-          )
+            ) : null}
+          </div>
         }
-        canvas={
-          workspaceTab === 'colors' ? (
-            <PaletteCanvas
-              mode={canvasMode}
-              onModeChange={setCanvasMode}
-              selectedColors={selectedColors}
-              generatedPalette={generatedPalette}
-              isLoading={isImageExtracting}
-            />
-          ) : (
-            <div className="flex min-h-0 flex-1 flex-col">
-              <TypographyPreview
-                palette={generatedPalette}
-                selectedPairing={selectedPairing}
-                variant="canvas"
-              />
-            </div>
-          )
-        }
+        main={mainContent}
         rightPanel={
-          isReviewPhase ? (
+          showInspectorPanel ? (
             <InspectorPanel
               activeSection={inspectorSection}
               onSectionChange={setInspectorSection}
               accessibilityPanel={<ContrastPanel palette={generatedPalette} variant="embedded" />}
               layoutsPanel={<LayoutsPlaceholder />}
             />
-          ) : (
+          ) : showSelectionPanel ? (
             <ColorSelectionPanel
               catalogSource={catalogSource}
               isExtracting={isImageExtracting}
@@ -258,9 +268,74 @@ export function SelectColorsWorkspace() {
                 setError(null);
               }}
             />
-          )
+          ) : null
         }
       />
+
+      {mobileRightPanelAvailable ? (
+        <div className="flex shrink-0 items-center justify-end border-t border-border bg-bg px-3 py-2 xl:hidden">
+          <button
+            type="button"
+            onClick={() => setRightPanelOpen((open) => !open)}
+            aria-expanded={rightPanelOpen}
+            className="rounded-md px-3 py-1.5 text-[0.8125rem] font-semibold text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+          >
+            {rightPanelOpen ? 'Ocultar panel' : 'Mostrar panel'}
+          </button>
+        </div>
+      ) : null}
+
+      <StudioStatusBar palette={generatedPalette} pairing={selectedPairing} />
     </div>
   );
+}
+
+function renderMainContent({
+  generatedPalette,
+  studioView,
+  canvasMode,
+  setCanvasMode,
+  selectedColors,
+  isImageExtracting,
+  selectedPairing,
+}: {
+  generatedPalette: GeneratedPalette | null;
+  studioView: StudioView;
+  canvasMode: PaletteCanvasMode;
+  setCanvasMode: (mode: PaletteCanvasMode) => void;
+  selectedColors: SelectableColor[];
+  isImageExtracting: boolean;
+  selectedPairing: FontPair | null;
+}) {
+  if (!generatedPalette) {
+    return (
+      <PaletteCanvas
+        mode={canvasMode}
+        onModeChange={setCanvasMode}
+        selectedColors={selectedColors}
+        generatedPalette={generatedPalette}
+        isLoading={isImageExtracting}
+      />
+    );
+  }
+
+  if (studioView === 'style-guide') {
+    return <StyleGuideView palette={generatedPalette} pairing={selectedPairing} />;
+  }
+
+  if (studioView === 'type-scale') {
+    return <TypeScaleView palette={generatedPalette} pairing={selectedPairing} />;
+  }
+
+  if (studioView === 'colors') {
+    return <ColorsView palette={generatedPalette} />;
+  }
+
+  if (isLayoutView(studioView)) {
+    return (
+      <LayoutPreview layout={studioView} palette={generatedPalette} pairing={selectedPairing} />
+    );
+  }
+
+  return null;
 }

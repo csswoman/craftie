@@ -2,6 +2,7 @@
 
 @theme {
   --color-bg: oklch(1 0 0);
+  --color-canvas: oklch(0.965 0.004 160);
   --color-surface: oklch(0.975 0 0);
   --color-surface-raised: oklch(0.955 0 0);
   --color-ink: oklch(0.19 0.008 160);
@@ -13,12 +14,18 @@
   --color-pass: oklch(0.45 0.12 150);
   --color-fail: oklch(0.48 0.18 25);
 
-  --font-display: var(--font-playfair), Georgia, serif;
-  --font-body: var(--font-open-sans), system-ui, sans-serif;
-
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
+
+  --shadow-float: 0 1px 2px oklch(0.19 0.008 160 / 0.06), 0 8px 24px oklch(0.19 0.008 160 / 0.08);
+  --z-dropdown: 40;
+  --z-sticky: 30;
+}
+
+@theme inline {
+  --font-display: var(--font-lora), Georgia, serif;
+  --font-body: var(--font-nunito), system-ui, sans-serif;
 }
 
 @layer base {
@@ -29,7 +36,28 @@
   h1,
   h2,
   h3 {
-    font-family: var(--font-display);
+    @apply font-display;
     text-wrap: balance;
+  }
+}
+
+@layer utilities {
+  .canvas-dots {
+    background-color: var(--color-canvas);
+    background-image: radial-gradient(circle, oklch(0.72 0.008 160 / 0.45) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .panel-float {
+    @apply rounded-xl border border-border bg-bg;
+    box-shadow: var(--shadow-float);
+  }
+
+  .z-dropdown {
+    z-index: var(--z-dropdown);
+  }
+
+  .z-sticky {
+    z-index: var(--z-sticky);
   }
 }

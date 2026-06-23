@@ -1,28 +1,16 @@
 'use client';
 
+import { useMemo } from 'react';
+
 import type { GeneratedPalette } from '@lib/color/formulas';
+import {
+  buildGeneratedPaletteColumns,
+  buildSelectionPaletteColumns,
+} from '@lib/color/paletteDisplay';
 import type { SelectableColor } from '@lib/color/selectableColors';
 import { pickReadableTextColor } from '@lib/color/readableText';
 
 export type PaletteCanvasMode = 'selection' | 'generated';
-
-const GENERATED_ROLE_LABELS: Record<keyof GeneratedPalette, string> = {
-  primary: 'Primario',
-  accent: 'Acento',
-  surface: 'Superficie',
-  onSurface: 'Sobre superficie',
-  neutralLight: 'Neutro claro',
-  neutralDark: 'Neutro oscuro',
-};
-
-const GENERATED_ROLE_ORDER: (keyof GeneratedPalette)[] = [
-  'primary',
-  'accent',
-  'surface',
-  'onSurface',
-  'neutralLight',
-  'neutralDark',
-];
 
 export type PaletteCanvasProps = {
   mode: PaletteCanvasMode;
@@ -42,18 +30,13 @@ export function PaletteCanvas({
   const canShowGenerated = generatedPalette !== null;
   const activeMode = mode === 'generated' && canShowGenerated ? 'generated' : 'selection';
 
-  const columns =
-    activeMode === 'generated' && generatedPalette
-      ? GENERATED_ROLE_ORDER.map((role) => ({
-          id: role,
-          hex: generatedPalette[role],
-          label: GENERATED_ROLE_LABELS[role],
-        }))
-      : selectedColors.map((color) => ({
-          id: color.id,
-          hex: color.hex,
-          label: color.name,
-        }));
+  const columns = useMemo(() => {
+    if (activeMode === 'generated' && generatedPalette) {
+      return buildGeneratedPaletteColumns(generatedPalette);
+    }
+
+    return buildSelectionPaletteColumns(selectedColors);
+  }, [activeMode, generatedPalette, selectedColors]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -103,10 +86,15 @@ export function PaletteCanvas({
                     style={{ backgroundColor: column.hex, color: textColor }}
                   >
                     <div className="mt-auto space-y-1">
-                      <p className="font-mono text-[clamp(0.75rem,1.6vw,1.125rem)] font-semibold tracking-wide">
-                        {column.hex.replace('#', '').toUpperCase()}
+                      <p className="text-[clamp(0.8125rem,1.8vw,1.125rem)] font-semibold tracking-[0.01em]">
+                        {column.name}
                       </p>
-                      <p className="text-[0.8125rem] font-medium opacity-90">{column.label}</p>
+                      <p className="font-mono text-[clamp(0.75rem,1.6vw,1rem)] font-semibold tracking-wide opacity-95">
+                        {column.hex.toUpperCase()}
+                      </p>
+                      {column.roleLabel ? (
+                        <p className="text-[0.75rem] font-medium opacity-80">{column.roleLabel}</p>
+                      ) : null}
                     </div>
                   </article>
                 </li>

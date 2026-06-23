@@ -2,7 +2,7 @@
   "name": "color-tool",
   "version": "1.0.0",
   "private": true,
-  "description": "Palette & Type Tool — color palettes, WCAG validation, and font pairings",
+  "description": "Craftie — color palettes, WCAG validation, and font pairings",
   "directories": {
     "doc": "docs",
     "lib": "lib"

@@ -1,5 +1,5 @@
 ---
-name: Palette & Type Tool
+name: Craftie
 description: Tema claro y neutro donde las paletas del usuario son el único color protagonista.
 colors:
   bg: "#ffffff"
@@ -76,7 +76,7 @@ components:
     size: "48px"
 ---
 
-# Design System: Palette & Type Tool
+# Design System: Craftie
 
 ## 1. Overview
 
