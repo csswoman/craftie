@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import type { GeneratedPalette } from '@lib/color/formulas';
 import { buildGeneratedPaletteColumns } from '@lib/color/paletteDisplay';
@@ -8,6 +8,8 @@ import { buildFontFamilyStack } from '@lib/typography/googleFonts';
 import type { FontPair } from '@lib/typography/pairings';
 import { formatColorValues } from '@lib/export/colorFormats';
 import type { LayoutView } from '@lib/export/studioViews';
+
+import { ColorDetailsDrawer } from '@/components/color-engine/ColorDetailsDrawer';
 
 const SCALE_STEPS = [
   { label: 'Display', size: 'clamp(2rem, 4vw, 3rem)', weight: 600 },
@@ -70,6 +72,7 @@ export type ColorsViewProps = {
 };
 
 export function ColorsView({ palette }: ColorsViewProps) {
+  const [selectedColorHex, setSelectedColorHex] = useState<string | null>(null);
   const columns = useMemo(() => buildGeneratedPaletteColumns(palette), [palette]);
 
   return (
@@ -79,24 +82,36 @@ export function ColorsView({ palette }: ColorsViewProps) {
           const formats = formatColorValues(column.hex);
           return (
             <li key={column.id} className="overflow-hidden rounded-xl border border-border bg-bg shadow-sm">
-              <div className="h-16 w-full" style={{ backgroundColor: column.hex }} aria-hidden="true" />
-              <div className="grid gap-1 px-4 py-3 sm:grid-cols-[140px_1fr]">
-                <div>
-                  <p className="text-[0.9375rem] font-semibold text-ink">{column.name}</p>
-                  {column.roleLabel ? (
-                    <p className="mt-0.5 text-[0.75rem] font-medium text-muted">{column.roleLabel}</p>
-                  ) : null}
+              <button
+                type="button"
+                onClick={() => setSelectedColorHex(column.hex)}
+                className="block w-full text-left focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+              >
+                <div className="h-16 w-full" style={{ backgroundColor: column.hex }} aria-hidden="true" />
+                <div className="grid gap-1 px-4 py-3 sm:grid-cols-[140px_1fr]">
+                  <div>
+                    <p className="text-[0.9375rem] font-semibold text-ink">{column.name}</p>
+                    {column.roleLabel ? (
+                      <p className="mt-0.5 text-[0.75rem] font-medium text-muted">{column.roleLabel}</p>
+                    ) : null}
+                  </div>
+                  <div className="font-mono text-[0.75rem] text-muted">
+                    <p>{formats.hex}</p>
+                    <p>RGB {formats.rgb}</p>
+                    <p>CMYK {formats.cmyk}</p>
+                  </div>
                 </div>
-                <div className="font-mono text-[0.75rem] text-muted">
-                  <p>{formats.hex}</p>
-                  <p>RGB {formats.rgb}</p>
-                  <p>CMYK {formats.cmyk}</p>
-                </div>
-              </div>
+              </button>
             </li>
           );
         })}
       </ul>
+
+      <ColorDetailsDrawer
+        colorHex={selectedColorHex}
+        open={selectedColorHex !== null}
+        onClose={() => setSelectedColorHex(null)}
+      />
     </div>
   );
 }

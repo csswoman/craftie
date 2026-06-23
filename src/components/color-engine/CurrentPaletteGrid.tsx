@@ -1,16 +1,19 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import { buildSelectionPaletteColumns } from '@lib/color/paletteDisplay';
 import type { SelectableColor } from '@lib/color/selectableColors';
 import { pickReadableTextColor } from '@lib/color/readableText';
+
+import { ColorDetailsDrawer } from '@/components/color-engine/ColorDetailsDrawer';
 
 export type CurrentPaletteGridProps = {
   colors: SelectableColor[];
 };
 
 export function CurrentPaletteGrid({ colors }: CurrentPaletteGridProps) {
+  const [selectedColorHex, setSelectedColorHex] = useState<string | null>(null);
   const columns = useMemo(() => buildSelectionPaletteColumns(colors), [colors]);
 
   return (
@@ -28,23 +31,31 @@ export function CurrentPaletteGrid({ colors }: CurrentPaletteGridProps) {
 
             return (
               <li key={column.id}>
-                <article
-                  className="flex min-h-28 flex-col items-center justify-center rounded-lg px-4 py-5 text-center"
+                <button
+                  type="button"
+                  onClick={() => setSelectedColorHex(column.hex)}
+                  className="flex min-h-28 w-full cursor-pointer flex-col items-center justify-center rounded-lg px-4 py-5 text-center transition-transform hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
                   style={{ backgroundColor: column.hex, color: textColor }}
                 >
-                  <h3 className="text-[0.9375rem] font-semibold tracking-[0.01em]">{column.name}</h3>
-                  <p className="mt-1 font-mono text-[0.8125rem] font-semibold opacity-95">
+                  <span className="text-[0.9375rem] font-semibold tracking-[0.01em]">{column.name}</span>
+                  <span className="mt-1 font-mono text-[0.8125rem] font-semibold opacity-95">
                     {column.hex.toUpperCase()}
-                  </p>
+                  </span>
                   {column.roleLabel ? (
-                    <p className="mt-0.5 text-[0.75rem] font-medium opacity-85">{column.roleLabel}</p>
+                    <span className="mt-0.5 text-[0.75rem] font-medium opacity-85">{column.roleLabel}</span>
                   ) : null}
-                </article>
+                </button>
               </li>
             );
           })}
         </ul>
       )}
+
+      <ColorDetailsDrawer
+        colorHex={selectedColorHex}
+        open={selectedColorHex !== null}
+        onClose={() => setSelectedColorHex(null)}
+      />
     </section>
   );
 }

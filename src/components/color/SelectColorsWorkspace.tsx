@@ -12,6 +12,7 @@ import {
   validateSelection,
   type SelectableColor,
 } from '@lib/color/selectableColors';
+import { replacePaletteColor } from '@lib/color/paletteOrder';
 import { replaceSeeds, validateSeedsForGeneration } from '@lib/color/seeds';
 import { DESIGN_STYLES, type DesignStyle } from '@lib/styles/presets';
 import { getRecommendedPairings, type FontPair } from '@lib/typography/pairings';
@@ -54,6 +55,9 @@ export function SelectColorsWorkspace() {
   const [inspectorSection, setInspectorSection] = useState<InspectorSection>('accessibility');
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const [canvasMode, setCanvasMode] = useState<PaletteCanvasMode>('selection');
+  const [lockedColorIds, setLockedColorIds] = useState<string[]>([]);
+
+  const activeCatalog = paletteCatalog.length > 0 ? paletteCatalog : SELECTABLE_COLORS;
 
   const activeMoods = useMemo(() => {
     if (selectedStyleId === null) {
@@ -77,7 +81,7 @@ export function SelectColorsWorkspace() {
     }
 
     setCatalogSource('curated');
-    setPaletteCatalog(SELECTABLE_COLORS);
+    setPaletteCatalog([...SELECTABLE_COLORS]);
     setSelectedStyleId(styleId);
     setSelectedColors(suggestion.colors);
     setGeneratedPalette(null);
@@ -150,6 +154,34 @@ export function SelectColorsWorkspace() {
     setRightPanelOpen(true);
   }
 
+  function handleToggleLock(colorId: string) {
+    setLockedColorIds((current) =>
+      current.includes(colorId)
+        ? current.filter((id) => id !== colorId)
+        : [...current, colorId],
+    );
+  }
+
+  function handleReplacePaletteColor(colorId: string, newHex: string) {
+    const result = replacePaletteColor(activeCatalog, selectedColors, colorId, newHex);
+
+    if (!result) {
+      return;
+    }
+
+    setPaletteCatalog(result.catalog);
+    setSelectedColors(result.selected);
+
+    const selectedIndex = selectedColors.findIndex((color) => color.id === colorId);
+    const updated = result.selected[selectedIndex];
+
+    if (updated && updated.id !== colorId) {
+      setLockedColorIds((current) =>
+        current.map((id) => (id === colorId ? updated.id : id)),
+      );
+    }
+  }
+
   function handleExportDesignMd() {
     if (!generatedPalette) return;
     const content = generateDesignMd({ palette: generatedPalette, pairing: selectedPairing });
@@ -177,6 +209,11 @@ export function SelectColorsWorkspace() {
     selectedColors,
     isImageExtracting,
     selectedPairing,
+    activeCatalog,
+    lockedColorIds,
+    onSelectedColorsChange: setSelectedColors,
+    onToggleLock: handleToggleLock,
+    onReplaceColor: handleReplacePaletteColor,
   });
 
   return (
@@ -298,6 +335,11 @@ function renderMainContent({
   selectedColors,
   isImageExtracting,
   selectedPairing,
+  activeCatalog,
+  lockedColorIds,
+  onSelectedColorsChange,
+  onToggleLock,
+  onReplaceColor,
 }: {
   generatedPalette: GeneratedPalette | null;
   studioView: StudioView;
@@ -306,6 +348,11 @@ function renderMainContent({
   selectedColors: SelectableColor[];
   isImageExtracting: boolean;
   selectedPairing: FontPair | null;
+  activeCatalog: SelectableColor[];
+  lockedColorIds: string[];
+  onSelectedColorsChange: (colors: SelectableColor[]) => void;
+  onToggleLock: (colorId: string) => void;
+  onReplaceColor: (colorId: string, newHex: string) => void;
 }) {
   if (!generatedPalette) {
     return (
@@ -315,6 +362,12 @@ function renderMainContent({
         selectedColors={selectedColors}
         generatedPalette={generatedPalette}
         isLoading={isImageExtracting}
+        catalog={activeCatalog}
+        lockedIds={lockedColorIds}
+        editable={selectedColors.length > 0}
+        onSelectedColorsChange={onSelectedColorsChange}
+        onReplaceColor={onReplaceColor}
+        onToggleLock={onToggleLock}
       />
     );
   }
