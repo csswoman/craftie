@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Lora, Nunito } from 'next/font/google';
 
+import { ThemeProvider } from '@/components/theme/ThemeProvider';
+
 import './globals.css';
 
 const lora = Lora({
@@ -27,8 +29,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${lora.variable} ${nunito.variable}`}>
-      <body>{children}</body>
+    <html lang="es" className={`${lora.variable} ${nunito.variable}`} suppressHydrationWarning>
+      <body>
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }

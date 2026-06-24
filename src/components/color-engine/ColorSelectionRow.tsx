@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { CUSTOM_COLOR_NAME_MAX_LENGTH } from '@lib/color/paletteOrder';
 import type { SelectableColor } from '@lib/color/selectableColors';
 
 export type ColorSelectionRowProps = {
@@ -63,9 +64,16 @@ export function ColorSelectionRow({
           id={`rename-${color.id}`}
           type="text"
           value={draftName}
+          maxLength={CUSTOM_COLOR_NAME_MAX_LENGTH}
           onChange={(event) => {
             setDraftName(event.target.value);
             setRenameFeedback(null);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') {
+              event.preventDefault();
+              cancelEditing();
+            }
           }}
           className="mt-2 w-full rounded-md border border-border bg-bg px-3 py-2 text-[0.8125rem] text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
         />

@@ -31,8 +31,8 @@ export function StyleCard({ style, selected, onSelect }: StyleCardProps) {
         ))}
       </div>
 
-      <h3 className="mt-3 text-base font-semibold text-ink">{style.name}</h3>
-      <p className="mt-1 flex-1 text-[0.8125rem] leading-relaxed text-muted">
+      <h3 className="mt-3 line-clamp-2 text-base font-semibold text-ink">{style.name}</h3>
+      <p className="mt-1 line-clamp-3 flex-1 text-[0.8125rem] leading-relaxed text-muted">
         {style.description}
       </p>
 

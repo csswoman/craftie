@@ -27,6 +27,7 @@ export function ImageUploader({
   const isEmbedded = variant === 'embedded';
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
+  const lastFileRef = useRef<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,6 +43,10 @@ export function ImageUploader({
   }, [previewUrl]);
 
   async function processFile(file: File) {
+    if (isLoading) {
+      return;
+    }
+
     setError(null);
 
     try {
@@ -63,6 +68,7 @@ export function ImageUploader({
     const nextPreviewUrl = URL.createObjectURL(file);
     setPreviewUrl(nextPreviewUrl);
     setFileName(file.name);
+    lastFileRef.current = file;
     setIsLoading(true);
     onExtractionStart?.();
 
@@ -105,6 +111,7 @@ export function ImageUploader({
   return (
     <section
       aria-label="Subir imagen de inspiración"
+      aria-busy={isLoading}
       className={
         isEmbedded
           ? showHeader
@@ -169,8 +176,32 @@ export function ImageUploader({
       </div>
 
       {error ? (
-        <p role="alert" className="mt-3 text-[0.8125rem] font-medium text-fail">
-          {error}
+        <div className="mt-3 space-y-2">
+          <p role="alert" className="text-[0.8125rem] font-medium text-fail">
+            {error}
+          </p>
+          {lastFileRef.current ? (
+            <button
+              type="button"
+              onClick={() => {
+                const file = lastFileRef.current;
+
+                if (file) {
+                  void processFile(file);
+                }
+              }}
+              disabled={isLoading}
+              className="rounded-md border border-border px-3 py-1.5 text-[0.8125rem] font-semibold text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Reintentar extracción
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
+      {isLoading ? (
+        <p role="status" className="mt-3 text-[0.8125rem] text-muted">
+          Extrayendo colores de la imagen…
         </p>
       ) : null}
 
@@ -182,7 +213,7 @@ export function ImageUploader({
             className="max-h-56 w-full object-contain"
           />
           {fileName ? (
-            <figcaption className="border-t border-border px-3 py-2 text-[0.75rem] text-muted">
+            <figcaption className="truncate border-t border-border px-3 py-2 text-[0.75rem] text-muted">
               {fileName}
             </figcaption>
           ) : null}

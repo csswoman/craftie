@@ -8,6 +8,12 @@ import {
   getStudioViewMeta,
   type StudioView,
 } from '@lib/export/studioViews';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
+
+import {
+  StudioShortcutsHelp,
+  type StudioShortcutsHelpHandle,
+} from '@/components/layout/StudioShortcutsHelp';
 
 export type LayoutNavigatorProps = {
   activeView: StudioView;
@@ -96,7 +102,7 @@ export function LayoutNavigator({ activeView, onViewChange }: LayoutNavigatorPro
         className="inline-flex items-center gap-2 rounded-md border border-border bg-bg px-3 py-2 text-[0.8125rem] font-semibold text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
       >
         <ViewIcon view={activeView} />
-        <span>{active.label}</span>
+        <span className="max-w-[9rem] truncate sm:max-w-none">{active.label}</span>
         <ChevronDown open={open} />
       </button>
 
@@ -105,7 +111,8 @@ export function LayoutNavigator({ activeView, onViewChange }: LayoutNavigatorPro
           ref={menuRef}
           id={menuId}
           role="menu"
-          className="fixed z-dropdown w-[min(100vw-2rem,320px)] rounded-xl border border-border bg-bg p-2 shadow-lg"
+          className="fixed z-dropdown w-[min(100vw-2rem,320px)] rounded-xl border border-border bg-bg p-2"
+          style={{ boxShadow: 'var(--shadow-float)' }}
           style={menuPosition}
         >
           <MenuSection
@@ -234,6 +241,7 @@ export type WorkspaceHeaderProps = {
   canExport: boolean;
   onExportDesignMd: () => void;
   onExportBrandKit: () => void;
+  shortcutsRef?: React.RefObject<StudioShortcutsHelpHandle | null>;
 };
 
 export function WorkspaceHeader({
@@ -242,6 +250,7 @@ export function WorkspaceHeader({
   canExport,
   onExportDesignMd,
   onExportBrandKit,
+  shortcutsRef,
 }: WorkspaceHeaderProps) {
   return (
     <header className="relative z-sticky shrink-0 border-b border-border/70 bg-bg/90 backdrop-blur-sm">
@@ -272,6 +281,8 @@ export function WorkspaceHeader({
         </Link>
 
         <div className="flex items-center justify-end gap-2 justify-self-end">
+          <ThemeToggle />
+          <StudioShortcutsHelp ref={shortcutsRef} />
           <button
             type="button"
             disabled={!canExport}

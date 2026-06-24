@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { GeneratedPalette } from '@lib/color/formulas';
 import { generatePalette } from '@lib/color/formulas';
@@ -21,6 +21,11 @@ import { downloadTextFile } from '@lib/export/download';
 import { generateDesignMd } from '@lib/export/generateDesignMd';
 import { isLayoutView, type StudioView } from '@lib/export/studioViews';
 import type { StudioFlowStepId } from '@lib/studio/studioFlow';
+import {
+  isGenerateShortcut,
+  isShortcutsHelpShortcut,
+  shouldIgnoreStudioShortcut,
+} from '@lib/studio/studioShortcuts';
 
 import { ColorSelectionPanel } from '@/components/color/ColorSelectionPanel';
 import { PaletteCanvas, type PaletteCanvasMode } from '@/components/color/PaletteCanvas';
@@ -34,6 +39,7 @@ import { StudioCanvas } from '@/components/layout/StudioCanvas';
 import { StudioFlowGuide } from '@/components/layout/StudioFlowGuide';
 import { StudioStatusBar } from '@/components/layout/StudioStatusBar';
 import { WorkspaceHeader } from '@/components/layout/WorkspaceHeader';
+import type { StudioShortcutsHelpHandle } from '@/components/layout/StudioShortcutsHelp';
 import { PairingList } from '@/components/font-pairing/PairingList';
 import { StyleGuideView } from '@/components/style-guide/StyleGuideView';
 import { MockupPreviewGrid } from '@/components/brand-preview/MockupPreviewGrid';
@@ -60,6 +66,10 @@ export function SelectColorsWorkspace() {
   const [canvasMode, setCanvasMode] = useState<PaletteCanvasMode>('selection');
   const [lockedColorIds, setLockedColorIds] = useState<string[]>([]);
   const [inspirationOpenRequestId, setInspirationOpenRequestId] = useState(0);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const generatingRef = useRef(false);
+  const shortcutsRef = useRef<StudioShortcutsHelpHandle>(null);
 
   const activeCatalog = paletteCatalog.length > 0 ? paletteCatalog : SELECTABLE_COLORS;
 
@@ -97,53 +107,69 @@ export function SelectColorsWorkspace() {
   }, [isReviewPhase, selectedColors.length, selectionReady]);
 
   const handleGenerate = useCallback(() => {
-    const selectionResult = validateSelection(selectedColors);
-
-    if (!selectionResult.ok) {
-      setError(selectionResult.error);
-      setGeneratedPalette(null);
+    if (generatingRef.current) {
       return;
     }
 
-    const seeds = replaceSeeds(mapSelectedColorsToSeeds(selectedColors));
-    const seedResult = validateSeedsForGeneration(seeds);
+    generatingRef.current = true;
+    setIsGenerating(true);
 
-    if (!seedResult.ok) {
-      setError(seedResult.error);
-      setGeneratedPalette(null);
-      return;
-    }
+    try {
+      const selectionResult = validateSelection(selectedColors);
 
-    setError(null);
-    const nextPalette = generatePalette(seedResult.seeds);
-    setGeneratedPalette(nextPalette);
-    setCanvasMode('generated');
-    setStudioView('style-guide');
-    setInspectorSection('accessibility');
-    setRightPanelOpen(true);
-  }, [selectedColors]);
-
-  useEffect(() => {
-    if (isReviewPhase || !selectionReady) {
-      return;
-    }
-
-    function handleShortcut(event: KeyboardEvent) {
-      if (event.key !== 'Enter' || !(event.ctrlKey || event.metaKey)) {
+      if (!selectionResult.ok) {
+        setError(selectionResult.error);
+        setGeneratedPalette(null);
+        setStatusMessage(null);
         return;
       }
 
-      const target = event.target;
+      const seeds = replaceSeeds(mapSelectedColorsToSeeds(selectedColors));
+      const seedResult = validateSeedsForGeneration(seeds);
 
-      if (
-        target instanceof HTMLElement &&
-        (target.isContentEditable ||
-          target.tagName === 'TEXTAREA' ||
-          (target.tagName === 'INPUT' &&
-            !['button', 'submit', 'reset', 'checkbox', 'radio'].includes(
-              (target as HTMLInputElement).type,
-            )))
-      ) {
+      if (!seedResult.ok) {
+        setError(seedResult.error);
+        setGeneratedPalette(null);
+        setStatusMessage(null);
+        return;
+      }
+
+      setError(null);
+      const nextPalette = generatePalette(seedResult.seeds);
+      setGeneratedPalette(nextPalette);
+      setCanvasMode('generated');
+      setStudioView('style-guide');
+      setInspectorSection('accessibility');
+      setRightPanelOpen(true);
+      setStatusMessage('Paleta generada. Revisa contraste y mockups en la guía de estilo.');
+    } finally {
+      generatingRef.current = false;
+      setIsGenerating(false);
+    }
+  }, [selectedColors]);
+
+  useEffect(() => {
+    if (!statusMessage) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => setStatusMessage(null), 5000);
+    return () => window.clearTimeout(timer);
+  }, [statusMessage]);
+
+  useEffect(() => {
+    function handleShortcut(event: KeyboardEvent) {
+      if (isShortcutsHelpShortcut(event)) {
+        event.preventDefault();
+        shortcutsRef.current?.open();
+        return;
+      }
+
+      if (isReviewPhase || !selectionReady) {
+        return;
+      }
+
+      if (!isGenerateShortcut(event) || shouldIgnoreStudioShortcut(event.target)) {
         return;
       }
 
@@ -296,13 +322,31 @@ export function SelectColorsWorkspace() {
   function handleExportDesignMd() {
     if (!generatedPalette) return;
     const content = generateDesignMd({ palette: generatedPalette, pairing: selectedPairing });
-    downloadTextFile('DESIGN.md', content, 'text/markdown;charset=utf-8');
+    const result = downloadTextFile('DESIGN.md', content, 'text/markdown;charset=utf-8');
+
+    if (!result.ok) {
+      setError(result.error);
+      setStatusMessage(null);
+      return;
+    }
+
+    setError(null);
+    setStatusMessage('DESIGN.md descargado.');
   }
 
   function handleExportBrandKit() {
     if (!generatedPalette) return;
     const kit = buildBrandKit(generatedPalette, selectedPairing);
-    downloadTextFile('brand-kit.json', serializeBrandKit(kit), 'application/json;charset=utf-8');
+    const result = downloadTextFile('brand-kit.json', serializeBrandKit(kit), 'application/json;charset=utf-8');
+
+    if (!result.ok) {
+      setError(result.error);
+      setStatusMessage(null);
+      return;
+    }
+
+    setError(null);
+    setStatusMessage('Brand Kit descargado.');
   }
 
   const showSelectionPanel = !isReviewPhase && (isImageExtracting || selectedColors.length > 0);
@@ -329,13 +373,27 @@ export function SelectColorsWorkspace() {
 
   return (
     <div className="flex min-h-screen flex-col pb-20">
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {statusMessage}
+      </div>
+
       <WorkspaceHeader
         activeView={studioView}
         onViewChange={setStudioView}
         canExport={isReviewPhase}
         onExportDesignMd={handleExportDesignMd}
         onExportBrandKit={handleExportBrandKit}
+        shortcutsRef={shortcutsRef}
       />
+
+      {error ? (
+        <p
+          role="alert"
+          className="mx-4 mt-0 border-b border-fail/20 bg-fail/5 px-3 py-2 text-[0.8125rem] font-medium text-fail lg:mx-5"
+        >
+          {error}
+        </p>
+      ) : null}
 
       {!isReviewPhase ? (
         <StudioFlowGuide
@@ -380,12 +438,11 @@ export function SelectColorsWorkspace() {
                     Calcula roles semánticos a partir de tu selección y abre la guía de estilo al
                     generar.
                   </p>
-                  <GenerateButton onClick={handleGenerate} />
-                  {error ? (
-                    <p role="alert" className="text-[0.8125rem] font-medium text-fail">
-                      {error}
-                    </p>
-                  ) : null}
+                  <GenerateButton
+                    onClick={handleGenerate}
+                    disabled={!selectionReady}
+                    busy={isGenerating}
+                  />
                   <PalettePreview palette={generatedPalette} variant="embedded" />
                 </div>
               }

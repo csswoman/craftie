@@ -6,7 +6,7 @@ export type InspectorSection = 'accessibility' | 'layouts';
 
 const SECTIONS: { id: InspectorSection; label: string }[] = [
   { id: 'accessibility', label: 'Contraste' },
-  { id: 'layouts', label: 'Maquetas' },
+  { id: 'layouts', label: 'Vistas previas' },
 ];
 
 export type InspectorPanelProps = {
@@ -70,17 +70,3 @@ export function InspectorPanel({
     </div>
   );
 }
-
-function LayoutsPlaceholder() {
-  return (
-    <div className="rounded-md border border-dashed border-border bg-bg px-4 py-10 text-center">
-      <p className="text-[0.9375rem] font-semibold text-ink">Maquetas en tiempo real</p>
-      <p className="mt-2 text-[0.8125rem] leading-relaxed text-muted">
-        Próximamente: vistas previas básicas (dashboard, marca, ilustración) con tu paleta y
-        tipografía aplicadas al instante.
-      </p>
-    </div>
-  );
-}
-
-export { LayoutsPlaceholder };

@@ -7,7 +7,9 @@ import { classifyHexToGroup } from './imagePalette';
 import { nameForHex } from './naming';
 import { normalizeHex, isValidOpaqueHex } from './normalizeHex';
 
-const CUSTOM_NAME_MAX_LENGTH = 40;
+export const CUSTOM_COLOR_NAME_MAX_LENGTH = 40;
+
+const CUSTOM_NAME_MAX_LENGTH = CUSTOM_COLOR_NAME_MAX_LENGTH;
 
 export function normalizeCustomColorName(name: string): string | null {
   const trimmed = name.trim();

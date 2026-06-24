@@ -1,5 +1,7 @@
 import Link from 'next/link';
 
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
+
 export type WorkspaceTab = 'colors' | 'typography';
 
 interface SiteHeaderProps {
@@ -41,29 +43,32 @@ export function SiteHeader({
           Craftie
         </Link>
 
-        <nav aria-label="Principal">
-          {isWorkspace ? (
-            <ul className="flex gap-1" role="tablist">
-              {WORKSPACE_TABS.map((tab) => (
-                <li key={tab.id} role="presentation">
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={workspaceTab === tab.id}
-                    onClick={() => onWorkspaceTabChange(tab.id)}
-                    className={tabClassName(workspaceTab === tab.id)}
-                  >
-                    {tab.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <Link href="/select-colors" className={tabClassName(activePath === '/select-colors')}>
-              Colores
-            </Link>
-          )}
-        </nav>
+        <div className="flex items-center gap-1">
+          <nav aria-label="Principal">
+            {isWorkspace ? (
+              <ul className="flex gap-1" role="tablist">
+                {WORKSPACE_TABS.map((tab) => (
+                  <li key={tab.id} role="presentation">
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={workspaceTab === tab.id}
+                      onClick={() => onWorkspaceTabChange(tab.id)}
+                      className={tabClassName(workspaceTab === tab.id)}
+                    >
+                      {tab.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <Link href="/select-colors" className={tabClassName(activePath === '/select-colors')}>
+                Colores
+              </Link>
+            )}
+          </nav>
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );

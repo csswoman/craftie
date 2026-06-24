@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import { CUSTOM_COLOR_NAME_MAX_LENGTH } from '@lib/color/paletteOrder';
+
 export type AddHexColorFormProps = {
   onSubmit: (hex: string, customName?: string) => string | null;
 };
@@ -10,11 +12,13 @@ export function AddHexColorForm({ onSubmit }: AddHexColorFormProps) {
   const [hexValue, setHexValue] = useState('');
   const [nameValue, setNameValue] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [isError, setIsError] = useState(false);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const message = onSubmit(hexValue.trim(), nameValue.trim() || undefined);
     setFeedback(message);
+    setIsError(message !== null);
 
     if (!message) {
       setHexValue('');
@@ -35,24 +39,34 @@ export function AddHexColorForm({ onSubmit }: AddHexColorFormProps) {
           onChange={(event) => {
             setHexValue(event.target.value);
             setFeedback(null);
+            setIsError(false);
           }}
           placeholder="#6986B8"
           spellCheck={false}
+          maxLength={7}
           aria-label="Código HEX"
           className="w-full rounded-md border border-border bg-bg px-3 py-2 font-mono text-[0.8125rem] text-ink placeholder:text-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
         />
-        <input
-          type="text"
-          value={nameValue}
-          onChange={(event) => {
-            setNameValue(event.target.value);
-            setFeedback(null);
-          }}
-          placeholder="Nombre opcional, p. ej. Azul acero"
-          spellCheck={false}
-          aria-label="Nombre del color"
-          className="w-full rounded-md border border-border bg-bg px-3 py-2 text-[0.8125rem] text-ink placeholder:text-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-        />
+        <div>
+          <input
+            type="text"
+            value={nameValue}
+            onChange={(event) => {
+              setNameValue(event.target.value);
+              setFeedback(null);
+              setIsError(false);
+            }}
+            placeholder="Nombre opcional, p. ej. Azul acero"
+            spellCheck={false}
+            maxLength={CUSTOM_COLOR_NAME_MAX_LENGTH}
+            aria-describedby="custom-color-name-hint"
+            aria-label="Nombre del color"
+            className="w-full rounded-md border border-border bg-bg px-3 py-2 text-[0.8125rem] text-ink placeholder:text-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+          />
+          <p id="custom-color-name-hint" className="mt-1 text-[0.6875rem] text-muted">
+            Máximo {CUSTOM_COLOR_NAME_MAX_LENGTH} caracteres. Acepta emoji y acentos.
+          </p>
+        </div>
       </div>
       <button
         type="submit"
@@ -61,7 +75,10 @@ export function AddHexColorForm({ onSubmit }: AddHexColorFormProps) {
         Añadir color
       </button>
       {feedback ? (
-        <p className="mt-2 text-[0.75rem] font-medium text-muted" role="status">
+        <p
+          className={`mt-2 text-[0.75rem] font-medium ${isError ? 'text-fail' : 'text-muted'}`}
+          role={isError ? 'alert' : 'status'}
+        >
           {feedback}
         </p>
       ) : null}
