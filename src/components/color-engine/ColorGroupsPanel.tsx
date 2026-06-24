@@ -2,8 +2,8 @@
 
 import { useMemo } from 'react';
 
+import { countSelectedInGroup } from '@lib/color/selectionPanel';
 import {
-  sortSelectedColors,
   toggleSelectedColor,
   type SelectableColor,
 } from '@lib/color/selectableColors';
@@ -57,8 +57,10 @@ export function ColorGroupsPanel({
       {GROUPS.map((group) => (
         <ColorGroup
           key={group.id}
+          groupId={group.id}
           title={group.title}
           requirement={group.requirement}
+          selectedCount={countSelectedInGroup(selectedColors, group.id)}
           colors={colors.filter((color) => color.group === group.id)}
           selectedIds={selectedIds}
           onToggleColor={handleToggle}
@@ -73,8 +75,4 @@ export function ColorGroupsPanel({
       ))}
     </div>
   );
-}
-
-export function getSortedSelection(selectedColors: SelectableColor[]) {
-  return sortSelectedColors(selectedColors);
 }
