@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 
 import {
@@ -16,10 +16,41 @@ export type LayoutNavigatorProps = {
 
 export function LayoutNavigator({ activeView, onViewChange }: LayoutNavigatorProps) {
   const [open, setOpen] = useState(false);
+  const [menuPosition, setMenuPosition] = useState<{ top: string; left: string } | null>(null);
   const menuId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const active = getStudioViewMeta(activeView);
+
+  useLayoutEffect(() => {
+    if (!open) {
+      setMenuPosition(null);
+      return;
+    }
+
+    function updatePosition() {
+      const trigger = triggerRef.current;
+
+      if (!trigger) {
+        return;
+      }
+
+      const rect = trigger.getBoundingClientRect();
+      setMenuPosition({
+        top: `${rect.bottom + 8}px`,
+        left: `${Math.max(16, rect.left)}px`,
+      });
+    }
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -62,20 +93,20 @@ export function LayoutNavigator({ activeView, onViewChange }: LayoutNavigatorPro
         aria-expanded={open}
         aria-controls={menuId}
         onClick={() => setOpen((value) => !value)}
-        className="inline-flex items-center gap-2 rounded-md border border-border bg-bg px-3 py-2 text-[0.8125rem] font-semibold text-ink shadow-sm transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+        className="inline-flex items-center gap-2 rounded-md border border-border bg-bg px-3 py-2 text-[0.8125rem] font-semibold text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
       >
         <ViewIcon view={activeView} />
         <span>{active.label}</span>
         <ChevronDown open={open} />
       </button>
 
-      {open ? (
+      {open && menuPosition ? (
         <div
           ref={menuRef}
           id={menuId}
           role="menu"
-          className="fixed z-dropdown mt-2 w-[min(100vw-2rem,320px)] rounded-xl border border-border bg-bg p-2 shadow-lg"
-          style={getMenuPosition(triggerRef.current)}
+          className="fixed z-dropdown w-[min(100vw-2rem,320px)] rounded-xl border border-border bg-bg p-2 shadow-lg"
+          style={menuPosition}
         >
           <MenuSection
             title="Sistema de diseño"
@@ -101,18 +132,6 @@ export function LayoutNavigator({ activeView, onViewChange }: LayoutNavigatorPro
   );
 }
 
-function getMenuPosition(trigger: HTMLButtonElement | null) {
-  if (!trigger) {
-    return { top: '4.5rem', left: '1rem' };
-  }
-
-  const rect = trigger.getBoundingClientRect();
-  return {
-    top: `${rect.bottom + 8}px`,
-    left: `${Math.max(16, rect.left)}px`,
-  };
-}
-
 function MenuSection({
   title,
   views,
@@ -126,7 +145,7 @@ function MenuSection({
 }) {
   return (
     <div className="py-1">
-      <p className="px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.06em] text-muted">
+      <p className="px-2.5 py-1.5 text-[0.75rem] font-semibold text-muted">
         {title}
       </p>
       <ul className="space-y-0.5">

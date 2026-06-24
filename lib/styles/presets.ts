@@ -1,13 +1,8 @@
-export type DesignStyle = {
-  id: string;
-  name: string;
-  description: string;
-  seeds: string[];
-  mood: string[];
-  thumbnailColors: string[];
-};
+import { CURATED_DESIGN_STYLES, type DesignStyle } from './curatedStyles';
 
-export const DESIGN_STYLES: DesignStyle[] = [];
+export type { DesignStyle };
+
+export const DESIGN_STYLES: DesignStyle[] = CURATED_DESIGN_STYLES;
 
 export function collectMoods(styles: DesignStyle[]): string[] {
   const moods = new Set<string>();

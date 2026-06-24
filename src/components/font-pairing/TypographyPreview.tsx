@@ -1,6 +1,7 @@
 'use client';
 
 import type { Palette } from '@lib/color/contrast';
+import { CONTRAST_SAMPLE_TEXT } from '@lib/color/contrast';
 import { buildFontFamilyStack } from '@lib/typography/googleFonts';
 import type { FontPair } from '@lib/typography/pairings';
 
@@ -95,8 +96,8 @@ export function TypographyPreview({
             fontFamily: bodyFont,
           }}
         >
-          The quick brown fox jumps over the lazy dog. Esta vista usa los colores de tu paleta
-          generada para evaluar jerarquía, legibilidad y tono visual del par seleccionado.
+          {CONTRAST_SAMPLE_TEXT} Esta vista usa los colores de tu paleta generada para evaluar
+          jerarquía, legibilidad y tono visual del par seleccionado.
         </p>
 
         <div className={`flex flex-wrap gap-2 ${isCanvas ? 'mt-8' : 'pt-2'}`}>

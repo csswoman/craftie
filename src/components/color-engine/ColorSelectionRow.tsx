@@ -96,7 +96,7 @@ export function ColorSelectionRow({
   return (
     <div
       className={`flex items-center gap-2 rounded-lg border transition-colors ${
-        selected ? 'border-primary bg-primary/5 shadow-sm' : 'border-border bg-bg'
+        selected ? 'border-primary bg-primary/5' : 'border-border bg-bg'
       }`}
     >
       <button

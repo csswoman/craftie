@@ -16,31 +16,31 @@ colors:
   fail: "#b42318"
 typography:
   display:
-    fontFamily: "Playfair Display, Georgia, serif"
+    fontFamily: "Lora, Georgia, serif"
     fontSize: "clamp(1.75rem, 3vw, 2.25rem)"
     fontWeight: 600
     lineHeight: 1.15
     letterSpacing: "-0.01em"
   headline:
-    fontFamily: "Playfair Display, Georgia, serif"
+    fontFamily: "Lora, Georgia, serif"
     fontSize: "1.375rem"
     fontWeight: 600
     lineHeight: 1.2
     letterSpacing: "normal"
   title:
-    fontFamily: "Open Sans, system-ui, sans-serif"
+    fontFamily: "Nunito, system-ui, sans-serif"
     fontSize: "1rem"
     fontWeight: 600
     lineHeight: 1.35
     letterSpacing: "normal"
   body:
-    fontFamily: "Open Sans, system-ui, sans-serif"
+    fontFamily: "Nunito, system-ui, sans-serif"
     fontSize: "0.9375rem"
     fontWeight: 400
     lineHeight: 1.55
     letterSpacing: "normal"
   label:
-    fontFamily: "Open Sans, system-ui, sans-serif"
+    fontFamily: "Nunito, system-ui, sans-serif"
     fontSize: "0.8125rem"
     fontWeight: 500
     lineHeight: 1.35
@@ -90,7 +90,7 @@ Densidad moderada, jerarquía clara, cero decoración SaaS. El verde musgo del s
 
 - Tema **claro** con fondo blanco puro; sin crema, arena ni tintes cálidos en superficies.
 - **Restrained**: cromo UI ≤10% de color de marca; saturación reservada a swatches y previews de paleta.
-- **Serif display + sans body**: Playfair Display para títulos, Open Sans para trabajo diario.
+- **Serif display + sans body**: Lora para títulos, Nunito para trabajo diario.
 - **Flat by default**: profundidad por borde y tono de superficie, no sombras pesadas.
 - **WCAG-first**: texto legible siempre; la herramienta practica lo que predica.
 
@@ -133,10 +133,10 @@ _Omitido._
 
 ## 3. Typography
 
-**Display Font:** Playfair Display (Georgia, serif)  
-**Body Font:** Open Sans (system-ui, sans-serif)
+**Display Font:** Lora (Georgia, serif)  
+**Body Font:** Nunito (system-ui, sans-serif)
 
-**Character:** Playfair aporta elegancia editorial en títulos; Open Sans es la voz de trabajo — legible, neutral, invisible en formularios y datos.
+**Character:** Lora aporta calidez editorial en títulos; Nunito es la voz de trabajo — legible, amable, invisible en formularios y datos.
 
 ### Hierarchy
 
@@ -148,7 +148,7 @@ _Omitido._
 
 ### Named Rules
 
-**The Two Voices Rule.** Playfair Display solo en display/headline. Open Sans en todo lo demás. Nunca Playfair en botones, inputs o tablas.
+**The Two Voices Rule.** Lora solo en display/headline. Nunito en todo lo demás. Nunca Lora en botones, inputs o tablas.
 
 **The No Inter Rule.** Inter, system-ui genérico como display, y pares de sans geométricos idénticos están prohibidos.
 
@@ -196,7 +196,7 @@ Sistema **plano por defecto**. La profundidad se comunica con cambio de tono de 
 ### Navigation
 
 - **Style:** barra superior o lateral en Soft Surface, Hairline inferior/derecho.
-- **Typography:** Title (Open Sans 600).
+- **Typography:** Title (Nunito 600).
 - **Active:** texto Ink + indicador 2px primary inferior; sin pill de color saturado.
 
 ## 6. Do's and Don'ts
@@ -204,7 +204,7 @@ Sistema **plano por defecto**. La profundidad se comunica con cambio de tono de 
 ### Do:
 
 - **Do** dejar que los swatches de paleta ocupen el centro visual de cada pantalla.
-- **Do** usar Playfair Display + Open Sans como par display/body.
+- **Do** usar Lora + Nunito como par display/body del chrome de la app.
 - **Do** mantener fondo blanco puro y texto Ink con contraste verificado.
 - **Do** mostrar ratios WCAG y niveles AA/AAA con datos explícitos (Show, don't tell).
 - **Do** usar `primary` solo para acciones y foco, nunca como decoración de fondo.

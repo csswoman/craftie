@@ -8,40 +8,45 @@ export type StudioStatusBarProps = {
   pairing: FontPair | null;
 };
 
+const SWATCH_ROLES: { role: keyof GeneratedPalette; label: string }[] = [
+  { role: 'primary', label: 'Primario' },
+  { role: 'accent', label: 'Acento' },
+  { role: 'surface', label: 'Fondo' },
+  { role: 'onSurface', label: 'Texto' },
+  { role: 'neutralLight', label: 'Superficie' },
+  { role: 'neutralDark', label: 'Borde' },
+];
+
 export function StudioStatusBar({ palette, pairing }: StudioStatusBarProps) {
   if (!palette) {
     return null;
   }
 
-  const swatches = [
-    palette.primary,
-    palette.accent,
-    palette.surface,
-    palette.onSurface,
-    palette.neutralLight,
-    palette.neutralDark,
-  ];
-
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-4 z-sticky flex justify-center px-4">
       <div className="panel-float pointer-events-auto flex max-w-full items-center gap-4 rounded-full px-4 py-2.5">
         <div className="hidden min-w-0 items-center gap-3 sm:flex">
-          <TypeChip label="Titular" value={pairing?.heading.family ?? '—'} />
+          <TypeChip label="Titular" value={pairing?.heading.family ?? 'Sin asignar'} />
           <span className="text-muted" aria-hidden="true">
             ·
           </span>
-          <TypeChip label="Cuerpo" value={pairing?.body.family ?? '—'} />
+          <TypeChip label="Cuerpo" value={pairing?.body.family ?? 'Sin asignar'} />
         </div>
-        <ul className="flex items-center gap-1.5" aria-label="Paleta activa">
-          {swatches.map((hex) => (
-            <li key={hex}>
-              <span
-                className="block size-6 rounded-full border border-border"
-                style={{ backgroundColor: hex }}
-                title={hex}
-              />
-            </li>
-          ))}
+        <ul className="flex items-center gap-1.5" aria-label="Colores activos de la paleta generada">
+          {SWATCH_ROLES.map(({ role, label }) => {
+            const hex = palette[role];
+
+            return (
+              <li key={role}>
+                <span
+                  className="block size-6 rounded-full border border-border"
+                  style={{ backgroundColor: hex }}
+                  role="img"
+                  aria-label={`${label}: ${hex.toUpperCase()}`}
+                />
+              </li>
+            );
+          })}
         </ul>
       </div>
     </div>

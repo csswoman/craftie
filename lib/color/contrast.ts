@@ -21,6 +21,10 @@ export type Palette = {
   neutralDark: string;
 };
 
+/** Short Spanish sample for contrast previews in the UI. */
+export const CONTRAST_SAMPLE_TEXT =
+  'La tipografía legible mejora la lectura en pantalla.';
+
 export type ColorToken = {
   role: keyof Palette;
   hex: string;

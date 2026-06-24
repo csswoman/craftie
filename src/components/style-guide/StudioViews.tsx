@@ -45,9 +45,7 @@ export function TypeScaleView({ palette, pairing }: TypeScaleViewProps) {
               className="border-b border-border/50 pb-6 last:border-b-0"
               style={{ color: palette.onSurface }}
             >
-              <p className="text-[0.75rem] font-semibold uppercase tracking-[0.05em] text-muted">
-                {step.label}
-              </p>
+              <p className="text-[0.8125rem] font-semibold text-muted">{step.label}</p>
               <p
                 className="mt-2 leading-tight"
                 style={{
@@ -81,7 +79,7 @@ export function ColorsView({ palette }: ColorsViewProps) {
         {columns.map((column) => {
           const formats = formatColorValues(column.hex);
           return (
-            <li key={column.id} className="overflow-hidden rounded-xl border border-border bg-bg shadow-sm">
+            <li key={column.id} className="overflow-hidden rounded-xl border border-border bg-bg">
               <button
                 type="button"
                 onClick={() => setSelectedColorHex(column.hex)}
@@ -132,7 +130,7 @@ export function LayoutPreview({ layout, palette, pairing }: LayoutPreviewProps) 
       style={{ backgroundColor: palette.neutralLight }}
     >
       <div
-        className="w-full max-w-4xl overflow-hidden rounded-xl border border-border bg-bg shadow-sm"
+        className="w-full max-w-4xl overflow-hidden rounded-xl border border-border bg-bg"
         style={{ backgroundColor: palette.surface }}
       >
         {layout === 'website' && <WebsiteMock palette={palette} heading={heading} body={body} />}

@@ -1,5 +1,9 @@
-import type { ContrastResult, ContrastTarget } from '@lib/color/contrast';
-import { getContrastStatus } from '@lib/color/contrast';
+import {
+  CONTRAST_SAMPLE_TEXT,
+  getContrastStatus,
+  type ContrastResult,
+  type ContrastTarget,
+} from '@lib/color/contrast';
 
 import { ContrastBadge } from './ContrastBadge';
 
@@ -10,8 +14,6 @@ const PAIR_LABELS: Record<ContrastResult['pairRole'], string> = {
   'accent/surface': 'Acento sobre superficie',
   'accent/neutral-dark': 'Acento sobre neutro oscuro',
 };
-
-const SAMPLE_TEXT = 'The quick brown fox';
 
 interface ContrastRowProps {
   result: ContrastResult;
@@ -47,7 +49,7 @@ export function ContrastRow({ result, target }: ContrastRowProps) {
               backgroundColor: result.background.hex,
             }}
           >
-            {SAMPLE_TEXT}
+            {CONTRAST_SAMPLE_TEXT}
           </p>
         </div>
 

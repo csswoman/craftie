@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { suggestSelectionFromHexes } from '../color/selectableColors';
+
 import {
   collectMoods,
   DESIGN_STYLES,
@@ -27,8 +29,16 @@ const sampleStyles: DesignStyle[] = [
 ];
 
 describe('presets', () => {
-  it('exports an empty curated styles list by default', () => {
-    expect(DESIGN_STYLES).toEqual([]);
+  it('exports curated styles for onboarding', () => {
+    expect(DESIGN_STYLES.length).toBeGreaterThanOrEqual(4);
+    expect(DESIGN_STYLES.every((style) => style.seeds.length >= 2)).toBe(true);
+  });
+
+  it('maps every curated style to a valid selection', () => {
+    for (const style of DESIGN_STYLES) {
+      const result = suggestSelectionFromHexes(style.seeds);
+      expect(result.ok, style.id).toBe(true);
+    }
   });
 
   it('collects unique moods in sorted order', () => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import type { GeneratedPalette } from '@lib/color/formulas';
 import { generatePalette } from '@lib/color/formulas';
@@ -30,6 +30,7 @@ import { ImageUploader } from '@/components/color-engine/ImageUploader';
 import { PalettePreview } from '@/components/color-engine/PalettePreview';
 import { StyleGallery } from '@/components/color-engine/StyleGallery';
 import { StudioCanvas } from '@/components/layout/StudioCanvas';
+import { StudioFlowGuide } from '@/components/layout/StudioFlowGuide';
 import { StudioStatusBar } from '@/components/layout/StudioStatusBar';
 import { WorkspaceHeader } from '@/components/layout/WorkspaceHeader';
 import { PairingList } from '@/components/font-pairing/PairingList';
@@ -71,6 +72,26 @@ export function SelectColorsWorkspace() {
     () => getRecommendedPairings(activeMoods, 3),
     [activeMoods],
   );
+
+  const selectionValidation = useMemo(() => validateSelection(selectedColors), [selectedColors]);
+  const selectionReady = selectionValidation.ok;
+  const isReviewPhase = generatedPalette !== null;
+  const showInspirationByDefault = !isReviewPhase && selectedColors.length === 0 && !isImageExtracting;
+
+  useEffect(() => {
+    if (isReviewPhase) {
+      return;
+    }
+
+    if (selectionReady) {
+      setToolSection('generate');
+      return;
+    }
+
+    if (selectedColors.length > 0) {
+      setToolSection('colors');
+    }
+  }, [isReviewPhase, selectedColors.length, selectionReady]);
 
   function applyCuratedInspiration(hexes: string[], styleId: string | null) {
     const suggestion = suggestSelectionFromHexes(hexes);
@@ -232,7 +253,6 @@ export function SelectColorsWorkspace() {
     downloadTextFile('brand-kit.json', serializeBrandKit(kit), 'application/json;charset=utf-8');
   }
 
-  const isReviewPhase = generatedPalette !== null;
   const showSelectionPanel =
     !isReviewPhase && (isImageExtracting || paletteCatalog.length > 0);
   const showInspectorPanel =
@@ -266,6 +286,14 @@ export function SelectColorsWorkspace() {
         onExportBrandKit={handleExportBrandKit}
       />
 
+      {!isReviewPhase ? (
+        <StudioFlowGuide
+          hasGeneratedPalette={false}
+          hasSelection={selectedColors.length > 0}
+          selectionReady={selectionReady}
+        />
+      ) : null}
+
       <StudioCanvas
         showRightPanel={showSelectionPanel || showInspectorPanel}
         rightPanelOpen={rightPanelOpen}
@@ -274,6 +302,7 @@ export function SelectColorsWorkspace() {
             <ToolsSidebar
               activeSection={toolSection}
               onSectionChange={setToolSection}
+              inspirationDefaultOpen={showInspirationByDefault}
               inspirationPanel={
                 <StyleGallery
                   styles={DESIGN_STYLES}

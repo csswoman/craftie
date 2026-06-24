@@ -126,7 +126,7 @@ export function ColorDetailsDrawer({
             <div className="space-y-3">
               {details.harmonies.map((harmony) => (
                 <div key={harmony.type}>
-                  <p className="mb-2 text-[0.6875rem] font-semibold uppercase tracking-[0.04em] text-muted">
+                  <p className="mb-2 text-[0.75rem] font-semibold text-muted">
                     {HARMONY_TYPE_LABELS[harmony.type]}
                   </p>
                   <ul className="space-y-2">

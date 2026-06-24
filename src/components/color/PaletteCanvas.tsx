@@ -218,7 +218,7 @@ function ModeToggle({
       onClick={onClick}
       aria-pressed={active}
       className={`rounded-[6px] px-2.5 py-1 text-[0.75rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
-        active ? 'bg-bg text-ink shadow-sm' : 'text-muted hover:text-ink'
+        active ? 'bg-bg text-ink' : 'text-muted hover:text-ink'
       }`}
     >
       {label}
