@@ -33,9 +33,9 @@ const HUE_NOUNS: { min: number; max: number; nouns: string[] }[] = [
   { min: 55, max: 95, nouns: ['Zest', 'Lime', 'Meadow', 'Sage'] },
   { min: 95, max: 145, nouns: ['Moss', 'Grove', 'Leaf', 'Fern'] },
   { min: 145, max: 195, nouns: ['Seaspray', 'Mint', 'Aqua', 'Breeze'] },
-  { min: 195, max: 245, nouns: ['Sky', 'Ocean', 'Azure', 'Lagoon'] },
-  { min: 245, max: 295, nouns: ['Orchid', 'Plum', 'Violet', 'Iris'] },
-  { min: 295, max: 360, nouns: ['Berry', 'Mulberry', 'Magenta', 'Fuchsia'] },
+  { min: 195, max: 272, nouns: ['Sky', 'Ocean', 'Azure', 'Lagoon', 'Periwinkle'] },
+  { min: 272, max: 310, nouns: ['Lilac', 'Orchid', 'Plum', 'Violet', 'Iris'] },
+  { min: 310, max: 360, nouns: ['Berry', 'Mulberry', 'Magenta', 'Fuchsia'] },
 ];
 
 const LIGHT_MODIFIERS = ['Mist', 'Frost', 'Pale', 'Soft', 'Cloud', 'Linen'];

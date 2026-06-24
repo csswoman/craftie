@@ -12,7 +12,7 @@ import {
   validateSelection,
   type SelectableColor,
 } from '@lib/color/selectableColors';
-import { replacePaletteColor } from '@lib/color/paletteOrder';
+import { addColorToPalette, renamePaletteColor, replacePaletteColor } from '@lib/color/paletteOrder';
 import { replaceSeeds, validateSeedsForGeneration } from '@lib/color/seeds';
 import { DESIGN_STYLES, type DesignStyle } from '@lib/styles/presets';
 import { getRecommendedPairings, type FontPair } from '@lib/typography/pairings';
@@ -182,6 +182,44 @@ export function SelectColorsWorkspace() {
     }
   }
 
+  function handleAddColorByHex(hex: string, customName?: string): string | null {
+    const baseCatalog = paletteCatalog.length > 0 ? paletteCatalog : [...SELECTABLE_COLORS];
+    const result = addColorToPalette(baseCatalog, selectedColors, hex, { customName });
+
+    if (!result.ok) {
+      return result.error;
+    }
+
+    if (paletteCatalog.length === 0) {
+      setCatalogSource('curated');
+    }
+
+    setPaletteCatalog(result.catalog);
+    setSelectedColors(result.selected);
+    setToolSection('colors');
+    setRightPanelOpen(true);
+    setError(null);
+
+    return result.message ?? null;
+  }
+
+  function handleRenameColor(colorId: string, name: string): string | null {
+    const baseCatalog = paletteCatalog.length > 0 ? paletteCatalog : [...SELECTABLE_COLORS];
+    const result = renamePaletteColor(baseCatalog, selectedColors, colorId, name);
+
+    if (!result) {
+      return 'Introduce un nombre válido (1–40 caracteres).';
+    }
+
+    if (paletteCatalog.length === 0) {
+      setCatalogSource('curated');
+    }
+
+    setPaletteCatalog(result.catalog);
+    setSelectedColors(result.selected);
+    return null;
+  }
+
   function handleExportDesignMd() {
     if (!generatedPalette) return;
     const content = generateDesignMd({ palette: generatedPalette, pairing: selectedPairing });
@@ -214,6 +252,8 @@ export function SelectColorsWorkspace() {
     onSelectedColorsChange: setSelectedColors,
     onToggleLock: handleToggleLock,
     onReplaceColor: handleReplacePaletteColor,
+    onAddColorByHex: handleAddColorByHex,
+    onRenameColor: handleRenameColor,
   });
 
   return (
@@ -304,6 +344,8 @@ export function SelectColorsWorkspace() {
                 setSelectedColors(colors);
                 setError(null);
               }}
+              onAddColorByHex={handleAddColorByHex}
+              onRenameColor={handleRenameColor}
             />
           ) : null
         }
@@ -340,6 +382,8 @@ function renderMainContent({
   onSelectedColorsChange,
   onToggleLock,
   onReplaceColor,
+  onAddColorByHex,
+  onRenameColor,
 }: {
   generatedPalette: GeneratedPalette | null;
   studioView: StudioView;
@@ -353,6 +397,8 @@ function renderMainContent({
   onSelectedColorsChange: (colors: SelectableColor[]) => void;
   onToggleLock: (colorId: string) => void;
   onReplaceColor: (colorId: string, newHex: string) => void;
+  onAddColorByHex: (hex: string, customName?: string) => string | null;
+  onRenameColor: (colorId: string, name: string) => string | null;
 }) {
   if (!generatedPalette) {
     return (
@@ -367,6 +413,7 @@ function renderMainContent({
         editable={selectedColors.length > 0}
         onSelectedColorsChange={onSelectedColorsChange}
         onReplaceColor={onReplaceColor}
+        onAddColorByHex={onAddColorByHex}
         onToggleLock={onToggleLock}
       />
     );

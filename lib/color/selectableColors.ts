@@ -7,6 +7,8 @@ export type SelectableColor = {
   name: string;
   hex: string;
   group: ColorGroupId;
+  /** When true, the user-provided name is preserved instead of auto-generated. */
+  customName?: boolean;
 };
 export const SELECTABLE_COLORS: SelectableColor[] = [
   { id: 'porcelain', name: 'Porcelain', hex: '#F7F7F5', group: 'light-neutral' },

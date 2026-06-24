@@ -34,4 +34,22 @@ describe('namePalette', () => {
     expect(name).not.toMatch(/^(Claro|Intenso|Oscuro) \d+$/);
     expect(name.length).toBeGreaterThan(0);
   });
+
+  it('uses blue-family names for muted blues instead of purple labels', () => {
+    const palette = [
+      { hex: '#6986B8' },
+      { hex: '#B8D1E4' },
+      { hex: '#D0C1FF' },
+      { hex: '#4A473D' },
+      { hex: '#EEC87E' },
+      { hex: '#87F5B7' },
+    ];
+
+    const names = namePalette(palette, { style: 'creative' });
+
+    expect(names.get('#6986B8')).toMatch(/Sky|Ocean|Azure|Lagoon|Periwinkle/i);
+    expect(names.get('#6986B8')).not.toMatch(/Orchid|Fuchsia/i);
+    expect(names.get('#D0C1FF')).toMatch(/Lilac|Orchid|Plum|Violet|Iris/i);
+    expect(names.get('#D0C1FF')).not.toMatch(/Fuchsia/i);
+  });
 });

@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 
+import { resolvePaletteDisplayNames } from '@lib/color/paletteDisplay';
 import { countSelectedInGroup } from '@lib/color/selectionPanel';
 import {
   toggleSelectedColor,
@@ -14,6 +15,7 @@ export type ColorGroupsPanelProps = {
   colors: SelectableColor[];
   selectedColors: SelectableColor[];
   onSelectedColorsChange: (colors: SelectableColor[]) => void;
+  onRenameColor?: (colorId: string, name: string) => string | null;
 };
 
 const GROUPS = [
@@ -38,11 +40,13 @@ export function ColorGroupsPanel({
   colors,
   selectedColors,
   onSelectedColorsChange,
+  onRenameColor,
 }: ColorGroupsPanelProps) {
   const selectedIds = useMemo(
     () => selectedColors.map((color) => color.id),
     [selectedColors],
   );
+  const displayNames = useMemo(() => resolvePaletteDisplayNames(colors), [colors]);
 
   function handleToggle(color: SelectableColor) {
     const nextSelection = toggleSelectedColor(selectedColors, color);
@@ -63,7 +67,9 @@ export function ColorGroupsPanel({
           selectedCount={countSelectedInGroup(selectedColors, group.id)}
           colors={colors.filter((color) => color.group === group.id)}
           selectedIds={selectedIds}
+          displayNames={displayNames}
           onToggleColor={handleToggle}
+          onRenameColor={onRenameColor}
           emptyMessage={
             group.id === 'light-neutral'
               ? 'No se detectaron neutros claros en la imagen.'

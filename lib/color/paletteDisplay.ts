@@ -35,11 +35,29 @@ function buildNamedLookup(hexes: string[]): Map<string, string> {
   );
 }
 
+export function resolvePaletteDisplayNames(colors: SelectableColor[]): Map<string, string> {
+  const autoNames = namePalette(
+    colors.map((color) => ({ hex: color.hex })),
+    { style: 'creative' },
+  );
+
+  return new Map(
+    colors.map((color) => [
+      color.id,
+      color.customName
+        ? color.name
+        : autoNames.get(normalizeHex(color.hex)) ?? color.name,
+    ]),
+  );
+}
+
 export function buildSelectionPaletteColumns(colors: SelectableColor[]): PaletteColumnDisplay[] {
+  const displayNames = resolvePaletteDisplayNames(colors);
+
   return colors.map((color) => ({
     id: color.id,
     hex: color.hex,
-    name: color.name,
+    name: displayNames.get(color.id) ?? color.name,
     roleLabel: GROUP_DISPLAY_LABELS[color.group],
   }));
 }

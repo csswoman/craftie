@@ -12,7 +12,9 @@ export type ColorGroupProps = {
   selectedCount: number;
   colors: SelectableColor[];
   selectedIds: string[];
+  displayNames: Map<string, string>;
   onToggleColor: (color: SelectableColor) => void;
+  onRenameColor?: (colorId: string, name: string) => string | null;
   emptyMessage?: string;
 };
 
@@ -23,7 +25,9 @@ export function ColorGroup({
   selectedCount,
   colors,
   selectedIds,
+  displayNames,
   onToggleColor,
+  onRenameColor,
   emptyMessage = 'No hay colores disponibles en este grupo.',
 }: ColorGroupProps) {
   return (
@@ -46,8 +50,10 @@ export function ColorGroup({
             <li key={color.id}>
               <ColorSelectionRow
                 color={color}
+                displayName={displayNames.get(color.id) ?? color.name}
                 selected={selectedIds.includes(color.id)}
                 onToggle={onToggleColor}
+                onRename={onRenameColor}
               />
             </li>
           ))}

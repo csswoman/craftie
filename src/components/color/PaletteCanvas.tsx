@@ -29,6 +29,7 @@ export type PaletteCanvasProps = {
   editable?: boolean;
   onSelectedColorsChange?: (colors: SelectableColor[]) => void;
   onReplaceColor?: (colorId: string, newHex: string) => void;
+  onAddColorByHex?: (hex: string, customName?: string) => string | null;
   onToggleLock?: (colorId: string) => void;
 };
 
@@ -43,6 +44,7 @@ export function PaletteCanvas({
   editable = false,
   onSelectedColorsChange,
   onReplaceColor,
+  onAddColorByHex,
   onToggleLock,
 }: PaletteCanvasProps) {
   const [shadesOpenId, setShadesOpenId] = useState<string | null>(null);
@@ -195,6 +197,7 @@ export function PaletteCanvas({
         colorHex={selectedColorHex}
         open={selectedColorHex !== null}
         onClose={() => setSelectedColorHex(null)}
+        onAddColor={onAddColorByHex}
       />
     </div>
   );

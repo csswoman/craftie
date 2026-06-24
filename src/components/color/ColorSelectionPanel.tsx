@@ -6,6 +6,7 @@ import {
 } from '@lib/color/selectionPanel';
 import type { SelectableColor } from '@lib/color/selectableColors';
 
+import { AddHexColorForm } from '@/components/color-engine/AddHexColorForm';
 import { ColorGroupsPanel } from '@/components/color-engine/ColorGroupsPanel';
 
 export type ColorSelectionPanelProps = {
@@ -14,6 +15,8 @@ export type ColorSelectionPanelProps = {
   colors: SelectableColor[];
   selectedColors: SelectableColor[];
   onSelectedColorsChange: (colors: SelectableColor[]) => void;
+  onAddColorByHex: (hex: string, customName?: string) => string | null;
+  onRenameColor?: (colorId: string, name: string) => string | null;
 };
 
 export function ColorSelectionPanel({
@@ -22,6 +25,8 @@ export function ColorSelectionPanel({
   colors,
   selectedColors,
   onSelectedColorsChange,
+  onAddColorByHex,
+  onRenameColor,
 }: ColorSelectionPanelProps) {
   if (isExtracting) {
     return (
@@ -70,11 +75,15 @@ export function ColorSelectionPanel({
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
-        <ColorGroupsPanel
-          colors={colors}
-          selectedColors={selectedColors}
-          onSelectedColorsChange={onSelectedColorsChange}
-        />
+        <div className="space-y-4">
+          <AddHexColorForm onSubmit={onAddColorByHex} />
+          <ColorGroupsPanel
+            colors={colors}
+            selectedColors={selectedColors}
+            onSelectedColorsChange={onSelectedColorsChange}
+            onRenameColor={onRenameColor}
+          />
+        </div>
       </div>
     </div>
   );
