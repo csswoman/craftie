@@ -11,12 +11,14 @@ export type StudioFlowGuideProps = {
   hasGeneratedPalette: boolean;
   hasSelection: boolean;
   selectionReady: boolean;
+  onStepFocus?: (stepId: StudioFlowStepId) => void;
 };
 
 export function StudioFlowGuide({
   hasGeneratedPalette,
   hasSelection,
   selectionReady,
+  onStepFocus,
 }: StudioFlowGuideProps) {
   const activeStep = getActiveStudioFlowStep({
     hasGeneratedPalette,
@@ -34,10 +36,16 @@ export function StudioFlowGuide({
       <ol className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-2 gap-y-2 sm:gap-x-3">
         {STUDIO_FLOW_STEPS.map((step, index) => {
           const status = getStepStatus(index, activeIndex);
+          const canFocus = index <= activeIndex && onStepFocus !== undefined;
 
           return (
             <li key={step.id} className="flex items-center gap-2 sm:gap-3">
-              <StepBadge step={step} status={status} />
+              <StepBadge
+                step={step}
+                status={status}
+                canFocus={canFocus}
+                onFocus={onStepFocus ? () => onStepFocus(step.id) : undefined}
+              />
               {index < STUDIO_FLOW_STEPS.length - 1 ? (
                 <span className="hidden text-muted sm:inline" aria-hidden="true">
                   →
@@ -71,19 +79,43 @@ function getStepStatus(index: number, activeIndex: number): 'complete' | 'curren
 function StepBadge({
   step,
   status,
+  canFocus,
+  onFocus,
 }: {
   step: { id: StudioFlowStepId; label: string };
   status: 'complete' | 'current' | 'upcoming';
+  canFocus: boolean;
+  onFocus?: () => void;
 }) {
   const styles = {
-    complete: 'border-primary/30 bg-primary/10 text-primary',
-    current: 'border-primary bg-primary text-white',
+    complete: 'border-primary/30 bg-primary/10 text-primary hover:border-primary/45',
+    current: 'border-primary bg-primary text-white hover:bg-primary-hover',
     upcoming: 'border-border bg-bg text-muted',
   }[status];
 
+  const className = `inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[0.75rem] font-semibold sm:px-3 sm:text-[0.8125rem] ${styles} ${
+    canFocus ? 'cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25' : ''
+  }`;
+
+  if (canFocus && onFocus) {
+    return (
+      <button
+        type="button"
+        onClick={onFocus}
+        className={className}
+        aria-current={status === 'current' ? 'step' : undefined}
+      >
+        <span className="sr-only">
+          {status === 'complete' ? 'Completado: ' : status === 'current' ? 'Actual: ' : 'Pendiente: '}
+        </span>
+        {step.label}
+      </button>
+    );
+  }
+
   return (
     <span
-      className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[0.75rem] font-semibold sm:px-3 sm:text-[0.8125rem] ${styles}`}
+      className={className}
       aria-current={status === 'current' ? 'step' : undefined}
     >
       <span className="sr-only">

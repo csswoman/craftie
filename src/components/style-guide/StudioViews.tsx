@@ -230,7 +230,7 @@ function SlidesMock({
 }) {
   return (
     <div className="aspect-video p-10" style={{ backgroundColor: palette.primary, color: palette.surface }}>
-      <p className="text-sm uppercase tracking-wide opacity-80" style={{ fontFamily: body }}>
+      <p className="text-sm font-medium opacity-80" style={{ fontFamily: body }}>
         Presentación
       </p>
       <h2 className="mt-4 text-4xl font-semibold" style={{ fontFamily: heading }}>
@@ -251,7 +251,7 @@ function SocialMock({
 }) {
   return (
     <div className="mx-auto aspect-[9/16] max-w-xs p-6" style={{ backgroundColor: palette.accent }}>
-      <p className="text-xs uppercase tracking-wide text-white/80" style={{ fontFamily: body }}>
+      <p className="text-xs font-medium text-white/80" style={{ fontFamily: body }}>
         Social
       </p>
       <h2 className="mt-6 text-2xl font-semibold text-white" style={{ fontFamily: heading }}>

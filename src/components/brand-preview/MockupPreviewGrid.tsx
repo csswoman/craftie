@@ -18,6 +18,7 @@ import { MockupScaledPreview } from './MockupScaledPreview';
 export type MockupPreviewGridProps = {
   palette: GeneratedPalette | null;
   pairing: FontPair | null;
+  variant?: 'default' | 'compact';
 };
 
 type MockupId = 'landing' | 'dashboard' | 'brand-card';
@@ -52,8 +53,13 @@ const MOCKUP_ITEMS: {
   },
 ];
 
-export function MockupPreviewGrid({ palette, pairing }: MockupPreviewGridProps) {
+export function MockupPreviewGrid({
+  palette,
+  pairing,
+  variant = 'default',
+}: MockupPreviewGridProps) {
   const [activeMockup, setActiveMockup] = useState<MockupId | null>(null);
+  const compact = variant === 'compact';
 
   const tokens = useMemo(
     () => (palette ? buildPaletteTokens(palette) : null),
@@ -83,23 +89,30 @@ export function MockupPreviewGrid({ palette, pairing }: MockupPreviewGridProps) 
 
   return (
     <section aria-label="Vistas previas de interfaz">
-      <div className="mb-3">
-        <h3 className="text-[0.9375rem] font-semibold text-ink">Vistas previas</h3>
-        <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">
-          Ejemplos de UI con los roles semánticos y tipografía de tu guía. Haz clic para ampliar.
+      {!compact ? (
+        <div className="mb-3">
+          <h3 className="text-[0.9375rem] font-semibold text-ink">Vistas previas</h3>
+          <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">
+            Ejemplos de UI con los roles semánticos y tipografía de tu guía. Haz clic para ampliar.
+          </p>
+        </div>
+      ) : (
+        <p className="mb-3 text-[0.8125rem] leading-relaxed text-muted">
+          Mismas vistas que en la guía de estilo. Toca una miniatura para inspeccionar detalle.
         </p>
-      </div>
+      )}
 
-      <ul className="grid gap-3 lg:grid-cols-2">
+      <ul className={compact ? 'grid gap-2' : 'grid gap-3 lg:grid-cols-2'}>
         {MOCKUP_ITEMS.map((item) => {
-          const featured = item.id === 'landing';
+          const featured = !compact && item.id === 'landing';
 
           return (
           <li key={item.id} className={featured ? 'lg:col-span-2' : undefined}>
             <MockupCard
               title={item.title}
-              description={item.description}
+              description={compact ? undefined : item.description}
               featured={featured}
+              expandHint="Clic para ampliar"
               onClick={() => setActiveMockup(item.id)}
             >
               <MockupScaledPreview>

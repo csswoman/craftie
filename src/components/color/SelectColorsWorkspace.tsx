@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { GeneratedPalette } from '@lib/color/formulas';
 import { generatePalette } from '@lib/color/formulas';
@@ -20,10 +20,11 @@ import { buildBrandKit, serializeBrandKit } from '@lib/export/brandKit';
 import { downloadTextFile } from '@lib/export/download';
 import { generateDesignMd } from '@lib/export/generateDesignMd';
 import { isLayoutView, type StudioView } from '@lib/export/studioViews';
+import type { StudioFlowStepId } from '@lib/studio/studioFlow';
 
 import { ColorSelectionPanel } from '@/components/color/ColorSelectionPanel';
 import { PaletteCanvas, type PaletteCanvasMode } from '@/components/color/PaletteCanvas';
-import { InspectorPanel, LayoutsPlaceholder, type InspectorSection } from '@/components/color/InspectorPanel';
+import { InspectorPanel, type InspectorSection } from '@/components/color/InspectorPanel';
 import { ContrastPanel } from '@/components/color-engine/ContrastPanel';
 import { GenerateButton } from '@/components/color-engine/GenerateButton';
 import { ImageUploader } from '@/components/color-engine/ImageUploader';
@@ -35,6 +36,7 @@ import { StudioStatusBar } from '@/components/layout/StudioStatusBar';
 import { WorkspaceHeader } from '@/components/layout/WorkspaceHeader';
 import { PairingList } from '@/components/font-pairing/PairingList';
 import { StyleGuideView } from '@/components/style-guide/StyleGuideView';
+import { MockupPreviewGrid } from '@/components/brand-preview/MockupPreviewGrid';
 import {
   ColorsView,
   LayoutPreview,
@@ -57,6 +59,7 @@ export function SelectColorsWorkspace() {
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const [canvasMode, setCanvasMode] = useState<PaletteCanvasMode>('selection');
   const [lockedColorIds, setLockedColorIds] = useState<string[]>([]);
+  const [inspirationOpenRequestId, setInspirationOpenRequestId] = useState(0);
 
   const activeCatalog = paletteCatalog.length > 0 ? paletteCatalog : SELECTABLE_COLORS;
 
@@ -92,6 +95,82 @@ export function SelectColorsWorkspace() {
       setToolSection('colors');
     }
   }, [isReviewPhase, selectedColors.length, selectionReady]);
+
+  const handleGenerate = useCallback(() => {
+    const selectionResult = validateSelection(selectedColors);
+
+    if (!selectionResult.ok) {
+      setError(selectionResult.error);
+      setGeneratedPalette(null);
+      return;
+    }
+
+    const seeds = replaceSeeds(mapSelectedColorsToSeeds(selectedColors));
+    const seedResult = validateSeedsForGeneration(seeds);
+
+    if (!seedResult.ok) {
+      setError(seedResult.error);
+      setGeneratedPalette(null);
+      return;
+    }
+
+    setError(null);
+    const nextPalette = generatePalette(seedResult.seeds);
+    setGeneratedPalette(nextPalette);
+    setCanvasMode('generated');
+    setStudioView('style-guide');
+    setInspectorSection('accessibility');
+    setRightPanelOpen(true);
+  }, [selectedColors]);
+
+  useEffect(() => {
+    if (isReviewPhase || !selectionReady) {
+      return;
+    }
+
+    function handleShortcut(event: KeyboardEvent) {
+      if (event.key !== 'Enter' || !(event.ctrlKey || event.metaKey)) {
+        return;
+      }
+
+      const target = event.target;
+
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          target.tagName === 'TEXTAREA' ||
+          (target.tagName === 'INPUT' &&
+            !['button', 'submit', 'reset', 'checkbox', 'radio'].includes(
+              (target as HTMLInputElement).type,
+            )))
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      handleGenerate();
+    }
+
+    window.addEventListener('keydown', handleShortcut);
+    return () => window.removeEventListener('keydown', handleShortcut);
+  }, [handleGenerate, isReviewPhase, selectionReady]);
+
+  function handleFlowStepFocus(stepId: StudioFlowStepId) {
+    if (stepId === 'inspire') {
+      setInspirationOpenRequestId((value) => value + 1);
+      return;
+    }
+
+    if (stepId === 'adjust') {
+      setToolSection('colors');
+      setRightPanelOpen(true);
+      return;
+    }
+
+    if (stepId === 'generate') {
+      setToolSection('generate');
+    }
+  }
 
   function applyCuratedInspiration(hexes: string[], styleId: string | null) {
     const suggestion = suggestSelectionFromHexes(hexes);
@@ -146,33 +225,6 @@ export function SelectColorsWorkspace() {
     setPaletteCatalog([]);
     setSelectedColors([]);
     setError(message);
-  }
-
-  function handleGenerate() {
-    const selectionResult = validateSelection(selectedColors);
-
-    if (!selectionResult.ok) {
-      setError(selectionResult.error);
-      setGeneratedPalette(null);
-      return;
-    }
-
-    const seeds = replaceSeeds(mapSelectedColorsToSeeds(selectedColors));
-    const seedResult = validateSeedsForGeneration(seeds);
-
-    if (!seedResult.ok) {
-      setError(seedResult.error);
-      setGeneratedPalette(null);
-      return;
-    }
-
-    setError(null);
-    const nextPalette = generatePalette(seedResult.seeds);
-    setGeneratedPalette(nextPalette);
-    setCanvasMode('generated');
-    setStudioView('style-guide');
-    setInspectorSection('accessibility');
-    setRightPanelOpen(true);
   }
 
   function handleToggleLock(colorId: string) {
@@ -253,8 +305,7 @@ export function SelectColorsWorkspace() {
     downloadTextFile('brand-kit.json', serializeBrandKit(kit), 'application/json;charset=utf-8');
   }
 
-  const showSelectionPanel =
-    !isReviewPhase && (isImageExtracting || paletteCatalog.length > 0);
+  const showSelectionPanel = !isReviewPhase && (isImageExtracting || selectedColors.length > 0);
   const showInspectorPanel =
     isReviewPhase && !isLayoutView(studioView) && studioView !== 'colors';
   const mobileRightPanelAvailable = showSelectionPanel || showInspectorPanel;
@@ -291,6 +342,7 @@ export function SelectColorsWorkspace() {
           hasGeneratedPalette={false}
           hasSelection={selectedColors.length > 0}
           selectionReady={selectionReady}
+          onStepFocus={handleFlowStepFocus}
         />
       ) : null}
 
@@ -303,6 +355,7 @@ export function SelectColorsWorkspace() {
               activeSection={toolSection}
               onSectionChange={setToolSection}
               inspirationDefaultOpen={showInspirationByDefault}
+              inspirationOpenRequestId={inspirationOpenRequestId}
               inspirationPanel={
                 <StyleGallery
                   styles={DESIGN_STYLES}
@@ -361,7 +414,13 @@ export function SelectColorsWorkspace() {
               activeSection={inspectorSection}
               onSectionChange={setInspectorSection}
               accessibilityPanel={<ContrastPanel palette={generatedPalette} variant="embedded" />}
-              layoutsPanel={<LayoutsPlaceholder />}
+              layoutsPanel={
+                <MockupPreviewGrid
+                  palette={generatedPalette}
+                  pairing={selectedPairing}
+                  variant="compact"
+                />
+              }
             />
           ) : showSelectionPanel ? (
             <ColorSelectionPanel

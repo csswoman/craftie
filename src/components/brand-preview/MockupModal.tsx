@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 export type MockupModalProps = {
   open: boolean;
@@ -10,39 +10,46 @@ export type MockupModalProps = {
 };
 
 export function MockupModal({ open, title, onClose, children }: MockupModalProps) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
   useEffect(() => {
-    if (!open) {
+    const dialog = dialogRef.current;
+
+    if (!dialog) {
       return;
     }
 
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        onClose();
-      }
+    if (open && !dialog.open) {
+      dialog.showModal();
+      return;
     }
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [open, onClose]);
+    if (!open && dialog.open) {
+      dialog.close();
+    }
+  }, [open]);
 
-  if (!open) {
-    return null;
+  function handleDialogClose() {
+    onClose();
   }
 
   return (
-    <div className="fixed inset-0 z-dropdown flex items-end justify-center bg-ink/30 p-4 sm:items-center">
-      <button
-        type="button"
-        aria-label="Cerrar vista previa"
-        className="absolute inset-0"
-        onClick={onClose}
-      />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        className="relative z-10 flex max-h-[min(92vh,820px)] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-border bg-bg shadow-lg"
-      >
+    <dialog
+      ref={dialogRef}
+      aria-label={title}
+      onClose={handleDialogClose}
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+      onClick={(event) => {
+        if (event.target === dialogRef.current) {
+          onClose();
+        }
+      }}
+      className="mockup-dialog fixed inset-0 z-dropdown m-0 max-h-none w-full max-w-none border-0 bg-transparent p-4 backdrop:bg-ink/30 open:flex open:items-end open:justify-center sm:open:items-center"
+    >
+      <div className="relative flex max-h-[min(92vh,820px)] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-border bg-bg shadow-lg">
         <header className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3">
           <h2 className="text-[0.9375rem] font-semibold text-ink">{title}</h2>
           <button
@@ -56,6 +63,6 @@ export function MockupModal({ open, title, onClose, children }: MockupModalProps
         </header>
         <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">{children}</div>
       </div>
-    </div>
+    </dialog>
   );
 }

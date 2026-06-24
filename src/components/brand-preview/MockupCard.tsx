@@ -4,6 +4,7 @@ export type MockupCardProps = {
   title: string;
   description?: string;
   featured?: boolean;
+  expandHint?: string;
   children: React.ReactNode;
   onClick: () => void;
 };
@@ -12,6 +13,7 @@ export function MockupCard({
   title,
   description,
   featured = false,
+  expandHint = 'Clic para ampliar',
   children,
   onClick,
 }: MockupCardProps) {
@@ -19,6 +21,7 @@ export function MockupCard({
     <button
       type="button"
       onClick={onClick}
+      aria-label={`${title}. ${expandHint}`}
       className={`group flex w-full flex-col overflow-hidden rounded-xl border bg-bg text-left transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
         featured
           ? 'border-primary/25 hover:border-primary/40'
@@ -39,6 +42,7 @@ export function MockupCard({
         {description ? (
           <p className="mt-0.5 text-[0.75rem] leading-relaxed text-muted">{description}</p>
         ) : null}
+        <p className="mt-1 text-[0.6875rem] font-medium text-primary/80">{expandHint}</p>
       </div>
     </button>
   );

@@ -1,14 +1,25 @@
 'use client';
 
-import { useId, useState, type ReactNode } from 'react';
+import { useEffect, useId, useState, type ReactNode } from 'react';
 
 export type InspirationDrawerProps = {
   children: ReactNode;
   defaultOpen?: boolean;
+  openRequestId?: number;
 };
 
-export function InspirationDrawer({ children, defaultOpen = false }: InspirationDrawerProps) {
+export function InspirationDrawer({
+  children,
+  defaultOpen = false,
+  openRequestId = 0,
+}: InspirationDrawerProps) {
   const [open, setOpen] = useState(defaultOpen);
+
+  useEffect(() => {
+    if (openRequestId > 0) {
+      setOpen(true);
+    }
+  }, [openRequestId]);
   const panelId = useId();
 
   return (

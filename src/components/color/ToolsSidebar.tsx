@@ -18,6 +18,7 @@ export type ToolsSidebarProps = {
   generatePanel: ReactNode;
   inspirationPanel: ReactNode;
   inspirationDefaultOpen?: boolean;
+  inspirationOpenRequestId?: number;
 };
 
 export function ToolsSidebar({
@@ -27,6 +28,7 @@ export function ToolsSidebar({
   generatePanel,
   inspirationPanel,
   inspirationDefaultOpen = false,
+  inspirationOpenRequestId = 0,
 }: ToolsSidebarProps) {
   const panels: Record<ToolSection, ReactNode> = {
     colors: colorsPanel,
@@ -77,6 +79,7 @@ export function ToolsSidebar({
       <InspirationDrawer
         key={inspirationDefaultOpen ? 'inspire-open' : 'inspire-closed'}
         defaultOpen={inspirationDefaultOpen}
+        openRequestId={inspirationOpenRequestId}
       >
         {inspirationPanel}
       </InspirationDrawer>
