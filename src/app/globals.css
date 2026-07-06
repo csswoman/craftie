@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 @theme {
   --color-bg: oklch(1 0 0);
@@ -33,7 +33,7 @@
 }
 
 @layer theme {
-  .dark {
+  [data-theme='dark'] {
     --color-bg: oklch(0.16 0.008 160);
     --color-canvas: oklch(0.14 0.01 160);
     --color-surface: oklch(0.19 0.01 160);
@@ -101,7 +101,7 @@
     background-size: 20px 20px;
   }
 
-  .dark .canvas-dots {
+  [data-theme='dark'] .canvas-dots {
     background-image: radial-gradient(circle, oklch(0.45 0.01 160 / 0.35) 1px, transparent 1px);
   }
 
