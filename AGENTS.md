@@ -23,6 +23,8 @@ Do not copy copyrighted content, datasets, tables, or text from third-party prod
 - Components < 250 lines.
 - Business logic belongs in `/lib`.
 - `/lib` must be framework-agnostic.
+- Browser-only adapters belong in `/src/lib/browser`, not `/lib`.
+- UI may import browser adapters with `@/lib/browser/*`; pure logic should use `@lib/*`.
 - One responsibility per module.
 - One task per PR.
 - Do not implement future phases unless explicitly requested.
