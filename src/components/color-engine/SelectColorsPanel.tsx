@@ -24,7 +24,7 @@ export type SelectColorsPanelProps = {
 function PaletteBuilderSkeleton({ message }: { message: string }) {
   return (
     <div
-      className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-start"
+      className="flex w-full min-w-0 flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-start"
       aria-busy="true"
       aria-live="polite"
     >
@@ -129,9 +129,13 @@ function SelectColorsPanelContent({
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-start">
-      <div className="space-y-8 rounded-lg border border-border bg-bg p-5">{groupsPanel}</div>
-      <RolePaletteGrid />
+    <div className="flex w-full min-w-0 flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-start">
+      <div className="min-w-0 space-y-8 rounded-lg border border-border bg-bg p-5">
+        {groupsPanel}
+      </div>
+      <div className="min-w-0">
+        <RolePaletteGrid />
+      </div>
     </div>
   );
 }
