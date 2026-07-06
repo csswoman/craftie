@@ -1,5 +1,3 @@
-import { converter, formatHex } from 'culori';
-
 import {
   classifyColorToGroup,
   DEFAULT_COLOR_GROUP_THRESHOLDS,
@@ -10,6 +8,7 @@ import type { GeneratedPalette } from './formulas';
 import type { ExtractedColor } from './imageExtractor';
 import { nameForHex } from './naming';
 import { normalizeHex } from './normalizeHex';
+import { deriveChromatic, toOklch } from './oklchMath';
 import {
   brandScore,
   pickBestChromaticRole,
@@ -58,8 +57,6 @@ export {
   validateRolePalette,
 } from './rolePaletteGenerated';
 
-const toOklch = converter('oklch');
-
 type ColorCandidate = {
   hex: string;
   prominence: number;
@@ -68,16 +65,6 @@ type ColorCandidate = {
   hue: number;
   isNeutral: boolean;
 };
-
-function oklchToHex(lightness: number, chroma: number, hue: number): string {
-  const converted = toOklch({ mode: 'oklch', l: lightness, c: chroma, h: hue });
-
-  if (!converted || converted.mode !== 'oklch') {
-    return '#000000';
-  }
-
-  return formatHex(converted) ?? '#000000';
-}
 
 function toCandidate(color: ExtractedColor): ColorCandidate {
   const hex = normalizeHex(color.hex);
@@ -109,20 +96,6 @@ function uniqueCandidates(extracted: ExtractedColor[]): ColorCandidate[] {
   }
 
   return [...byHex.values()];
-}
-
-function deriveChromatic(seedHex: string, hueOffset: number): string {
-  const seed = toOklch(seedHex);
-
-  if (!seed || seed.mode !== 'oklch') {
-    return seedHex;
-  }
-
-  const hue = ((seed.h ?? 0) + hueOffset) % 360;
-  const chroma = Math.max(seed.c ?? 0.1, 0.08);
-  const lightness = Math.min(Math.max(seed.l ?? 0.55, 0.45), 0.72);
-
-  return oklchToHex(lightness, chroma, hue);
 }
 
 function pickNeutral(
