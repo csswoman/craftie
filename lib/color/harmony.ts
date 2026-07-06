@@ -1,86 +1,50 @@
 import { converter, formatHex } from 'culori';
 
+import {
+  ANALOGOUS_SPREAD,
+  CHROMA_MIN,
+  CHROMA_OUTLIER_THRESHOLD,
+  HARMONY_CLUSTER_TOLERANCE,
+  HUE_OUTLIER_THRESHOLD,
+  LIGHTNESS_OUTLIER_THRESHOLD,
+  MONOCHROMATIC_SPREAD,
+} from './harmonyConstants';
+import type {
+  HarmonyAnalysis,
+  HarmonyConfidence,
+  HarmonyPattern,
+  HarmonySuggestion,
+  HarmonyType,
+  OklchColor,
+  OutlierDimension,
+  PaletteColorEntry,
+  PaletteOklchStats,
+  PaletteOutlier,
+} from './harmonyTypes';
 import { normalizeHex } from './normalizeHex';
 
-/** Minimum chroma (OKLCH) to treat a color as having a meaningful hue. */
-export const CHROMA_MIN = 0.04;
+export {
+  ANALOGOUS_SPREAD,
+  CHROMA_MIN,
+  CHROMA_OUTLIER_THRESHOLD,
+  HARMONY_CLUSTER_TOLERANCE,
+  HUE_OUTLIER_THRESHOLD,
+  LIGHTNESS_OUTLIER_THRESHOLD,
+  MONOCHROMATIC_SPREAD,
+} from './harmonyConstants';
 
-/** Hue deviation from group mean that marks an outlier (degrees). */
-export const HUE_OUTLIER_THRESHOLD = 60;
-
-/** Lightness deviation from group mean that marks an outlier (OKLCH L, 0–1). */
-export const LIGHTNESS_OUTLIER_THRESHOLD = 0.18;
-
-/** Chroma deviation from group mean that marks an outlier (OKLCH C). */
-export const CHROMA_OUTLIER_THRESHOLD = 0.08;
-
-/** Max hue spread for a monochromatic palette (degrees). */
-export const MONOCHROMATIC_SPREAD = 15;
-
-/** Max hue spread for an analogous palette (degrees). */
-export const ANALOGOUS_SPREAD = 30;
-
-/** Cluster membership tolerance when fitting harmony patterns (degrees). */
-export const HARMONY_CLUSTER_TOLERANCE = 30;
-
-export type HarmonyType =
-  | 'monochromatic'
-  | 'analogous'
-  | 'complementary'
-  | 'triadic'
-  | 'split_complementary'
-  | 'tetradic'
-  | 'achromatic'
-  | 'mixed';
-
-export type HarmonyConfidence = 'strong' | 'weak' | 'none';
-
-export type OutlierDimension = 'hue' | 'lightness' | 'chroma';
-
-export interface OklchColor {
-  l: number;
-  c: number;
-  h: number | undefined;
-}
-
-export interface PaletteColorEntry {
-  hex: string;
-  oklch: OklchColor;
-}
-
-export interface PaletteOklchStats {
-  meanHue: number | null;
-  meanLightness: number;
-  meanChroma: number;
-  chromaticCount: number;
-}
-
-export interface PaletteOutlier {
-  hex: string;
-  dimensions: OutlierDimension[];
-  oklch: OklchColor;
-}
-
-export interface HarmonySuggestion {
-  originalHex: string;
-  suggestedHex: string;
-  reason: string;
-}
-
-export interface HarmonyPattern {
-  type: HarmonyType;
-  confidence: HarmonyConfidence;
-  /** Hue anchors (degrees) for the detected pattern, when applicable. */
-  anchors: number[];
-}
-
-export interface HarmonyAnalysis {
-  colors: PaletteColorEntry[];
-  stats: PaletteOklchStats;
-  pattern: HarmonyPattern;
-  outliers: PaletteOutlier[];
-  suggestions: HarmonySuggestion[];
-}
+export type {
+  HarmonyAnalysis,
+  HarmonyConfidence,
+  HarmonyPattern,
+  HarmonySuggestion,
+  HarmonyType,
+  OklchColor,
+  OutlierDimension,
+  PaletteColorEntry,
+  PaletteOklchStats,
+  PaletteOutlier,
+} from './harmonyTypes';
 
 const toOklch = converter('oklch');
 
