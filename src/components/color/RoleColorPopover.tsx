@@ -23,11 +23,15 @@ export function RoleColorPopover({ anchor, onClose }: RoleColorPopoverProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Portals need to wait until the browser document exists.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
   useLayoutEffect(() => {
     if (!anchor) {
+      // Clear stale coordinates when the popover closes.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPosition(null);
       return;
     }

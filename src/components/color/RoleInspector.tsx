@@ -4,7 +4,8 @@ import { ROLE_LABELS, type PaletteRoleId } from '@lib/color/rolePalette';
 
 import { useRolePalette } from '@/context/RolePaletteContext';
 
-import { RoleColorEditor, RoleLockToggle } from './RoleColorEditor';
+import { RoleColorEditor } from './RoleColorEditor';
+import { RoleLockToggle } from './RoleColorEditorControls';
 import { useRoleColorEditor } from './useRoleColorEditor';
 
 export function RoleInspector() {

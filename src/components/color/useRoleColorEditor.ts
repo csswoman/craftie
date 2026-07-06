@@ -21,7 +21,7 @@ export function useRoleColorEditor(role: PaletteRoleId) {
 
   const oklch = useMemo(
     () => (slot ? hexToOklchChannels(slot.hex) : null),
-    [slot?.hex],
+    [slot],
   );
 
   const chromaMax = useMemo(

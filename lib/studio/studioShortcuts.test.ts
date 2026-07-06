@@ -32,7 +32,7 @@ describe('studioShortcuts', () => {
       metaKey: false,
       altKey: false,
       target: mockElement('body'),
-    } as KeyboardEvent;
+    } as unknown as KeyboardEvent;
 
     expect(isShortcutsHelpShortcut(event)).toBe(true);
   });

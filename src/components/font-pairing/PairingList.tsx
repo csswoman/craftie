@@ -28,10 +28,13 @@ export function PairingList({
 
   useEffect(() => {
     if (visiblePairings.length === 0) {
+      // No font request is pending when there are no visible pairings.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFontsReady(false);
       return;
     }
 
+    // Mark the preview as loading until the browser font set settles.
     setFontsReady(false);
     loadGoogleFonts(visiblePairings);
 
@@ -44,6 +47,7 @@ export function PairingList({
         }
       });
     } else {
+      // Older browsers without FontFaceSet cannot report readiness.
       setFontsReady(true);
     }
 

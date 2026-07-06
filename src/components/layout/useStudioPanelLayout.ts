@@ -65,6 +65,8 @@ export function useStudioPanelLayout() {
   const [layoutReady, setLayoutReady] = useState(false);
 
   useEffect(() => {
+    // The saved panel layout lives in localStorage, so it is only known after mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLayout(readStoredLayout());
     setLayoutReady(true);
   }, []);

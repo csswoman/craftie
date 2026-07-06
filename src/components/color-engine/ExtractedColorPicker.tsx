@@ -20,6 +20,8 @@ export function ExtractedColorPicker({ colors, onConfirmSeeds }: ExtractedColorP
   const [selectedHexes, setSelectedHexes] = useState<string[]>(() => colors.map((color) => color.hex));
 
   useEffect(() => {
+    // New extraction results should start selected by default.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedHexes(colors.map((color) => color.hex));
   }, [colors]);
 

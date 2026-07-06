@@ -29,6 +29,8 @@ export function ColorSelectionRow({
 
   useEffect(() => {
     if (!isEditing) {
+      // Keep the draft in sync with external renames while the row is idle.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDraftName(displayName);
     }
   }, [displayName, isEditing]);

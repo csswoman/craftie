@@ -42,6 +42,8 @@ export function ColorSelectionPanel({
   const previousPanelCollapsed = useRef(rightPanelCollapsed);
 
   useEffect(() => {
+    // Switching roles should collapse the catalog into assignment mode.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCatalogOpen(activeRole === null);
   }, [activeRole]);
 

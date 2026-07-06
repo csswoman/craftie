@@ -26,6 +26,8 @@ export function StudioFlowGuide({
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
+    // The dismissed flag lives in localStorage, so it is only known after mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDismissed(readFlowGuideDismissed());
   }, []);
 
