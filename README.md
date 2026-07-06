@@ -163,19 +163,19 @@ Core functionality is implemented as reusable and testable utilities.
 Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 Run development server:
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 Run tests:
 
 ```bash
-npm run test
+pnpm test
 ```
 
 ---
