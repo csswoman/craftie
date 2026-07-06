@@ -29,5 +29,8 @@ jobs:
       - name: Verify
         run: pnpm verify
 
+      - name: Build
+        run: pnpm build
+
       - name: Audit
         run: pnpm audit --audit-level moderate
