@@ -26,7 +26,9 @@ export function isGenerateShortcut(event: Pick<KeyboardEvent, 'key' | 'ctrlKey' 
   return event.key === 'Enter' && (event.ctrlKey || event.metaKey);
 }
 
-export function isShortcutsHelpShortcut(event: Pick<KeyboardEvent, 'key' | 'ctrlKey' | 'metaKey' | 'altKey'>): boolean {
+export function isShortcutsHelpShortcut(
+  event: Pick<KeyboardEvent, 'key' | 'ctrlKey' | 'metaKey' | 'altKey' | 'target'>,
+): boolean {
   if (event.key !== '?' || event.ctrlKey || event.metaKey || event.altKey) {
     return false;
   }

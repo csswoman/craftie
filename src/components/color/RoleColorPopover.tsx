@@ -77,7 +77,7 @@ export function RoleColorPopover({ anchor, onClose }: RoleColorPopoverProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="role-color-popover-title"
-        className="fixed z-50 w-72 max-h-[min(420px,calc(100vh-16px))] overflow-y-auto rounded-lg border border-border bg-surface p-3 shadow-float"
+        className="fixed z-50 w-72 max-h-[min(420px,calc(100vh-16px))] overflow-y-auto rounded-lg border border-border bg-surface p-3 shadow-[var(--shadow-float)]"
         style={{ top: position.top, left: position.left }}
         onClick={(event) => event.stopPropagation()}
         onMouseDown={(event) => event.stopPropagation()}

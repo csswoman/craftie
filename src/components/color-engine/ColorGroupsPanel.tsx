@@ -77,8 +77,10 @@ export function ColorGroupsPanel({
     return null;
   }
 
+  const currentPalette = rolePalette;
+
   function handleToggle(color: SelectableColor) {
-    const next = toggleColorInRolePalette(rolePalette, color.hex, activeRole ?? undefined);
+    const next = toggleColorInRolePalette(currentPalette, color.hex, activeRole ?? undefined);
     setRolePalette(next);
   }
 
