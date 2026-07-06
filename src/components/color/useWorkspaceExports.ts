@@ -4,9 +4,9 @@ import type { GeneratedPalette } from '@lib/color/formulas';
 import type { PaletteSeeds, RolePalette } from '@lib/color/rolePalette';
 import type { ThemesConfig } from '@lib/color/themePalette';
 import { buildBrandKit, serializeBrandKit } from '@lib/export/brandKit';
-import { downloadTextFile } from '@lib/export/download';
 import { generateDesignMd } from '@lib/export/generateDesignMd';
 import type { FontPair } from '@lib/typography/pairings';
+import { downloadTextFile } from '@/lib/browser/download';
 
 export function useWorkspaceExports({
   generatedPalette,

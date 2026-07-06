@@ -52,10 +52,8 @@ const DEFAULT_OPTIONS: ResolvedOptions = {
 
 export const PALETTE_EXTRACTION_COUNT = 10;
 const DEFAULT_MAX_COUNT = 5;
-const PALETTE_MAX_COUNT = 12;
 
 const ACCEPTED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
-const MAX_CANVAS_DIMENSION = 256;
 const NEAR_WHITE_L = 0.95;
 const NEAR_BLACK_L = 0.05;
 const NEUTRAL_DOMINANCE_THRESHOLD = 0.4;
@@ -104,21 +102,6 @@ export function validateImageFile(file: File, maxFileSizeMB: number): void {
   if (file.size > maxBytes) {
     throw new Error(`Image exceeds maximum size of ${maxFileSizeMB}MB.`);
   }
-}
-
-function getDrawDimensions(width: number, height: number): { width: number; height: number } {
-  const largestSide = Math.max(width, height);
-
-  if (largestSide <= MAX_CANVAS_DIMENSION) {
-    return { width, height };
-  }
-
-  const scale = MAX_CANVAS_DIMENSION / largestSide;
-
-  return {
-    width: Math.max(1, Math.round(width * scale)),
-    height: Math.max(1, Math.round(height * scale)),
-  };
 }
 
 function rgbSample(r: number, g: number, b: number): RgbSample {
@@ -392,85 +375,4 @@ export function extractColorsFromRaster(
   }
 
   return results;
-}
-
-function loadImageElement(file: File): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const objectUrl = URL.createObjectURL(file);
-    const image = new Image();
-
-    image.onload = () => {
-      URL.revokeObjectURL(objectUrl);
-      resolve(image);
-    };
-
-    image.onerror = () => {
-      URL.revokeObjectURL(objectUrl);
-      reject(new Error('Unable to load image file.'));
-    };
-
-    image.src = objectUrl;
-  });
-}
-
-function rasterizeImage(image: HTMLImageElement): RasterData {
-  const dimensions = getDrawDimensions(image.naturalWidth, image.naturalHeight);
-  const canvas = document.createElement('canvas');
-  canvas.width = dimensions.width;
-  canvas.height = dimensions.height;
-
-  const context = canvas.getContext('2d', { willReadFrequently: true });
-
-  if (context === null) {
-    throw new Error('Unable to create canvas rendering context.');
-  }
-
-  context.drawImage(image, 0, 0, dimensions.width, dimensions.height);
-  const imageData = context.getImageData(0, 0, dimensions.width, dimensions.height);
-
-  return {
-    data: imageData.data,
-    width: imageData.width,
-    height: imageData.height,
-  };
-}
-
-/**
- * Extracts dominant colors from a local image file using canvas sampling and k-means.
- */
-export async function extractColorsFromImage(
-  file: File,
-  options?: ImageExtractionOptions,
-): Promise<ExtractedColor[]> {
-  const resolved = resolveOptions(options);
-  validateImageFile(file, resolved.maxFileSizeMB);
-
-  if (typeof document === 'undefined') {
-    throw new Error('extractColorsFromImage requires a browser environment.');
-  }
-
-  const image = await loadImageElement(file);
-  const raster = rasterizeImage(image);
-
-  return extractColorsFromRaster(raster, options);
-}
-
-/**
- * Extracts a broader set of dominant colors for the visual palette builder.
- * Pass a higher regenerateIndex to sample the image differently and surface alternate colors.
- */
-export async function extractPaletteColorsFromImage(
-  file: File,
-  regenerateIndex = 0,
-): Promise<ExtractedColor[]> {
-  const sampleSteps = [6, 8, 10, 12, 14];
-  const sampleStep = sampleSteps[regenerateIndex % sampleSteps.length]!;
-
-  return extractColorsFromImage(file, {
-    count: PALETTE_EXTRACTION_COUNT,
-    maxCount: PALETTE_MAX_COUNT,
-    sampleStep,
-    sampleOffset: regenerateIndex % sampleStep,
-    centroidSeed: regenerateIndex * 3,
-  });
 }

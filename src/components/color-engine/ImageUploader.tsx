@@ -3,9 +3,10 @@
 import { useEffect, useId, useRef, useState } from 'react';
 
 import { buildImagePalette } from '@lib/color/imagePalette';
-import { extractPaletteColorsFromImage, validateImageFile } from '@lib/color/imageExtractor';
+import { validateImageFile } from '@lib/color/imageExtractor';
 import type { ImagePaletteBuildResult } from '@lib/color/imagePalette';
 
+import { extractPaletteColorsFromImage } from '@/lib/browser/imageExtractor';
 import { ImageUploadPreview } from '@/components/color-engine/ImageUploadPreview';
 
 export type ImageUploaderProps = {

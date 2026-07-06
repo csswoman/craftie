@@ -8,7 +8,7 @@ import {
   STUDIO_FLOW_STEPS,
   type StudioFlowStepId,
 } from '@lib/studio/studioFlow';
-import { readFlowGuideDismissed, writeFlowGuideDismissed } from '@lib/studio/flowGuideDismiss';
+import { readFlowGuideDismissed, writeFlowGuideDismissed } from '@/lib/browser/flowGuideDismiss';
 
 export type StudioFlowGuideProps = {
   hasGeneratedPalette: boolean;

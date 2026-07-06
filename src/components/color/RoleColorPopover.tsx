@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 
 import { ROLE_LABELS, type PaletteRoleId } from '@lib/color/rolePalette';
 
-import { computePopoverPosition } from '@lib/utils/computePopoverPosition';
+import { computePopoverPosition } from '@/lib/browser/computePopoverPosition';
 import { RoleColorEditor } from './RoleColorEditor';
 
 export type RoleColorPopoverAnchor = {

@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { loadGoogleFonts } from '@lib/typography/googleFonts';
 import type { FontPair } from '@lib/typography/pairings';
 
+import { loadGoogleFonts } from '@/lib/browser/googleFonts';
 import { PairCard } from './PairCard';
 
 export type PairingListProps = {

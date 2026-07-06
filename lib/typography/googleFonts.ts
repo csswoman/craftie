@@ -85,35 +85,3 @@ export function buildGoogleFontsUrl(pairs: FontPair[]): string {
   return `${GOOGLE_FONTS_BASE}?${familyParams.join('&')}&display=swap`;
 }
 
-/**
- * Injects a stylesheet link for the required Google Fonts families.
- * Skips injection when an identical URL is already present.
- */
-export function loadGoogleFonts(pairs: FontPair[]): void {
-  if (typeof document === 'undefined') {
-    return;
-  }
-
-  const url = buildGoogleFontsUrl(pairs);
-
-  if (url === '') {
-    return;
-  }
-
-  const linkId = getGoogleFontsLinkId(url);
-  const existing = document.getElementById(linkId);
-
-  if (existing instanceof HTMLLinkElement && existing.href === url) {
-    return;
-  }
-
-  if (existing) {
-    existing.remove();
-  }
-
-  const link = document.createElement('link');
-  link.id = linkId;
-  link.rel = 'stylesheet';
-  link.href = url;
-  document.head.appendChild(link);
-}
