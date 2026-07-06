@@ -1,7 +1,13 @@
-import { converter, formatHex } from 'culori';
-
 import { contrastRatio, evaluateContrast } from './contrast';
-import { CHROMA_MIN } from './harmony';
+import {
+  assertNonEmptySeeds,
+  hueDistance,
+  isChromatic,
+  neutralChroma,
+  oklchToHex,
+  parseSeedOklch,
+  type SeedOklch,
+} from './formulaColorMath';
 import { normalizeHex } from './normalizeHex';
 import {
   type GeneratedPalette,
@@ -32,74 +38,6 @@ const NEUTRAL_STEPS: NeutralStep[] = [
 const MIN_ACCENT_HUE_SEPARATION = 30;
 const ON_SURFACE_CHROMA = 0.03;
 const NORMAL_TEXT_AA = 4.5;
-
-const toOklch = converter('oklch');
-
-interface SeedOklch {
-  l: number;
-  c: number;
-  h: number | undefined;
-}
-
-function assertValidSeed(seed: string): void {
-  if (typeof seed !== 'string' || seed.trim() === '') {
-    throw new Error('Seed must be a non-empty color string');
-  }
-}
-
-function assertNonEmptySeeds(seeds: string[]): void {
-  if (!Array.isArray(seeds) || seeds.length === 0) {
-    throw new Error('At least one seed color is required');
-  }
-}
-
-function parseSeedOklch(seed: string): SeedOklch {
-  assertValidSeed(seed);
-  const normalized = normalizeHex(seed);
-  const converted = toOklch(normalized);
-
-  if (!converted || converted.mode !== 'oklch') {
-    throw new Error(`Unable to convert seed to OKLCH: "${normalized}"`);
-  }
-
-  return {
-    l: converted.l ?? 0,
-    c: converted.c ?? 0,
-    h: converted.h,
-  };
-}
-
-function hueDistance(a: number, b: number): number {
-  const diff = Math.abs(a - b) % 360;
-  return diff > 180 ? 360 - diff : diff;
-}
-
-function neutralChroma(seedChroma: number): number {
-  if (seedChroma < CHROMA_MIN) {
-    return 0.012;
-  }
-
-  return Math.min(0.06, Math.max(0.01, seedChroma * 0.12));
-}
-
-function oklchToHex(l: number, c: number, h: number | undefined): string {
-  const hex = formatHex({
-    mode: 'oklch',
-    l,
-    c,
-    h,
-  });
-
-  if (!hex) {
-    throw new Error('Unable to format OKLCH color as hex');
-  }
-
-  return normalizeHex(hex);
-}
-
-function isChromatic(oklch: SeedOklch): boolean {
-  return oklch.c >= CHROMA_MIN && oklch.h !== undefined;
-}
 
 function accentChroma(seed: SeedOklch): number {
   return Math.min(0.28, Math.max(0.08, seed.c * 1.1 + 0.04));
