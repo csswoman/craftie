@@ -8,6 +8,7 @@ import {
   parseSeedOklch,
   type SeedOklch,
 } from './formulaColorMath';
+import { generateNeutrals } from './formulaNeutrals';
 import { normalizeHex } from './normalizeHex';
 import {
   type GeneratedPalette,
@@ -18,22 +19,7 @@ import {
 import { sortSelectedColors, type SelectableColor } from './selectableColors';
 
 export type { GeneratedPalette, NeutralScale, NeutralStep } from './paletteTypes';
-
-const NEUTRAL_LIGHTNESS: Record<NeutralStep, number> = {
-  veryLight: 0.97,
-  light: 0.92,
-  medium: 0.62,
-  dark: 0.38,
-  veryDark: 0.2,
-};
-
-const NEUTRAL_STEPS: NeutralStep[] = [
-  'veryLight',
-  'light',
-  'medium',
-  'dark',
-  'veryDark',
-];
+export { generateNeutrals } from './formulaNeutrals';
 
 const MIN_ACCENT_HUE_SEPARATION = 30;
 const ON_SURFACE_CHROMA = 0.03;
@@ -417,19 +403,6 @@ export function generatePaletteFromSelection(colors: SelectableColor[]): Generat
   return finalizePalette(palette, primarySeedHex, {
     skipGeneratedAccent: boldHexes.length >= 2,
   });
-}
-
-export function generateNeutrals(seed: string): NeutralScale {
-  const seedOklch = parseSeedOklch(seed);
-  const chroma = neutralChroma(seedOklch.c);
-  const hue = seedOklch.h;
-  const scale = {} as NeutralScale;
-
-  for (const step of NEUTRAL_STEPS) {
-    scale[step] = oklchToHex(NEUTRAL_LIGHTNESS[step], chroma, hue);
-  }
-
-  return scale;
 }
 
 export function generateAccent(seed: string): string {
