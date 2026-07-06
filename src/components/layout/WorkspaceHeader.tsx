@@ -112,8 +112,7 @@ export function LayoutNavigator({ activeView, onViewChange }: LayoutNavigatorPro
           id={menuId}
           role="menu"
           className="fixed z-dropdown w-[min(100vw-2rem,320px)] rounded-xl border border-border bg-bg p-2"
-          style={{ boxShadow: 'var(--shadow-float)' }}
-          style={menuPosition}
+          style={{ ...menuPosition, boxShadow: 'var(--shadow-float)' }}
         >
           <MenuSection
             title="Sistema de diseño"

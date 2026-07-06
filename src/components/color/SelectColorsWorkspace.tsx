@@ -3,17 +3,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { GeneratedPalette } from '@lib/color/formulas';
-import { generatePalette } from '@lib/color/formulas';
 import type { ImagePaletteBuildResult } from '@lib/color/imagePalette';
+import { isGeneratedPaletteRole } from '@lib/color/paletteDisplay';
+import { normalizeHex } from '@lib/color/normalizeHex';
+import { addColorToPalette, renamePaletteColor } from '@lib/color/paletteOrder';
 import {
-  mapSelectedColorsToSeeds,
-  SELECTABLE_COLORS,
-  suggestSelectionFromHexes,
-  validateSelection,
-  type SelectableColor,
-} from '@lib/color/selectableColors';
-import { addColorToPalette, renamePaletteColor, replacePaletteColor } from '@lib/color/paletteOrder';
-import { replaceSeeds, validateSeedsForGeneration } from '@lib/color/seeds';
+  assignColorToRolePalette,
+  generatePaletteFromRolePalette,
+  isPaletteRoleId,
+  validateRolePalette,
+} from '@lib/color/rolePalette';
+import { SELECTABLE_COLORS, type SelectableColor } from '@lib/color/selectableColors';
 import { DESIGN_STYLES, type DesignStyle } from '@lib/styles/presets';
 import { getRecommendedPairings, type FontPair } from '@lib/typography/pairings';
 import { buildBrandKit, serializeBrandKit } from '@lib/export/brandKit';
@@ -28,13 +28,15 @@ import {
 } from '@lib/studio/studioShortcuts';
 
 import { ColorSelectionPanel } from '@/components/color/ColorSelectionPanel';
-import { PaletteCanvas, type PaletteCanvasMode } from '@/components/color/PaletteCanvas';
+import { PaletteCanvas } from '@/components/color/PaletteCanvas';
+import { RoleActiveSelector } from '@/components/color/RoleActiveSelector';
+import { RoleInspector } from '@/components/color/RoleInspector';
 import { InspectorPanel, type InspectorSection } from '@/components/color/InspectorPanel';
 import { ContrastPanel } from '@/components/color-engine/ContrastPanel';
-import { GenerateButton } from '@/components/color-engine/GenerateButton';
 import { ImageUploader } from '@/components/color-engine/ImageUploader';
 import { PalettePreview } from '@/components/color-engine/PalettePreview';
 import { StyleGallery } from '@/components/color-engine/StyleGallery';
+import { CollapsibleSection } from '@/components/layout/CollapsibleSection';
 import { StudioCanvas } from '@/components/layout/StudioCanvas';
 import { StudioFlowGuide } from '@/components/layout/StudioFlowGuide';
 import { StudioStatusBar } from '@/components/layout/StudioStatusBar';
@@ -48,24 +50,55 @@ import {
   LayoutPreview,
   TypeScaleView,
 } from '@/components/style-guide/StudioViews';
-import { ToolsSidebar, type ToolSection } from '@/components/color/ToolsSidebar';
+import { InspirationModal } from '@/components/color/InspirationModal';
+import { ReviewPhaseControls } from '@/components/color/ReviewPhaseControls';
+import { StudioToolsPanel } from '@/components/color/StudioToolsPanel';
+import { Button } from '@/components/ui/Button';
+import { RolePaletteProvider, useRolePalette } from '@/context/RolePaletteContext';
 
 export function SelectColorsWorkspace() {
+  const [generatedPalette, setGeneratedPalette] = useState<GeneratedPalette | null>(null);
+
+  return (
+    <RolePaletteProvider>
+      <SelectColorsWorkspaceContent
+        generatedPalette={generatedPalette}
+        setGeneratedPalette={setGeneratedPalette}
+      />
+    </RolePaletteProvider>
+  );
+}
+
+function SelectColorsWorkspaceContent({
+  generatedPalette,
+  setGeneratedPalette,
+}: {
+  generatedPalette: GeneratedPalette | null;
+  setGeneratedPalette: (palette: GeneratedPalette | null) => void;
+}) {
   const [studioView, setStudioView] = useState<StudioView>('style-guide');
   const [paletteCatalog, setPaletteCatalog] = useState<SelectableColor[]>([]);
-  const [selectedColors, setSelectedColors] = useState<SelectableColor[]>([]);
+  const {
+    rolePalette,
+    seeds,
+    themes,
+    selectionReady,
+    setRolePalette,
+    clearRolePalette,
+    replaceRole,
+    renameRole,
+    assignFromHexes,
+  } = useRolePalette();
   const [catalogSource, setCatalogSource] = useState<'none' | 'curated' | 'image'>('none');
   const [selectedStyleId, setSelectedStyleId] = useState<string | null>(null);
-  const [generatedPalette, setGeneratedPalette] = useState<GeneratedPalette | null>(null);
   const [selectedPairing, setSelectedPairing] = useState<FontPair | null>(null);
   const [isImageExtracting, setIsImageExtracting] = useState(false);
+  const [isImageRegenerating, setIsImageRegenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [toolSection, setToolSection] = useState<ToolSection>('colors');
   const [inspectorSection, setInspectorSection] = useState<InspectorSection>('accessibility');
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
-  const [canvasMode, setCanvasMode] = useState<PaletteCanvasMode>('selection');
-  const [lockedColorIds, setLockedColorIds] = useState<string[]>([]);
-  const [inspirationOpenRequestId, setInspirationOpenRequestId] = useState(0);
+  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
+  const [inspirationModalOpen, setInspirationModalOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const generatingRef = useRef(false);
@@ -86,25 +119,15 @@ export function SelectColorsWorkspace() {
     [activeMoods],
   );
 
-  const selectionValidation = useMemo(() => validateSelection(selectedColors), [selectedColors]);
-  const selectionReady = selectionValidation.ok;
   const isReviewPhase = generatedPalette !== null;
-  const showInspirationByDefault = !isReviewPhase && selectedColors.length === 0 && !isImageExtracting;
 
   useEffect(() => {
-    if (isReviewPhase) {
+    if (!rolePalette || !isReviewPhase) {
       return;
     }
 
-    if (selectionReady) {
-      setToolSection('generate');
-      return;
-    }
-
-    if (selectedColors.length > 0) {
-      setToolSection('colors');
-    }
-  }, [isReviewPhase, selectedColors.length, selectionReady]);
+    setGeneratedPalette(generatePaletteFromRolePalette(rolePalette));
+  }, [rolePalette, isReviewPhase, setGeneratedPalette]);
 
   const handleGenerate = useCallback(() => {
     if (generatingRef.current) {
@@ -115,7 +138,7 @@ export function SelectColorsWorkspace() {
     setIsGenerating(true);
 
     try {
-      const selectionResult = validateSelection(selectedColors);
+      const selectionResult = validateRolePalette(rolePalette);
 
       if (!selectionResult.ok) {
         setError(selectionResult.error);
@@ -124,29 +147,18 @@ export function SelectColorsWorkspace() {
         return;
       }
 
-      const seeds = replaceSeeds(mapSelectedColorsToSeeds(selectedColors));
-      const seedResult = validateSeedsForGeneration(seeds);
-
-      if (!seedResult.ok) {
-        setError(seedResult.error);
-        setGeneratedPalette(null);
-        setStatusMessage(null);
-        return;
-      }
-
       setError(null);
-      const nextPalette = generatePalette(seedResult.seeds);
+      const nextPalette = generatePaletteFromRolePalette(rolePalette!);
       setGeneratedPalette(nextPalette);
-      setCanvasMode('generated');
       setStudioView('style-guide');
       setInspectorSection('accessibility');
       setRightPanelOpen(true);
-      setStatusMessage('Paleta generada. Revisa contraste y mockups en la guía de estilo.');
+      setStatusMessage('Guía de marca lista. Revisa contraste, tipografía y exporta tu Brand Kit.');
     } finally {
       generatingRef.current = false;
       setIsGenerating(false);
     }
-  }, [selectedColors]);
+  }, [rolePalette, setGeneratedPalette]);
 
   useEffect(() => {
     if (!statusMessage) {
@@ -181,109 +193,111 @@ export function SelectColorsWorkspace() {
     return () => window.removeEventListener('keydown', handleShortcut);
   }, [handleGenerate, isReviewPhase, selectionReady]);
 
+  function exitReviewPhase() {
+    setGeneratedPalette(null);
+    setStatusMessage(null);
+  }
+
   function handleFlowStepFocus(stepId: StudioFlowStepId) {
+    if (stepId === 'review') {
+      return;
+    }
+
+    if (isReviewPhase) {
+      exitReviewPhase();
+    }
+
     if (stepId === 'inspire') {
-      setInspirationOpenRequestId((value) => value + 1);
+      setInspirationModalOpen(true);
       return;
     }
 
-    if (stepId === 'adjust') {
-      setToolSection('colors');
+    if (stepId === 'adjust' || stepId === 'generate') {
       setRightPanelOpen(true);
-      return;
-    }
-
-    if (stepId === 'generate') {
-      setToolSection('generate');
     }
   }
 
   function applyCuratedInspiration(hexes: string[], styleId: string | null) {
-    const suggestion = suggestSelectionFromHexes(hexes);
-
-    if (!suggestion.ok) {
-      setError(suggestion.error);
-      return;
-    }
-
     setCatalogSource('curated');
     setPaletteCatalog([...SELECTABLE_COLORS]);
     setSelectedStyleId(styleId);
-    setSelectedColors(suggestion.colors);
+    assignFromHexes(hexes);
     setGeneratedPalette(null);
-    setCanvasMode('selection');
-    setToolSection('colors');
     setRightPanelOpen(true);
     setError(null);
   }
 
   function handleSelectStyle(style: DesignStyle) {
     applyCuratedInspiration(style.seeds, style.id);
+    setInspirationModalOpen(false);
   }
 
   function handleImageExtractionStart() {
     setIsImageExtracting(true);
+    setIsImageRegenerating(false);
     setCatalogSource('image');
     setPaletteCatalog([]);
-    setSelectedColors([]);
+    clearRolePalette();
     setSelectedStyleId(null);
     setGeneratedPalette(null);
-    setCanvasMode('selection');
+    setError(null);
+  }
+
+  function handleImageRegenerateStart() {
+    setIsImageRegenerating(true);
     setError(null);
   }
 
   function handleImagePaletteExtracted(palette: ImagePaletteBuildResult) {
     setIsImageExtracting(false);
+    setIsImageRegenerating(false);
     setCatalogSource('image');
     setPaletteCatalog(palette.catalog);
     setSelectedStyleId(null);
-    setSelectedColors(palette.selection);
+    setRolePalette(palette.rolePalette);
     setGeneratedPalette(null);
-    setCanvasMode('selection');
-    setToolSection('colors');
     setRightPanelOpen(true);
     setError(null);
   }
 
   function handleImageExtractionError(message: string) {
     setIsImageExtracting(false);
+    setIsImageRegenerating(false);
     setCatalogSource('none');
     setPaletteCatalog([]);
-    setSelectedColors([]);
+    clearRolePalette();
     setError(message);
   }
 
-  function handleToggleLock(colorId: string) {
-    setLockedColorIds((current) =>
-      current.includes(colorId)
-        ? current.filter((id) => id !== colorId)
-        : [...current, colorId],
-    );
-  }
-
-  function handleReplacePaletteColor(colorId: string, newHex: string) {
-    const result = replacePaletteColor(activeCatalog, selectedColors, colorId, newHex);
-
-    if (!result) {
-      return;
+  function handleReplacePreviewColor(columnId: string, newHex: string): string | null {
+    if (!generatedPalette) {
+      return 'Genera una paleta primero.';
     }
 
-    setPaletteCatalog(result.catalog);
-    setSelectedColors(result.selected);
+    let normalized: string;
 
-    const selectedIndex = selectedColors.findIndex((color) => color.id === colorId);
-    const updated = result.selected[selectedIndex];
-
-    if (updated && updated.id !== colorId) {
-      setLockedColorIds((current) =>
-        current.map((id) => (id === colorId ? updated.id : id)),
-      );
+    try {
+      normalized = normalizeHex(newHex);
+    } catch {
+      return 'Introduce un código HEX válido.';
     }
+
+    if (isGeneratedPaletteRole(columnId)) {
+      setGeneratedPalette({ ...generatedPalette, [columnId]: normalized });
+      return null;
+    }
+
+    if (isPaletteRoleId(columnId) && rolePalette) {
+      replaceRole(columnId, normalized);
+      return null;
+    }
+
+    return 'No se pudo sustituir este color.';
   }
 
   function handleAddColorByHex(hex: string, customName?: string): string | null {
     const baseCatalog = paletteCatalog.length > 0 ? paletteCatalog : [...SELECTABLE_COLORS];
-    const result = addColorToPalette(baseCatalog, selectedColors, hex, { customName });
+    const result = addColorToPalette(baseCatalog, [], hex, { customName });
 
     if (!result.ok) {
       return result.error;
@@ -294,20 +308,25 @@ export function SelectColorsWorkspace() {
     }
 
     setPaletteCatalog(result.catalog);
-    setSelectedColors(result.selected);
-    setToolSection('colors');
+
+    if (rolePalette) {
+      setRolePalette(assignColorToRolePalette(rolePalette, hex));
+    } else {
+      assignFromHexes([hex]);
+    }
+
     setRightPanelOpen(true);
     setError(null);
 
     return result.message ?? null;
   }
 
-  function handleRenameColor(colorId: string, name: string): string | null {
+  function handleRenameColor(color: SelectableColor, newName: string): boolean {
     const baseCatalog = paletteCatalog.length > 0 ? paletteCatalog : [...SELECTABLE_COLORS];
-    const result = renamePaletteColor(baseCatalog, selectedColors, colorId, name);
+    const result = renamePaletteColor(baseCatalog, [], color.id, newName);
 
     if (!result) {
-      return 'Introduce un nombre válido (1–40 caracteres).';
+      return false;
     }
 
     if (paletteCatalog.length === 0) {
@@ -315,13 +334,23 @@ export function SelectColorsWorkspace() {
     }
 
     setPaletteCatalog(result.catalog);
-    setSelectedColors(result.selected);
-    return null;
+
+    if (rolePalette) {
+      const matchingRole = Object.values(rolePalette).find(
+        (slot) => normalizeHex(slot.hex) === normalizeHex(color.hex),
+      )?.role;
+
+      if (matchingRole) {
+        renameRole(matchingRole, newName);
+      }
+    }
+
+    return true;
   }
 
   function handleExportDesignMd() {
-    if (!generatedPalette) return;
-    const content = generateDesignMd({ palette: generatedPalette, pairing: selectedPairing });
+    if (!generatedPalette || !rolePalette || !seeds) return;
+    const content = generateDesignMd({ seeds, themes, pairing: selectedPairing });
     const result = downloadTextFile('DESIGN.md', content, 'text/markdown;charset=utf-8');
 
     if (!result.ok) {
@@ -335,8 +364,11 @@ export function SelectColorsWorkspace() {
   }
 
   function handleExportBrandKit() {
-    if (!generatedPalette) return;
-    const kit = buildBrandKit(generatedPalette, selectedPairing);
+    if (!generatedPalette || !rolePalette || !seeds) return;
+    const kit = buildBrandKit(generatedPalette, rolePalette, selectedPairing, 'Craftie Kit', {
+      seeds,
+      themes,
+    });
     const result = downloadTextFile('brand-kit.json', serializeBrandKit(kit), 'application/json;charset=utf-8');
 
     if (!result.ok) {
@@ -349,30 +381,21 @@ export function SelectColorsWorkspace() {
     setStatusMessage('Brand Kit descargado.');
   }
 
-  const showSelectionPanel = !isReviewPhase && (isImageExtracting || selectedColors.length > 0);
-  const showInspectorPanel =
-    isReviewPhase && !isLayoutView(studioView) && studioView !== 'colors';
-  const mobileRightPanelAvailable = showSelectionPanel || showInspectorPanel;
+  const showInspectorPanel = isReviewPhase;
 
   const mainContent = renderMainContent({
     generatedPalette,
     studioView,
-    canvasMode,
-    setCanvasMode,
-    selectedColors,
     isImageExtracting,
+    isImageRegenerating,
     selectedPairing,
-    activeCatalog,
-    lockedColorIds,
-    onSelectedColorsChange: setSelectedColors,
-    onToggleLock: handleToggleLock,
-    onReplaceColor: handleReplacePaletteColor,
     onAddColorByHex: handleAddColorByHex,
-    onRenameColor: handleRenameColor,
   });
 
+  const mobileRightPanelAvailable = true;
+
   return (
-    <div className="flex min-h-screen flex-col pb-20">
+    <div className="flex h-dvh flex-col overflow-hidden">
       <div aria-live="polite" aria-atomic="true" className="sr-only">
         {statusMessage}
       </div>
@@ -395,71 +418,64 @@ export function SelectColorsWorkspace() {
         </p>
       ) : null}
 
-      {!isReviewPhase ? (
-        <StudioFlowGuide
-          hasGeneratedPalette={false}
-          hasSelection={selectedColors.length > 0}
-          selectionReady={selectionReady}
-          onStepFocus={handleFlowStepFocus}
-        />
-      ) : null}
+      <StudioFlowGuide
+        hasGeneratedPalette={isReviewPhase}
+        hasSelection={rolePalette !== null}
+        selectionReady={selectionReady}
+        onStepFocus={handleFlowStepFocus}
+      />
 
       <StudioCanvas
-        showRightPanel={showSelectionPanel || showInspectorPanel}
+        showRightPanel
         rightPanelOpen={rightPanelOpen}
+        syncRightPanelWithActiveRole={!isReviewPhase}
+        onRightPanelCollapsedChange={setRightPanelCollapsed}
         sidebar={
-          <div className="flex min-h-0 flex-1 flex-col">
-            <ToolsSidebar
-              activeSection={toolSection}
-              onSectionChange={setToolSection}
-              inspirationDefaultOpen={showInspirationByDefault}
-              inspirationOpenRequestId={inspirationOpenRequestId}
-              inspirationPanel={
-                <StyleGallery
-                  styles={DESIGN_STYLES}
-                  selectedStyleId={selectedStyleId}
-                  onSelectStyle={handleSelectStyle}
-                  variant="embedded"
-                  showHeader={false}
-                />
-              }
-              colorsPanel={
-                <ImageUploader
-                  onExtractionStart={handleImageExtractionStart}
-                  onPaletteExtracted={handleImagePaletteExtracted}
-                  onExtractionError={handleImageExtractionError}
-                  variant="embedded"
-                  showHeader={false}
-                />
-              }
-              generatePanel={
-                <div className="space-y-4">
-                  <p className="text-[0.8125rem] leading-relaxed text-muted">
-                    Calcula roles semánticos a partir de tu selección y abre la guía de estilo al
-                    generar.
-                  </p>
-                  <GenerateButton
-                    onClick={handleGenerate}
-                    disabled={!selectionReady}
-                    busy={isGenerating}
+          <div className="flex h-full min-h-0 flex-1 flex-col">
+            <StudioToolsPanel>
+              {isReviewPhase ? (
+                <>
+                  <ReviewPhaseControls onEditSelection={() => handleFlowStepFocus('adjust')} />
+                  {generatedPalette ? (
+                    <PalettePreview
+                      palette={generatedPalette}
+                      variant="embedded"
+                      onReplaceColor={handleReplacePreviewColor}
+                    />
+                  ) : null}
+                </>
+              ) : (
+                <>
+                  {rolePalette ? <RoleActiveSelector /> : null}
+                  <RoleInspector />
+                  <ImageUploader
+                    onExtractionStart={handleImageExtractionStart}
+                    onRegenerateStart={handleImageRegenerateStart}
+                    onPaletteExtracted={handleImagePaletteExtracted}
+                    onExtractionError={handleImageExtractionError}
+                    variant="embedded"
+                    showHeader={false}
                   />
-                  <PalettePreview palette={generatedPalette} variant="embedded" />
-                </div>
-              }
-            />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full border border-border/50 px-3 py-2 text-[0.8125rem]"
+                    onClick={() => setInspirationModalOpen(true)}
+                  >
+                    Elegir inspiración
+                  </Button>
+                </>
+              )}
+            </StudioToolsPanel>
             {isReviewPhase ? (
-              <div className="shrink-0 border-t border-border p-4">
-                <h2 className="text-[0.8125rem] font-semibold text-ink">Tipografía</h2>
-                <p className="mt-1 text-[0.75rem] leading-relaxed text-muted">
-                  Pares sugeridos según el estilo elegido.
-                </p>
-                <div className="mt-3">
+              <div className="shrink-0 border-t border-border px-4 py-3">
+                <CollapsibleSection title="Tipografía" defaultOpen={recommendedPairings.length > 0}>
                   <PairingList
                     pairings={recommendedPairings}
                     selectedPairing={selectedPairing}
                     onSelectPairing={setSelectedPairing}
                   />
-                </div>
+                </CollapsibleSection>
               </div>
             ) : null}
           </div>
@@ -470,7 +486,15 @@ export function SelectColorsWorkspace() {
             <InspectorPanel
               activeSection={inspectorSection}
               onSectionChange={setInspectorSection}
-              accessibilityPanel={<ContrastPanel palette={generatedPalette} variant="embedded" />}
+              accessibilityPanel={
+                <ContrastPanel
+                  palette={generatedPalette}
+                  variant="embedded"
+                  onApplyForeground={(role, hex) => {
+                    void handleReplacePreviewColor(role, hex);
+                  }}
+                />
+              }
               layoutsPanel={
                 <MockupPreviewGrid
                   palette={generatedPalette}
@@ -479,20 +503,19 @@ export function SelectColorsWorkspace() {
                 />
               }
             />
-          ) : showSelectionPanel ? (
+          ) : (
             <ColorSelectionPanel
               catalogSource={catalogSource}
               isExtracting={isImageExtracting}
+              isRegenerating={isImageRegenerating}
               colors={paletteCatalog}
-              selectedColors={selectedColors}
-              onSelectedColorsChange={(colors) => {
-                setSelectedColors(colors);
-                setError(null);
-              }}
+              isGenerating={isGenerating}
+              onGenerate={handleGenerate}
               onAddColorByHex={handleAddColorByHex}
               onRenameColor={handleRenameColor}
+              rightPanelCollapsed={rightPanelCollapsed}
             />
-          ) : null
+          )
         }
       />
 
@@ -510,6 +533,19 @@ export function SelectColorsWorkspace() {
       ) : null}
 
       <StudioStatusBar palette={generatedPalette} pairing={selectedPairing} />
+
+      <InspirationModal
+        open={inspirationModalOpen && !isReviewPhase}
+        onClose={() => setInspirationModalOpen(false)}
+      >
+        <StyleGallery
+          styles={DESIGN_STYLES}
+          selectedStyleId={selectedStyleId}
+          onSelectStyle={handleSelectStyle}
+          variant="embedded"
+          showHeader={false}
+        />
+      </InspirationModal>
     </div>
   );
 }
@@ -517,49 +553,25 @@ export function SelectColorsWorkspace() {
 function renderMainContent({
   generatedPalette,
   studioView,
-  canvasMode,
-  setCanvasMode,
-  selectedColors,
   isImageExtracting,
+  isImageRegenerating,
   selectedPairing,
-  activeCatalog,
-  lockedColorIds,
-  onSelectedColorsChange,
-  onToggleLock,
-  onReplaceColor,
   onAddColorByHex,
-  onRenameColor,
 }: {
   generatedPalette: GeneratedPalette | null;
   studioView: StudioView;
-  canvasMode: PaletteCanvasMode;
-  setCanvasMode: (mode: PaletteCanvasMode) => void;
-  selectedColors: SelectableColor[];
   isImageExtracting: boolean;
+  isImageRegenerating: boolean;
   selectedPairing: FontPair | null;
-  activeCatalog: SelectableColor[];
-  lockedColorIds: string[];
-  onSelectedColorsChange: (colors: SelectableColor[]) => void;
-  onToggleLock: (colorId: string) => void;
-  onReplaceColor: (colorId: string, newHex: string) => void;
   onAddColorByHex: (hex: string, customName?: string) => string | null;
-  onRenameColor: (colorId: string, name: string) => string | null;
 }) {
   if (!generatedPalette) {
     return (
       <PaletteCanvas
-        mode={canvasMode}
-        onModeChange={setCanvasMode}
-        selectedColors={selectedColors}
-        generatedPalette={generatedPalette}
         isLoading={isImageExtracting}
-        catalog={activeCatalog}
-        lockedIds={lockedColorIds}
-        editable={selectedColors.length > 0}
-        onSelectedColorsChange={onSelectedColorsChange}
-        onReplaceColor={onReplaceColor}
+        isUpdating={isImageRegenerating}
+        editable
         onAddColorByHex={onAddColorByHex}
-        onToggleLock={onToggleLock}
       />
     );
   }

@@ -5,7 +5,7 @@ import { ThemeToggle } from '@/components/theme/ThemeToggle';
 export type WorkspaceTab = 'colors' | 'typography';
 
 interface SiteHeaderProps {
-  activePath?: '/' | '/select-colors';
+  activePath?: '/';
   compact?: boolean;
   workspaceTab?: WorkspaceTab;
   onWorkspaceTabChange?: (tab: WorkspaceTab) => void;
@@ -62,7 +62,7 @@ export function SiteHeader({
                 ))}
               </ul>
             ) : (
-              <Link href="/select-colors" className={tabClassName(activePath === '/select-colors')}>
+              <Link href="/" className={tabClassName(activePath === '/')}>
                 Colores
               </Link>
             )}

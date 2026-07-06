@@ -76,11 +76,8 @@ export function MockupPreviewGrid({
 
   if (!palette || !tokens) {
     return (
-      <section className="rounded-xl border border-dashed border-border bg-bg/60 px-4 py-8 text-center">
-        <p className="text-[0.8125rem] font-semibold text-ink">Vistas previas de interfaz</p>
-        <p className="mt-1 text-[0.75rem] leading-relaxed text-muted">
-          Genera una paleta para ver cómo se aplica en landing, dashboard y tarjeta de marca.
-        </p>
+      <section className="rounded-md border border-dashed border-border bg-surface px-3 py-4 text-center">
+        <p className="text-[0.75rem] text-muted">Genera una paleta para ver mockups.</p>
       </section>
     );
   }
@@ -96,11 +93,7 @@ export function MockupPreviewGrid({
             Ejemplos de UI con los roles semánticos y tipografía de tu guía. Haz clic para ampliar.
           </p>
         </div>
-      ) : (
-        <p className="mb-3 text-[0.8125rem] leading-relaxed text-muted">
-          Mismas vistas que en la guía de estilo. Toca una miniatura para inspeccionar detalle.
-        </p>
-      )}
+      ) : null}
 
       <ul className={compact ? 'grid gap-2' : 'grid gap-3 lg:grid-cols-2'}>
         {MOCKUP_ITEMS.map((item) => {
@@ -112,6 +105,7 @@ export function MockupPreviewGrid({
               title={item.title}
               description={compact ? undefined : item.description}
               featured={featured}
+              compact={compact}
               expandHint="Clic para ampliar"
               onClick={() => setActiveMockup(item.id)}
             >

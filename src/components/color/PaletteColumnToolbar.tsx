@@ -6,6 +6,8 @@ type PaletteColumnToolbarProps = {
   canMoveLeft: boolean;
   canMoveRight: boolean;
   showShades: boolean;
+  lightChrome: boolean;
+  hoverGroup?: 'column' | 'slot';
   onToggleLock: () => void;
   onMoveLeft: () => void;
   onMoveRight: () => void;
@@ -14,12 +16,20 @@ type PaletteColumnToolbarProps = {
   onOpenInfo: () => void;
 };
 
+const HOVER_VISIBILITY: Record<'column' | 'slot', string> = {
+  column:
+    'opacity-0 transition-opacity group-hover/column:opacity-100 group-focus-within/column:opacity-100',
+  slot: 'opacity-0 transition-opacity group-hover/slot:opacity-100 group-focus-within/slot:opacity-100',
+};
+
 export function PaletteColumnToolbar({
   locked,
   editable,
   canMoveLeft,
   canMoveRight,
   showShades,
+  lightChrome,
+  hoverGroup = 'column',
   onToggleLock,
   onMoveLeft,
   onMoveRight,
@@ -28,21 +38,25 @@ export function PaletteColumnToolbar({
   onOpenInfo,
 }: PaletteColumnToolbarProps) {
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-[18%] z-10 flex justify-center opacity-0 transition-opacity group-hover/column:opacity-100 group-focus-within/column:opacity-100">
+    <div
+      className={`pointer-events-none absolute inset-x-0 top-[18%] z-10 flex justify-center ${HOVER_VISIBILITY[hoverGroup]}`}
+    >
       <div className="pointer-events-auto flex flex-col items-center gap-2.5">
         <ToolbarIconButton
           label={showShades ? 'Ocultar shades' : 'Ver shades'}
           active={showShades}
+          lightChrome={lightChrome}
           onClick={onToggleShades}
         >
           <ShadesIcon />
         </ToolbarIconButton>
 
-        {editable ? (
+        {editable && (canMoveLeft || canMoveRight) ? (
           <>
             <ToolbarIconButton
               label="Mover a la izquierda"
               disabled={!canMoveLeft || locked}
+              lightChrome={lightChrome}
               onClick={onMoveLeft}
             >
               <MoveLeftIcon />
@@ -50,6 +64,7 @@ export function PaletteColumnToolbar({
             <ToolbarIconButton
               label="Mover a la derecha"
               disabled={!canMoveRight || locked}
+              lightChrome={lightChrome}
               onClick={onMoveRight}
             >
               <MoveRightIcon />
@@ -57,11 +72,11 @@ export function PaletteColumnToolbar({
           </>
         ) : null}
 
-        <ToolbarIconButton label="Copiar HEX" onClick={onCopyHex}>
+        <ToolbarIconButton label="Copiar HEX" lightChrome={lightChrome} onClick={onCopyHex}>
           <CopyIcon />
         </ToolbarIconButton>
 
-        <ToolbarIconButton label="Ver info del color" onClick={onOpenInfo}>
+        <ToolbarIconButton label="Ver info del color" lightChrome={lightChrome} onClick={onOpenInfo}>
           <InfoIcon />
         </ToolbarIconButton>
 
@@ -69,6 +84,7 @@ export function PaletteColumnToolbar({
           <ToolbarIconButton
             label={locked ? 'Desbloquear color' : 'Bloquear color'}
             active={locked}
+            lightChrome={lightChrome}
             onClick={onToggleLock}
           >
             <LockIcon locked={locked} />
@@ -84,14 +100,26 @@ function ToolbarIconButton({
   children,
   disabled = false,
   active = false,
+  lightChrome,
   onClick,
 }: {
   label: string;
   children: React.ReactNode;
   disabled?: boolean;
   active?: boolean;
+  lightChrome: boolean;
   onClick: () => void;
 }) {
+  const chromeClasses = lightChrome
+    ? {
+        button: active ? 'bg-white/20' : 'hover:bg-white/10 hover:scale-105',
+        focus: 'focus-visible:ring-white/70',
+      }
+    : {
+        button: active ? 'bg-black/15' : 'hover:bg-black/10 hover:scale-105',
+        focus: 'focus-visible:ring-black/30',
+      };
+
   return (
     <div className="group/tooltip relative">
       <button
@@ -100,15 +128,13 @@ function ToolbarIconButton({
         title={label}
         disabled={disabled}
         onClick={onClick}
-        className={`flex size-8 items-center justify-center rounded-md text-white transition-[opacity,transform,background-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:cursor-not-allowed disabled:opacity-35 ${
-          active ? 'bg-white/20' : 'hover:bg-white/10 hover:scale-105'
-        }`}
+        className={`flex size-8 items-center justify-center rounded-md text-current transition-[opacity,transform,background-color] focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-35 ${chromeClasses.focus} ${chromeClasses.button}`}
       >
         {children}
       </button>
       <span
         role="tooltip"
-        className="pointer-events-none absolute left-[calc(100%+8px)] top-1/2 z-20 -translate-y-1/2 whitespace-nowrap rounded-md bg-ink px-2 py-1 text-[0.6875rem] font-medium text-white opacity-0 shadow-md transition-opacity group-hover/tooltip:opacity-100 group-focus-within/tooltip:opacity-100"
+        className="pointer-events-none absolute left-[calc(100%+8px)] top-1/2 z-20 -translate-y-1/2 whitespace-nowrap rounded-md border border-border bg-ink px-2 py-1 text-[0.6875rem] font-medium text-bg opacity-0 shadow-md transition-opacity group-hover/tooltip:opacity-100 group-focus-within/tooltip:opacity-100"
       >
         {label}
       </span>

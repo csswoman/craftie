@@ -1,11 +1,14 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 import {
   getActiveStudioFlowStep,
   getStudioFlowStepIndex,
   STUDIO_FLOW_STEPS,
   type StudioFlowStepId,
 } from '@lib/studio/studioFlow';
+import { readFlowGuideDismissed, writeFlowGuideDismissed } from '@lib/studio/flowGuideDismiss';
 
 export type StudioFlowGuideProps = {
   hasGeneratedPalette: boolean;
@@ -20,6 +23,16 @@ export function StudioFlowGuide({
   selectionReady,
   onStepFocus,
 }: StudioFlowGuideProps) {
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    setDismissed(readFlowGuideDismissed());
+  }, []);
+
+  if (dismissed) {
+    return null;
+  }
+
   const activeStep = getActiveStudioFlowStep({
     hasGeneratedPalette,
     hasSelection,
@@ -28,38 +41,63 @@ export function StudioFlowGuide({
   const activeIndex = getStudioFlowStepIndex(activeStep);
   const current = STUDIO_FLOW_STEPS[activeIndex];
 
+  function handleDismiss() {
+    writeFlowGuideDismissed(true);
+    setDismissed(true);
+  }
+
   return (
     <section
       aria-label="Progreso del flujo de paleta"
-      className="border-b border-border bg-surface/60 px-4 py-3 lg:px-5"
+      className="relative shrink-0 border-b border-border bg-surface/60 px-4 py-2.5 lg:px-6"
     >
-      <ol className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-2 gap-y-2 sm:gap-x-3">
-        {STUDIO_FLOW_STEPS.map((step, index) => {
-          const status = getStepStatus(index, activeIndex);
-          const canFocus = index <= activeIndex && onStepFocus !== undefined;
+      <button
+        type="button"
+        onClick={handleDismiss}
+        aria-label="Ocultar guía del flujo"
+        title="Ocultar guía"
+        className="absolute right-3 top-2 flex size-7 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 lg:right-5"
+      >
+        <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4">
+          <path
+            d="M4 4l8 8M12 4l-8 8"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+          />
+        </svg>
+      </button>
 
-          return (
-            <li key={step.id} className="flex items-center gap-2 sm:gap-3">
-              <StepBadge
-                step={step}
-                status={status}
-                canFocus={canFocus}
-                onFocus={onStepFocus ? () => onStepFocus(step.id) : undefined}
-              />
-              {index < STUDIO_FLOW_STEPS.length - 1 ? (
-                <span className="hidden text-muted sm:inline" aria-hidden="true">
-                  →
-                </span>
-              ) : null}
-            </li>
-          );
-        })}
-      </ol>
-      {current ? (
-        <p className="mx-auto mt-2 max-w-5xl text-[0.8125rem] text-muted">
-          <span className="font-semibold text-ink">Paso {activeIndex + 1}:</span> {current.hint}
-        </p>
-      ) : null}
+      <div className="mx-auto flex w-full max-w-2xl flex-col items-center px-8">
+        <ol className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 sm:gap-x-3">
+          {STUDIO_FLOW_STEPS.map((step, index) => {
+            const status = getStepStatus(index, activeIndex);
+            const canFocus = index <= activeIndex && onStepFocus !== undefined;
+
+            return (
+              <li key={step.id} className="flex items-center gap-2 sm:gap-3">
+                <StepBadge
+                  step={step}
+                  status={status}
+                  canFocus={canFocus}
+                  onFocus={onStepFocus ? () => onStepFocus(step.id) : undefined}
+                />
+                {index < STUDIO_FLOW_STEPS.length - 1 ? (
+                  <span className="hidden text-muted sm:inline" aria-hidden="true">
+                    →
+                  </span>
+                ) : null}
+              </li>
+            );
+          })}
+        </ol>
+        {current ? (
+          <p className="mt-1.5 text-center text-[0.8125rem] text-muted">
+            <span className="font-semibold text-ink">Paso {activeIndex + 1}:</span> {current.hint}
+          </p>
+        ) : null}
+      </div>
     </section>
   );
 }

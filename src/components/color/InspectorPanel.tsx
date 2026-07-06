@@ -29,8 +29,8 @@ export function InspectorPanel({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <nav aria-label="Revisión de paleta" className="shrink-0 border-b border-border px-3 pt-3">
-        <ul className="flex flex-wrap gap-1" role="tablist">
+      <nav aria-label="Revisión de paleta" className="shrink-0 border-b border-border px-4 pt-3">
+        <ul className="flex flex-wrap gap-1.5" role="tablist">
           {SECTIONS.map((section) => (
             <li key={section.id} role="presentation">
               <button
@@ -40,7 +40,7 @@ export function InspectorPanel({
                 aria-selected={activeSection === section.id}
                 aria-controls={`inspector-panel-${section.id}`}
                 onClick={() => onSectionChange(section.id)}
-                className={`rounded-t-md px-2.5 py-2 text-[0.75rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+                className={`rounded-t-md px-3 py-2 text-[0.8125rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
                   activeSection === section.id
                     ? 'bg-bg text-ink'
                     : 'text-muted hover:bg-surface-raised hover:text-ink'

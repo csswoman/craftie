@@ -8,7 +8,7 @@ const STATUS_LABELS: Record<ContrastStatus, string> = {
 
 const STATUS_CLASSES: Record<ContrastStatus, string> = {
   pass: 'border-pass/30 bg-pass/10 text-pass',
-  warning: 'border-border bg-surface-raised text-ink',
+  warning: 'border-border bg-surface-raised text-muted',
   fail: 'border-fail/30 bg-fail/10 text-fail',
 };
 
@@ -17,10 +17,35 @@ interface ContrastBadgeProps {
   level: WCAGLevel;
   status: ContrastStatus;
   target: ContrastTarget;
+  compact?: boolean;
+  contextLabel?: string;
 }
 
-export function ContrastBadge({ ratio, level, status, target }: ContrastBadgeProps) {
-  const levelLabel = level === 'fail' ? 'Sin nivel' : level;
+export function ContrastBadge({
+  ratio,
+  level,
+  status,
+  target,
+  compact = false,
+  contextLabel,
+}: ContrastBadgeProps) {
+  const levelLabel = level === 'fail' ? '—' : level;
+
+  if (compact) {
+    return (
+      <span
+        className={`inline-flex shrink-0 items-center gap-1 rounded-md border px-1.5 py-0.5 font-mono text-[0.625rem] tabular-nums ${STATUS_CLASSES[status]}`}
+        aria-label={`${contextLabel ? `${contextLabel}; ` : ''}Ratio ${ratio.toFixed(2)}; nivel ${levelLabel}; objetivo ${target}; ${STATUS_LABELS[status]}`}
+      >
+        {contextLabel ? (
+          <span className="max-w-[4.5rem] truncate text-[0.5625rem] font-semibold normal-case">
+            {contextLabel}
+          </span>
+        ) : null}
+        <span className="font-semibold">{ratio.toFixed(2)}:1</span>
+      </span>
+    );
+  }
 
   return (
     <div

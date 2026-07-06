@@ -27,6 +27,26 @@ export function PaletteShadesOverlay({
       onClick={(event) => event.stopPropagation()}
       onKeyDown={(event) => event.stopPropagation()}
     >
+      <div className="absolute right-2 top-2 z-10">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Cerrar selector de shades"
+          title="Cerrar"
+          className="flex size-7 items-center justify-center rounded-md bg-black/35 text-white backdrop-blur-sm transition-colors hover:bg-black/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+        >
+          <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3.5">
+            <path
+              d="M4 4l8 8M12 4l-8 8"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+            />
+          </svg>
+        </button>
+      </div>
+
       {shades.map((shade) => {
         const textColor = pickReadableTextColor(shade.hex);
         const isCurrent = shade.hex.toUpperCase() === hex.toUpperCase();

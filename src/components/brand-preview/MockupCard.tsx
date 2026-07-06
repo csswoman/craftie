@@ -4,6 +4,7 @@ export type MockupCardProps = {
   title: string;
   description?: string;
   featured?: boolean;
+  compact?: boolean;
   expandHint?: string;
   children: React.ReactNode;
   onClick: () => void;
@@ -13,6 +14,7 @@ export function MockupCard({
   title,
   description,
   featured = false,
+  compact = false,
   expandHint = 'Clic para ampliar',
   children,
   onClick,
@@ -29,20 +31,26 @@ export function MockupCard({
       }`}
     >
       <div
-        className={`w-full overflow-hidden border-b border-border bg-surface/40 p-2 sm:p-3 ${
-          featured ? 'aspect-[21/9] min-h-[200px] sm:min-h-[220px]' : 'aspect-[4/3] min-h-[168px] sm:min-h-[192px]'
+        className={`w-full overflow-hidden border-b border-border bg-surface/40 ${
+          compact ? 'aspect-[5/3] min-h-[120px] p-1.5' : 'p-2 sm:p-3'
+        } ${
+          !compact && featured ? 'aspect-[21/9] min-h-[200px] sm:min-h-[220px]' : ''
+        } ${
+          !compact && !featured ? 'aspect-[4/3] min-h-[168px] sm:min-h-[192px]' : ''
         }`}
       >
         <div className="pointer-events-none h-full w-full overflow-hidden rounded-lg border border-border/70">
           {children}
         </div>
       </div>
-      <div className="px-3 py-3">
+      <div className={compact ? 'px-2 py-2' : 'px-3 py-3'}>
         <p className="text-[0.8125rem] font-semibold text-ink group-hover:text-primary">{title}</p>
         {description ? (
           <p className="mt-0.5 text-[0.75rem] leading-relaxed text-muted">{description}</p>
         ) : null}
-        <p className="mt-1 text-[0.6875rem] font-medium text-primary/80">{expandHint}</p>
+        {!compact ? (
+          <p className="mt-1 text-[0.6875rem] font-medium text-primary/80">{expandHint}</p>
+        ) : null}
       </div>
     </button>
   );

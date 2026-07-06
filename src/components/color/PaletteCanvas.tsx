@@ -2,194 +2,186 @@
 
 import { useMemo, useState } from 'react';
 
-import type { GeneratedPalette } from '@lib/color/formulas';
-import {
-  buildGeneratedPaletteColumns,
-  buildSelectionPaletteColumns,
-} from '@lib/color/paletteDisplay';
-import { getInsertableCatalogColors, insertSelectedColor, moveSelectedColor } from '@lib/color/paletteOrder';
-import type { SelectableColor } from '@lib/color/selectableColors';
-import { SELECTABLE_COLORS } from '@lib/color/selectableColors';
+import { buildRolePaletteColumnsWithContrast, hasRolePaletteContrastFailure } from '@lib/color/rolePaletteContrast';
+import { normalizeHex } from '@lib/color/normalizeHex';
+import { isPaletteRoleId, type PaletteRoleId } from '@lib/color/rolePalette';
 
 import { ColorDetailsDrawer } from '@/components/color-engine/ColorDetailsDrawer';
+import { useRolePalette } from '@/context/RolePaletteContext';
 
-import { PaletteAddGap } from './PaletteAddGap';
-import { PaletteColumn } from './PaletteColumn';
-
-export type PaletteCanvasMode = 'selection' | 'generated';
+import { PaletteView } from './PaletteView';
+import { PreviewView } from './PreviewView';
+import {
+  openRoleColorPopover,
+  RoleColorPopover,
+  type RoleColorPopoverAnchor,
+} from './RoleColorPopover';
 
 export type PaletteCanvasProps = {
-  mode: PaletteCanvasMode;
-  onModeChange: (mode: PaletteCanvasMode) => void;
-  selectedColors: SelectableColor[];
-  generatedPalette: GeneratedPalette | null;
   isLoading?: boolean;
-  catalog?: SelectableColor[];
-  lockedIds?: string[];
+  isUpdating?: boolean;
   editable?: boolean;
-  onSelectedColorsChange?: (colors: SelectableColor[]) => void;
-  onReplaceColor?: (colorId: string, newHex: string) => void;
   onAddColorByHex?: (hex: string, customName?: string) => string | null;
-  onToggleLock?: (colorId: string) => void;
 };
 
+type CanvasTab = 'palette' | 'preview';
+
+const CANVAS_TABS: Array<{ id: CanvasTab; label: string }> = [
+  { id: 'palette', label: 'Paleta' },
+  { id: 'preview', label: 'Vista previa' },
+];
+
 export function PaletteCanvas({
-  mode,
-  onModeChange,
-  selectedColors,
-  generatedPalette,
   isLoading = false,
-  catalog = SELECTABLE_COLORS,
-  lockedIds = [],
+  isUpdating = false,
   editable = false,
-  onSelectedColorsChange,
-  onReplaceColor,
   onAddColorByHex,
-  onToggleLock,
 }: PaletteCanvasProps) {
-  const [shadesOpenId, setShadesOpenId] = useState<string | null>(null);
+  const { rolePalette, activeRole, lockedRoles, replaceRole, setActiveRole } = useRolePalette();
+
+  const [activeTab, setActiveTab] = useState<CanvasTab>('palette');
   const [selectedColorHex, setSelectedColorHex] = useState<string | null>(null);
-  const [copyMessage, setCopyMessage] = useState<string | null>(null);
+  const [colorPopover, setColorPopover] = useState<RoleColorPopoverAnchor | null>(null);
 
-  const canShowGenerated = generatedPalette !== null;
-  const activeMode = mode === 'generated' && canShowGenerated ? 'generated' : 'selection';
-  const isEditable = editable && activeMode === 'selection';
-
-  const columns = useMemo(() => {
-    if (activeMode === 'generated' && generatedPalette) {
-      return buildGeneratedPaletteColumns(generatedPalette);
-    }
-
-    return buildSelectionPaletteColumns(selectedColors);
-  }, [activeMode, generatedPalette, selectedColors]);
-
-  const insertOptions = useMemo(
-    () => getInsertableCatalogColors(catalog, selectedColors),
-    [catalog, selectedColors],
+  const columns = useMemo(
+    () => (rolePalette ? buildRolePaletteColumnsWithContrast(rolePalette) : []),
+    [rolePalette],
   );
 
-  const lockedSet = useMemo(() => new Set(lockedIds), [lockedIds]);
+  const contrastFailure = rolePalette ? hasRolePaletteContrastFailure(rolePalette) : false;
+  const lockedSet = useMemo(() => new Set(lockedRoles), [lockedRoles]);
+  const canReplace = editable && rolePalette !== null;
+  const hasPalette = columns.length > 0 && rolePalette !== null;
 
-  function handleMove(fromIndex: number, toIndex: number) {
-    if (!onSelectedColorsChange || !isEditable) {
-      return;
+  function handleReplaceFromDrawer(newHex: string): string | null {
+    if (!selectedColorHex || !rolePalette) {
+      return 'No se puede sustituir este color.';
     }
 
-    const moved = moveSelectedColor(selectedColors, fromIndex, toIndex);
-    onSelectedColorsChange(moved);
-  }
+    let normalized: string;
 
-  function handleInsert(index: number, color: SelectableColor) {
-    if (!onSelectedColorsChange || !isEditable) {
-      return;
-    }
-
-    const next = insertSelectedColor(selectedColors, index, color);
-
-    if (next) {
-      onSelectedColorsChange(next);
-    }
-  }
-
-  function handleApplyShade(colorId: string, newHex: string) {
-    if (!isEditable || lockedSet.has(colorId)) {
-      return;
-    }
-
-    if (onReplaceColor) {
-      onReplaceColor(colorId, newHex);
-      setShadesOpenId(null);
-      return;
-    }
-
-    if (!onSelectedColorsChange) {
-      return;
-    }
-
-    setShadesOpenId(null);
-  }
-
-  async function handleCopyHex(hex: string) {
     try {
-      await navigator.clipboard.writeText(hex.toUpperCase());
-      setCopyMessage('HEX copiado');
-      window.setTimeout(() => setCopyMessage(null), 1500);
+      normalized = normalizeHex(newHex);
     } catch {
-      setCopyMessage('No se pudo copiar');
-      window.setTimeout(() => setCopyMessage(null), 1500);
+      return 'Introduce un código HEX válido.';
     }
+
+    if (normalizeHex(selectedColorHex) === normalized) {
+      return null;
+    }
+
+    const role = columns.find((column) => {
+      try {
+        return normalizeHex(column.hex) === normalizeHex(selectedColorHex);
+      } catch {
+        return false;
+      }
+    })?.id;
+
+    if (!role || !isPaletteRoleId(role)) {
+      return 'No se puede sustituir este color.';
+    }
+
+    if (lockedSet.has(role)) {
+      return 'Desbloquea el color para sustituirlo.';
+    }
+
+    replaceRole(role, normalized);
+    setSelectedColorHex(normalized);
+    return null;
+  }
+
+  function handleEditRole(role: PaletteRoleId, element: HTMLElement) {
+    openRoleColorPopover(role, element, setActiveRole, setColorPopover);
+  }
+
+  function handleCloseColorPopover() {
+    setColorPopover(null);
   }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3">
+      <div className="flex shrink-0 flex-col gap-2 border-b border-border px-4 py-2.5">
         <p className="text-[0.8125rem] font-medium text-muted">
-          {copyMessage ??
-            (isLoading
+          {isUpdating
+            ? 'Regenerando colores…'
+            : isLoading
               ? 'Extrayendo colores…'
-              : columns.length === 0
-                ? 'Elige colores para ver tu paleta'
-                : `${columns.length} color${columns.length === 1 ? '' : 'es'}`)}
+              : !hasPalette
+                ? 'Sube una imagen para armar tu paleta por roles'
+                : activeRole
+                  ? `Rol activo: ${activeRole} · toca un color fuente para asignarlo`
+                  : 'Haz clic en una banda para elegir el rol activo'}
         </p>
-
-        {canShowGenerated ? (
-          <div
-            role="group"
-            aria-label="Vista de paleta"
-            className="flex rounded-md border border-border bg-surface p-0.5"
+        {contrastFailure ? (
+          <p
+            role="alert"
+            className="rounded-md border border-fail/30 bg-fail/10 px-2.5 py-1.5 text-[0.75rem] font-medium text-fail"
           >
-            <ModeToggle
-              label="Selección"
-              active={activeMode === 'selection'}
-              onClick={() => onModeChange('selection')}
-            />
-            <ModeToggle
-              label="Generada"
-              active={activeMode === 'generated'}
-              onClick={() => onModeChange('generated')}
-            />
-          </div>
+            Hay pares de contraste que no alcanzan AA. Revisa texto sobre fondos y acentos.
+          </p>
         ) : null}
       </div>
 
-      <div className="relative min-h-0 flex-1">
-        {isLoading ? (
-          <PaletteCanvasSkeleton count={6} />
-        ) : columns.length === 0 ? (
+      {hasPalette ? (
+        <div
+          role="tablist"
+          aria-label="Vista del lienzo"
+          className="flex shrink-0 gap-1 border-b border-border px-4 py-2"
+        >
+          {CANVAS_TABS.map((tab) => {
+            const selected = activeTab === tab.id;
+
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                onClick={() => setActiveTab(tab.id)}
+                className={`rounded-md px-3 py-1.5 text-[0.8125rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+                  selected
+                    ? 'bg-primary text-white'
+                    : 'text-muted hover:bg-surface-raised hover:text-ink'
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+
+      <div className="relative flex min-h-0 flex-1 flex-col">
+        {isLoading && !hasPalette ? (
+          <PaletteCanvasSkeleton />
+        ) : !hasPalette ? (
           <EmptyCanvas />
         ) : (
-          <ul className="flex h-full min-h-[320px]">
-            {columns.map((column, index) => (
-              <li key={column.id} className="group/column-wrap relative flex min-w-0 flex-1">
-                <PaletteColumn
-                  column={column}
-                  index={index}
-                  total={columns.length}
-                  locked={lockedSet.has(column.id)}
-                  showShades={shadesOpenId === column.id}
-                  editable={isEditable}
-                  onToggleLock={() => onToggleLock?.(column.id)}
-                  onMoveLeft={() => handleMove(index, index - 1)}
-                  onMoveRight={() => handleMove(index, index + 1)}
-                  onCopyHex={() => void handleCopyHex(column.hex)}
-                  onToggleShades={() =>
-                    setShadesOpenId((current) => (current === column.id ? null : column.id))
-                  }
-                  onOpenInfo={() => setSelectedColorHex(column.hex)}
-                  onSelectColor={setSelectedColorHex}
-                  onApplyShade={(newHex) => handleApplyShade(column.id, newHex)}
+          <>
+            <div
+              role="tabpanel"
+              className={`relative flex min-h-0 flex-1 flex-col transition-opacity duration-150 motion-reduce:transition-none ${
+                isUpdating ? 'opacity-60' : 'opacity-100'
+              }`}
+            >
+              {activeTab === 'palette' ? (
+                <PaletteView
+                  editable={editable}
+                  onOpenDetails={setSelectedColorHex}
+                  onEditRole={handleEditRole}
                 />
-                {isEditable && index < columns.length - 1 ? (
-                  <PaletteAddGap
-                    insertIndex={index + 1}
-                    options={insertOptions}
-                    onInsert={handleInsert}
-                    className="pointer-events-none absolute right-0 top-1/2 h-0 w-0"
-                  />
-                ) : null}
-              </li>
-            ))}
-          </ul>
+              ) : (
+                <PreviewView onEditRole={handleEditRole} />
+              )}
+            </div>
+            {isUpdating ? (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 bg-bg/10 backdrop-blur-[1px]"
+              />
+            ) : null}
+          </>
         )}
       </div>
 
@@ -197,54 +189,30 @@ export function PaletteCanvas({
         colorHex={selectedColorHex}
         open={selectedColorHex !== null}
         onClose={() => setSelectedColorHex(null)}
-        onAddColor={onAddColorByHex}
+        onAddColor={!canReplace ? onAddColorByHex : undefined}
+        onReplaceColor={canReplace ? handleReplaceFromDrawer : undefined}
       />
-    </div>
-  );
-}
 
-function ModeToggle({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={`rounded-[6px] px-2.5 py-1 text-[0.75rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
-        active ? 'bg-bg text-ink' : 'text-muted hover:text-ink'
-      }`}
-    >
-      {label}
-    </button>
+      <RoleColorPopover anchor={colorPopover} onClose={handleCloseColorPopover} />
+    </div>
   );
 }
 
 function EmptyCanvas() {
   return (
-    <div className="flex h-full min-h-[320px] items-center justify-center bg-surface-raised/40 px-6">
-      <p className="max-w-xs text-center text-[0.9375rem] leading-relaxed text-muted">
-        Tu paleta aparecerá aquí en columnas a pantalla completa. Sube una imagen a la izquierda
-        y ajusta los colores en el panel derecho.
+    <div className="flex h-full min-h-0 items-center justify-center bg-surface-raised/40 px-6 py-8">
+      <p className="max-w-xs text-center text-[0.8125rem] leading-relaxed text-muted">
+        Sube una imagen y la paleta se armará automáticamente por roles. Haz clic en una banda del
+        centro para elegir el rol activo.
       </p>
     </div>
   );
 }
 
-function PaletteCanvasSkeleton({ count }: { count: number }) {
+function PaletteCanvasSkeleton() {
   return (
-    <ul className="flex h-full min-h-[320px]" aria-busy="true" aria-label="Cargando paleta">
-      {Array.from({ length: count }).map((_, index) => (
-        <li key={`skeleton-${index}`} className="flex min-w-0 flex-1">
-          <div className="w-full animate-pulse bg-surface-raised" />
-        </li>
-      ))}
-    </ul>
+    <div className="flex min-h-0 flex-1 flex-col" aria-busy="true" aria-label="Cargando paleta">
+      <div className="flex-1 animate-pulse bg-surface-raised" />
+    </div>
   );
 }

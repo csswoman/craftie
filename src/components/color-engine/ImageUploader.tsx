@@ -8,6 +8,7 @@ import type { ImagePaletteBuildResult } from '@lib/color/imagePalette';
 
 export type ImageUploaderProps = {
   onExtractionStart?: () => void;
+  onRegenerateStart?: () => void;
   onPaletteExtracted: (palette: ImagePaletteBuildResult) => void;
   onExtractionError?: (message: string) => void;
   variant?: 'default' | 'embedded';
@@ -19,6 +20,7 @@ const MAX_FILE_SIZE_MB = 5;
 
 export function ImageUploader({
   onExtractionStart,
+  onRegenerateStart,
   onPaletteExtracted,
   onExtractionError,
   variant = 'default',
@@ -33,6 +35,7 @@ export function ImageUploader({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [regenerateIndex, setRegenerateIndex] = useState(0);
 
   useEffect(() => {
     return () => {
@@ -42,9 +45,17 @@ export function ImageUploader({
     };
   }, [previewUrl]);
 
-  async function processFile(file: File) {
+  async function processFile(file: File, nextRegenerateIndex?: number) {
     if (isLoading) {
       return;
+    }
+
+    const regenIndex = nextRegenerateIndex ?? 0;
+    const isRegenerate =
+      nextRegenerateIndex !== undefined && lastFileRef.current === file && previewUrl !== null;
+
+    if (nextRegenerateIndex === undefined) {
+      setRegenerateIndex(0);
     }
 
     setError(null);
@@ -61,19 +72,27 @@ export function ImageUploader({
       return;
     }
 
-    if (previewUrl !== null) {
-      URL.revokeObjectURL(previewUrl);
+    if (!isRegenerate) {
+      if (previewUrl !== null) {
+        URL.revokeObjectURL(previewUrl);
+      }
+
+      const nextPreviewUrl = URL.createObjectURL(file);
+      setPreviewUrl(nextPreviewUrl);
+      setFileName(file.name);
+      lastFileRef.current = file;
     }
 
-    const nextPreviewUrl = URL.createObjectURL(file);
-    setPreviewUrl(nextPreviewUrl);
-    setFileName(file.name);
-    lastFileRef.current = file;
     setIsLoading(true);
-    onExtractionStart?.();
+
+    if (isRegenerate) {
+      onRegenerateStart?.();
+    } else {
+      onExtractionStart?.();
+    }
 
     try {
-      const extracted = await extractPaletteColorsFromImage(file);
+      const extracted = await extractPaletteColorsFromImage(file, regenIndex);
       onPaletteExtracted(buildImagePalette(extracted));
     } catch (extractionError) {
       const message =
@@ -85,6 +104,18 @@ export function ImageUploader({
     } finally {
       setIsLoading(false);
     }
+  }
+
+  function handleRegenerate() {
+    const file = lastFileRef.current;
+
+    if (!file || isLoading) {
+      return;
+    }
+
+    const nextIndex = regenerateIndex + 1;
+    setRegenerateIndex(nextIndex);
+    void processFile(file, nextIndex);
   }
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -126,7 +157,7 @@ export function ImageUploader({
             Inspiración desde imagen
           </h2>
           <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">
-            Sube una imagen local para extraer neutros claros, colores intensos y neutros oscuros. El
+            Sube una imagen local para extraer colores y armar automáticamente una paleta por roles. El
             archivo no sale de tu navegador.
           </p>
         </div>
@@ -156,7 +187,9 @@ export function ImageUploader({
           type="file"
           accept={ACCEPTED_EXTENSIONS}
           onChange={handleFileChange}
-          className="sr-only"
+          className="pointer-events-none fixed -left-[9999px] h-px w-px opacity-0"
+          tabIndex={-1}
+          aria-hidden="true"
         />
 
         <div className="flex flex-col items-center gap-3 text-center">
@@ -199,7 +232,7 @@ export function ImageUploader({
         </div>
       ) : null}
 
-      {isLoading ? (
+      {isLoading && previewUrl === null ? (
         <p role="status" className="mt-3 text-[0.8125rem] text-muted">
           Extrayendo colores de la imagen…
         </p>
@@ -207,11 +240,23 @@ export function ImageUploader({
 
       {previewUrl !== null ? (
         <figure className="mt-4 overflow-hidden rounded-md border border-border bg-bg">
-          <img
-            src={previewUrl}
-            alt={fileName ? `Vista previa de ${fileName}` : 'Vista previa de la imagen subida'}
-            className="max-h-56 w-full object-contain"
-          />
+          <div className="relative">
+            <img
+              src={previewUrl}
+              alt={fileName ? `Vista previa de ${fileName}` : 'Vista previa de la imagen subida'}
+              className="max-h-56 w-full object-contain"
+            />
+            <button
+              type="button"
+              onClick={handleRegenerate}
+              disabled={isLoading}
+              aria-label="Regenerar paleta de la imagen"
+              title="Regenerar paleta"
+              className="absolute right-2 top-2 flex size-8 items-center justify-center rounded-md border border-border bg-bg/90 text-muted backdrop-blur-sm transition-colors hover:bg-surface hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <RegenerateIcon spinning={isLoading} />
+            </button>
+          </div>
           {fileName ? (
             <figcaption className="truncate border-t border-border px-3 py-2 text-[0.75rem] text-muted">
               {fileName}
@@ -220,5 +265,24 @@ export function ImageUploader({
         </figure>
       ) : null}
     </section>
+  );
+}
+
+function RegenerateIcon({ spinning }: { spinning: boolean }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 16 16"
+      className={`size-4 ${spinning ? 'animate-spin motion-reduce:animate-none' : ''}`}
+    >
+      <path
+        d="M13 3v3H10M3 13V10H6M13 8a5 5 0 0 0-8.5-3.5L3 6M3 8a5 5 0 0 0 8.5 3.5L13 10"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
