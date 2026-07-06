@@ -8,7 +8,7 @@ import {
 } from './colorGroupClassification';
 import type { GeneratedPalette } from './formulas';
 import type { ExtractedColor } from './imageExtractor';
-import { nameForHex, namePalette } from './naming';
+import { nameForHex } from './naming';
 import { normalizeHex } from './normalizeHex';
 import {
   brandScore,
@@ -29,13 +29,17 @@ import {
   type ColorSource,
   type PaletteRoleId,
   type RolePalette,
-  type RoleSlot,
 } from './roleTypes';
 import {
   generatePaletteFromRolePalette,
   rolePaletteToGeneratedPalette,
   validateRolePalette,
 } from './rolePaletteGenerated';
+import {
+  applyUniqueRoleNames,
+  buildPaletteInput,
+  createRoleSlot,
+} from './rolePaletteSlots';
 
 export {
   DERIVED_ROLES,
@@ -107,22 +111,6 @@ function uniqueCandidates(extracted: ExtractedColor[]): ColorCandidate[] {
   return [...byHex.values()];
 }
 
-function createSlot(
-  role: PaletteRoleId,
-  hex: string,
-  source: ColorSource,
-  paletteInput: { hex: string }[],
-): RoleSlot {
-  const normalized = normalizeHex(hex);
-
-  return {
-    role,
-    hex: normalized,
-    name: nameForHex(normalized, paletteInput, { style: 'creative' }),
-    source,
-  };
-}
-
 function deriveChromatic(seedHex: string, hueOffset: number): string {
   const seed = toOklch(seedHex);
 
@@ -153,10 +141,6 @@ function pickNeutral(
   }
 
   return null;
-}
-
-function buildPaletteInput(slots: Partial<Record<PaletteRoleId, string>>): { hex: string }[] {
-  return PALETTE_ROLE_ORDER.map((role) => slots[role]).filter(Boolean).map((hex) => ({ hex: hex! }));
 }
 
 function resolveDominantSeed(
@@ -229,19 +213,19 @@ export function buildBasePalette(
   const paletteInput = buildPaletteInput(slots);
   const palette = {} as RolePalette;
 
-  palette.fondo = createSlot(
+  palette.fondo = createRoleSlot(
     'fondo',
     slots.fondo,
     sources?.fondo ?? 'derived',
     paletteInput,
   );
-  palette.primario = createSlot(
+  palette.primario = createRoleSlot(
     'primario',
     slots.primario,
     sources?.primario ?? 'derived',
     paletteInput,
   );
-  palette.acento = createSlot(
+  palette.acento = createRoleSlot(
     'acento',
     slots.acento,
     sources?.acento ?? 'derived',
@@ -253,7 +237,7 @@ export function buildBasePalette(
       continue;
     }
 
-    palette[role] = createSlot(role, slots.fondo, 'derived', paletteInput);
+    palette[role] = createRoleSlot(role, slots.fondo, 'derived', paletteInput);
   }
 
   return palette;
@@ -290,7 +274,7 @@ export function buildSeedPalette(
 }
 
 export function finalizeRolePalette(palette: RolePalette): RolePalette {
-  return applyUniqueNames(palette);
+  return applyUniqueRoleNames(palette);
 }
 
 export function recomputeDerivedRoles(
@@ -323,7 +307,7 @@ export function recomputeDerivedRoles(
   const next = { ...palette };
 
   if (!locked.has('fondo')) {
-    next.fondo = createSlot('fondo', fondoHex, 'derived', paletteInput);
+    next.fondo = createRoleSlot('fondo', fondoHex, 'derived', paletteInput);
   }
 
   for (const role of DERIVED_ROLES) {
@@ -333,10 +317,10 @@ export function recomputeDerivedRoles(
 
     const hex = slotHex[role]!;
     const source: ColorSource = locked.has(role) ? palette[role].source : 'derived';
-    next[role] = createSlot(role, hex, source, paletteInput);
+    next[role] = createRoleSlot(role, hex, source, paletteInput);
   }
 
-  return applyUniqueNames(next);
+  return applyUniqueRoleNames(next);
 }
 
 export function assignRolesFromExtracted(extracted: ExtractedColor[]): RolePalette {
@@ -399,24 +383,6 @@ export function assignRolesFromHexes(hexes: string[]): RolePalette {
   return assignRolesFromExtracted(extracted);
 }
 
-function applyUniqueNames(palette: RolePalette): RolePalette {
-  const names = namePalette(
-    PALETTE_ROLE_ORDER.map((role) => ({ hex: palette[role].hex })),
-    { style: 'creative' },
-  );
-
-  const next = { ...palette };
-
-  for (const role of PALETTE_ROLE_ORDER) {
-    next[role] = {
-      ...next[role],
-      name: names.get(normalizeHex(next[role].hex)) ?? ROLE_LABELS[role],
-    };
-  }
-
-  return next;
-}
-
 export function mergeRolePalettePreservingLocks(
   current: RolePalette,
   next: RolePalette,
@@ -435,7 +401,7 @@ export function mergeRolePalettePreservingLocks(
     }
   }
 
-  return applyUniqueNames(merged);
+  return applyUniqueRoleNames(merged);
 }
 
 export function isPaletteRoleId(id: string): id is PaletteRoleId {
@@ -469,7 +435,7 @@ export function replaceRoleHex(
       : nameForHex(normalized, paletteInput, { style: 'creative' }),
   };
 
-  const updated = applyUniqueNames(next);
+  const updated = applyUniqueRoleNames(next);
 
   if (role === 'fondo' || role === 'primario') {
     const neutralHue =
@@ -575,9 +541,9 @@ function setDerivedRoleSlot(palette: RolePalette, role: PaletteRoleId): RolePale
     hex: entry === role ? hex : palette[entry].hex,
   }));
 
-  return applyUniqueNames({
+  return applyUniqueRoleNames({
     ...palette,
-    [role]: createSlot(role, hex, 'derived', paletteInput),
+    [role]: createRoleSlot(role, hex, 'derived', paletteInput),
   });
 }
 
