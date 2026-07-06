@@ -1,5 +1,13 @@
-import { converter, parse } from 'culori';
-import type { Rgb } from 'culori';
+import { converter } from 'culori';
+
+import {
+  adjustLightnessForContrast,
+  contrastRatio,
+  relativeLuminance,
+} from '../utils/colorMath';
+import { normalizeHex } from './normalizeHex';
+
+export { contrastRatio, relativeLuminance } from '../utils/colorMath';
 
 export type WCAGLevel = 'fail' | 'AA' | 'AAA';
 
@@ -52,85 +60,7 @@ const NORMAL_TEXT_AAA = 7;
 const LARGE_TEXT_AA = 3;
 const LARGE_TEXT_AAA = 4.5;
 
-const toRgb = converter('rgb');
-
-function assertValidColorInput(hex: string): void {
-  if (typeof hex !== 'string' || hex.trim() === '') {
-    throw new Error(
-      `Invalid color input: expected a non-empty hex string, received ${String(hex)}`,
-    );
-  }
-}
-
-function hasTransparency(color: { alpha?: number; mode?: string }): boolean {
-  if (color.mode === 'transparent') {
-    return true;
-  }
-
-  return typeof color.alpha === 'number' && color.alpha < 1;
-}
-
-function parseOpaqueColor(hex: string): Rgb {
-  assertValidColorInput(hex);
-
-  const trimmed = hex.trim();
-  const parsed = parse(trimmed);
-
-  if (parsed === undefined) {
-    throw new Error(`Unable to parse color: "${trimmed}"`);
-  }
-
-  if (hasTransparency(parsed)) {
-    throw new Error(`Unsupported alpha/transparency in color: "${trimmed}"`);
-  }
-
-  const rgb = toRgb(parsed);
-
-  if (rgb === undefined) {
-    throw new Error(`Unable to convert color to RGB: "${trimmed}"`);
-  }
-
-  if (hasTransparency(rgb)) {
-    throw new Error(`Unsupported alpha/transparency in color: "${trimmed}"`);
-  }
-
-  return rgb;
-}
-
-function channelToLinear(channel: number): number {
-  if (channel <= 0.03928) {
-    return channel / 12.92;
-  }
-
-  return ((channel + 0.055) / 1.055) ** 2.4;
-}
-
-/**
- * WCAG 2.2 relative luminance for an sRGB color.
- * @see https://www.w3.org/TR/WCAG22/#dfn-relative-luminance
- */
-export function relativeLuminance(hex: string): number {
-  const { r, g, b } = parseOpaqueColor(hex);
-
-  const linearR = channelToLinear(r);
-  const linearG = channelToLinear(g);
-  const linearB = channelToLinear(b);
-
-  return 0.2126 * linearR + 0.7152 * linearG + 0.0722 * linearB;
-}
-
-/**
- * WCAG 2.2 contrast ratio between two sRGB colors.
- * @see https://www.w3.org/TR/WCAG22/#dfn-contrast-ratio
- */
-export function contrastRatio(hexA: string, hexB: string): number {
-  const lumA = relativeLuminance(hexA);
-  const lumB = relativeLuminance(hexB);
-  const lighter = Math.max(lumA, lumB);
-  const darker = Math.min(lumA, lumB);
-
-  return (lighter + 0.05) / (darker + 0.05);
-}
+const toOklch = converter('oklch');
 
 /**
  * Maps a contrast ratio to a WCAG 2.2 level for normal or large text.
@@ -217,6 +147,65 @@ export function getContrastStatus(
 
 function isPresentHex(value: string | undefined): value is string {
   return typeof value === 'string' && value.trim() !== '';
+}
+
+export type AccessibleVariantSuggestion = {
+  hex: string;
+  ratio: number;
+  normalText: WCAGLevel;
+  /** OKLCH lightness delta from the original foreground (0 when already compliant). */
+  deltaL: number;
+};
+
+function getTargetRatio(target: ContrastTarget): number {
+  return target === 'AAA' ? NORMAL_TEXT_AAA : NORMAL_TEXT_AA;
+}
+
+/**
+ * Suggests the closest OKLCH lightness adjustment to the foreground that meets the target.
+ * Keeps hue and chroma intact; searches both directions and picks the smallest change.
+ */
+export function suggestAccessibleForeground(
+  foregroundHex: string,
+  backgroundHex: string,
+  target: ContrastTarget,
+): AccessibleVariantSuggestion | null {
+  const targetRatio = getTargetRatio(target);
+  const normalizedForeground = normalizeHex(foregroundHex);
+  const evaluation = evaluateContrast(normalizedForeground, backgroundHex);
+
+  if (evaluation.ratio >= targetRatio) {
+    return {
+      hex: normalizedForeground,
+      ratio: evaluation.ratio,
+      normalText: evaluation.normalText,
+      deltaL: 0,
+    };
+  }
+
+  const oklch = toOklch(normalizedForeground);
+
+  if (!oklch || oklch.mode !== 'oklch') {
+    return null;
+  }
+
+  const originalL = oklch.l ?? 0;
+  const hex = adjustLightnessForContrast(normalizedForeground, backgroundHex, targetRatio);
+  const suggested = evaluateContrast(hex, backgroundHex);
+
+  if (suggested.ratio < targetRatio) {
+    return null;
+  }
+
+  const adjusted = toOklch(hex);
+  const deltaL = (adjusted?.l ?? originalL) - originalL;
+
+  return {
+    hex,
+    ratio: suggested.ratio,
+    normalText: suggested.normalText,
+    deltaL,
+  };
 }
 
 /**

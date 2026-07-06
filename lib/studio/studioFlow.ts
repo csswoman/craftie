@@ -15,17 +15,17 @@ export const STUDIO_FLOW_STEPS: StudioFlowStep[] = [
   {
     id: 'adjust',
     label: 'Ajusta',
-    hint: 'Refina la selección por grupo en el panel derecho.',
+    hint: 'Refina cada rol en el panel derecho o en el lienzo.',
   },
   {
     id: 'generate',
-    label: 'Genera',
-    hint: 'Calcula roles semánticos y abre la guía.',
+    label: 'Guía de marca',
+    hint: 'Crea la guía de marca y abre la vista de exportación.',
   },
   {
     id: 'review',
     label: 'Revisa',
-    hint: 'Explora contraste, tipografía y mockups.',
+    hint: 'Explora contraste, tipografía, mockups y exporta.',
   },
 ];
 

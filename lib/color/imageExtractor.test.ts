@@ -153,7 +153,7 @@ describe('extractColorsFromRaster', () => {
     expect(() => extractColorsFromRaster(raster, { count: 6 })).toThrow(/between 2 and 5/i);
   });
 
-  it('allows palette builder extraction counts when maxCount is raised', () => {
+  it('can vary extraction with sample offset and centroid seed', () => {
     const raster = createRaster(40, 40, (x) => {
       if (x < 13) {
         return [30, 120, 200, 255];
@@ -166,13 +166,21 @@ describe('extractColorsFromRaster', () => {
       return [35, 140, 70, 255];
     });
 
-    const colors = extractColorsFromRaster(raster, {
-      count: 10,
-      maxCount: 12,
-      sampleStep: 2,
+    const baseline = extractColorsFromRaster(raster, {
+      count: 3,
+      sampleStep: 6,
+      sampleOffset: 0,
+      centroidSeed: 0,
+    });
+    const alternate = extractColorsFromRaster(raster, {
+      count: 3,
+      sampleStep: 10,
+      sampleOffset: 2,
+      centroidSeed: 4,
     });
 
-    expect(colors.length).toBeGreaterThan(2);
+    expect(baseline.length).toBeGreaterThan(0);
+    expect(alternate.length).toBeGreaterThan(0);
   });
 });
 

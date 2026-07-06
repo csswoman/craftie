@@ -7,6 +7,7 @@ import {
   getContrastStatus,
   getWCAGLevel,
   relativeLuminance,
+  suggestAccessibleForeground,
 } from './contrast';
 import { generatePalette } from './formulas';
 
@@ -155,6 +156,45 @@ describe('getContrastStatus', () => {
   it('returns fail when neither text size meets the target', () => {
     expect(getContrastStatus({ normalText: 'fail', largeText: 'fail' }, 'AA')).toBe('fail');
     expect(getContrastStatus({ normalText: 'fail', largeText: 'AA' }, 'AAA')).toBe('fail');
+  });
+});
+
+describe('suggestAccessibleForeground', () => {
+  it('returns the original color when it already meets the target', () => {
+    const suggestion = suggestAccessibleForeground('#000000', '#FFFFFF', 'AA');
+
+    expect(suggestion).toEqual({
+      hex: '#000000',
+      ratio: 21,
+      normalText: 'AAA',
+      deltaL: 0,
+    });
+  });
+
+  it('darkens a light foreground on a light background for AA', () => {
+    const suggestion = suggestAccessibleForeground('#949494', '#FFFFFF', 'AA');
+
+    expect(suggestion).not.toBeNull();
+    expect(suggestion!.ratio).toBeGreaterThanOrEqual(4.5);
+    expect(suggestion!.hex).not.toBe('#949494');
+    expect(suggestion!.normalText).not.toBe('fail');
+    expect(Math.abs(suggestion!.deltaL)).toBeGreaterThan(0);
+  });
+
+  it('reaches AAA when requested', () => {
+    const suggestion = suggestAccessibleForeground('#767676', '#FFFFFF', 'AAA');
+
+    expect(suggestion).not.toBeNull();
+    expect(suggestion!.ratio).toBeGreaterThanOrEqual(7);
+    expect(suggestion!.normalText).toBe('AAA');
+  });
+
+  it('lightens a foreground that is too dark on a dark background', () => {
+    const suggestion = suggestAccessibleForeground('#1A1A1A', '#141414', 'AA');
+
+    expect(suggestion).not.toBeNull();
+    expect(suggestion!.ratio).toBeGreaterThanOrEqual(4.5);
+    expect(suggestion!.deltaL).toBeGreaterThan(0);
   });
 });
 

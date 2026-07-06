@@ -1,25 +1,24 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  formatGroupSelectionLabel,
-  getSelectionPanelStatus,
-} from './selectionPanel';
-import { SELECTABLE_COLORS } from './selectableColors';
+import { assignRolesFromExtracted } from './rolePalette';
+import { getRolePalettePanelStatus } from './selectionPanel';
 
 describe('selectionPanel', () => {
-  it('formats group selection labels', () => {
-    expect(formatGroupSelectionLabel('light-neutral', 1)).toBe('1 de 1 seleccionado');
-    expect(formatGroupSelectionLabel('bold', 4)).toBe('4 de 4 seleccionados');
-    expect(formatGroupSelectionLabel('dark-neutral', 2)).toBe('2 seleccionados');
+  it('reports not ready when palette is missing', () => {
+    const status = getRolePalettePanelStatus(null);
+
+    expect(status.ready).toBe(false);
   });
 
-  it('reports ready state for a valid selection', () => {
-    const porcelain = SELECTABLE_COLORS.find((color) => color.id === 'porcelain')!;
-    const seaspray = SELECTABLE_COLORS.find((color) => color.id === 'seaspray')!;
-    const zest = SELECTABLE_COLORS.find((color) => color.id === 'zest')!;
-    const twilight = SELECTABLE_COLORS.find((color) => color.id === 'twilight')!;
+  it('reports ready state for a role palette', () => {
+    const palette = assignRolesFromExtracted([
+      { hex: '#F7F7F5', prominence: 0.35 },
+      { hex: '#9ADBD6', prominence: 0.2 },
+      { hex: '#E8D44D', prominence: 0.15 },
+      { hex: '#2C3E50', prominence: 0.1 },
+    ]);
 
-    const status = getSelectionPanelStatus([porcelain, seaspray, zest, twilight]);
+    const status = getRolePalettePanelStatus(palette);
 
     expect(status.ready).toBe(true);
   });

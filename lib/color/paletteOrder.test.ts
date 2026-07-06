@@ -103,5 +103,18 @@ describe('renamePaletteColor', () => {
     expect(result).not.toBeNull();
     expect(result!.selected.find((color) => color.id === seaspray.id)?.name).toBe('Mi acento');
     expect(result!.selected.find((color) => color.id === seaspray.id)?.customName).toBe(true);
+    expect(result!.catalog.find((color) => color.id === seaspray.id)?.name).toBe('Mi acento');
+  });
+
+  it('renames a catalog color that is not selected', () => {
+    const chalk = SELECTABLE_COLORS.find((color) => color.id === 'chalk')!;
+    const catalog = [...SELECTABLE_COLORS];
+    const selected: typeof SELECTABLE_COLORS = [];
+
+    const result = renamePaletteColor(catalog, selected, chalk.id, 'Crema suave');
+
+    expect(result).not.toBeNull();
+    expect(result!.catalog.find((color) => color.id === chalk.id)?.name).toBe('Crema suave');
+    expect(result!.selected).toHaveLength(0);
   });
 });

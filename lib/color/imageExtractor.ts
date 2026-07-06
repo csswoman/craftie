@@ -12,6 +12,8 @@ export type ImageExtractionOptions = {
   maxFileSizeMB?: number;
   sampleStep?: number;
   maxCount?: number;
+  sampleOffset?: number;
+  centroidSeed?: number;
 };
 
 type ResolvedOptions = {
@@ -136,12 +138,13 @@ function toLabSample(rgb: RgbSample): LabSample {
   };
 }
 
-function samplePixels(raster: RasterData, sampleStep: number): RgbSample[] {
+function samplePixels(raster: RasterData, sampleStep: number, sampleOffset = 0): RgbSample[] {
   const samples: RgbSample[] = [];
   const { data, width, height } = raster;
+  const offset = ((sampleOffset % sampleStep) + sampleStep) % sampleStep;
 
-  for (let y = 0; y < height; y += sampleStep) {
-    for (let x = 0; x < width; x += sampleStep) {
+  for (let y = offset; y < height; y += sampleStep) {
+    for (let x = offset; x < width; x += sampleStep) {
       const index = (y * width + x) * 4;
       const alpha = data[index + 3] ?? 0;
 
@@ -228,12 +231,17 @@ function averageCentroid(members: LabSample[]): [number, number, number] {
   return [totals[0] / count, totals[1] / count, totals[2] / count];
 }
 
-function initializeCentroids(samples: LabSample[], clusterCount: number): [number, number, number][] {
+function initializeCentroids(
+  samples: LabSample[],
+  clusterCount: number,
+  centroidSeed = 0,
+): [number, number, number][] {
   if (samples.length === 0) {
     return [];
   }
 
-  const centroids: [number, number, number][] = [[...samples[0]!.lab]];
+  const startIndex = centroidSeed % samples.length;
+  const centroids: [number, number, number][] = [[...samples[startIndex]!.lab]];
 
   while (centroids.length < clusterCount) {
     let bestIndex = 0;
@@ -262,13 +270,17 @@ function initializeCentroids(samples: LabSample[], clusterCount: number): [numbe
   return centroids;
 }
 
-export function clusterSamples(samples: LabSample[], clusterCount: number): Cluster[] {
+export function clusterSamples(
+  samples: LabSample[],
+  clusterCount: number,
+  centroidSeed = 0,
+): Cluster[] {
   if (samples.length === 0) {
     return [];
   }
 
   const k = Math.min(clusterCount, samples.length);
-  let centroids = initializeCentroids(samples, k);
+  let centroids = initializeCentroids(samples, k, centroidSeed);
   let assignments = new Array<number>(samples.length).fill(0);
 
   for (let iteration = 0; iteration < K_MEANS_ITERATIONS; iteration += 1) {
@@ -343,7 +355,9 @@ export function extractColorsFromRaster(
   options?: ImageExtractionOptions,
 ): ExtractedColor[] {
   const resolved = resolveOptions(options);
-  const rgbSamples = samplePixels(raster, resolved.sampleStep);
+  const sampleOffset = options?.sampleOffset ?? 0;
+  const centroidSeed = options?.centroidSeed ?? 0;
+  const rgbSamples = samplePixels(raster, resolved.sampleStep, sampleOffset);
 
   if (rgbSamples.length === 0) {
     throw new Error('No opaque pixels were available for color extraction.');
@@ -352,7 +366,7 @@ export function extractColorsFromRaster(
   const filteredSamples = filterNeutralSamples(rgbSamples);
   const workingSamples = filteredSamples.length >= 2 ? filteredSamples : rgbSamples;
   const labSamples = workingSamples.map(toLabSample);
-  const clusters = clusterSamples(labSamples, resolved.count);
+  const clusters = clusterSamples(labSamples, resolved.count, centroidSeed);
   const totalSamples = workingSamples.length;
 
   const merged = new Map<string, number>();
@@ -443,10 +457,20 @@ export async function extractColorsFromImage(
 
 /**
  * Extracts a broader set of dominant colors for the visual palette builder.
+ * Pass a higher regenerateIndex to sample the image differently and surface alternate colors.
  */
-export async function extractPaletteColorsFromImage(file: File): Promise<ExtractedColor[]> {
+export async function extractPaletteColorsFromImage(
+  file: File,
+  regenerateIndex = 0,
+): Promise<ExtractedColor[]> {
+  const sampleSteps = [6, 8, 10, 12, 14];
+  const sampleStep = sampleSteps[regenerateIndex % sampleSteps.length]!;
+
   return extractColorsFromImage(file, {
     count: PALETTE_EXTRACTION_COUNT,
     maxCount: PALETTE_MAX_COUNT,
+    sampleStep,
+    sampleOffset: regenerateIndex % sampleStep,
+    centroidSeed: regenerateIndex * 3,
   });
 }

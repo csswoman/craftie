@@ -285,7 +285,10 @@ export function renamePaletteColor(
     return null;
   }
 
-  if (!selected.some((color) => color.id === colorId)) {
+  const inCatalog = catalog.some((color) => color.id === colorId);
+  const inSelected = selected.some((color) => color.id === colorId);
+
+  if (!inCatalog && !inSelected) {
     return null;
   }
 
@@ -295,8 +298,8 @@ export function renamePaletteColor(
       : color;
 
   return {
-    catalog: catalog.map(applyRename),
-    selected: selected.map(applyRename),
+    catalog: inCatalog ? catalog.map(applyRename) : catalog,
+    selected: inSelected ? selected.map(applyRename) : selected,
   };
 }
 

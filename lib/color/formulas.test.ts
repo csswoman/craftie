@@ -7,9 +7,11 @@ import {
   generateAccent,
   generateNeutrals,
   generatePalette,
+  generatePaletteFromSelection,
   type GeneratedPalette,
   type NeutralScale,
 } from './formulas';
+import { createDefaultSelection } from './selectableColors';
 
 const toOklch = converter('oklch');
 
@@ -194,7 +196,59 @@ describe('generatePalette', () => {
     expectUniqueRoles(palette);
   });
 
+  it('derives an accessible primary when the lead seed is too light for text', () => {
+    const brightLime = '#A2FC87';
+    const palette = generatePalette([brightLime]);
+    const primaryOnSurface = evaluateContrast(palette.primary, palette.surface);
+
+    expect(primaryOnSurface.normalText).not.toBe('fail');
+    expect(primaryOnSurface.ratio).toBeGreaterThanOrEqual(4.5);
+    expect(palette.primary).not.toBe(brightLime);
+    expect(palette.accent).toBe(brightLime);
+  });
+
+  it('keeps a user-provided accent when the lead seed becomes a derived primary', () => {
+    const brightLime = '#A2FC87';
+    const palette = generatePalette([brightLime, ORANGE_ACCENT]);
+
+    expect(evaluateContrast(palette.primary, palette.surface).normalText).not.toBe('fail');
+    expect(palette.accent).toBe(ORANGE_ACCENT);
+    expect(palette.primary).not.toBe(brightLime);
+  });
+
   it('throws for empty seed lists', () => {
     expect(() => generatePalette([])).toThrow(/at least one seed/i);
+  });
+});
+
+describe('generatePaletteFromSelection', () => {
+  it('uses selected colors for roles and keeps a bright bold as accent when needed', () => {
+    const selection = createDefaultSelection();
+    const palette = generatePaletteFromSelection(selection);
+    const roleHexes = Object.values(palette).map((hex) => hex.toUpperCase());
+    const boldHexes = selection
+      .filter((color) => color.group === 'bold')
+      .map((color) => color.hex.toUpperCase());
+
+    expect(boldHexes.some((hex) => roleHexes.includes(hex))).toBe(true);
+    expect(evaluateContrast(palette.primary, palette.surface).normalText).not.toBe('fail');
+  });
+
+  it('keeps a bright bold color as accent when primary must be derived', () => {
+    const brightLime = '#A2FC87';
+    const purple = '#CCC6EA';
+    const surface = '#EEF9EB';
+    const dark = '#212D1E';
+
+    const palette = generatePaletteFromSelection([
+      { id: 'surface', name: 'Surface', hex: surface, group: 'light-neutral' },
+      { id: 'lime', name: 'Lime', hex: brightLime, group: 'bold' },
+      { id: 'purple', name: 'Purple', hex: purple, group: 'bold' },
+      { id: 'dark', name: 'Dark', hex: dark, group: 'dark-neutral' },
+    ]);
+
+    expect(palette.surface).toBe(surface);
+    expect(palette.accent.toUpperCase()).toBe(brightLime.toUpperCase());
+    expect(evaluateContrast(palette.primary, palette.surface).normalText).not.toBe('fail');
   });
 });

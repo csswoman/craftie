@@ -41,8 +41,12 @@ export const SELECTABLE_COLORS: SelectableColor[] = [
 
 const GROUP_ORDER: ColorGroupId[] = ['light-neutral', 'bold', 'dark-neutral'];
 
-const BOLD_MIN = 2;
-const BOLD_MAX = 4;
+export const SELECTION_GUIDELINES = {
+  lightNeutralMin: 1,
+  boldMin: 2,
+  boldMax: 4,
+  darkNeutralMin: 1,
+} as const;
 
 export type SelectionValidationResult =
   | { ok: true }
@@ -73,25 +77,32 @@ function countByGroup(colors: SelectableColor[], group: ColorGroupId): number {
   return colors.filter((color) => color.group === group).length;
 }
 
-export function validateSelection(colors: SelectableColor[]): SelectionValidationResult {
+export function getSelectionSuggestions(colors: SelectableColor[]): string[] {
+  const suggestions: string[] = [];
   const lightCount = countByGroup(colors, 'light-neutral');
   const boldCount = countByGroup(colors, 'bold');
   const darkCount = countByGroup(colors, 'dark-neutral');
 
-  if (lightCount < 1) {
-    return { ok: false, error: 'Elige al menos un color neutro claro.' };
+  if (lightCount < SELECTION_GUIDELINES.lightNeutralMin) {
+    suggestions.push('Sugerencia: elige al menos un neutro claro para superficies.');
   }
 
-  if (boldCount < BOLD_MIN) {
-    return { ok: false, error: 'Elige al menos 2 colores intensos.' };
+  if (boldCount < SELECTION_GUIDELINES.boldMin) {
+    suggestions.push('Sugerencia: elige 2–4 colores intensos para primario y acento.');
+  } else if (boldCount > SELECTION_GUIDELINES.boldMax) {
+    suggestions.push('Sugerencia: 2–4 colores intensos suelen dar mejor balance.');
   }
 
-  if (boldCount > BOLD_MAX) {
-    return { ok: false, error: 'Puedes elegir hasta 4 colores intensos.' };
+  if (darkCount < SELECTION_GUIDELINES.darkNeutralMin) {
+    suggestions.push('Sugerencia: elige al menos un neutro oscuro para texto.');
   }
 
-  if (darkCount < 1) {
-    return { ok: false, error: 'Elige al menos un color neutro oscuro.' };
+  return suggestions;
+}
+
+export function validateSelection(colors: SelectableColor[]): SelectionValidationResult {
+  if (colors.length < 1) {
+    return { ok: false, error: 'Selecciona al menos un color para generar.' };
   }
 
   return { ok: true };
@@ -103,16 +114,11 @@ export function canToggleColor(
 ): boolean {
   const isSelected = selected.some((entry) => entry.id === color.id);
 
-  if (!isSelected) {
-    if (color.group === 'bold' && countByGroup(selected, 'bold') >= BOLD_MAX) {
-      return false;
-    }
-
+  if (isSelected) {
     return true;
   }
 
-  const next = selected.filter((entry) => entry.id !== color.id);
-  return validateSelection(next).ok;
+  return true;
 }
 
 export function toggleSelectedColor(
@@ -152,7 +158,19 @@ export function mapSelectedColorsToSeeds(colors: SelectableColor[]): string[] {
     .map((color) => color.hex);
   const dark = sorted.filter((color) => color.group === 'dark-neutral').map((color) => color.hex);
 
-  return [...bold, ...light, ...dark].slice(0, 3);
+  const combined = [...bold, ...light, ...dark];
+  const seen = new Set<string>();
+
+  return combined.filter((hex) => {
+    const normalized = normalizeHex(hex);
+
+    if (seen.has(normalized)) {
+      return false;
+    }
+
+    seen.add(normalized);
+    return true;
+  });
 }
 
 function uniqueColors(colors: SelectableColor[]): SelectableColor[] {
@@ -169,31 +187,13 @@ function uniqueColors(colors: SelectableColor[]): SelectableColor[] {
 }
 
 function ensureMinimumSelection(colors: SelectableColor[]): SelectableColor[] {
-  let selection = uniqueColors(colors);
-  const fallbackIds = ['porcelain', 'seaspray', 'zest', 'nectar', 'twilight'];
+  const selection = uniqueColors(colors);
 
-  for (const id of fallbackIds) {
-    const validation = validateSelection(selection);
-
-    if (validation.ok) {
-      break;
-    }
-
-    const fallback = SELECTABLE_COLORS.find((color) => color.id === id);
-
-    if (fallback && !selection.some((color) => color.id === fallback.id)) {
-      selection = [...selection, fallback];
-    }
+  if (selection.length > 0) {
+    return sortSelectedColors(selection);
   }
 
-  const boldColors = selection.filter((color) => color.group === 'bold');
-
-  if (boldColors.length > BOLD_MAX) {
-    const keepIds = new Set(boldColors.slice(0, BOLD_MAX).map((color) => color.id));
-    selection = selection.filter((color) => color.group !== 'bold' || keepIds.has(color.id));
-  }
-
-  return sortSelectedColors(selection);
+  return createDefaultSelection();
 }
 
 /**
@@ -215,12 +215,7 @@ export function suggestSelectionFromHexes(hexes: string[]): SelectionSuggestionR
     }
   }
 
-  const selection = ensureMinimumSelection(matched.length > 0 ? matched : createDefaultSelection());
-  const validation = validateSelection(selection);
-
-  if (!validation.ok) {
-    return { ok: false, error: validation.error };
-  }
+  const selection = ensureMinimumSelection(matched);
 
   return { ok: true, colors: selection };
 }

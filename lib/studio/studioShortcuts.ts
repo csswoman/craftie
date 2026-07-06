@@ -7,8 +7,8 @@ export type StudioShortcut = {
 export const STUDIO_SHORTCUTS: StudioShortcut[] = [
   {
     keys: 'mod+Enter',
-    label: 'Generar paleta',
-    when: 'Con selección válida en fase de creación',
+    label: 'Crear guía de marca',
+    when: 'Con paleta por roles lista en fase de ajuste',
   },
   {
     keys: 'Esc',
