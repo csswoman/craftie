@@ -7,7 +7,6 @@ import {
   NEUTRAL_CHROMA_MAX,
 } from './colorGroupClassification';
 import type { GeneratedPalette } from './formulas';
-import { finalizePalette } from './formulas';
 import type { ExtractedColor } from './imageExtractor';
 import { nameForHex, namePalette } from './naming';
 import { normalizeHex } from './normalizeHex';
@@ -32,6 +31,11 @@ import {
   type RolePalette,
   type RoleSlot,
 } from './roleTypes';
+import {
+  generatePaletteFromRolePalette,
+  rolePaletteToGeneratedPalette,
+  validateRolePalette,
+} from './rolePaletteGenerated';
 
 export {
   DERIVED_ROLES,
@@ -43,6 +47,12 @@ export {
   type RolePalette,
   type RoleSlot,
 } from './roleTypes';
+
+export {
+  generatePaletteFromRolePalette,
+  rolePaletteToGeneratedPalette,
+  validateRolePalette,
+} from './rolePaletteGenerated';
 
 const toOklch = converter('oklch');
 
@@ -430,33 +440,6 @@ export function mergeRolePalettePreservingLocks(
 
 export function isPaletteRoleId(id: string): id is PaletteRoleId {
   return (PALETTE_ROLE_ORDER as string[]).includes(id);
-}
-
-export function validateRolePalette(palette: RolePalette | null): { ok: true } | { ok: false; error: string } {
-  if (!palette) {
-    return { ok: false, error: 'Sube una imagen o elige inspiración para armar tu paleta.' };
-  }
-
-  return { ok: true };
-}
-
-export function rolePaletteToGeneratedPalette(palette: RolePalette): GeneratedPalette {
-  return {
-    primary: palette.primario.hex,
-    accent: palette.acento.hex,
-    surface: palette.fondo.hex,
-    onSurface: palette.texto.hex,
-    neutralLight: palette.superficie.hex,
-    neutralDark: palette.borde.hex,
-  };
-}
-
-export function generatePaletteFromRolePalette(palette: RolePalette): GeneratedPalette {
-  const base = rolePaletteToGeneratedPalette(palette);
-
-  return finalizePalette(base, palette.primario.hex, {
-    skipGeneratedAccent: palette.acento.source === 'extracted',
-  });
 }
 
 export function replaceRoleHex(
