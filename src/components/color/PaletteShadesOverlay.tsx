@@ -22,7 +22,7 @@ export function PaletteShadesOverlay({
 
   return (
     <div
-      className="absolute inset-0 z-[5] flex flex-col"
+      className="absolute inset-0 z-[5] flex flex-row"
       aria-label="Shades del color"
       onClick={(event) => event.stopPropagation()}
       onKeyDown={(event) => event.stopPropagation()}
@@ -67,7 +67,7 @@ export function PaletteShadesOverlay({
                 onClose();
               }
             }}
-            className={`group/shade relative flex min-h-0 flex-1 flex-col items-center justify-center px-1 py-1 text-center transition-[filter,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/70 disabled:cursor-default ${
+            className={`group/shade relative flex min-h-0 min-w-0 flex-1 flex-col items-center justify-center px-1 py-1 text-center transition-[filter,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/70 disabled:cursor-default ${
               canApply ? 'cursor-pointer hover:brightness-110' : ''
             } ${isCurrent ? 'ring-2 ring-inset ring-white/80' : ''}`}
             style={{ backgroundColor: shade.hex, color: textColor }}

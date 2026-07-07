@@ -87,7 +87,11 @@ export function StudioCanvas({
             style={{ width: sidebarWidth }}
           >
             <div className="panel-float flex h-full max-h-[min(70vh,640px)] min-h-[240px] flex-col overflow-hidden xl:max-h-none xl:min-h-0">
-              <PanelCollapseBar align="end">
+              <PanelCollapseBar
+                align="end"
+                title="Herramientas"
+                subtitle="Roles, imagen e inspiración."
+              >
                 <PanelCollapseButton
                   label="Comprimir herramientas"
                   direction="left"
@@ -132,7 +136,11 @@ export function StudioCanvas({
                 style={{ width: rightWidth }}
               >
                 <div className="panel-float flex h-full max-h-[min(50vh,480px)] min-h-[200px] flex-col overflow-hidden xl:max-h-none xl:min-h-0">
-                  <PanelCollapseBar align="start">
+                  <PanelCollapseBar
+                    align="start"
+                    title="Inspector"
+                    subtitle="Rol activo con edición y contraste."
+                  >
                     <PanelCollapseButton
                       label="Comprimir inspector"
                       direction="right"
@@ -152,9 +160,13 @@ export function StudioCanvas({
 
 function PanelCollapseBar({
   align,
+  title,
+  subtitle,
   children,
 }: {
   align: 'start' | 'end';
+  title: string;
+  subtitle?: string;
   children: ReactNode;
 }) {
   return (
@@ -163,7 +175,13 @@ function PanelCollapseBar({
         align === 'end' ? 'justify-end' : 'justify-start'
       }`}
     >
-      {children}
+      <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+        <div className={`min-w-0 ${align === 'end' ? 'text-right' : 'text-left'}`}>
+          <p className="truncate text-[0.8125rem] font-semibold text-ink">{title}</p>
+          {subtitle ? <p className="truncate text-[0.6875rem] text-muted">{subtitle}</p> : null}
+        </div>
+        <div className="shrink-0">{children}</div>
+      </div>
     </div>
   );
 }

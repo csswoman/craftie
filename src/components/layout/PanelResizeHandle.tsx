@@ -19,7 +19,6 @@ export function PanelResizeHandle({
     (event: React.PointerEvent<HTMLDivElement>) => {
       event.preventDefault();
       draggingRef.current = true;
-      event.currentTarget.setPointerCapture(event.pointerId);
 
       const handlePointerMove = (moveEvent: PointerEvent) => {
         if (!draggingRef.current) {
@@ -29,9 +28,12 @@ export function PanelResizeHandle({
         onResize(moveEvent.movementX);
       };
 
-      const handlePointerUp = (upEvent: PointerEvent) => {
+      const handlePointerUp = () => {
+        if (!draggingRef.current) {
+          return;
+        }
+
         draggingRef.current = false;
-        event.currentTarget.releasePointerCapture(upEvent.pointerId);
         window.removeEventListener('pointermove', handlePointerMove);
         window.removeEventListener('pointerup', handlePointerUp);
         window.removeEventListener('pointercancel', handlePointerUp);

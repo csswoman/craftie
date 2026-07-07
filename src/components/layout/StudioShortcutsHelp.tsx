@@ -70,8 +70,11 @@ export const StudioShortcutsHelp = forwardRef<StudioShortcutsHelpHandle>(functio
       className="group relative hidden sm:block"
       aria-label="Atajos de teclado del estudio"
     >
-      <summary className="inline-flex min-h-9 min-w-9 cursor-pointer list-none items-center justify-center rounded-md px-2.5 text-[0.8125rem] font-semibold text-muted transition-colors hover:bg-surface hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 [&::-webkit-details-marker]:hidden">
-        Atajos
+      <summary
+        className="inline-flex min-h-10 min-w-10 cursor-pointer list-none items-center justify-center rounded-lg px-2.5 text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 [&::-webkit-details-marker]:hidden"
+        title="Atajos de teclado"
+      >
+        <KeyboardIcon />
       </summary>
       <div
         ref={panelRef}
@@ -94,3 +97,25 @@ export const StudioShortcutsHelp = forwardRef<StudioShortcutsHelpHandle>(functio
     </details>
   );
 });
+
+function KeyboardIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 20 20" className="size-5" fill="none">
+      <rect
+        x="3"
+        y="6"
+        width="14"
+        height="9"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M6 9h.01M8.75 9h.01M11.5 9h.01M14.25 9h.01M6 12h8"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}

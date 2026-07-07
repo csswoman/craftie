@@ -5,7 +5,7 @@ import { buildPreviewTokens } from '@lib/color/previewTokens';
 
 import { useRolePalette } from '@/context/RolePaletteContext';
 import { PreviewBrandCard } from '@/components/color/preview/PreviewBrandCard';
-import { PreviewContrastWarnings, PreviewThemeToggle } from '@/components/color/preview/PreviewChrome';
+import { PreviewContrastWarnings } from '@/components/color/preview/PreviewChrome';
 import { PreviewRoleTarget } from '@/components/color/preview/PreviewRoleTarget';
 import {
   PreviewChips,
@@ -18,7 +18,7 @@ export type PreviewViewProps = {
 };
 
 export function PreviewView({ onEditRole }: PreviewViewProps) {
-  const { rolePalette, activeTheme, setActiveTheme } = useRolePalette();
+  const { rolePalette, activeTheme } = useRolePalette();
 
   if (!rolePalette) {
     return null;
@@ -34,7 +34,6 @@ export function PreviewView({ onEditRole }: PreviewViewProps) {
       style={{ backgroundColor: rolePalette.fondo.hex }}
     >
       <div className="mx-auto flex w-full max-w-lg flex-col gap-4 p-5 pb-8 sm:gap-5 sm:p-8">
-        <PreviewThemeToggle activeTheme={activeTheme} onChange={setActiveTheme} />
         {tokens.warnings.length > 0 ? <PreviewContrastWarnings warnings={tokens.warnings} /> : null}
         <PreviewBrandCard
           palette={rolePalette}

@@ -12,12 +12,12 @@ export function RoleActiveSelector() {
   }
 
   return (
-    <div className="rounded-md border border-border bg-surface px-3 py-2">
-      <p className="text-[0.6875rem] font-semibold text-muted">Rol activo</p>
-      <p className="mt-0.5 text-[0.6875rem] leading-relaxed text-muted">
+    <div className="h-full overflow-y-auto px-3 py-3">
+      <p className="text-[1rem] font-extrabold text-ink">Rol activo</p>
+      <p className="mt-0.5 text-[0.875rem] leading-relaxed text-muted">
         Sincronizado con la paleta central.
       </p>
-      <div className="mt-2 grid grid-cols-2 gap-1">
+      <div className="mt-7 flex flex-col gap-2">
         {PALETTE_ROLE_ORDER.map((role) => {
           const slot = rolePalette[role];
           const isActive = activeRole === role;
@@ -27,7 +27,7 @@ export function RoleActiveSelector() {
               key={role}
               type="button"
               onClick={() => setActiveRole(role)}
-              className={`rounded-md border px-2 py-1 text-[0.6875rem] font-medium transition-colors ${
+              className={`flex min-h-14 items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
                 isActive
                   ? 'border-primary bg-primary/10 text-primary'
                   : 'border-border bg-bg text-ink hover:bg-surface-raised'
@@ -35,10 +35,24 @@ export function RoleActiveSelector() {
               title={`${ROLE_LABELS[role]} · ${slot.name} · ${slot.hex}`}
             >
               <span
-                className="mr-1.5 inline-block size-2.5 rounded-full align-middle ring-1 ring-inset ring-ink/10"
+                className="inline-block size-7 shrink-0 rounded-md ring-1 ring-inset ring-ink/10"
                 style={{ backgroundColor: slot.hex }}
               />
-              {ROLE_LABELS[role]}
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[0.9375rem] font-extrabold text-ink">
+                  {ROLE_LABELS[role]}
+                </span>
+                <span className="block truncate text-[0.8125rem] font-medium text-muted">
+                  {slot.name}
+                </span>
+              </span>
+              <span
+                className={`rounded-full px-2 py-0.5 text-[0.75rem] font-bold ${
+                  isActive ? 'bg-bg/70 text-primary' : 'bg-surface text-primary'
+                }`}
+              >
+                AA
+              </span>
             </button>
           );
         })}

@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { GeneratedPalette } from '@lib/color/formulas';
+import { buildImagePalette } from '@lib/color/imagePalette';
+import { validateImageFile } from '@lib/color/imageExtractor';
 import {
   generatePaletteFromRolePalette,
   validateRolePalette,
@@ -10,20 +12,18 @@ import {
 import type { SelectableColor } from '@lib/color/selectableColors';
 import { DESIGN_STYLES } from '@lib/styles/presets';
 import { getRecommendedPairings, type FontPair } from '@lib/typography/pairings';
-import type { StudioView } from '@lib/export/studioViews';
 import type { StudioFlowStepId } from '@lib/studio/studioFlow';
 
-import type { InspectorSection } from '@/components/color/InspectorPanel';
 import { useWorkspaceExports } from '@/components/color/useWorkspaceExports';
 import { useWorkspaceInspiration } from '@/components/color/useWorkspaceInspiration';
 import { useWorkspacePaletteActions } from '@/components/color/useWorkspacePaletteActions';
 import { useWorkspaceShortcuts } from '@/components/color/useWorkspaceShortcuts';
 import type { StudioShortcutsHelpHandle } from '@/components/layout/StudioShortcutsHelp';
 import { useRolePalette } from '@/context/RolePaletteContext';
+import { extractPaletteColorsFromImage } from '@/lib/browser/imageExtractor';
 
 export function useSelectColorsWorkspaceController() {
   const [generatedPalette, setGeneratedPalette] = useState<GeneratedPalette | null>(null);
-  const [studioView, setStudioView] = useState<StudioView>('style-guide');
   const [paletteCatalog, setPaletteCatalog] = useState<SelectableColor[]>([]);
   const {
     rolePalette,
@@ -42,14 +42,88 @@ export function useSelectColorsWorkspaceController() {
   const [isImageExtracting, setIsImageExtracting] = useState(false);
   const [isImageRegenerating, setIsImageRegenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [inspectorSection, setInspectorSection] = useState<InspectorSection>('accessibility');
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
   const [inspirationModalOpen, setInspirationModalOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [imageFileName, setImageFileName] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageRegenerateIndex, setImageRegenerateIndex] = useState(0);
   const generatingRef = useRef(false);
+  const imagePreviewUrlRef = useRef<string | null>(null);
   const shortcutsRef = useRef<StudioShortcutsHelpHandle>(null);
+
+  useEffect(() => {
+    return () => {
+      if (imagePreviewUrlRef.current !== null) {
+        URL.revokeObjectURL(imagePreviewUrlRef.current);
+      }
+    };
+  }, []);
+
+  const isImageBusy = isImageExtracting || isImageRegenerating;
+
+  function updateImagePreview(file: File) {
+    if (imagePreviewUrlRef.current !== null) {
+      URL.revokeObjectURL(imagePreviewUrlRef.current);
+    }
+
+    const nextPreviewUrl = URL.createObjectURL(file);
+    imagePreviewUrlRef.current = nextPreviewUrl;
+    setImagePreviewUrl(nextPreviewUrl);
+    setImageFileName(file.name);
+    setImageFile(file);
+  }
+
+  async function processImageFile(file: File, regenerateIndex = 0, isRegenerate = false) {
+    if (isImageBusy) {
+      return;
+    }
+
+    try {
+      validateImageFile(file, 5);
+    } catch (validationError) {
+      const message =
+        validationError instanceof Error ? validationError.message : 'No se pudo validar la imagen.';
+      handleImageExtractionError(message);
+      return;
+    }
+
+    if (!isRegenerate) {
+      setImageRegenerateIndex(0);
+      updateImagePreview(file);
+      handleImageExtractionStart();
+    } else {
+      setImageRegenerateIndex(regenerateIndex);
+      handleImageRegenerateStart();
+    }
+
+    try {
+      const extracted = await extractPaletteColorsFromImage(file, regenerateIndex);
+      handleImagePaletteExtracted(buildImagePalette(extracted));
+    } catch (extractionError) {
+      const message =
+        extractionError instanceof Error
+          ? extractionError.message
+          : 'No se pudieron extraer colores de la imagen.';
+      handleImageExtractionError(message);
+    }
+  }
+
+  function handleImageFileSelected(file: File) {
+    const isSameFile = imageFile !== null && imageFile.name === file.name && imageFile.size === file.size;
+    void processImageFile(file, isSameFile ? imageRegenerateIndex + 1 : 0, isSameFile);
+  }
+
+  function handleImageRegenerate() {
+    if (imageFile === null) {
+      return;
+    }
+
+    void processImageFile(imageFile, imageRegenerateIndex + 1, true);
+  }
 
   const activeMoods = useMemo(() => {
     if (selectedStyleId === null) {
@@ -97,8 +171,6 @@ export function useSelectColorsWorkspaceController() {
       setError(null);
       const nextPalette = generatePaletteFromRolePalette(rolePalette!);
       setGeneratedPalette(nextPalette);
-      setStudioView('style-guide');
-      setInspectorSection('accessibility');
       setRightPanelOpen(true);
       setStatusMessage('Guía de marca lista. Revisa contraste, tipografía y exporta tu Brand Kit.');
     } finally {
@@ -192,6 +264,10 @@ export function useSelectColorsWorkspaceController() {
   return {
     catalogSource,
     error,
+    imageFileName,
+    imagePreviewUrl,
+    handleImageFileSelected,
+    handleImageRegenerate,
     generatedPalette,
     handleAddColorByHex,
     handleExportBrandKit,
@@ -206,10 +282,10 @@ export function useSelectColorsWorkspaceController() {
     handleReplacePreviewColor,
     handleSelectStyle,
     inspirationModalOpen,
-    inspectorSection,
     isGenerating,
     isImageExtracting,
     isImageRegenerating,
+    isImageBusy,
     isReviewPhase,
     paletteCatalog,
     recommendedPairings,
@@ -220,13 +296,10 @@ export function useSelectColorsWorkspaceController() {
     selectedStyleId,
     selectionReady,
     setInspirationModalOpen,
-    setInspectorSection,
     setRightPanelCollapsed,
     setRightPanelOpen,
     setSelectedPairing,
-    setStudioView,
     shortcutsRef,
     statusMessage,
-    studioView,
   };
 }

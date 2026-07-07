@@ -37,11 +37,19 @@ export function PaletteColumnToolbar({
   onToggleShades,
   onOpenInfo,
 }: PaletteColumnToolbarProps) {
+  const slotMode = hoverGroup === 'slot';
+
   return (
     <div
-      className={`pointer-events-none absolute inset-x-0 top-[18%] z-10 flex justify-center ${HOVER_VISIBILITY[hoverGroup]}`}
+      className={`pointer-events-none absolute z-10 flex ${
+        slotMode ? 'inset-x-0 top-4 justify-center' : 'inset-x-0 top-[18%] justify-center'
+      } ${HOVER_VISIBILITY[hoverGroup]}`}
     >
-      <div className="pointer-events-auto flex flex-col items-center gap-2.5">
+      <div
+        className={`pointer-events-auto flex items-center ${
+          slotMode ? 'flex-row gap-1.5' : 'flex-col gap-2.5'
+        }`}
+      >
         <ToolbarIconButton
           label={showShades ? 'Ocultar shades' : 'Ver shades'}
           active={showShades}
@@ -134,7 +142,7 @@ function ToolbarIconButton({
       </button>
       <span
         role="tooltip"
-        className="pointer-events-none absolute left-[calc(100%+8px)] top-1/2 z-20 -translate-y-1/2 whitespace-nowrap rounded-md border border-border bg-ink px-2 py-1 text-[0.6875rem] font-medium text-bg opacity-0 shadow-md transition-opacity group-hover/tooltip:opacity-100 group-focus-within/tooltip:opacity-100"
+        className="pointer-events-none absolute left-1/2 top-[calc(100%+8px)] z-20 -translate-x-1/2 whitespace-nowrap rounded-md border border-border bg-ink px-2 py-1 text-[0.6875rem] font-medium text-bg opacity-0 shadow-md transition-opacity group-hover/tooltip:opacity-100 group-focus-within/tooltip:opacity-100"
       >
         {label}
       </span>

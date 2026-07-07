@@ -37,7 +37,8 @@ export function PaletteCanvas({
   editable = false,
   onAddColorByHex,
 }: PaletteCanvasProps) {
-  const { rolePalette, activeRole, lockedRoles, replaceRole, setActiveRole } = useRolePalette();
+  const { rolePalette, activeTheme, lockedRoles, replaceRole, setActiveRole, setActiveTheme } =
+    useRolePalette();
 
   const [activeTab, setActiveTab] = useState<CanvasTab>('palette');
   const [selectedColorHex, setSelectedColorHex] = useState<string | null>(null);
@@ -101,58 +102,47 @@ export function PaletteCanvas({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex shrink-0 flex-col gap-2 border-b border-border px-4 py-2.5">
-        <p className="text-[0.8125rem] font-medium text-muted">
-          {isUpdating
-            ? 'Regenerando colores…'
-            : isLoading
-              ? 'Extrayendo colores…'
-              : !hasPalette
-                ? 'Sube una imagen para armar tu paleta por roles'
-                : activeRole
-                  ? `Rol activo: ${activeRole} · toca un color fuente para asignarlo`
-                  : 'Haz clic en una banda para elegir el rol activo'}
-        </p>
-        {contrastFailure ? (
-          <p
-            role="alert"
-            className="rounded-md border border-fail/30 bg-fail/10 px-2.5 py-1.5 text-[0.75rem] font-medium text-fail"
-          >
-            Hay pares de contraste que no alcanzan AA. Revisa texto sobre fondos y acentos.
-          </p>
-        ) : null}
-      </div>
-
       {hasPalette ? (
         <div
           role="tablist"
           aria-label="Vista del lienzo"
-          className="flex shrink-0 gap-1 border-b border-border px-4 py-2"
+          className="flex h-13 shrink-0 items-center justify-between gap-4 border-b border-border px-6"
         >
-          {CANVAS_TABS.map((tab) => {
-            const selected = activeTab === tab.id;
+          <div className="flex h-full items-end gap-2">
+            {CANVAS_TABS.map((tab) => {
+              const selected = activeTab === tab.id;
 
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={selected}
-                onClick={() => setActiveTab(tab.id)}
-                className={`rounded-md px-3 py-1.5 text-[0.8125rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
-                  selected
-                    ? 'bg-primary text-white'
-                    : 'text-muted hover:bg-surface-raised hover:text-ink'
-                }`}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`border-b px-3 pb-3 pt-2 text-[0.9375rem] transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+                    selected
+                      ? 'border-primary font-extrabold text-ink'
+                      : 'border-transparent font-medium text-muted hover:text-ink'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+          <PaletteThemeToggle activeTheme={activeTheme} onChange={setActiveTheme} />
         </div>
       ) : null}
 
       <div className="relative flex min-h-0 flex-1 flex-col">
+        {contrastFailure && hasPalette ? (
+          <p
+            role="alert"
+            className="absolute left-4 top-4 z-30 max-w-sm rounded-lg border border-fail/30 bg-bg/95 px-3 py-2 text-[0.75rem] font-semibold text-fail"
+          >
+            Hay pares de contraste que no alcanzan AA.
+          </p>
+        ) : null}
         {isLoading && !hasPalette ? (
           <PaletteCanvasSkeleton />
         ) : !hasPalette ? (
@@ -213,6 +203,36 @@ function PaletteCanvasSkeleton() {
   return (
     <div className="flex min-h-0 flex-1 flex-col" aria-busy="true" aria-label="Cargando paleta">
       <div className="flex-1 animate-pulse bg-surface-raised" />
+    </div>
+  );
+}
+
+function PaletteThemeToggle({
+  activeTheme,
+  onChange,
+}: {
+  activeTheme: 'light' | 'dark';
+  onChange: (theme: 'light' | 'dark') => void;
+}) {
+  return (
+    <div className="flex shrink-0 justify-end" role="group" aria-label="Modo de tema">
+      <div className="inline-flex rounded-lg border border-border bg-bg p-0.5">
+        {(['light', 'dark'] as const).map((theme) => (
+          <button
+            key={theme}
+            type="button"
+            aria-pressed={activeTheme === theme}
+            onClick={() => onChange(theme)}
+            className={`rounded-md px-3 py-1.5 text-[0.8125rem] font-extrabold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+              activeTheme === theme
+                ? 'bg-ink text-bg'
+                : 'text-muted hover:bg-surface-raised hover:text-ink'
+            }`}
+          >
+            {theme === 'light' ? 'Claro' : 'Oscuro'}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

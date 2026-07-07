@@ -64,7 +64,7 @@ export function RoleSlotStrip({
 
       <ul
         className={`flex min-h-0 ${
-          expanded ? 'h-full min-h-[280px] flex-1 divide-x divide-white/10' : 'h-16 shrink-0 border-t border-border'
+          expanded ? 'h-full min-h-[420px] flex-1 flex-col divide-y divide-white/10' : 'h-16 shrink-0 border-t border-border'
         }`}
         aria-label="Roles de la paleta"
       >
@@ -82,7 +82,7 @@ export function RoleSlotStrip({
           const canApplyShade = editable && !locked;
 
           return (
-            <li key={column.id} className="relative flex h-full min-w-0 flex-1">
+            <li key={column.id} className="relative flex min-h-0 min-w-0 flex-1">
               <div
                 role="button"
                 tabIndex={0}
@@ -111,15 +111,16 @@ export function RoleSlotStrip({
                     onSelectRole(role);
                   }
                 }}
-                className={`group/slot relative flex w-full cursor-pointer flex-col items-center justify-end transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+                className={`group/slot relative flex w-full cursor-pointer transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
                   expanded
-                    ? 'h-full min-h-0 px-3 pb-5 pt-10'
+                    ? 'min-h-24 flex-row items-center justify-start gap-5 px-7 py-6'
                     : 'h-16 px-1 pb-1.5 pt-6'
                 } ${isActive ? 'z-[1] shadow-[inset_0_0_0_2px] shadow-primary' : ''}`}
                 style={{ backgroundColor: column.hex, color: textColor }}
               >
                 {!showShades ? (
                   <div
+                    className="contents"
                     onClick={(event) => event.stopPropagation()}
                     onKeyDown={(event) => event.stopPropagation()}
                   >
@@ -158,7 +159,7 @@ export function RoleSlotStrip({
                 {locked ? (
                   <span
                     className={`absolute z-10 size-2 rounded-full bg-white/80 ${
-                      expanded ? 'right-3 top-3' : 'right-1 top-1 size-1.5'
+                      expanded ? 'right-4 top-4' : 'right-1 top-1 size-1.5'
                     }`}
                     aria-label="Bloqueado"
                   />
@@ -167,7 +168,7 @@ export function RoleSlotStrip({
                 {column.contrastBadges && column.contrastBadges.length > 0 ? (
                   <div
                     className={`absolute z-10 flex max-w-[calc(100%-0.5rem)] flex-col gap-0.5 ${
-                      expanded ? 'left-2 top-2 gap-1' : 'left-0.5 top-0.5'
+                      expanded ? 'right-7 top-1/2 -translate-y-1/2 items-end gap-2' : 'left-0.5 top-0.5'
                     }`}
                   >
                     {column.contrastBadges.map((badge) => (
@@ -178,32 +179,29 @@ export function RoleSlotStrip({
                         status={badge.status}
                         target="AA"
                         compact
-                        contextLabel={badge.label}
+                        contextLabel={expanded ? undefined : badge.label}
                       />
                     ))}
                   </div>
                 ) : null}
 
                 {!showShades ? (
-                  <div className={`w-full text-center ${expanded ? 'mt-auto space-y-0.5' : ''}`}>
+                  <div className={`${expanded ? 'min-w-0 pr-36 text-left' : 'w-full text-center'}`}>
                     <span
-                      className={`block max-w-full truncate font-semibold uppercase tracking-wide opacity-90 ${
+                      className={`block max-w-full truncate font-semibold uppercase tracking-wide opacity-80 ${
                         expanded ? 'text-[0.6875rem]' : 'px-0.5 text-[0.5625rem]'
                       }`}
                     >
-                      {role}
+                      {column.roleLabel ?? role}
                     </span>
                     {expanded ? (
                       <>
-                        <p className="font-mono text-[clamp(0.875rem,2vw,1.25rem)] font-semibold tracking-[0.06em]">
-                          {column.hex.replace('#', '').toUpperCase()}
-                        </p>
-                        <p className="max-w-full truncate px-1 text-[clamp(0.75rem,1.6vw,0.9375rem)] font-medium tracking-[0.01em] opacity-90">
+                        <p className="mt-1 max-w-full truncate text-[1.375rem] font-extrabold leading-tight">
                           {column.name}
                         </p>
-                        {column.roleLabel ? (
-                          <p className="text-[0.6875rem] font-medium opacity-75">{column.roleLabel}</p>
-                        ) : null}
+                        <p className="font-mono text-[0.875rem] font-semibold tracking-normal opacity-90">
+                          {column.hex.toUpperCase()}
+                        </p>
                       </>
                     ) : null}
                   </div>

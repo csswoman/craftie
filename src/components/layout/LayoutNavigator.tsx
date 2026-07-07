@@ -20,6 +20,7 @@ export function LayoutNavigator({ activeView, onViewChange }: LayoutNavigatorPro
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const active = getStudioViewMeta(activeView);
+  const activeGroupLabel = active.group === 'layouts' ? 'Maquetas' : 'Sistema';
 
   useLayoutEffect(() => {
     if (!open) {
@@ -91,10 +92,10 @@ export function LayoutNavigator({ activeView, onViewChange }: LayoutNavigatorPro
         aria-expanded={open}
         aria-controls={menuId}
         onClick={() => setOpen((value) => !value)}
-        className="inline-flex items-center gap-2 rounded-md border border-border bg-bg px-3 py-2 text-[0.8125rem] font-semibold text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+        className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-border bg-bg px-3.5 py-2 text-[0.9375rem] font-semibold text-ink shadow-sm transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
       >
         <ViewIcon view={activeView} />
-        <span className="max-w-[9rem] truncate sm:max-w-none">{active.label}</span>
+        <span className="max-w-[9rem] truncate sm:max-w-none">{activeGroupLabel}</span>
         <ChevronDown open={open} />
       </button>
 
@@ -188,7 +189,7 @@ function ViewIcon({ view }: { view: StudioView }) {
     <svg
       aria-hidden="true"
       viewBox="0 0 20 20"
-      className="mt-0.5 size-5 shrink-0 text-muted"
+      className="size-4 shrink-0 text-ink"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.5"

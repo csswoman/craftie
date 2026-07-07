@@ -1,131 +1,37 @@
 'use client';
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useId } from 'react';
 
-import { buildImagePalette } from '@lib/color/imagePalette';
-import { validateImageFile } from '@lib/color/imageExtractor';
-import type { ImagePaletteBuildResult } from '@lib/color/imagePalette';
-
-import { extractPaletteColorsFromImage } from '@/lib/browser/imageExtractor';
 import { ImageUploadPreview } from '@/components/color-engine/ImageUploadPreview';
 
 export type ImageUploaderProps = {
-  onExtractionStart?: () => void;
-  onRegenerateStart?: () => void;
-  onPaletteExtracted: (palette: ImagePaletteBuildResult) => void;
-  onExtractionError?: (message: string) => void;
+  fileName: string | null;
+  hasPreview: boolean;
+  isLoading: boolean;
+  previewUrl: string | null;
+  onFileSelected: (file: File) => void;
+  onRegenerate: () => void;
   variant?: 'default' | 'embedded';
   showHeader?: boolean;
 };
 
-const ACCEPTED_EXTENSIONS = '.jpg,.jpeg,.png,.webp';
-const MAX_FILE_SIZE_MB = 5;
-
 export function ImageUploader({
-  onExtractionStart,
-  onRegenerateStart,
-  onPaletteExtracted,
-  onExtractionError,
+  fileName,
+  hasPreview,
+  isLoading,
+  previewUrl,
+  onFileSelected,
+  onRegenerate,
   variant = 'default',
   showHeader = true,
 }: ImageUploaderProps) {
   const isEmbedded = variant === 'embedded';
   const inputId = useId();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const lastFileRef = useRef<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [fileName, setFileName] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [regenerateIndex, setRegenerateIndex] = useState(0);
-
-  useEffect(() => {
-    return () => {
-      if (previewUrl !== null) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [previewUrl]);
-
-  async function processFile(file: File, nextRegenerateIndex?: number) {
-    if (isLoading) {
-      return;
-    }
-
-    const regenIndex = nextRegenerateIndex ?? 0;
-    const isRegenerate =
-      nextRegenerateIndex !== undefined && lastFileRef.current === file && previewUrl !== null;
-
-    if (nextRegenerateIndex === undefined) {
-      setRegenerateIndex(0);
-    }
-
-    setError(null);
-
-    try {
-      validateImageFile(file, MAX_FILE_SIZE_MB);
-    } catch (validationError) {
-      const message =
-        validationError instanceof Error
-          ? validationError.message
-          : 'No se pudo validar la imagen.';
-      setError(message);
-      onExtractionError?.(message);
-      return;
-    }
-
-    if (!isRegenerate) {
-      if (previewUrl !== null) {
-        URL.revokeObjectURL(previewUrl);
-      }
-
-      const nextPreviewUrl = URL.createObjectURL(file);
-      setPreviewUrl(nextPreviewUrl);
-      setFileName(file.name);
-      lastFileRef.current = file;
-    }
-
-    setIsLoading(true);
-
-    if (isRegenerate) {
-      onRegenerateStart?.();
-    } else {
-      onExtractionStart?.();
-    }
-
-    try {
-      const extracted = await extractPaletteColorsFromImage(file, regenIndex);
-      onPaletteExtracted(buildImagePalette(extracted));
-    } catch (extractionError) {
-      const message =
-        extractionError instanceof Error
-          ? extractionError.message
-          : 'No se pudieron extraer colores de la imagen.';
-      setError(message);
-      onExtractionError?.(message);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  function handleRegenerate() {
-    const file = lastFileRef.current;
-
-    if (!file || isLoading) {
-      return;
-    }
-
-    const nextIndex = regenerateIndex + 1;
-    setRegenerateIndex(nextIndex);
-    void processFile(file, nextIndex);
-  }
-
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
 
     if (file) {
-      void processFile(file);
+      onFileSelected(file);
     }
 
     event.target.value = '';
@@ -133,12 +39,10 @@ export function ImageUploader({
 
   function handleDrop(event: React.DragEvent<HTMLDivElement>) {
     event.preventDefault();
-    setIsDragging(false);
-
     const file = event.dataTransfer.files[0];
 
     if (file) {
-      void processFile(file);
+      onFileSelected(file);
     }
   }
 
@@ -163,87 +67,46 @@ export function ImageUploader({
         </div>
       ) : null}
 
+      {hasPreview ? (
+        <ImageUploadPreview
+          previewUrl={previewUrl ?? ''}
+          fileName={fileName}
+          isLoading={isLoading}
+          onRegenerate={onRegenerate}
+        />
+      ) : null}
+
       <div
-        className={`${showHeader ? 'mt-4' : ''} rounded-md border border-dashed px-4 py-6 transition-colors ${
-          isDragging ? 'border-primary bg-surface-raised' : 'border-border bg-bg'
+        className={`rounded-md border border-dashed px-4 py-6 transition-colors ${
+          hasPreview ? 'mt-3 border-border bg-bg' : `${showHeader ? 'mt-4' : ''} border-border bg-bg`
         }`}
-        onDragEnter={(event) => {
-          event.preventDefault();
-          setIsDragging(true);
-        }}
         onDragOver={(event) => {
           event.preventDefault();
-          setIsDragging(true);
-        }}
-        onDragLeave={(event) => {
-          event.preventDefault();
-          setIsDragging(false);
         }}
         onDrop={handleDrop}
       >
         <input
-          ref={inputRef}
           id={inputId}
           type="file"
-          accept={ACCEPTED_EXTENSIONS}
+          accept=".jpg,.jpeg,.png,.webp"
           onChange={handleFileChange}
-          className="pointer-events-none fixed -left-[9999px] h-px w-px opacity-0"
-          tabIndex={-1}
-          aria-hidden="true"
+          className="sr-only"
         />
 
         <div className="flex flex-col items-center gap-3 text-center">
           <p className="text-[0.9375rem] text-ink">
-            Arrastra una imagen aquí o{' '}
-            <button
-              type="button"
-              onClick={() => inputRef.current?.click()}
-              disabled={isLoading}
-              className="font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+            {hasPreview ? 'Arrastra otra imagen o ' : 'Arrastra una imagen aquí o '}
+            <label
+              htmlFor={inputId}
+              className="cursor-pointer font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
             >
-              selecciona un archivo
-            </button>
+              {hasPreview ? 'cambia la imagen' : 'selecciona un archivo'}
+            </label>
           </p>
           <p className="text-[0.8125rem] text-muted">JPG, PNG o WebP · máximo 5 MB</p>
         </div>
       </div>
 
-      {error ? (
-        <div className="mt-3 space-y-2">
-          <p role="alert" className="text-[0.8125rem] font-medium text-fail">
-            {error}
-          </p>
-          {fileName ? (
-            <button
-              type="button"
-              onClick={() => {
-                const file = lastFileRef.current;
-
-                if (file) void processFile(file);
-              }}
-              disabled={isLoading}
-              className="rounded-md border border-border px-3 py-1.5 text-[0.8125rem] font-semibold text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Reintentar extracción
-            </button>
-          ) : null}
-        </div>
-      ) : null}
-
-      {isLoading && previewUrl === null ? (
-        <p role="status" className="mt-3 text-[0.8125rem] text-muted">
-          Extrayendo colores de la imagen…
-        </p>
-      ) : null}
-
-      {previewUrl !== null ? (
-        <ImageUploadPreview
-          previewUrl={previewUrl}
-          fileName={fileName}
-          isLoading={isLoading}
-          onRegenerate={handleRegenerate}
-        />
-      ) : null}
     </section>
   );
 }

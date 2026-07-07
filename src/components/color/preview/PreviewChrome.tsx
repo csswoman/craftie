@@ -1,5 +1,3 @@
-import type { ThemeId } from '@lib/color/themePalette';
-
 export function PreviewContrastWarnings({ warnings }: { warnings: string[] }) {
   return (
     <div
@@ -12,43 +10,6 @@ export function PreviewContrastWarnings({ warnings }: { warnings: string[] }) {
           <li key={warning}>{warning}</li>
         ))}
       </ul>
-    </div>
-  );
-}
-
-export function PreviewThemeToggle({
-  activeTheme,
-  onChange,
-}: {
-  activeTheme: ThemeId;
-  onChange: (theme: ThemeId) => void;
-}) {
-  const options: Array<{ id: ThemeId; label: string }> = [
-    { id: 'light', label: 'Claro' },
-    { id: 'dark', label: 'Oscuro' },
-  ];
-
-  return (
-    <div className="flex w-full items-center justify-center" role="group" aria-label="Tema de vista previa">
-      <div className="inline-flex rounded-lg border border-border bg-surface p-0.5 shadow-sm">
-        {options.map((option) => {
-          const isActive = option.id === activeTheme;
-
-          return (
-            <button
-              key={option.id}
-              type="button"
-              aria-pressed={isActive}
-              onClick={() => onChange(option.id)}
-              className={`rounded-md px-3 py-1.5 text-[0.8125rem] font-semibold transition-colors ${
-                isActive ? 'bg-primary text-white shadow-sm' : 'text-muted hover:text-ink'
-              }`}
-            >
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
     </div>
   );
 }

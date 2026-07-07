@@ -1,7 +1,6 @@
 'use client';
 
 import { DESIGN_STYLES } from '@lib/styles/presets';
-import type { ComponentProps } from 'react';
 
 import { InspirationModal } from '@/components/color/InspirationModal';
 import { SelectColorsWorkspaceMain } from '@/components/color/SelectColorsWorkspaceMain';
@@ -11,7 +10,6 @@ import { useSelectColorsWorkspaceController } from '@/components/color/useSelect
 import { ImageUploader } from '@/components/color-engine/ImageUploader';
 import { StyleGallery } from '@/components/color-engine/StyleGallery';
 import { StudioCanvas } from '@/components/layout/StudioCanvas';
-import { StudioFlowGuide } from '@/components/layout/StudioFlowGuide';
 import { StudioStatusBar } from '@/components/layout/StudioStatusBar';
 import { WorkspaceHeader } from '@/components/layout/WorkspaceHeader';
 import { RolePaletteProvider } from '@/context/RolePaletteContext';
@@ -27,66 +25,28 @@ export function SelectColorsWorkspace() {
 function SelectColorsWorkspaceContent() {
   const workspace = useSelectColorsWorkspaceController();
   const hasInspirationSource = workspace.catalogSource !== 'none';
+  const inspirationModal = (
+    <InspirationModal
+      open={workspace.inspirationModalOpen && !workspace.isReviewPhase}
+      onClose={() => workspace.setInspirationModalOpen(false)}
+    >
+      <StyleGallery
+        styles={DESIGN_STYLES}
+        selectedStyleId={workspace.selectedStyleId}
+        onSelectStyle={workspace.handleSelectStyle}
+        variant="embedded"
+        showHeader={false}
+      />
+    </InspirationModal>
+  );
 
-  if (!hasInspirationSource) {
-    return (
-      <div className="flex h-dvh flex-col overflow-hidden">
-        <div aria-live="polite" aria-atomic="true" className="sr-only">
-          {workspace.statusMessage}
-        </div>
-
-        <WorkspaceHeader
-          activeView={workspace.studioView}
-          onViewChange={workspace.setStudioView}
-          canExport={workspace.isReviewPhase}
-          onExportDesignMd={workspace.handleExportDesignMd}
-          onExportBrandKit={workspace.handleExportBrandKit}
-          shortcutsRef={workspace.shortcutsRef}
-        />
-
-        {workspace.error ? (
-          <p
-            role="alert"
-            className="mx-4 mt-0 border-b border-fail/20 bg-fail/5 px-3 py-2 text-[0.8125rem] font-medium text-fail lg:mx-5"
-          >
-            {workspace.error}
-          </p>
-        ) : null}
-
-        <div className="flex min-h-0 flex-1 items-center justify-center p-4 lg:p-6">
-          <EmptyWorkspaceCard
-            onImageExtractionStart={workspace.handleImageExtractionStart}
-            onImageRegenerateStart={workspace.handleImageRegenerateStart}
-            onImagePaletteExtracted={workspace.handleImagePaletteExtracted}
-            onImageExtractionError={workspace.handleImageExtractionError}
-          />
-        </div>
-
-        <InspirationModal
-          open={workspace.inspirationModalOpen && !workspace.isReviewPhase}
-          onClose={() => workspace.setInspirationModalOpen(false)}
-        >
-          <StyleGallery
-            styles={DESIGN_STYLES}
-            selectedStyleId={workspace.selectedStyleId}
-            onSelectStyle={workspace.handleSelectStyle}
-            variant="embedded"
-            showHeader={false}
-          />
-        </InspirationModal>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex h-dvh flex-col overflow-hidden">
+  const sharedChrome = (
+    <>
       <div aria-live="polite" aria-atomic="true" className="sr-only">
         {workspace.statusMessage}
       </div>
 
       <WorkspaceHeader
-        activeView={workspace.studioView}
-        onViewChange={workspace.setStudioView}
         canExport={workspace.isReviewPhase}
         onExportDesignMd={workspace.handleExportDesignMd}
         onExportBrandKit={workspace.handleExportBrandKit}
@@ -101,64 +61,74 @@ function SelectColorsWorkspaceContent() {
           {workspace.error}
         </p>
       ) : null}
+    </>
+  );
 
-      <StudioFlowGuide
-        hasGeneratedPalette={workspace.isReviewPhase}
-        hasSelection={workspace.rolePalette !== null}
-        selectionReady={workspace.selectionReady}
-        onStepFocus={workspace.handleFlowStepFocus}
-      />
+  if (!hasInspirationSource) {
+    return (
+      <div className="canvas-dots flex h-dvh flex-col overflow-hidden">
+        {sharedChrome}
+
+        <div className="flex min-h-0 flex-1 items-center justify-center p-4 lg:p-6">
+          <EmptyWorkspaceCard
+            fileName={workspace.imageFileName}
+            hasPreview={workspace.imagePreviewUrl !== null}
+            imagePreviewUrl={workspace.imagePreviewUrl}
+            isImageBusy={workspace.isImageBusy}
+            onImageFileSelected={workspace.handleImageFileSelected}
+            onImageRegenerate={workspace.handleImageRegenerate}
+          />
+        </div>
+
+        {inspirationModal}
+      </div>
+    );
+  }
+
+  return (
+    <div className="canvas-dots flex h-dvh flex-col overflow-hidden">
+      {sharedChrome}
 
       <StudioCanvas
         showRightPanel
         rightPanelOpen={workspace.rightPanelOpen}
-        syncRightPanelWithActiveRole={!workspace.isReviewPhase}
+        syncRightPanelWithActiveRole={false}
         onRightPanelCollapsedChange={workspace.setRightPanelCollapsed}
         sidebar={
           <SelectColorsWorkspaceSidebar
-            generatedPalette={workspace.generatedPalette}
+            catalogSource={workspace.catalogSource}
+            fileName={workspace.imageFileName}
+            hasPreview={workspace.imagePreviewUrl !== null}
             isReviewPhase={workspace.isReviewPhase}
+            isImageBusy={workspace.isImageBusy}
+            imagePreviewUrl={workspace.imagePreviewUrl}
             recommendedPairings={workspace.recommendedPairings}
             rolePaletteAvailable={workspace.rolePalette !== null}
             selectedPairing={workspace.selectedPairing}
-            onAddColorByHex={workspace.handleAddColorByHex}
-            onEditSelection={() => workspace.handleFlowStepFocus('adjust')}
-            onImageExtractionError={workspace.handleImageExtractionError}
-            onImageExtractionStart={workspace.handleImageExtractionStart}
-            onImagePaletteExtracted={workspace.handleImagePaletteExtracted}
-            onImageRegenerateStart={workspace.handleImageRegenerateStart}
+            onImageFileSelected={workspace.handleImageFileSelected}
+            onImageRegenerate={workspace.handleImageRegenerate}
             onOpenInspiration={() => workspace.setInspirationModalOpen(true)}
-            onReplacePreviewColor={workspace.handleReplacePreviewColor}
             onSelectPairing={workspace.setSelectedPairing}
           />
         }
         main={
           <SelectColorsWorkspaceMain
-            generatedPalette={workspace.generatedPalette}
-            studioView={workspace.studioView}
             isImageExtracting={workspace.isImageExtracting}
             isImageRegenerating={workspace.isImageRegenerating}
-            selectedPairing={workspace.selectedPairing}
             onAddColorByHex={workspace.handleAddColorByHex}
           />
         }
         rightPanel={
           <SelectColorsWorkspaceRightPanel
             catalogSource={workspace.catalogSource}
-            generatedPalette={workspace.generatedPalette}
-            inspectorSection={workspace.inspectorSection}
             isGenerating={workspace.isGenerating}
             isImageExtracting={workspace.isImageExtracting}
             isImageRegenerating={workspace.isImageRegenerating}
-            isReviewPhase={workspace.isReviewPhase}
             paletteCatalog={workspace.paletteCatalog}
             rightPanelCollapsed={workspace.rightPanelCollapsed}
-            selectedPairing={workspace.selectedPairing}
             onAddColorByHex={workspace.handleAddColorByHex}
             onGenerate={workspace.handleGenerate}
             onRenameColor={workspace.handleRenameColor}
-            onReplacePreviewColor={workspace.handleReplacePreviewColor}
-            onSectionChange={workspace.setInspectorSection}
           />
         }
       />
@@ -176,45 +146,36 @@ function SelectColorsWorkspaceContent() {
 
       <StudioStatusBar palette={workspace.generatedPalette} pairing={workspace.selectedPairing} />
 
-      <InspirationModal
-        open={workspace.inspirationModalOpen && !workspace.isReviewPhase}
-        onClose={() => workspace.setInspirationModalOpen(false)}
-      >
-        <StyleGallery
-          styles={DESIGN_STYLES}
-          selectedStyleId={workspace.selectedStyleId}
-          onSelectStyle={workspace.handleSelectStyle}
-          variant="embedded"
-          showHeader={false}
-        />
-      </InspirationModal>
+      {inspirationModal}
     </div>
   );
 }
 
-type ImagePaletteExtractedHandler = NonNullable<
-  ComponentProps<typeof ImageUploader>['onPaletteExtracted']
->;
-
 function EmptyWorkspaceCard({
-  onImageExtractionStart,
-  onImageRegenerateStart,
-  onImagePaletteExtracted,
-  onImageExtractionError,
+  fileName,
+  hasPreview,
+  imagePreviewUrl,
+  isImageBusy,
+  onImageFileSelected,
+  onImageRegenerate,
 }: {
-  onImageExtractionStart: () => void;
-  onImageRegenerateStart: () => void;
-  onImagePaletteExtracted: ImagePaletteExtractedHandler;
-  onImageExtractionError: (message: string) => void;
+  fileName: string | null;
+  hasPreview: boolean;
+  imagePreviewUrl: string | null;
+  isImageBusy: boolean;
+  onImageFileSelected: (file: File) => void;
+  onImageRegenerate: () => void;
 }) {
   return (
     <section className="w-full max-w-xl rounded-xl border border-border bg-surface p-4 shadow-sm">
       <div className="mx-auto max-w-md">
         <ImageUploader
-          onExtractionStart={onImageExtractionStart}
-          onRegenerateStart={onImageRegenerateStart}
-          onPaletteExtracted={onImagePaletteExtracted}
-          onExtractionError={onImageExtractionError}
+          fileName={fileName}
+          hasPreview={hasPreview}
+          isLoading={isImageBusy}
+          previewUrl={imagePreviewUrl}
+          onFileSelected={onImageFileSelected}
+          onRegenerate={onImageRegenerate}
           variant="embedded"
           showHeader={false}
         />
