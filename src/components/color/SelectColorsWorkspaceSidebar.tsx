@@ -1,6 +1,7 @@
 import type { SelectableColor } from '@lib/color/selectableColors';
 
 import { ImageUploader } from '@/components/color-engine/ImageUploader';
+import { PaletteAdjustmentsSection } from '@/components/color/PaletteAdjustmentsSection';
 import { SourceColorsSection } from '@/components/color/SourceColorsSection';
 import { StudioToolsPanel } from '@/components/color/StudioToolsPanel';
 import { Button } from '@/components/ui/Button';
@@ -46,6 +47,7 @@ export function SelectColorsWorkspaceSidebar({
               showChangeImageControl={hasPreview}
             />
             <SourceColorsSection colors={paletteCatalog} />
+            <PaletteAdjustmentsSection />
           </>
         ) : (
           <>
@@ -72,6 +74,7 @@ export function SelectColorsWorkspaceSidebar({
               </Button>
             ) : null}
             <SourceColorsSection colors={paletteCatalog} />
+            <PaletteAdjustmentsSection />
           </>
         )}
       </StudioToolsPanel>

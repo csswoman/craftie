@@ -23,7 +23,9 @@ import type { ExtractedColor } from '@lib/color/imageExtractor';
 import { normalizeHex } from '@lib/color/normalizeHex';
 import { tokenNameForPaletteRole } from '@lib/color/semanticRoleProjection';
 import {
+  DEFAULT_NEUTRAL_STYLE,
   deriveSemanticTokens,
+  type NeutralStyle,
   type SemanticTokenName,
   type SemanticTokenOverrides,
   type SemanticTokens,
@@ -52,6 +54,7 @@ export type RolePaletteContextValue = {
   savedVibrancy: number;
   previewVibrancy: number;
   hasUnsavedVibrancy: boolean;
+  neutralStyle: NeutralStyle;
   activeTheme: ThemeId;
   themes: ThemesConfig;
   lockedRoles: PaletteRoleId[];
@@ -62,6 +65,7 @@ export type RolePaletteContextValue = {
   assignFromExtracted: (extracted: ExtractedColor[]) => void;
   setPreviewVibrancy: (value: number) => void;
   saveVibrancy: () => void;
+  setNeutralStyle: (style: NeutralStyle) => void;
   setActiveTheme: (theme: ThemeId) => void;
   setActiveRole: (role: PaletteRoleId | null) => void;
   replaceRole: (role: PaletteRoleId, hex: string) => void;
@@ -85,6 +89,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   const [activeTheme, setActiveTheme] = useState<ThemeId>('light');
   const [savedVibrancy, setSavedVibrancy] = useState(VIBRANCY_MID);
   const [previewVibrancy, setPreviewVibrancyState] = useState(VIBRANCY_MID);
+  const [neutralStyle, setNeutralStyle] = useState<NeutralStyle>(DEFAULT_NEUTRAL_STYLE);
   const [lockedRolesByTheme, setLockedRolesByTheme] =
     useState<Record<ThemeId, PaletteRoleId[]>>(EMPTY_LOCKED_BY_THEME);
   const [activeRole, setActiveRole] = useState<PaletteRoleId | null>(null);
@@ -100,9 +105,10 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       extracted: extractedColors,
       overrides: tokenOverrides,
       theme: activeTheme,
+      neutralStyle,
       vibrancy: savedVibrancy,
     });
-  }, [activeTheme, extractedColors, savedVibrancy, tokenOverrides]);
+  }, [activeTheme, extractedColors, neutralStyle, savedVibrancy, tokenOverrides]);
 
   const previewSemanticTokens = useMemo(() => {
     if (extractedColors.length === 0) {
@@ -113,9 +119,10 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       extracted: extractedColors,
       overrides: tokenOverrides,
       theme: activeTheme,
+      neutralStyle,
       vibrancy: previewVibrancy,
     });
-  }, [activeTheme, extractedColors, previewVibrancy, tokenOverrides]);
+  }, [activeTheme, extractedColors, neutralStyle, previewVibrancy, tokenOverrides]);
 
   const rolePalette = useMemo(
     () => (semanticTokens ? projectSemanticTokensToRolePalette(semanticTokens, roleNames) : null),
@@ -153,6 +160,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
         setLockedRolesByTheme(EMPTY_LOCKED_BY_THEME);
         setSavedVibrancy(VIBRANCY_MID);
         setPreviewVibrancyState(VIBRANCY_MID);
+        setNeutralStyle(DEFAULT_NEUTRAL_STYLE);
         return;
       }
 
@@ -165,6 +173,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       setTokenOverrides(rolePaletteAsSemanticOverrides(palette));
       setSavedVibrancy(VIBRANCY_MID);
       setPreviewVibrancyState(VIBRANCY_MID);
+      setNeutralStyle(DEFAULT_NEUTRAL_STYLE);
     },
     [],
   );
@@ -176,6 +185,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
     setLockedRolesByTheme(EMPTY_LOCKED_BY_THEME);
     setSavedVibrancy(VIBRANCY_MID);
     setPreviewVibrancyState(VIBRANCY_MID);
+    setNeutralStyle(DEFAULT_NEUTRAL_STYLE);
     setActiveRole(null);
   }, []);
 
@@ -259,6 +269,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
     setActiveTheme('light');
     setSavedVibrancy(VIBRANCY_MID);
     setPreviewVibrancyState(VIBRANCY_MID);
+    setNeutralStyle(DEFAULT_NEUTRAL_STYLE);
     setActiveRole(null);
   }, []);
 
@@ -279,6 +290,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       );
       setSavedVibrancy(VIBRANCY_MID);
       setPreviewVibrancyState(VIBRANCY_MID);
+      setNeutralStyle(DEFAULT_NEUTRAL_STYLE);
     },
     [],
   );
@@ -295,6 +307,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       savedVibrancy,
       previewVibrancy,
       hasUnsavedVibrancy,
+      neutralStyle,
       activeTheme,
       themes,
       lockedRoles,
@@ -305,6 +318,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       assignFromExtracted,
       setPreviewVibrancy,
       saveVibrancy,
+      setNeutralStyle,
       setActiveTheme,
       setActiveRole,
       replaceRole,
@@ -323,6 +337,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       savedVibrancy,
       previewVibrancy,
       hasUnsavedVibrancy,
+      neutralStyle,
       activeTheme,
       themes,
       lockedRoles,
@@ -333,6 +348,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       assignFromExtracted,
       setPreviewVibrancy,
       saveVibrancy,
+      setNeutralStyle,
       replaceRole,
       replaceSemanticToken,
       renameRole,

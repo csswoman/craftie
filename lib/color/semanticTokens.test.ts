@@ -421,6 +421,32 @@ describe('deriveSemanticTokens', () => {
     }
   });
 
+  it('applies vibrancy to both light and dark theme branches', () => {
+    for (const theme of ['light', 'dark'] as const) {
+      const midpoint = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, theme, vibrancy: 50 });
+      const bright = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, theme, vibrancy: 100 });
+
+      expect(bright.primary.hex).not.toBe(midpoint.primary.hex);
+      expect(bright.secondary.hex).not.toBe(midpoint.secondary.hex);
+      expect(bright.accent.hex).not.toBe(midpoint.accent.hex);
+      expect(contrastRatio(bright['on-primary'].hex, bright.primary.hex)).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(bright['on-secondary'].hex, bright.secondary.hex)).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(bright['on-accent'].hex, bright.accent.hex)).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it('applies neutralStyle to both light and dark theme branches', () => {
+    for (const theme of ['light', 'dark'] as const) {
+      const pure = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, theme, neutralStyle: 'pure' });
+      const tinted = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, theme, neutralStyle: 'tinted' });
+
+      expect(tinted.background.hex).not.toBe(pure.background.hex);
+      expect(tinted.surface.hex).not.toBe(pure.surface.hex);
+      expect(tinted.border.hex).not.toBe(pure.border.hex);
+      expect(tinted.divider.hex).not.toBe(pure.divider.hex);
+    }
+  });
+
   it('leaves structural neutral tokens byte-for-byte unchanged across vibrancy extremes', () => {
     const pastel = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, vibrancy: 0 });
     const bright = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, vibrancy: 100 });

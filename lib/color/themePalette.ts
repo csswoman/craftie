@@ -1,18 +1,17 @@
 import { converter } from 'culori';
 
-import { adjustLightnessForContrast, contrastRatio } from '../utils/colorMath';
+import { contrastRatio } from '../utils/colorMath';
 import { deriveFondo } from '../utils/deriveRoles';
 import { normalizeHex } from './normalizeHex';
 import {
-  buildBasePalette,
   buildPaletteFromSeeds,
   finalizeRolePalette,
   PALETTE_ROLE_ORDER,
   recomputeDerivedRoles,
-  type ColorSource,
   type PaletteRoleId,
   type PaletteSeeds,
   type RolePalette,
+  type ColorSource,
 } from './rolePalette';
 
 export type ThemeId = 'light' | 'dark';
@@ -49,24 +48,7 @@ export function deriveTheme(
   theme: ThemeId,
   lockedRoles: PaletteRoleId[] = [],
 ): RolePalette {
-  if (theme === 'light') {
-    return buildPaletteFromSeeds(seeds, 'light', lockedRoles);
-  }
-
-  const fondo = deriveFondo(seeds.neutralHue, 'dark');
-  const primario = adjustLightnessForContrast(seeds.primario, fondo, AA_TARGET);
-  const acento = adjustLightnessForContrast(seeds.acento, fondo, AA_TARGET);
-  const base = buildBasePalette(
-    { fondo, primario, acento },
-    {
-      fondo: 'derived',
-      primario:
-        normalizeHex(primario) === normalizeHex(seeds.primario) ? 'extracted' : 'corrected',
-      acento: normalizeHex(acento) === normalizeHex(seeds.acento) ? 'extracted' : 'corrected',
-    },
-  );
-
-  return recomputeDerivedRoles(base, lockedRoles, seeds, 'dark');
+  return buildPaletteFromSeeds(seeds, theme, lockedRoles);
 }
 
 function applyThemeOverrides(
@@ -164,21 +146,6 @@ export function diffThemeOverrides(
 }
 
 /** Records the provenance of each overridden role so it survives re-derivation. */
-export function diffThemeSources(
-  target: RolePalette,
-  overrides: ThemeOverrides,
-): Partial<Record<PaletteRoleId, ColorSource>> {
-  const sources: Partial<Record<PaletteRoleId, ColorSource>> = {};
-
-  for (const role of PALETTE_ROLE_ORDER) {
-    if (overrides[role]) {
-      sources[role] = target[role].source;
-    }
-  }
-
-  return sources;
-}
-
 export function diffThemeNames(
   base: RolePalette,
   target: RolePalette,

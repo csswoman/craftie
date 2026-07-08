@@ -29,7 +29,6 @@ import {
   SemanticTokenColorPopover,
   type SemanticTokenPopoverAnchor,
 } from '@/components/color/SemanticTokenColorPopover';
-import { VibrancyCalibrator } from '@/components/color/VibrancyCalibrator';
 
 export type PreviewViewProps = {
   onEditRole?: (role: PaletteRoleId, element: HTMLElement) => void;
@@ -78,7 +77,6 @@ export function PreviewView({ onEditRole }: PreviewViewProps) {
         {family.id === 'ui' ? (
           <LayoutModeSwitcher activeMode={activeMode} modes={family.modes} onChange={setActiveMode} />
         ) : null}
-        <VibrancyCalibrator />
         <ActiveLayoutPreview mode={activeMode} colors={colors} onEditSlot={handleEditSlot} />
       </div>
       <SemanticTokenColorPopover anchor={tokenPopover} onClose={() => setTokenPopover(null)} />
@@ -93,6 +91,12 @@ function PreviewFamilySwitcher({
   activeFamily: PreviewFamilyId;
   onChange: (family: PreviewFamilyId) => void;
 }) {
+  const selectableFamilies = PREVIEW_FAMILIES.filter((family) => family.modes.length > 0);
+
+  if (selectableFamilies.length <= 1) {
+    return null;
+  }
+
   return (
     <div
       role="tablist"
