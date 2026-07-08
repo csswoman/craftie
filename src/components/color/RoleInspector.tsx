@@ -9,7 +9,7 @@ import { RoleLockToggle } from './RoleColorEditorControls';
 import { useRoleColorEditor } from './useRoleColorEditor';
 
 export function RoleInspector() {
-  const { rolePalette, activeRole } = useRolePalette();
+  const { rolePalette, activeRole, setActiveRole } = useRolePalette();
 
   if (!rolePalette) {
     return null;
@@ -19,10 +19,10 @@ export function RoleInspector() {
     return <RoleInspectorEmpty />;
   }
 
-  return <RoleInspectorPanel role={activeRole} />;
+  return <RoleInspectorPanel role={activeRole} onClose={() => setActiveRole(null)} />;
 }
 
-function RoleInspectorPanel({ role }: { role: PaletteRoleId }) {
+function RoleInspectorPanel({ role, onClose }: { role: PaletteRoleId; onClose: () => void }) {
   const editor = useRoleColorEditor(role);
 
   if (!editor.ready || !editor.slot) {
@@ -32,7 +32,10 @@ function RoleInspectorPanel({ role }: { role: PaletteRoleId }) {
   const swatchName = editor.slot.name;
 
   return (
-    <section className="rounded-2xl border border-border bg-surface px-4 py-4" aria-label={`Inspector del rol ${ROLE_LABELS[role]}`}>
+    <section
+      className="rounded-2xl border border-border bg-surface px-4 py-4"
+      aria-label={`Inspector del rol ${ROLE_LABELS[role]}`}
+    >
       <header className="flex items-start justify-between gap-3 border-b border-border/70 pb-4">
         <div className="min-w-0">
           <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-muted">
@@ -40,7 +43,16 @@ function RoleInspectorPanel({ role }: { role: PaletteRoleId }) {
           </p>
           <p className="mt-1 truncate text-[0.875rem] text-muted">{swatchName} · {ROLE_LABELS[role]}</p>
         </div>
-        <RoleLockToggle locked={editor.locked} onToggle={editor.toggleLock} />
+        <div className="flex items-center gap-2">
+          <RoleLockToggle locked={editor.locked} onToggle={editor.toggleLock} />
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-8 items-center rounded-md border border-border px-2.5 text-[0.75rem] font-semibold text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+          >
+            Cerrar
+          </button>
+        </div>
       </header>
 
       <div className="pt-4">
@@ -68,11 +80,7 @@ function RoleInspectorEmpty() {
   return (
     <section className="rounded-2xl border border-dashed border-border bg-surface/60 px-4 py-4">
       <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-muted">Inspector</p>
-      <p className="mt-2 text-[0.875rem] font-medium text-ink">Ningún rol seleccionado</p>
-      <p className="mt-1 text-[0.75rem] leading-relaxed text-muted">
-        Elige un rol en las pastillas, en la banda central o en la vista previa para editar su color
-        aquí. También puedes hacer doble clic en una banda o elemento de la vista previa.
-      </p>
+      <p className="mt-2 text-[0.875rem] font-medium text-ink">Selecciona un rol para editarlo.</p>
     </section>
   );
 }

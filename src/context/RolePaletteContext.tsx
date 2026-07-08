@@ -12,22 +12,29 @@ import {
 import {
   assignRolesFromHexes,
   extractSeedsFromPalette,
-  mergeRolePalettePreservingLocks,
+  rolePaletteAsSemanticOverrides,
   renameRoleSlot,
   validateRolePalette,
   type PaletteRoleId,
   type PaletteSeeds,
   type RolePalette,
 } from '@lib/color/rolePalette';
+import type { ExtractedColor } from '@lib/color/imageExtractor';
 import { normalizeHex } from '@lib/color/normalizeHex';
+import { tokenNameForPaletteRole } from '@lib/color/semanticRoleProjection';
 import {
-  diffThemeNames,
-  diffThemeOverrides,
+  deriveSemanticTokens,
+  type SemanticTokenName,
+  type SemanticTokenOverrides,
+  type SemanticTokens,
+} from '@lib/color/semanticTokens';
+import { projectSemanticTokensToRolePalette } from '@lib/color/semanticRoleProjection';
+import {
   EMPTY_THEMES,
-  resolveThemePalette,
   type ThemeId,
   type ThemesConfig,
 } from '@lib/color/themePalette';
+import { VIBRANCY_MID, normalizeVibrancy } from '@lib/color/vibrancy';
 
 export type { ThemeId, ThemesConfig };
 
@@ -38,7 +45,13 @@ const EMPTY_LOCKED_BY_THEME: Record<ThemeId, PaletteRoleId[]> = {
 
 export type RolePaletteContextValue = {
   rolePalette: RolePalette | null;
+  semanticTokens: SemanticTokens | null;
+  previewRolePalette: RolePalette | null;
+  previewSemanticTokens: SemanticTokens | null;
   seeds: PaletteSeeds | null;
+  savedVibrancy: number;
+  previewVibrancy: number;
+  hasUnsavedVibrancy: boolean;
   activeTheme: ThemeId;
   themes: ThemesConfig;
   lockedRoles: PaletteRoleId[];
@@ -46,9 +59,13 @@ export type RolePaletteContextValue = {
   activeRole: PaletteRoleId | null;
   selectionReady: boolean;
   setRolePalette: (palette: RolePalette | null) => void;
+  assignFromExtracted: (extracted: ExtractedColor[]) => void;
+  setPreviewVibrancy: (value: number) => void;
+  saveVibrancy: () => void;
   setActiveTheme: (theme: ThemeId) => void;
   setActiveRole: (role: PaletteRoleId | null) => void;
   replaceRole: (role: PaletteRoleId, hex: string) => void;
+  replaceSemanticToken: (tokenName: SemanticTokenName, hex: string) => void;
   renameRole: (role: PaletteRoleId, name: string) => boolean;
   toggleLock: (role: PaletteRoleId) => void;
   clearRolePalette: () => void;
@@ -61,82 +78,136 @@ type RolePaletteProviderProps = {
 
 const RolePaletteContext = createContext<RolePaletteContextValue | null>(null);
 
-function isGlobalSeedRole(role: PaletteRoleId): boolean {
-  return role === 'primario' || role === 'acento';
-}
-
 export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
-  const [seeds, setSeeds] = useState<PaletteSeeds | null>(null);
-  const [themes, setThemes] = useState<ThemesConfig>(EMPTY_THEMES);
+  const [extractedColors, setExtractedColors] = useState<ExtractedColor[]>([]);
+  const [tokenOverrides, setTokenOverrides] = useState<SemanticTokenOverrides>({});
+  const [roleNames, setRoleNames] = useState<Partial<Record<PaletteRoleId, string>>>({});
   const [activeTheme, setActiveTheme] = useState<ThemeId>('light');
+  const [savedVibrancy, setSavedVibrancy] = useState(VIBRANCY_MID);
+  const [previewVibrancy, setPreviewVibrancyState] = useState(VIBRANCY_MID);
   const [lockedRolesByTheme, setLockedRolesByTheme] =
     useState<Record<ThemeId, PaletteRoleId[]>>(EMPTY_LOCKED_BY_THEME);
   const [activeRole, setActiveRole] = useState<PaletteRoleId | null>(null);
 
   const lockedRoles = lockedRolesByTheme[activeTheme];
 
+  const semanticTokens = useMemo(() => {
+    if (extractedColors.length === 0) {
+      return null;
+    }
+
+    return deriveSemanticTokens({
+      extracted: extractedColors,
+      overrides: tokenOverrides,
+      theme: activeTheme,
+      vibrancy: savedVibrancy,
+    });
+  }, [activeTheme, extractedColors, savedVibrancy, tokenOverrides]);
+
+  const previewSemanticTokens = useMemo(() => {
+    if (extractedColors.length === 0) {
+      return null;
+    }
+
+    return deriveSemanticTokens({
+      extracted: extractedColors,
+      overrides: tokenOverrides,
+      theme: activeTheme,
+      vibrancy: previewVibrancy,
+    });
+  }, [activeTheme, extractedColors, previewVibrancy, tokenOverrides]);
+
   const rolePalette = useMemo(
-    () => resolveThemePalette(seeds, activeTheme, themes, lockedRoles),
-    [seeds, activeTheme, themes, lockedRoles],
+    () => (semanticTokens ? projectSemanticTokensToRolePalette(semanticTokens, roleNames) : null),
+    [roleNames, semanticTokens],
+  );
+  const previewRolePalette = useMemo(
+    () =>
+      previewSemanticTokens
+        ? projectSemanticTokensToRolePalette(previewSemanticTokens, roleNames)
+        : null,
+    [previewSemanticTokens, roleNames],
   );
 
-  const syncThemeFromPalette = useCallback(
-    (palette: RolePalette, theme: ThemeId, themeLocks: PaletteRoleId[]) => {
-      const nextSeeds = extractSeedsFromPalette(palette);
-      const derivedBase = resolveThemePalette(nextSeeds, theme, EMPTY_THEMES, themeLocks);
+  const seeds = useMemo<PaletteSeeds | null>(
+    () =>
+      rolePalette
+        ? {
+            ...extractSeedsFromPalette(rolePalette),
+            extracted: extractedColors,
+            vibrancy: savedVibrancy,
+          }
+        : null,
+    [extractedColors, rolePalette, savedVibrancy],
+  );
 
-      if (!derivedBase) {
+  const themes = useMemo<ThemesConfig>(() => EMPTY_THEMES, []);
+  const hasUnsavedVibrancy = previewVibrancy !== savedVibrancy;
+
+  const setRolePalette = useCallback(
+    (palette: RolePalette | null) => {
+      if (palette === null) {
+        setExtractedColors([]);
+        setTokenOverrides({});
+        setRoleNames({});
+        setLockedRolesByTheme(EMPTY_LOCKED_BY_THEME);
+        setSavedVibrancy(VIBRANCY_MID);
+        setPreviewVibrancyState(VIBRANCY_MID);
         return;
       }
 
-      setSeeds(nextSeeds);
-      setThemes((current) => ({
+      setExtractedColors(
+        Object.values(palette).map((slot, index) => ({
+          hex: slot.hex,
+          prominence: 1 - index * 0.05,
+        })),
+      );
+      setTokenOverrides(rolePaletteAsSemanticOverrides(palette));
+      setSavedVibrancy(VIBRANCY_MID);
+      setPreviewVibrancyState(VIBRANCY_MID);
+    },
+    [],
+  );
+
+  const assignFromExtracted = useCallback((extracted: ExtractedColor[]) => {
+    setExtractedColors(extracted);
+    setTokenOverrides({});
+    setRoleNames({});
+    setLockedRolesByTheme(EMPTY_LOCKED_BY_THEME);
+    setSavedVibrancy(VIBRANCY_MID);
+    setPreviewVibrancyState(VIBRANCY_MID);
+    setActiveRole(null);
+  }, []);
+
+  const setPreviewVibrancy = useCallback((value: number) => {
+    setPreviewVibrancyState(normalizeVibrancy(value));
+  }, []);
+
+  const saveVibrancy = useCallback(() => {
+    setSavedVibrancy(previewVibrancy);
+  }, [previewVibrancy]);
+
+  const replaceRole = useCallback(
+    (role: PaletteRoleId, hex: string) => {
+      const normalized = normalizeHex(hex);
+      const tokenName = tokenNameForPaletteRole(role);
+
+      setTokenOverrides((current) => ({
         ...current,
-        [theme]: {
-          overrides: diffThemeOverrides(derivedBase, palette, themeLocks),
-          names: diffThemeNames(derivedBase, palette),
-        },
+        [tokenName]: normalized,
       }));
     },
     [],
   );
 
-  const setRolePalette = useCallback(
-    (palette: RolePalette | null) => {
-      if (palette === null) {
-        setSeeds(null);
-        setThemes(EMPTY_THEMES);
-        setLockedRolesByTheme(EMPTY_LOCKED_BY_THEME);
-        return;
-      }
+  const replaceSemanticToken = useCallback((tokenName: SemanticTokenName, hex: string) => {
+    const normalized = normalizeHex(hex);
 
-      syncThemeFromPalette(palette, activeTheme, lockedRolesByTheme[activeTheme]);
-    },
-    [activeTheme, lockedRolesByTheme, syncThemeFromPalette],
-  );
-
-  const replaceRole = useCallback(
-    (role: PaletteRoleId, hex: string) => {
-      const normalized = normalizeHex(hex);
-
-      if (isGlobalSeedRole(role)) {
-        setSeeds((current) => (current ? { ...current, [role]: normalized } : current));
-        return;
-      }
-
-      setThemes((current) => ({
-        ...current,
-        [activeTheme]: {
-          ...current[activeTheme],
-          overrides: {
-            ...current[activeTheme].overrides,
-            [role]: normalized,
-          },
-        },
-      }));
-    },
-    [activeTheme],
-  );
+    setTokenOverrides((current) => ({
+      ...current,
+      [tokenName]: normalized,
+    }));
+  }, []);
 
   const renameRole = useCallback(
     (role: PaletteRoleId, name: string) => {
@@ -156,20 +227,11 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
         return false;
       }
 
-      setThemes((current) => ({
-        ...current,
-        [activeTheme]: {
-          ...current[activeTheme],
-          names: {
-            ...current[activeTheme].names,
-            [role]: trimmed,
-          },
-        },
-      }));
+      setRoleNames((current) => ({ ...current, [role]: trimmed }));
 
       return true;
     },
-    [activeTheme, rolePalette],
+    [rolePalette],
   );
 
   const toggleLock = useCallback(
@@ -190,26 +252,35 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   );
 
   const clearRolePalette = useCallback(() => {
-    setSeeds(null);
-    setThemes(EMPTY_THEMES);
+    setExtractedColors([]);
+    setTokenOverrides({});
+    setRoleNames({});
     setLockedRolesByTheme(EMPTY_LOCKED_BY_THEME);
     setActiveTheme('light');
+    setSavedVibrancy(VIBRANCY_MID);
+    setPreviewVibrancyState(VIBRANCY_MID);
     setActiveRole(null);
   }, []);
 
   const assignFromHexes = useCallback(
     (hexes: string[]) => {
+      const extracted = hexes.map((hex, index) => ({
+        hex,
+        prominence: 1 - index * 0.05,
+      }));
       const assigned = assignRolesFromHexes(hexes);
-      const themeLocks = lockedRolesByTheme[activeTheme];
-      const currentResolved = resolveThemePalette(seeds, activeTheme, themes, themeLocks);
-      const merged =
-        currentResolved && themeLocks.length > 0
-          ? mergeRolePalettePreservingLocks(currentResolved, assigned, themeLocks)
-          : assigned;
 
-      syncThemeFromPalette(merged, activeTheme, themeLocks);
+      setExtractedColors(extracted);
+      setTokenOverrides({});
+      setRoleNames(
+        Object.fromEntries(
+          Object.values(assigned).map((slot) => [slot.role, slot.name]),
+        ) as Partial<Record<PaletteRoleId, string>>,
+      );
+      setSavedVibrancy(VIBRANCY_MID);
+      setPreviewVibrancyState(VIBRANCY_MID);
     },
-    [activeTheme, lockedRolesByTheme, seeds, syncThemeFromPalette, themes],
+    [],
   );
 
   const selectionReady = useMemo(() => validateRolePalette(rolePalette).ok, [rolePalette]);
@@ -217,7 +288,13 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   const value = useMemo<RolePaletteContextValue>(
     () => ({
       rolePalette,
+      semanticTokens,
+      previewRolePalette,
+      previewSemanticTokens,
       seeds,
+      savedVibrancy,
+      previewVibrancy,
+      hasUnsavedVibrancy,
       activeTheme,
       themes,
       lockedRoles,
@@ -225,9 +302,13 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       activeRole,
       selectionReady,
       setRolePalette,
+      assignFromExtracted,
+      setPreviewVibrancy,
+      saveVibrancy,
       setActiveTheme,
       setActiveRole,
       replaceRole,
+      replaceSemanticToken,
       renameRole,
       toggleLock,
       clearRolePalette,
@@ -235,7 +316,13 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
     }),
     [
       rolePalette,
+      semanticTokens,
+      previewRolePalette,
+      previewSemanticTokens,
       seeds,
+      savedVibrancy,
+      previewVibrancy,
+      hasUnsavedVibrancy,
       activeTheme,
       themes,
       lockedRoles,
@@ -243,7 +330,11 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       activeRole,
       selectionReady,
       setRolePalette,
+      assignFromExtracted,
+      setPreviewVibrancy,
+      saveVibrancy,
       replaceRole,
+      replaceSemanticToken,
       renameRole,
       toggleLock,
       clearRolePalette,

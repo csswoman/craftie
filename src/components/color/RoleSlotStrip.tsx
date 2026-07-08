@@ -165,11 +165,9 @@ export function RoleSlotStrip({
                   />
                 ) : null}
 
-                {column.contrastBadges && column.contrastBadges.length > 0 ? (
+                {!expanded && column.contrastBadges && column.contrastBadges.length > 0 ? (
                   <div
-                    className={`absolute z-10 flex max-w-[calc(100%-0.5rem)] flex-col gap-0.5 ${
-                      expanded ? 'right-7 top-1/2 -translate-y-1/2 items-end gap-2' : 'left-0.5 top-0.5'
-                    }`}
+                    className="absolute left-0.5 top-0.5 z-10 flex max-w-[calc(100%-0.75rem)] flex-col gap-1"
                   >
                     {column.contrastBadges.map((badge) => (
                       <ContrastBadge
@@ -179,14 +177,14 @@ export function RoleSlotStrip({
                         status={badge.status}
                         target="AA"
                         compact
-                        contextLabel={expanded ? undefined : badge.label}
+                        contextLabel={badge.label}
                       />
                     ))}
                   </div>
                 ) : null}
 
                 {!showShades ? (
-                  <div className={`${expanded ? 'min-w-0 pr-36 text-left' : 'w-full text-center'}`}>
+                  <div className={`${expanded ? 'min-w-0 max-w-[28rem] text-left' : 'w-full text-center'}`}>
                     <span
                       className={`block max-w-full truncate font-semibold uppercase tracking-wide opacity-80 ${
                         expanded ? 'text-[0.6875rem]' : 'px-0.5 text-[0.5625rem]'
@@ -202,6 +200,20 @@ export function RoleSlotStrip({
                         <p className="font-mono text-[0.875rem] font-semibold tracking-normal opacity-90">
                           {column.hex.toUpperCase()}
                         </p>
+                        {column.contrastBadges && column.contrastBadges.length > 0 ? (
+                          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                            {column.contrastBadges.map((badge) => (
+                              <ContrastBadge
+                                key={badge.label}
+                                ratio={badge.ratio}
+                                level={badge.level}
+                                status={badge.status}
+                                target="AA"
+                                compact
+                              />
+                            ))}
+                          </div>
+                        ) : null}
                       </>
                     ) : null}
                   </div>

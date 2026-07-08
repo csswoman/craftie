@@ -9,6 +9,7 @@ import {
   finalizeRolePalette,
   PALETTE_ROLE_ORDER,
   recomputeDerivedRoles,
+  type ColorSource,
   type PaletteRoleId,
   type PaletteSeeds,
   type RolePalette,
@@ -21,6 +22,8 @@ export type ThemeOverrides = Partial<Record<PaletteRoleId, string>>;
 export type ThemeConfig = {
   overrides: ThemeOverrides;
   names?: Partial<Record<PaletteRoleId, string>>;
+  /** Real provenance of each override (extracted vs corrected). Defaults to extracted. */
+  sources?: Partial<Record<PaletteRoleId, ColorSource>>;
 };
 
 export type ThemesConfig = Record<ThemeId, ThemeConfig>;
@@ -55,7 +58,12 @@ export function deriveTheme(
   const acento = adjustLightnessForContrast(seeds.acento, fondo, AA_TARGET);
   const base = buildBasePalette(
     { fondo, primario, acento },
-    { fondo: 'derived', primario: 'derived', acento: 'derived' },
+    {
+      fondo: 'derived',
+      primario:
+        normalizeHex(primario) === normalizeHex(seeds.primario) ? 'extracted' : 'corrected',
+      acento: normalizeHex(acento) === normalizeHex(seeds.acento) ? 'extracted' : 'corrected',
+    },
   );
 
   return recomputeDerivedRoles(base, lockedRoles, seeds, 'dark');
@@ -84,7 +92,7 @@ function applyThemeOverrides(
         [role]: {
           ...next[role],
           hex: normalizeHex(overrideHex),
-          source: 'extracted',
+          source: config.sources?.[role] ?? 'extracted',
         },
       };
     }
@@ -106,7 +114,13 @@ function applyThemeOverrides(
   const primarioOverridden = config.overrides.primario && !locked.has('primario');
 
   if (fondoOverridden || primarioOverridden) {
-    next = recomputeDerivedRoles(next, lockedRoles, seeds, theme);
+    // When fondo itself is overridden, recompute around it instead of the seed hue.
+    next = recomputeDerivedRoles(
+      next,
+      lockedRoles,
+      fondoOverridden ? undefined : seeds,
+      theme,
+    );
   }
 
   return finalizeRolePalette(next);
@@ -147,6 +161,22 @@ export function diffThemeOverrides(
   }
 
   return overrides;
+}
+
+/** Records the provenance of each overridden role so it survives re-derivation. */
+export function diffThemeSources(
+  target: RolePalette,
+  overrides: ThemeOverrides,
+): Partial<Record<PaletteRoleId, ColorSource>> {
+  const sources: Partial<Record<PaletteRoleId, ColorSource>> = {};
+
+  for (const role of PALETTE_ROLE_ORDER) {
+    if (overrides[role]) {
+      sources[role] = target[role].source;
+    }
+  }
+
+  return sources;
 }
 
 export function diffThemeNames(

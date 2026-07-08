@@ -36,4 +36,15 @@ describe('previewTokens', () => {
     expect(hasPreviewContrastFailure(tokens)).toBe(false);
     expect(tokens.supportBanner.backgroundColor).not.toBe(palette.secundario.hex);
   });
+
+  it('derives preview paint only from rolePalette slots', () => {
+    const palette = assignRolesFromHexes(['#F7F7F5', '#3366CC', '#E8D44D', '#2C3E50']);
+    const tokens = buildPreviewTokens(palette);
+
+    expect(tokens.buttons.filled.backgroundColor).toBe(palette.primario.hex);
+    expect(tokens.neutralFilled.backgroundColor).toBe(palette.texto.hex);
+    expect(tokens.neutralFilled.color).toBe(palette.fondo.hex);
+    expect(tokens.accentLink.color).toBe(tokens.readable.acentoReadableOnSuperficie);
+    expect(tokens.navbarActive.color).toBe(tokens.readable.acentoReadableOnSuperficie);
+  });
 });

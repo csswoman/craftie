@@ -11,7 +11,6 @@ export type StudioCanvasProps = {
   main: ReactNode;
   rightPanel?: ReactNode;
   showRightPanel?: boolean;
-  rightPanelOpen?: boolean;
   /** Colapsa el panel derecho al elegir un rol; lo expande al volver a asignar. */
   syncRightPanelWithActiveRole?: boolean;
   onRightPanelCollapsedChange?: (collapsed: boolean) => void;
@@ -22,7 +21,6 @@ export function StudioCanvas({
   main,
   rightPanel,
   showRightPanel = false,
-  rightPanelOpen = true,
   syncRightPanelWithActiveRole = false,
   onRightPanelCollapsedChange,
 }: StudioCanvasProps) {
@@ -32,13 +30,10 @@ export function StudioCanvas({
 
   const {
     sidebarWidth,
-    rightWidth,
     sidebarCollapsed,
     rightCollapsed,
     resizeSidebar,
-    resizeRight,
     toggleSidebarCollapsed,
-    toggleRightCollapsed,
     setRightCollapsed,
   } = useStudioPanelLayout();
 
@@ -50,11 +45,11 @@ export function StudioCanvas({
     const previous = previousActiveRole.current;
 
     if (activeRole !== null && previous === null) {
-      setRightCollapsed(true);
+      setRightCollapsed(false);
     }
 
     if (activeRole === null && previous !== null) {
-      setRightCollapsed(false);
+      setRightCollapsed(true);
     }
 
     previousActiveRole.current = activeRole;
@@ -65,11 +60,10 @@ export function StudioCanvas({
   }, [onRightPanelCollapsedChange, rightCollapsed]);
 
   const showRight = showRightPanel && rightPanel;
-  const showRightOnMobile = showRight && rightPanelOpen;
 
   return (
     <div className="canvas-dots relative flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 lg:gap-5 lg:p-6 xl:flex-row xl:gap-5">
+      <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 lg:gap-5 lg:p-6 xl:flex-row">
         {sidebarCollapsed ? (
           <aside aria-label="Herramientas" className="hidden shrink-0 xl:flex">
             <div className="panel-float flex h-full min-h-0 flex-col overflow-hidden">
@@ -110,50 +104,42 @@ export function StudioCanvas({
         <main aria-label="Vista del estudio" className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="panel-float flex min-h-0 flex-1 flex-col overflow-hidden">{main}</div>
         </main>
-
-        {showRight ? (
-          <>
-            {!rightCollapsed ? (
-              <PanelResizeHandle onResize={resizeRight} label="Redimensionar panel inspector" />
-            ) : null}
-
-            {rightCollapsed ? (
-              <aside aria-label="Inspector" className="hidden shrink-0 xl:flex">
-                <div className="panel-float flex h-full min-h-0 flex-col overflow-hidden">
-                  <PanelCollapseRail
-                    label="Expandir inspector"
-                    direction="left"
-                    onClick={toggleRightCollapsed}
-                  />
-                </div>
-              </aside>
-            ) : (
-              <aside
-                aria-label="Inspector"
-                className={`flex min-h-0 shrink-0 flex-col xl:h-full max-xl:order-last ${
-                  showRightOnMobile ? 'flex' : 'hidden xl:flex'
-                }`}
-                style={{ width: rightWidth }}
-              >
-                <div className="panel-float flex h-full max-h-[min(50vh,480px)] min-h-[200px] flex-col overflow-hidden xl:max-h-none xl:min-h-0">
-                  <PanelCollapseBar
-                    align="start"
-                    title="Inspector"
-                    subtitle="Rol activo con edición y contraste."
-                  >
-                    <PanelCollapseButton
-                      label="Comprimir inspector"
-                      direction="right"
-                      onClick={toggleRightCollapsed}
-                    />
-                  </PanelCollapseBar>
-                  <div className="min-h-0 flex-1 overflow-hidden">{rightPanel}</div>
-                </div>
-              </aside>
-            )}
-          </>
-        ) : null}
       </div>
+
+      {showRight ? (
+        <div
+          className={`absolute inset-0 z-30 transition-opacity duration-200 ${
+            rightCollapsed ? 'pointer-events-none opacity-0' : 'opacity-100'
+          }`}
+          aria-hidden={rightCollapsed}
+        >
+          <button
+            type="button"
+            aria-label="Cerrar inspector"
+            className="absolute inset-0 cursor-default bg-ink/10 backdrop-blur-[1px]"
+            onClick={() => setRightCollapsed(true)}
+          />
+          <aside
+            aria-label="Inspector"
+            className={`absolute right-4 top-4 bottom-4 flex w-[min(30rem,calc(100vw-2rem))] min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-bg shadow-[0_24px_80px_rgba(58,65,57,0.18)] transition-transform duration-200 motion-reduce:transition-none ${
+              rightCollapsed ? 'translate-x-[105%]' : 'translate-x-0'
+            }`}
+          >
+            <PanelCollapseBar
+              align="start"
+              title="Inspector"
+              subtitle="Rol activo con edición y contraste."
+            >
+              <PanelCollapseButton
+                label="Cerrar inspector"
+                direction="right"
+                onClick={() => setRightCollapsed(true)}
+              />
+            </PanelCollapseBar>
+            <div className="min-h-0 flex-1 overflow-hidden">{rightPanel}</div>
+          </aside>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { assignRolesFromHexes } from './rolePalette';
+import { contrastRatio } from '../utils/colorMath';
 import { getActiveRoleContrastInfo } from './roleInspectorContrast';
 
 describe('getActiveRoleContrastInfo', () => {
@@ -20,9 +21,8 @@ describe('getActiveRoleContrastInfo', () => {
     const primarioInfo = getActiveRoleContrastInfo(palette, 'primario');
 
     expect(primarioInfo.pairLabel).toBe('Texto legible sobre superficie');
-    expect(primarioInfo.foregroundHex).not.toBe(palette.primario.hex);
     expect(primarioInfo.backgroundHex).toBe(palette.superficie.hex);
-    expect(primarioInfo.ratio).toBeGreaterThan(0);
+    expect(contrastRatio(primarioInfo.foregroundHex, primarioInfo.backgroundHex)).toBeGreaterThanOrEqual(4.5);
   });
 
   it('recalculates when palette colors change', () => {

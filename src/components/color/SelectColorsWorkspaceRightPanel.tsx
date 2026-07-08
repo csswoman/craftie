@@ -25,14 +25,18 @@ export function SelectColorsWorkspaceRightPanel({
   onGenerate: () => void;
   onRenameColor: (color: SelectableColor, newName: string) => boolean;
 }) {
-  const { rolePalette } = useRolePalette();
+  const { rolePalette, activeRole } = useRolePalette();
 
-  if (rolePalette) {
+  if (rolePalette && activeRole !== null) {
     return (
       <div className="h-full min-h-0 overflow-y-auto p-4">
         <RoleInspector />
       </div>
     );
+  }
+
+  if (rolePalette) {
+    return null;
   }
 
   return (

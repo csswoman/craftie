@@ -1,11 +1,9 @@
-import type { FontPair } from '@lib/typography/pairings';
+import type { SelectableColor } from '@lib/color/selectableColors';
 
 import { ImageUploader } from '@/components/color-engine/ImageUploader';
-import { RoleActiveSelector } from '@/components/color/RoleActiveSelector';
+import { SourceColorsSection } from '@/components/color/SourceColorsSection';
 import { StudioToolsPanel } from '@/components/color/StudioToolsPanel';
 import { Button } from '@/components/ui/Button';
-import { PairingList } from '@/components/font-pairing/PairingList';
-import { CollapsibleSection } from '@/components/layout/CollapsibleSection';
 
 export function SelectColorsWorkspaceSidebar({
   catalogSource,
@@ -14,13 +12,10 @@ export function SelectColorsWorkspaceSidebar({
   isReviewPhase,
   isImageBusy,
   imagePreviewUrl,
-  recommendedPairings,
-  rolePaletteAvailable,
-  selectedPairing,
+  paletteCatalog,
   onImageFileSelected,
   onImageRegenerate,
   onOpenInspiration,
-  onSelectPairing,
 }: {
   catalogSource: 'none' | 'curated' | 'image';
   fileName: string | null;
@@ -28,13 +23,10 @@ export function SelectColorsWorkspaceSidebar({
   isReviewPhase: boolean;
   isImageBusy: boolean;
   imagePreviewUrl: string | null;
-  recommendedPairings: FontPair[];
-  rolePaletteAvailable: boolean;
-  selectedPairing: FontPair | null;
+  paletteCatalog: SelectableColor[];
   onImageFileSelected: (file: File) => void;
   onImageRegenerate: () => void;
   onOpenInspiration: () => void;
-  onSelectPairing: (pairing: FontPair) => void;
 }) {
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col">
@@ -50,8 +42,10 @@ export function SelectColorsWorkspaceSidebar({
               onRegenerate={onImageRegenerate}
               variant="embedded"
               showHeader={false}
+              showDropzone={!hasPreview}
+              showChangeImageControl={hasPreview}
             />
-            {rolePaletteAvailable ? <RoleActiveSelector /> : null}
+            <SourceColorsSection colors={paletteCatalog} />
           </>
         ) : (
           <>
@@ -64,9 +58,10 @@ export function SelectColorsWorkspaceSidebar({
               onRegenerate={onImageRegenerate}
               variant="embedded"
               showHeader={false}
+              showDropzone={!hasPreview}
+              showChangeImageControl={hasPreview}
             />
-            {rolePaletteAvailable ? <RoleActiveSelector /> : null}
-            {catalogSource === 'none' ? (
+            {!hasPreview && catalogSource === 'none' ? (
               <Button
                 type="button"
                 variant="ghost"
@@ -76,20 +71,10 @@ export function SelectColorsWorkspaceSidebar({
                 Elegir inspiración
               </Button>
             ) : null}
+            <SourceColorsSection colors={paletteCatalog} />
           </>
         )}
       </StudioToolsPanel>
-      {isReviewPhase ? (
-        <div className="shrink-0 border-t border-border px-4 py-3">
-          <CollapsibleSection title="Tipografía" defaultOpen={recommendedPairings.length > 0}>
-            <PairingList
-              pairings={recommendedPairings}
-              selectedPairing={selectedPairing}
-              onSelectPairing={onSelectPairing}
-            />
-          </CollapsibleSection>
-        </div>
-      ) : null}
     </div>
   );
 }

@@ -78,7 +78,9 @@ export function buildRolePaletteColumns(palette: RolePalette): PaletteColumnDisp
       roleLabel:
         slot.source === 'derived'
           ? `${ROLE_LABELS[role]} · derivado`
-          : ROLE_LABELS[role],
+          : slot.source === 'corrected'
+            ? `${ROLE_LABELS[role]} · ajustado`
+            : ROLE_LABELS[role],
     };
   });
 }

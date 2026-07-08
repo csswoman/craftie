@@ -91,8 +91,7 @@ function SelectColorsWorkspaceContent() {
 
       <StudioCanvas
         showRightPanel
-        rightPanelOpen={workspace.rightPanelOpen}
-        syncRightPanelWithActiveRole={false}
+        syncRightPanelWithActiveRole
         onRightPanelCollapsedChange={workspace.setRightPanelCollapsed}
         sidebar={
           <SelectColorsWorkspaceSidebar
@@ -102,20 +101,20 @@ function SelectColorsWorkspaceContent() {
             isReviewPhase={workspace.isReviewPhase}
             isImageBusy={workspace.isImageBusy}
             imagePreviewUrl={workspace.imagePreviewUrl}
-            recommendedPairings={workspace.recommendedPairings}
-            rolePaletteAvailable={workspace.rolePalette !== null}
-            selectedPairing={workspace.selectedPairing}
+            paletteCatalog={workspace.paletteCatalog}
             onImageFileSelected={workspace.handleImageFileSelected}
             onImageRegenerate={workspace.handleImageRegenerate}
             onOpenInspiration={() => workspace.setInspirationModalOpen(true)}
-            onSelectPairing={workspace.setSelectedPairing}
           />
         }
         main={
           <SelectColorsWorkspaceMain
             isImageExtracting={workspace.isImageExtracting}
             isImageRegenerating={workspace.isImageRegenerating}
+            recommendedPairings={workspace.recommendedPairings}
+            selectedPairing={workspace.selectedPairing}
             onAddColorByHex={workspace.handleAddColorByHex}
+            onSelectPairing={workspace.setSelectedPairing}
           />
         }
         rightPanel={
@@ -178,6 +177,8 @@ function EmptyWorkspaceCard({
           onRegenerate={onImageRegenerate}
           variant="embedded"
           showHeader={false}
+          showDropzone={!hasPreview}
+          showChangeImageControl={false}
         />
       </div>
     </section>

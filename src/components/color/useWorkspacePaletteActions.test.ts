@@ -56,7 +56,6 @@ function useSetup(overrides: Partial<Parameters<typeof useWorkspacePaletteAction
     setGeneratedPalette: vi.fn(),
     setPaletteCatalog: vi.fn(),
     setRightPanelOpen: vi.fn(),
-    setRolePalette: vi.fn(),
     ...overrides,
   };
 
@@ -75,13 +74,15 @@ describe('useWorkspacePaletteActions', () => {
     });
   });
 
-  it('updates role palette when adding a custom color with an existing role palette', () => {
+  it('feeds semantic derivation inputs when adding a custom color with an existing role palette', () => {
     const { actions, options } = useSetup();
 
     actions.handleAddColorByHex('#123456', 'Brand Blue');
     expect(options.setCatalogSource).toHaveBeenCalledWith('curated');
     expect(options.setPaletteCatalog).toHaveBeenCalled();
-    expect(options.setRolePalette).toHaveBeenCalled();
+    expect(options.assignFromHexes).toHaveBeenCalledWith(
+      expect.arrayContaining(['#123456']),
+    );
     expect(options.setRightPanelOpen).toHaveBeenCalledWith(true);
     expect(options.setError).toHaveBeenCalledWith(null);
   });

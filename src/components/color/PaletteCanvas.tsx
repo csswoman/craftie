@@ -5,12 +5,15 @@ import { useMemo, useState } from 'react';
 import { buildRolePaletteColumnsWithContrast, hasRolePaletteContrastFailure } from '@lib/color/rolePaletteContrast';
 import { normalizeHex } from '@lib/color/normalizeHex';
 import { isPaletteRoleId, type PaletteRoleId } from '@lib/color/rolePalette';
+import type { FontPair } from '@lib/typography/pairings';
 
 import { ColorDetailsDrawer } from '@/components/color-engine/ColorDetailsDrawer';
 import { useRolePalette } from '@/context/RolePaletteContext';
 
 import { PaletteView } from './PaletteView';
+import { PaletteThemeToggle } from './PaletteThemeToggle';
 import { PreviewView } from './PreviewView';
+import { TypographyCanvasView } from './TypographyCanvasView';
 import {
   openRoleColorPopover,
   RoleColorPopover,
@@ -22,13 +25,17 @@ export type PaletteCanvasProps = {
   isUpdating?: boolean;
   editable?: boolean;
   onAddColorByHex?: (hex: string, customName?: string) => string | null;
+  recommendedPairings?: FontPair[];
+  selectedPairing?: FontPair | null;
+  onSelectPairing?: (pairing: FontPair) => void;
 };
 
-type CanvasTab = 'palette' | 'preview';
+type CanvasTab = 'palette' | 'preview' | 'typography';
 
 const CANVAS_TABS: Array<{ id: CanvasTab; label: string }> = [
-  { id: 'palette', label: 'Paleta' },
+  { id: 'palette', label: 'Colores' },
   { id: 'preview', label: 'Vista previa' },
+  { id: 'typography', label: 'Tipografía' },
 ];
 
 export function PaletteCanvas({
@@ -36,6 +43,9 @@ export function PaletteCanvas({
   isUpdating = false,
   editable = false,
   onAddColorByHex,
+  recommendedPairings = [],
+  selectedPairing = null,
+  onSelectPairing,
 }: PaletteCanvasProps) {
   const { rolePalette, activeTheme, lockedRoles, replaceRole, setActiveRole, setActiveTheme } =
     useRolePalette();
@@ -161,8 +171,14 @@ export function PaletteCanvas({
                   onOpenDetails={setSelectedColorHex}
                   onEditRole={handleEditRole}
                 />
-              ) : (
+              ) : activeTab === 'preview' ? (
                 <PreviewView onEditRole={handleEditRole} />
+              ) : (
+                <TypographyCanvasView
+                  recommendedPairings={recommendedPairings}
+                  selectedPairing={selectedPairing}
+                  onSelectPairing={onSelectPairing ?? (() => undefined)}
+                />
               )}
             </div>
             {isUpdating ? (
@@ -203,36 +219,6 @@ function PaletteCanvasSkeleton() {
   return (
     <div className="flex min-h-0 flex-1 flex-col" aria-busy="true" aria-label="Cargando paleta">
       <div className="flex-1 animate-pulse bg-surface-raised" />
-    </div>
-  );
-}
-
-function PaletteThemeToggle({
-  activeTheme,
-  onChange,
-}: {
-  activeTheme: 'light' | 'dark';
-  onChange: (theme: 'light' | 'dark') => void;
-}) {
-  return (
-    <div className="flex shrink-0 justify-end" role="group" aria-label="Modo de tema">
-      <div className="inline-flex rounded-lg border border-border bg-bg p-0.5">
-        {(['light', 'dark'] as const).map((theme) => (
-          <button
-            key={theme}
-            type="button"
-            aria-pressed={activeTheme === theme}
-            onClick={() => onChange(theme)}
-            className={`rounded-md px-3 py-1.5 text-[0.8125rem] font-extrabold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
-              activeTheme === theme
-                ? 'bg-ink text-bg'
-                : 'text-muted hover:bg-surface-raised hover:text-ink'
-            }`}
-          >
-            {theme === 'light' ? 'Claro' : 'Oscuro'}
-          </button>
-        ))}
-      </div>
     </div>
   );
 }

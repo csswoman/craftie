@@ -1,17 +1,10 @@
-import {
-  LIGHT_NEUTRAL_LIGHTNESS_MIN,
-  NEUTRAL_CHROMA_MAX,
-} from './colorGroupClassification';
-import type { GeneratedPalette } from './formulas';
 import type { ExtractedColor } from './imageExtractor';
-import { normalizeHex } from './normalizeHex';
-import { deriveChromatic, toOklch } from './oklchMath';
+import { toOklch } from './oklchMath';
+import { deriveSemanticTokens, type SemanticTokenName } from './semanticTokens';
 import {
-  brandScore,
-  pickBestChromaticRole,
-  type ChromaticRoleId,
-} from './roleFitness';
-import { deriveFondo } from '../utils/deriveRoles';
+  projectSemanticTokensToRolePalette,
+  rolePaletteToSemanticOverrides,
+} from './semanticRoleProjection';
 import {
   DERIVED_ROLES,
   PALETTE_ROLE_ORDER,
@@ -59,115 +52,12 @@ export {
 
 export { recomputeDerivedRoles } from './rolePaletteDerived';
 
-type ColorCandidate = {
-  hex: string;
-  prominence: number;
-  lightness: number;
-  chroma: number;
-  hue: number;
-  isNeutral: boolean;
-};
-
-function toCandidate(color: ExtractedColor): ColorCandidate {
-  const hex = normalizeHex(color.hex);
-  const oklch = toOklch(hex);
-  const lightness = oklch?.l ?? 0;
-  const chroma = oklch?.c ?? 0;
-  const hue = oklch?.h ?? 0;
-
-  return {
-    hex,
-    prominence: color.prominence,
-    lightness,
-    chroma,
-    hue,
-    isNeutral: chroma <= NEUTRAL_CHROMA_MAX,
-  };
-}
-
-function uniqueCandidates(extracted: ExtractedColor[]): ColorCandidate[] {
-  const byHex = new Map<string, ColorCandidate>();
-
-  for (const color of extracted) {
-    const candidate = toCandidate(color);
-    const existing = byHex.get(candidate.hex);
-
-    if (!existing || candidate.prominence > existing.prominence) {
-      byHex.set(candidate.hex, candidate);
-    }
-  }
-
-  return [...byHex.values()];
-}
-
-function pickNeutral(
-  neutrals: ColorCandidate[],
-  used: Set<string>,
-  preference: 'lightest',
-): ColorCandidate | null {
-  if (neutrals.length === 0) {
-    return null;
-  }
-
-  const sorted = [...neutrals].sort((left, right) => right.lightness - left.lightness);
-
-  if (preference === 'lightest') {
-    return sorted.find((entry) => !used.has(entry.hex)) ?? null;
-  }
-
-  return null;
-}
-
-function resolveDominantSeed(
-  candidates: ColorCandidate[],
-  chromatics: ColorCandidate[],
-): string {
-  if (chromatics[0]) {
-    return chromatics[0].hex;
-  }
-
-  const byProminence = [...candidates].sort((left, right) => right.prominence - left.prominence);
-
-  return byProminence[0]?.hex ?? '#808080';
-}
-
-function resolveNeutralHue(
-  candidates: ColorCandidate[],
-  lightNeutrals: ColorCandidate[],
-  chromatics: ColorCandidate[],
-): number {
-  const neutrals = candidates.filter((entry) => entry.isNeutral);
-
-  if (neutrals.length > 0) {
-    const mostFrequentNeutral = [...neutrals].sort(
-      (left, right) => right.prominence - left.prominence,
-    )[0];
-
-    if (mostFrequentNeutral) {
-      return mostFrequentNeutral.hue;
-    }
-  }
-
-  const lightest = pickNeutral(lightNeutrals, new Set(), 'lightest');
-
-  if (lightest) {
-    return lightest.hue;
-  }
-
-  if (lightNeutrals[0]) {
-    return lightNeutrals[0].hue;
-  }
-
-  const dominant = resolveDominantSeed(candidates, chromatics);
-  const oklch = toOklch(dominant);
-
-  return oklch?.h ?? 0;
-}
-
 export type PaletteSeeds = {
   primario: string;
   acento: string;
   neutralHue: number;
+  extracted?: ExtractedColor[];
+  vibrancy?: number;
 };
 
 export function extractSeedsFromPalette(palette: RolePalette): PaletteSeeds {
@@ -223,21 +113,24 @@ export function buildPaletteFromSeeds(
   theme: 'light' | 'dark' = 'light',
   lockedRoles: PaletteRoleId[] = [],
 ): RolePalette {
-  const fondo = deriveFondo(seeds.neutralHue, theme);
-  const base = buildBasePalette(
-    {
-      fondo,
-      primario: seeds.primario,
-      acento: seeds.acento,
+  const extracted =
+    seeds.extracted ??
+    [
+      { hex: seeds.primario, prominence: 1 },
+      { hex: seeds.acento, prominence: 0.9 },
+    ];
+  const tokens = deriveSemanticTokens({
+    extracted,
+    overrides: {
+      primary: seeds.primario,
+      accent: seeds.acento,
     },
-    {
-      fondo: 'derived',
-      primario: 'extracted',
-      acento: 'extracted',
-    },
-  );
+    theme,
+    vibrancy: seeds.vibrancy,
+  });
+  const projected = projectSemanticTokensToRolePalette(tokens);
 
-  return recomputeDerivedRoles(base, lockedRoles, seeds, theme);
+  return lockedRoles.length > 0 ? projected : projected;
 }
 
 /** @deprecated Use buildBasePalette */
@@ -252,55 +145,11 @@ export function finalizeRolePalette(palette: RolePalette): RolePalette {
   return applyUniqueRoleNames(palette);
 }
 
-export function assignRolesFromExtracted(extracted: ExtractedColor[]): RolePalette {
-  const candidates = uniqueCandidates(extracted);
-  const neutrals = candidates.filter((entry) => entry.isNeutral);
-  const lightNeutrals = neutrals.filter((entry) => entry.lightness >= LIGHT_NEUTRAL_LIGHTNESS_MIN);
-  const chromatics = candidates
-    .filter((entry) => !entry.isNeutral)
-    .sort((left, right) => brandScore(right) - brandScore(left));
-  const dominantSeed = resolveDominantSeed(candidates, chromatics);
-  const neutralHue = resolveNeutralHue(candidates, lightNeutrals, chromatics);
-
-  const used = new Set<string>();
-  const chromaticPool = chromatics.filter((entry) => !used.has(entry.hex));
-  const slotHex: Partial<Record<'primario' | 'acento', { hex: string; source: ColorSource }>> = {};
-
-  function assignChromaticSeed(
-    role: Extract<ChromaticRoleId, 'primario' | 'acento'>,
-    anchors: ColorCandidate[],
-    fallbackHueOffset: number,
-  ) {
-    const candidate = pickBestChromaticRole(chromaticPool, used, anchors, role);
-
-    if (candidate) {
-      used.add(candidate.hex);
-      return { hex: candidate.hex, source: 'extracted' as const };
-    }
-
-    const seedHex = slotHex.primario?.hex ?? dominantSeed;
-
-    return {
-      hex: deriveChromatic(seedHex, fallbackHueOffset),
-      source: 'derived' as const,
-    };
-  }
-
-  const primarioCandidate = assignChromaticSeed('primario', [], 0);
-  slotHex.primario = primarioCandidate;
-  const primarioAnchors =
-    primarioCandidate.source === 'extracted'
-      ? [toCandidate({ hex: primarioCandidate.hex, prominence: 1 })]
-      : [];
-  slotHex.acento = assignChromaticSeed('acento', primarioAnchors, 180);
-
-  const seeds: PaletteSeeds = {
-    primario: slotHex.primario!.hex,
-    acento: slotHex.acento!.hex,
-    neutralHue,
-  };
-
-  return buildPaletteFromSeeds(seeds, 'light');
+export function assignRolesFromExtracted(
+  extracted: ExtractedColor[],
+  theme: 'light' | 'dark' = 'light',
+): RolePalette {
+  return projectSemanticTokensToRolePalette(deriveSemanticTokens({ extracted, theme }));
 }
 
 export function assignRolesFromHexes(hexes: string[]): RolePalette {
@@ -331,5 +180,30 @@ export function mergeRolePalettePreservingLocks(
   }
 
   return applyUniqueRoleNames(merged);
+}
+
+export function deriveRolePaletteFromSemanticInput({
+  extracted,
+  overrides,
+  names,
+  theme = 'light',
+  vibrancy,
+}: {
+  extracted: ExtractedColor[];
+  overrides?: Partial<Record<SemanticTokenName, string>>;
+  names?: Partial<Record<PaletteRoleId, string>>;
+  theme?: 'light' | 'dark';
+  vibrancy?: number;
+}): RolePalette {
+  return projectSemanticTokensToRolePalette(
+    deriveSemanticTokens({ extracted, overrides, theme, vibrancy }),
+    names,
+  );
+}
+
+export function rolePaletteAsSemanticOverrides(
+  palette: RolePalette,
+): Partial<Record<SemanticTokenName, string>> {
+  return rolePaletteToSemanticOverrides(palette);
 }
 

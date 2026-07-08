@@ -7,7 +7,7 @@ export type PaletteRoleId =
   | 'acento'
   | 'borde';
 
-export type ColorSource = 'extracted' | 'derived';
+export type ColorSource = 'extracted' | 'derived' | 'corrected';
 
 export type RoleSlot = {
   role: PaletteRoleId;

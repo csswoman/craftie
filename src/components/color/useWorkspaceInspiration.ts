@@ -3,13 +3,14 @@
 import type { Dispatch, SetStateAction } from 'react';
 
 import type { GeneratedPalette } from '@lib/color/formulas';
+import type { ExtractedColor } from '@lib/color/imageExtractor';
 import type { ImagePaletteBuildResult } from '@lib/color/imagePalette';
-import type { RolePalette } from '@lib/color/rolePalette';
 import { SELECTABLE_COLORS, type SelectableColor } from '@lib/color/selectableColors';
 import type { DesignStyle } from '@lib/styles/presets';
 
 export function useWorkspaceInspiration({
   assignFromHexes,
+  assignFromExtracted,
   clearRolePalette,
   setCatalogSource,
   setError,
@@ -19,10 +20,10 @@ export function useWorkspaceInspiration({
   setIsImageRegenerating,
   setPaletteCatalog,
   setRightPanelOpen,
-  setRolePalette,
   setSelectedStyleId,
 }: {
   assignFromHexes: (hexes: string[]) => void;
+  assignFromExtracted: (extracted: ExtractedColor[]) => void;
   clearRolePalette: () => void;
   setCatalogSource: Dispatch<SetStateAction<'none' | 'curated' | 'image'>>;
   setError: Dispatch<SetStateAction<string | null>>;
@@ -32,7 +33,6 @@ export function useWorkspaceInspiration({
   setIsImageRegenerating: Dispatch<SetStateAction<boolean>>;
   setPaletteCatalog: Dispatch<SetStateAction<SelectableColor[]>>;
   setRightPanelOpen: Dispatch<SetStateAction<boolean>>;
-  setRolePalette: (palette: RolePalette | null) => void;
   setSelectedStyleId: Dispatch<SetStateAction<string | null>>;
 }) {
   function applyCuratedInspiration(hexes: string[], styleId: string | null) {
@@ -72,7 +72,7 @@ export function useWorkspaceInspiration({
     setCatalogSource('image');
     setPaletteCatalog(palette.catalog);
     setSelectedStyleId(null);
-    setRolePalette(palette.rolePalette);
+    assignFromExtracted(palette.extracted);
     setGeneratedPalette(null);
     setRightPanelOpen(true);
     setError(null);

@@ -8,7 +8,7 @@ const DEFAULTS = {
   sidebarWidth: 220,
   rightWidth: 400,
   sidebarCollapsed: false,
-  rightCollapsed: false,
+  rightCollapsed: true,
 };
 
 const LIMITS = {

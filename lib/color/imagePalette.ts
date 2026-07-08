@@ -47,6 +47,7 @@ function ensureLightNeutralInCatalog(catalog: SelectableColor[]): SelectableColo
 
 export type ImagePaletteBuildResult = {
   catalog: SelectableColor[];
+  extracted: ExtractedColor[];
   rolePalette: RolePalette;
 };
 
@@ -109,5 +110,5 @@ export function buildImagePalette(extracted: ExtractedColor[]): ImagePaletteBuil
   const catalog = ensureLightNeutralInCatalog(buildSelectableColorsFromExtracted(extracted));
   const rolePalette = assignRolesFromExtracted(extracted);
 
-  return { catalog, rolePalette };
+  return { catalog, extracted, rolePalette };
 }

@@ -7,7 +7,6 @@ import { normalizeHex } from '@lib/color/normalizeHex';
 import { isGeneratedPaletteRole } from '@lib/color/paletteDisplay';
 import { addColorToPalette, renamePaletteColor } from '@lib/color/paletteOrder';
 import {
-  assignColorToRolePalette,
   isPaletteRoleId,
   type PaletteRoleId,
   type RolePalette,
@@ -26,7 +25,6 @@ export function useWorkspacePaletteActions({
   setGeneratedPalette,
   setPaletteCatalog,
   setRightPanelOpen,
-  setRolePalette,
 }: {
   assignFromHexes: (hexes: string[]) => void;
   generatedPalette: GeneratedPalette | null;
@@ -39,7 +37,6 @@ export function useWorkspacePaletteActions({
   setGeneratedPalette: Dispatch<SetStateAction<GeneratedPalette | null>>;
   setPaletteCatalog: Dispatch<SetStateAction<SelectableColor[]>>;
   setRightPanelOpen: Dispatch<SetStateAction<boolean>>;
-  setRolePalette: (palette: RolePalette | null) => void;
 }) {
   function handleReplacePreviewColor(columnId: string, newHex: string): string | null {
     if (!generatedPalette) {
@@ -82,7 +79,7 @@ export function useWorkspacePaletteActions({
     setPaletteCatalog(result.catalog);
 
     if (rolePalette) {
-      setRolePalette(assignColorToRolePalette(rolePalette, hex));
+      assignFromHexes([...Object.values(rolePalette).map((slot) => slot.hex), hex]);
     } else {
       assignFromHexes([hex]);
     }

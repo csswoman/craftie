@@ -30,11 +30,11 @@ export function useSelectColorsWorkspaceController() {
     seeds,
     themes,
     selectionReady,
-    setRolePalette,
     clearRolePalette,
     replaceRole,
     renameRole,
     assignFromHexes,
+    assignFromExtracted,
   } = useRolePalette();
   const [catalogSource, setCatalogSource] = useState<'none' | 'curated' | 'image'>('none');
   const [selectedStyleId, setSelectedStyleId] = useState<string | null>(null);
@@ -222,6 +222,7 @@ export function useSelectColorsWorkspaceController() {
     handleSelectStyle,
   } = useWorkspaceInspiration({
     assignFromHexes,
+    assignFromExtracted,
     clearRolePalette,
     setCatalogSource,
     setError,
@@ -231,7 +232,6 @@ export function useSelectColorsWorkspaceController() {
     setIsImageRegenerating,
     setPaletteCatalog,
     setRightPanelOpen,
-    setRolePalette,
     setSelectedStyleId,
   });
 
@@ -245,11 +245,10 @@ export function useSelectColorsWorkspaceController() {
       rolePalette,
       setCatalogSource,
       setError,
-      setGeneratedPalette,
-      setPaletteCatalog,
-      setRightPanelOpen,
-      setRolePalette,
-    });
+    setGeneratedPalette,
+    setPaletteCatalog,
+    setRightPanelOpen,
+  });
 
   const { handleExportBrandKit, handleExportDesignMd } = useWorkspaceExports({
     generatedPalette,

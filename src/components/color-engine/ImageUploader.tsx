@@ -13,6 +13,8 @@ export type ImageUploaderProps = {
   onRegenerate: () => void;
   variant?: 'default' | 'embedded';
   showHeader?: boolean;
+  showDropzone?: boolean;
+  showChangeImageControl?: boolean;
 };
 
 export function ImageUploader({
@@ -24,6 +26,8 @@ export function ImageUploader({
   onRegenerate,
   variant = 'default',
   showHeader = true,
+  showDropzone = true,
+  showChangeImageControl = true,
 }: ImageUploaderProps) {
   const isEmbedded = variant === 'embedded';
   const inputId = useId();
@@ -76,37 +80,66 @@ export function ImageUploader({
         />
       ) : null}
 
-      <div
-        className={`rounded-md border border-dashed px-4 py-6 transition-colors ${
-          hasPreview ? 'mt-3 border-border bg-bg' : `${showHeader ? 'mt-4' : ''} border-border bg-bg`
-        }`}
-        onDragOver={(event) => {
-          event.preventDefault();
-        }}
-        onDrop={handleDrop}
-      >
-        <input
-          id={inputId}
-          type="file"
-          accept=".jpg,.jpeg,.png,.webp"
-          onChange={handleFileChange}
-          className="sr-only"
-        />
+      <input
+        id={inputId}
+        type="file"
+        accept=".jpg,.jpeg,.png,.webp"
+        onChange={handleFileChange}
+        className="sr-only"
+      />
 
-        <div className="flex flex-col items-center gap-3 text-center">
-          <p className="text-[0.9375rem] text-ink">
-            {hasPreview ? 'Arrastra otra imagen o ' : 'Arrastra una imagen aquí o '}
-            <label
-              htmlFor={inputId}
-              className="cursor-pointer font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-            >
-              {hasPreview ? 'cambia la imagen' : 'selecciona un archivo'}
-            </label>
-          </p>
-          <p className="text-[0.8125rem] text-muted">JPG, PNG o WebP · máximo 5 MB</p>
+      {showDropzone ? (
+        <div
+          className={`rounded-md border border-dashed px-4 py-6 transition-colors ${
+            hasPreview ? 'mt-3 border-border bg-bg' : `${showHeader ? 'mt-4' : ''} border-border bg-bg`
+          }`}
+          onDragOver={(event) => {
+            event.preventDefault();
+          }}
+          onDrop={handleDrop}
+        >
+          <div className="flex flex-col items-center gap-3 text-center">
+            <p className="text-[0.9375rem] text-ink">
+              {hasPreview ? 'Arrastra otra imagen o ' : 'Arrastra una imagen aquí o '}
+              <label
+                htmlFor={inputId}
+                className="cursor-pointer font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+              >
+                {hasPreview ? 'cambia la imagen' : 'selecciona un archivo'}
+              </label>
+            </p>
+            {!hasPreview ? <p className="text-[0.8125rem] text-muted">JPG, PNG o WebP · máximo 5 MB</p> : null}
+          </div>
         </div>
-      </div>
+      ) : null}
+
+      {hasPreview && showChangeImageControl ? (
+        <div className="pt-2">
+          <label
+            htmlFor={inputId}
+            className="inline-flex cursor-pointer items-center gap-2 text-[0.8125rem] font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+          >
+            <ChangeImageIcon />
+            Cambiar imagen
+          </label>
+        </div>
+      ) : null}
 
     </section>
+  );
+}
+
+function ChangeImageIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3.5">
+      <path
+        d="M3 8h10M8 3l5 5-5 5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

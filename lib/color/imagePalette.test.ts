@@ -56,7 +56,7 @@ describe('imagePalette', () => {  it('classifies colors into light, bold, and da
     ]);
 
     expect(catalog.length).toBeGreaterThanOrEqual(5);
-    expect(rolePalette.primario.source).toBe('extracted');
+    expect(['extracted', 'corrected']).toContain(rolePalette.primario.source);
     expect(rolePalette.fondo.source).toBe('derived');
     expect(assignRolesFromExtracted([
       { hex: '#F7F7F5', prominence: 0.35 },
