@@ -16,14 +16,16 @@ export type PaletteViewProps = {
 };
 
 export function PaletteView({ editable = true, onOpenDetails, onEditRole }: PaletteViewProps) {
-  const { rolePalette, activeRole, lockedRoles, setActiveRole } = useRolePalette();
+  const { rolePalette, previewRolePalette, activeRole, lockedRoles, setActiveRole } =
+    useRolePalette();
+  const liveRolePalette = previewRolePalette ?? rolePalette;
 
   const columns = useMemo(
-    () => (rolePalette ? buildRolePaletteColumnsWithContrast(rolePalette) : []),
-    [rolePalette],
+    () => (liveRolePalette ? buildRolePaletteColumnsWithContrast(liveRolePalette) : []),
+    [liveRolePalette],
   );
 
-  if (!rolePalette || columns.length === 0) {
+  if (!liveRolePalette || columns.length === 0) {
     return null;
   }
 

@@ -43,6 +43,17 @@ function lerp(from: number, to: number, amount: number): number {
   return from + (to - from) * amount;
 }
 
+export function dataSeriesChromaFloorForVibrancy(chromaFloor: number, vibrancy: number): number {
+  if (vibrancy >= VIBRANCY_MID) {
+    return chromaFloor;
+  }
+
+  const amount = (VIBRANCY_MID - vibrancy) / VIBRANCY_MID;
+  const pastelFloor = chromaFloor * VIBRANCY_CURVE.pastel.chromaMultiplier;
+
+  return lerp(chromaFloor, pastelFloor, amount);
+}
+
 export function normalizeVibrancy(value: number | undefined): number {
   if (typeof value !== 'number' || Number.isNaN(value)) {
     return VIBRANCY_MID;
@@ -105,6 +116,7 @@ export function calibrateDataSeriesHex(
   chromaFloor: number,
   chromaCap: number,
 ): string {
+  const vibrancy = normalizeVibrancy(vibrancyInput);
   const calibrated = calibrateExpressiveHex(hex, vibrancyInput);
   const channels = toOklch(calibrated);
 
@@ -112,9 +124,11 @@ export function calibrateDataSeriesHex(
     return calibrated;
   }
 
+  const effectiveChromaFloor = dataSeriesChromaFloorForVibrancy(chromaFloor, vibrancy);
+
   return oklchChannelsToHex(
     channels.l ?? 0.56,
-    clamp(channels.c ?? 0, chromaFloor, chromaCap),
+    clamp(channels.c ?? 0, effectiveChromaFloor, chromaCap),
     channels.h ?? 0,
   );
 }

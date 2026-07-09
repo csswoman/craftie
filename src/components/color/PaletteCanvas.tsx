@@ -47,22 +47,30 @@ export function PaletteCanvas({
   selectedPairing = null,
   onSelectPairing,
 }: PaletteCanvasProps) {
-  const { rolePalette, activeTheme, lockedRoles, replaceRole, setActiveRole, setActiveTheme } =
-    useRolePalette();
+  const {
+    rolePalette,
+    previewRolePalette,
+    activeTheme,
+    lockedRoles,
+    replaceRole,
+    setActiveRole,
+    setActiveTheme,
+  } = useRolePalette();
 
   const [activeTab, setActiveTab] = useState<CanvasTab>('palette');
   const [selectedColorHex, setSelectedColorHex] = useState<string | null>(null);
   const [colorPopover, setColorPopover] = useState<RoleColorPopoverAnchor | null>(null);
+  const liveRolePalette = previewRolePalette ?? rolePalette;
 
   const columns = useMemo(
-    () => (rolePalette ? buildRolePaletteColumnsWithContrast(rolePalette) : []),
-    [rolePalette],
+    () => (liveRolePalette ? buildRolePaletteColumnsWithContrast(liveRolePalette) : []),
+    [liveRolePalette],
   );
 
-  const contrastFailure = rolePalette ? hasRolePaletteContrastFailure(rolePalette) : false;
+  const contrastFailure = liveRolePalette ? hasRolePaletteContrastFailure(liveRolePalette) : false;
   const lockedSet = useMemo(() => new Set(lockedRoles), [lockedRoles]);
   const canReplace = editable && rolePalette !== null;
-  const hasPalette = columns.length > 0 && rolePalette !== null;
+  const hasPalette = columns.length > 0 && liveRolePalette !== null;
 
   function handleReplaceFromDrawer(newHex: string): string | null {
     if (!selectedColorHex || !rolePalette) {

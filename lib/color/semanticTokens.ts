@@ -20,6 +20,7 @@ import {
 import {
   calibrateDataSeriesHex,
   calibrateExpressiveHex,
+  dataSeriesChromaFloorForVibrancy,
   normalizeVibrancy,
 } from './vibrancy';
 
@@ -124,6 +125,7 @@ const DATA_SERIES_MIN_CONTRAST = 3;
 // Data marks are display colors optimized for legibility, not source-fidelity.
 // Low-chroma source palettes are boosted toward this floor, capped below neon.
 const DATA_SERIES_MIN_CHROMA = 0.18;
+const DATA_SERIES_REALIZED_CHROMA_MIN = DATA_SERIES_MIN_CHROMA * 0.5;
 const DATA_SERIES_CHROMA_CAP = 0.34;
 const DATA_SERIES_LIGHT_TARGET = 0.56;
 const DATA_SERIES_LIGHT_L = [0.56, 0.52, 0.6, 0.48, 0.44, 0.64, 0.4, 0.36] as const;
@@ -416,161 +418,54 @@ function colorsAreDistinguishable(leftHex: string, rightHex: string): boolean {
   return hueSeparated || lightnessSeparated;
 }
 
-function dataSeriesVibrancyScore(hex: string): number {
+function dataSeriesIdentityScore(hex: string): number {
   const channels = toOklch(hex);
-  const chroma = channels?.c ?? 0;
-  const lightness = channels?.l ?? DATA_SERIES_LIGHT_TARGET;
-
-  return chroma * 4 - Math.abs(lightness - DATA_SERIES_LIGHT_TARGET);
+  return (channels?.c ?? 0) * 4 - Math.abs((channels?.l ?? DATA_SERIES_LIGHT_TARGET) - DATA_SERIES_LIGHT_TARGET);
 }
 
-function dataSeriesDisplayCandidates(
-  baseHex: string,
-  surfaceHex: string,
-  lightnesses: readonly number[],
+function buildDataSeriesIdentities(
+  tokens: SemanticToken[],
+  dominantHueValue: number,
+  expressivePoolSize: number,
   vibrancy: number,
-  allowHueNudge = true,
 ): string[] {
-  const channels = toOklch(baseHex);
+  const chromaFloor = dataSeriesChromaFloorForVibrancy(DATA_SERIES_MIN_CHROMA, vibrancy);
 
-  if (!channels) {
-    return [];
-  }
-
-  const targetChroma = Math.min(
-    DATA_SERIES_CHROMA_CAP,
-    Math.max(channels.c ?? 0, DATA_SERIES_MIN_CHROMA),
-  );
-
-  const hueOffsets = allowHueNudge ? DATA_SERIES_HUE_NUDGE : [0];
-
-  return lightnesses
-    .flatMap((lightness) =>
-      hueOffsets.map((offset) =>
-        oklchChannelsToHex(lightness, targetChroma, ((channels.h ?? 0) + offset + 360) % 360),
-      ),
-    )
-    .map((hex) =>
+  if (expressivePoolSize <= 1) {
+    return DATA_SERIES_LIGHT_L.map((lightness) =>
       calibrateDataSeriesHex(
-        hex,
+        oklchChannelsToHex(lightness, DATA_SERIES_CHROMA_CAP, dominantHueValue),
         vibrancy,
         DATA_SERIES_MIN_CHROMA,
         DATA_SERIES_CHROMA_CAP,
       ),
-    )
-    .filter((hex, index, entries) => entries.indexOf(hex) === index)
-    .filter((hex) => contrastRatio(hex, surfaceHex) >= DATA_SERIES_MIN_CONTRAST)
-    .filter((hex) => (toOklch(hex)?.c ?? 0) >= Math.min(DATA_SERIES_MIN_CHROMA, targetChroma * 0.85));
-}
-
-function pickDataSeriesCandidate(
-  baseHex: string,
-  surfaceHex: string,
-  lightnesses: readonly number[],
-  picked: SemanticToken[],
-  surfaceIsLight: boolean,
-  vibrancy: number,
-): SemanticToken | null {
-  let best: { hex: string; score: number } | null = null;
-
-  for (const hex of dataSeriesDisplayCandidates(baseHex, surfaceHex, lightnesses, vibrancy)) {
-    if (!picked.every((entry) => colorsAreDistinguishable(hex, entry.hex))) {
-      continue;
-    }
-
-    if (!surfaceIsLight) {
-      return token(hex, 'derived');
-    }
-
-    const score = dataSeriesVibrancyScore(hex);
-
-    if (!best || score > best.score) {
-      best = { hex, score };
-    }
+    ).slice(0, 6);
   }
 
-  return best ? token(best.hex, 'derived') : null;
-}
-
-function tonalSeriesFromSingleHue(
-  base: SemanticToken,
-  surfaceHex: string,
-  vibrancy: number,
-): SemanticToken[] {
-  const picked: SemanticToken[] = [];
-  const surfaceIsLight = relativeLuminance(surfaceHex) >= 0.5;
-  const fillLightness = surfaceIsLight
-    ? DATA_SERIES_MONO_LIGHT_L
-    : DATA_SERIES_MONO_DARK_L;
-
-  for (const lightness of fillLightness) {
-    if (picked.length === 6) {
-      break;
-    }
-
-    const hex = dataSeriesDisplayCandidates(base.hex, surfaceHex, [lightness], vibrancy, false)[0];
-
-    if (!hex) {
-      continue;
-    }
-
-    if (picked.every((entry) => colorsAreDistinguishable(hex, entry.hex))) {
-      picked.push(token(hex, 'derived'));
-    }
-  }
-
-  for (const lightness of fillLightness) {
-    if (picked.length >= 5) {
-      break;
-    }
-
-    const hex = dataSeriesDisplayCandidates(base.hex, surfaceHex, [lightness], vibrancy, true)[0];
-
-    if (!hex) {
-      continue;
-    }
-
-    if (picked.every((entry) => colorsAreDistinguishable(hex, entry.hex))) {
-      picked.push(token(hex, 'derived'));
-    }
-  }
-
-  return picked;
-}
-
-function distinguishableSeries(
-  tokens: SemanticToken[],
-  surfaceHex: string,
-  dominantHueValue: number,
-  theme: 'light' | 'dark',
-  expressivePoolSize: number,
-  vibrancy: number,
-): SemanticToken[] {
-  if (expressivePoolSize <= 1) {
-    return tonalSeriesFromSingleHue(tokens[0]!, surfaceHex, vibrancy);
-  }
-
-  const surfaceIsLight = relativeLuminance(surfaceHex) >= 0.5;
-  const preferredLightnesses = surfaceIsLight ? DATA_SERIES_LIGHT_L : DATA_SERIES_DARK_L;
   const candidates = tokens
     .filter((entry, index, entries) => {
       const hex = normalizeHex(entry.hex);
       return entries.findIndex((candidate) => normalizeHex(candidate.hex) === hex) === index;
-    });
-  const picked: SemanticToken[] = [];
+    })
+    .map((entry) => {
+      const channels = toOklch(entry.hex);
+      const chroma = Math.min(
+        DATA_SERIES_CHROMA_CAP,
+        Math.max(channels?.c ?? 0, chromaFloor),
+      );
+      return calibrateDataSeriesHex(
+        oklchChannelsToHex(channels?.l ?? DATA_SERIES_LIGHT_TARGET, chroma, channels?.h ?? dominantHueValue),
+        vibrancy,
+        DATA_SERIES_MIN_CHROMA,
+        DATA_SERIES_CHROMA_CAP,
+      );
+    })
+    .sort((left, right) => dataSeriesIdentityScore(right) - dataSeriesIdentityScore(left));
+  const picked: string[] = [];
 
-  for (const candidate of candidates) {
-    const pickedCandidate = pickDataSeriesCandidate(
-      candidate.hex,
-      surfaceHex,
-      preferredLightnesses,
-      picked,
-      surfaceIsLight,
-      vibrancy,
-    );
-
-    if (pickedCandidate) {
-      picked.push(pickedCandidate);
+  for (const hex of candidates) {
+    if (picked.every((entry) => colorsAreDistinguishable(hex, entry))) {
+      picked.push(hex);
     }
 
     if (picked.length === 6) {
@@ -586,20 +481,123 @@ function distinguishableSeries(
     }
 
     const hue = (dominantHueValue + offset) % 360;
-    const fallbackScale = deriveTonalScale(
-      oklchChannelsToHex(theme === 'dark' ? 0.54 : 0.5, 0.12, hue),
+    const fallback = calibrateDataSeriesHex(
+      oklchChannelsToHex(DATA_SERIES_LIGHT_TARGET, DATA_SERIES_CHROMA_CAP, hue),
+      vibrancy,
+      DATA_SERIES_MIN_CHROMA,
+      DATA_SERIES_CHROMA_CAP,
     );
-    const fallback = pickDataSeriesCandidate(
-      fallbackScale[500],
+
+    if (picked.every((entry) => colorsAreDistinguishable(fallback, entry))) {
+      picked.push(fallback);
+    }
+  }
+
+  return picked.slice(0, 6);
+}
+
+function chooseSeriesLightness(
+  identityHex: string,
+  surfaceHex: string,
+  lightnesses: readonly number[],
+  picked: SemanticToken[],
+  chromaFloor: number,
+): SemanticToken | null {
+  const channels = toOklch(identityHex);
+
+  if (!channels) {
+    return null;
+  }
+
+  const identityHue = channels.h ?? 0;
+  const identityChroma = channels.c ?? 0;
+
+  let best: { hex: string; score: number } | null = null;
+
+  for (const lightness of lightnesses) {
+    const hex = oklchChannelsToHex(lightness, identityChroma, identityHue);
+    const channels = toOklch(hex);
+    const resolved = channels
+      ? oklchChannelsToHex(
+          channels.l ?? lightness,
+          Math.min(DATA_SERIES_CHROMA_CAP, Math.max(channels.c ?? 0, chromaFloor)),
+          channels.h ?? identityHue,
+        )
+      : hex;
+    const resolvedChroma = toOklch(resolved)?.c ?? 0;
+
+    if (contrastRatio(resolved, surfaceHex) < DATA_SERIES_MIN_CONTRAST) {
+      continue;
+    }
+
+    if (resolvedChroma < Math.min(chromaFloor * 0.85, DATA_SERIES_REALIZED_CHROMA_MIN)) {
+      continue;
+    }
+
+    if (!picked.every((entry) => colorsAreDistinguishable(resolved, entry.hex))) {
+      continue;
+    }
+
+    const score = resolvedChroma * 4 - Math.abs((toOklch(resolved)?.l ?? lightness) - DATA_SERIES_LIGHT_TARGET);
+
+    if (!best || score > best.score) {
+      best = { hex: resolved, score };
+    }
+  }
+
+  return best ? token(best.hex, 'derived') : null;
+}
+
+function materializeSeries(
+  identities: string[],
+  surfaceHex: string,
+  theme: 'light' | 'dark',
+  vibrancy: number,
+): SemanticToken[] {
+  const picked: SemanticToken[] = [];
+  const chromaFloor = dataSeriesChromaFloorForVibrancy(DATA_SERIES_MIN_CHROMA, vibrancy);
+  const surfaceIsLight = relativeLuminance(surfaceHex) >= 0.5;
+  const preferredLightnesses = surfaceIsLight
+    ? [0.42, 0.48, 0.54, 0.6, 0.66, 0.72, 0.36]
+    : [0.62, 0.68, 0.74, 0.8, 0.56, 0.48, 0.84];
+
+  for (const identity of identities) {
+    const tokenCandidate = chooseSeriesLightness(
+      identity,
       surfaceHex,
       preferredLightnesses,
       picked,
-      surfaceIsLight,
-      vibrancy,
+      chromaFloor,
     );
 
-    if (fallback) {
-      picked.push(fallback);
+    if (tokenCandidate) {
+      picked.push(tokenCandidate);
+    }
+  }
+
+  if (picked.length === 6) {
+    return picked;
+  }
+
+  const backupLightnesses = theme === 'dark'
+    ? DATA_SERIES_DARK_L
+    : DATA_SERIES_LIGHT_L;
+
+  for (const identity of identities) {
+    if (picked.length === 6) {
+      break;
+    }
+
+    const tokenCandidate = chooseSeriesLightness(
+      identity,
+      surfaceHex,
+      backupLightnesses,
+      picked,
+      chromaFloor,
+    );
+
+    if (tokenCandidate) {
+      picked.push(tokenCandidate);
     }
   }
 
@@ -736,6 +734,12 @@ export function deriveSemanticTokens(input: SemanticTokenDerivationInput): Seman
     pickState(pool, STANDARD_STATE_HUES.error, hue, surface.hex, theme),
     overrides,
   );
+  const seriesIdentities = buildDataSeriesIdentities(
+    [primary, secondary, accent, success, warning, error],
+    hue,
+    pool.length,
+    vibrancy,
+  );
   const onPrimary = applyOverride(
     'on-primary',
     token(readableOn(theme === 'dark' ? background.hex : surfaceElevated.hex, primary.hex), 'derived'),
@@ -761,14 +765,7 @@ export function deriveSemanticTokens(input: SemanticTokenDerivationInput): Seman
     token(readableOn(theme === 'dark' ? background.hex : surfaceElevated.hex, heroSurface.hex), 'derived'),
     overrides,
   );
-  const dataSeries = distinguishableSeries(
-    [primary, secondary, accent, success, warning, error],
-    surface.hex,
-    hue,
-    theme,
-    pool.length,
-    vibrancy,
-  );
+  const dataSeries = materializeSeries(seriesIdentities, surface.hex, theme, vibrancy);
   const dataToken = (index: number, fallback: SemanticToken): SemanticToken =>
     dataSeries[index] ?? dataSeries[dataSeries.length - 1] ?? fallback;
   const tonalTokens = Object.fromEntries([
