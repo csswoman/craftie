@@ -7,6 +7,7 @@ function createPair(overrides: Partial<FontPair> & Pick<FontPair, 'id'>): FontPa
   return {
     heading: {
       family: 'Playfair Display',
+      googleFontsRef: 'https://fonts.google.com/specimen/Playfair+Display',
       classification: 'serif',
       contrast: 'high',
       xHeight: 'medium',
@@ -15,14 +16,17 @@ function createPair(overrides: Partial<FontPair> & Pick<FontPair, 'id'>): FontPa
     },
     body: {
       family: 'Open Sans',
+      googleFontsRef: 'https://fonts.google.com/specimen/Open+Sans',
       classification: 'sans-serif',
       contrast: 'medium',
       xHeight: 'high',
       personality: ['legible'],
       bestFor: 'body',
     },
+    displayName: overrides.id,
     rationale: 'Editorial pairing',
     mood: ['editorial'],
+    character: ['editorial'],
     ...overrides,
   };
 }
@@ -44,6 +48,7 @@ describe('googleFonts', () => {
         id: 'two',
         heading: {
           family: 'Playfair Display',
+          googleFontsRef: 'https://fonts.google.com/specimen/Playfair+Display',
           classification: 'serif',
           contrast: 'high',
           xHeight: 'medium',
@@ -52,6 +57,7 @@ describe('googleFonts', () => {
         },
         body: {
           family: 'Open Sans',
+          googleFontsRef: 'https://fonts.google.com/specimen/Open+Sans',
           classification: 'sans-serif',
           contrast: 'medium',
           xHeight: 'high',
@@ -75,6 +81,7 @@ describe('googleFonts', () => {
         id: 'shared',
         heading: {
           family: 'Inter',
+          googleFontsRef: 'https://fonts.google.com/specimen/Inter',
           classification: 'sans-serif',
           contrast: 'medium',
           xHeight: 'high',
@@ -83,6 +90,7 @@ describe('googleFonts', () => {
         },
         body: {
           family: 'Inter',
+          googleFontsRef: 'https://fonts.google.com/specimen/Inter',
           classification: 'sans-serif',
           contrast: 'medium',
           xHeight: 'high',
@@ -101,6 +109,7 @@ describe('googleFonts', () => {
         id: 'spaced',
         heading: {
           family: 'Source Sans 3',
+          googleFontsRef: 'https://fonts.google.com/specimen/Source+Sans+3',
           classification: 'sans-serif',
           contrast: 'medium',
           xHeight: 'high',

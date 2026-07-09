@@ -1,3 +1,5 @@
+import { CURATED_FONT_PAIRS } from './fontPairLibrary';
+
 export type FontClassification =
   | 'serif'
   | 'sans-serif'
@@ -6,6 +8,7 @@ export type FontClassification =
 
 export type FontMeta = {
   family: string;
+  googleFontsRef: string;
   classification: FontClassification;
   contrast: 'high' | 'medium' | 'low';
   xHeight: 'high' | 'medium' | 'low';
@@ -15,14 +18,16 @@ export type FontMeta = {
 
 export type FontPair = {
   id: string;
+  displayName: string;
   heading: FontMeta;
   body: FontMeta;
   rationale: string;
   mood: string[];
+  character: string[];
   wcagNote?: string;
 };
 
-export const FONT_PAIRS: FontPair[] = [];
+export const FONT_PAIRS: FontPair[] = [...CURATED_FONT_PAIRS];
 
 const STRONG_PERSONALITY_TAG_COUNT = 3;
 

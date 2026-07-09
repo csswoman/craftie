@@ -24,6 +24,7 @@ export type PaletteCanvasProps = {
   isLoading?: boolean;
   isUpdating?: boolean;
   editable?: boolean;
+  fontPairings?: FontPair[];
   onAddColorByHex?: (hex: string, customName?: string) => string | null;
   recommendedPairings?: FontPair[];
   selectedPairing?: FontPair | null;
@@ -42,6 +43,7 @@ export function PaletteCanvas({
   isLoading = false,
   isUpdating = false,
   editable = false,
+  fontPairings = [],
   onAddColorByHex,
   recommendedPairings = [],
   selectedPairing = null,
@@ -183,6 +185,7 @@ export function PaletteCanvas({
                 <PreviewView onEditRole={handleEditRole} />
               ) : (
                 <TypographyCanvasView
+                  fontPairings={fontPairings}
                   recommendedPairings={recommendedPairings}
                   selectedPairing={selectedPairing}
                   onSelectPairing={onSelectPairing ?? (() => undefined)}

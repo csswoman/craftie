@@ -111,6 +111,7 @@ function SelectColorsWorkspaceContent() {
           <SelectColorsWorkspaceMain
             isImageExtracting={workspace.isImageExtracting}
             isImageRegenerating={workspace.isImageRegenerating}
+            fontPairings={workspace.fontPairings}
             recommendedPairings={workspace.recommendedPairings}
             selectedPairing={workspace.selectedPairing}
             onAddColorByHex={workspace.handleAddColorByHex}

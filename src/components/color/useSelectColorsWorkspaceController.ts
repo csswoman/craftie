@@ -11,7 +11,7 @@ import {
 } from '@lib/color/rolePalette';
 import type { SelectableColor } from '@lib/color/selectableColors';
 import { DESIGN_STYLES } from '@lib/styles/presets';
-import { getRecommendedPairings, type FontPair } from '@lib/typography/pairings';
+import { FONT_PAIRS, getRecommendedPairings, type FontPair } from '@lib/typography/pairings';
 import type { StudioFlowStepId } from '@lib/studio/studioFlow';
 
 import { useWorkspaceExports } from '@/components/color/useWorkspaceExports';
@@ -21,6 +21,7 @@ import { useWorkspaceShortcuts } from '@/components/color/useWorkspaceShortcuts'
 import type { StudioShortcutsHelpHandle } from '@/components/layout/StudioShortcutsHelp';
 import { useRolePalette } from '@/context/RolePaletteContext';
 import { extractPaletteColorsFromImage } from '@/lib/browser/imageExtractor';
+import { readSelectedFontPairId, writeSelectedFontPairId } from '@/lib/browser/selectedFontPair';
 
 export function useSelectColorsWorkspaceController() {
   const [generatedPalette, setGeneratedPalette] = useState<GeneratedPalette | null>(null);
@@ -54,6 +55,16 @@ export function useSelectColorsWorkspaceController() {
   const generatingRef = useRef(false);
   const imagePreviewUrlRef = useRef<string | null>(null);
   const shortcutsRef = useRef<StudioShortcutsHelpHandle>(null);
+
+  useEffect(() => {
+    const storedPairId = readSelectedFontPairId();
+    const storedPair = FONT_PAIRS.find((pairing) => pairing.id === storedPairId) ?? null;
+
+    if (storedPair !== null) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedPairing(storedPair);
+    }
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -137,6 +148,7 @@ export function useSelectColorsWorkspaceController() {
     () => getRecommendedPairings(activeMoods, 3),
     [activeMoods],
   );
+  const fontPairings = FONT_PAIRS;
 
   const isReviewPhase = generatedPalette !== null;
 
@@ -214,6 +226,11 @@ export function useSelectColorsWorkspaceController() {
     }
   }
 
+  function handleSelectPairing(pairing: FontPair) {
+    setSelectedPairing(pairing);
+    writeSelectedFontPairId(pairing.id);
+  }
+
   const {
     handleImageExtractionError,
     handleImageExtractionStart,
@@ -288,6 +305,7 @@ export function useSelectColorsWorkspaceController() {
     isReviewPhase,
     paletteCatalog,
     recommendedPairings,
+    fontPairings,
     rightPanelCollapsed,
     rightPanelOpen,
     rolePalette,
@@ -297,7 +315,7 @@ export function useSelectColorsWorkspaceController() {
     setInspirationModalOpen,
     setRightPanelCollapsed,
     setRightPanelOpen,
-    setSelectedPairing,
+    setSelectedPairing: handleSelectPairing,
     shortcutsRef,
     statusMessage,
   };

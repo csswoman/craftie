@@ -3,8 +3,6 @@
 import type { FontPair } from '@lib/typography/pairings';
 import { buildFontFamilyStack } from '@lib/typography/googleFonts';
 
-import { Button } from '@/components/ui/Button';
-
 export type PairCardProps = {
   pairing: FontPair;
   selected: boolean;
@@ -17,55 +15,49 @@ export function PairCard({ pairing, selected, fontsReady, onSelect }: PairCardPr
   const bodyFont = buildFontFamilyStack(pairing.body);
 
   return (
-    <article
-      className={`flex h-full flex-col rounded-lg border p-4 ${
-        selected ? 'border-primary ring-2 ring-ink ring-offset-2 ring-offset-bg' : 'border-border bg-surface'
+    <button
+      type="button"
+      onClick={() => onSelect(pairing)}
+      aria-pressed={selected}
+      className={`block w-full border-l-2 px-3 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+        selected
+          ? 'border-l-primary bg-primary/5'
+          : 'border-l-transparent bg-surface hover:border-l-border hover:bg-surface-raised'
       }`}
     >
-      <div className={fontsReady ? '' : 'animate-pulse'}>
-        <h3
-          className="text-lg font-semibold leading-tight text-ink"
-          style={{ fontFamily: headingFont }}
-        >
-          {fontsReady ? 'Título de muestra' : 'Cargando tipografía…'}
-        </h3>
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-[0.875rem] font-extrabold text-ink">
+            {pairing.displayName}
+          </p>
+          <p className="mt-0.5 truncate text-[0.75rem] font-medium text-muted">
+            {pairing.heading.family} + {pairing.body.family}
+          </p>
+        </div>
+        {selected ? (
+          <span
+            aria-hidden="true"
+            className="mt-0.5 rounded-full bg-primary px-2 py-0.5 text-[0.6875rem] font-bold text-bg"
+          >
+            ✓
+          </span>
+        ) : null}
+      </div>
+
+      <div className={fontsReady ? 'mt-2.5' : 'mt-2.5 animate-pulse'}>
         <p
-          className="mt-2 text-[0.9375rem] leading-relaxed text-muted"
-          style={{ fontFamily: bodyFont }}
+          className="truncate text-[1.5rem] font-semibold leading-tight text-ink"
+          style={{ fontFamily: fontsReady ? headingFont : undefined }}
         >
-          {fontsReady
-            ? 'Un párrafo breve para evaluar legibilidad, ritmo y personalidad del par.'
-            : 'Preparando la vista previa de fuentes.'}
+          Diseñar una marca clara
+        </p>
+        <p
+          className="mt-1 truncate text-[0.875rem] leading-snug text-muted"
+          style={{ fontFamily: fontsReady ? bodyFont : undefined }}
+        >
+          Una línea breve para evaluar ritmo y legibilidad.
         </p>
       </div>
-
-      <ul className="mt-3 flex flex-wrap gap-1.5" aria-label={`Estado de ánimo: ${pairing.id}`}>
-        {pairing.mood.map((tag) => (
-          <li
-            key={`${pairing.id}-${tag}`}
-            className="rounded-full border border-border bg-bg px-2.5 py-0.5 text-[0.75rem] font-medium text-muted"
-          >
-            {tag}
-          </li>
-        ))}
-      </ul>
-
-      <p className="mt-3 flex-1 text-[0.8125rem] leading-relaxed text-muted">{pairing.rationale}</p>
-
-      {pairing.wcagNote ? (
-        <p className="mt-2 text-[0.75rem] text-muted">{pairing.wcagNote}</p>
-      ) : null}
-
-      <div className="mt-4">
-        <Button
-          type="button"
-          variant={selected ? 'primary' : 'ghost'}
-          onClick={() => onSelect(pairing)}
-          aria-pressed={selected}
-        >
-          {selected ? 'Seleccionado' : 'Seleccionar par'}
-        </Button>
-      </div>
-    </article>
+    </button>
   );
 }

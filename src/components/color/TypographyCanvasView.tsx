@@ -1,14 +1,16 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { buildFontFamilyStack } from '@lib/typography/googleFonts';
 import type { FontPair } from '@lib/typography/pairings';
 
+import { PairingList } from '@/components/font-pairing/PairingList';
 import { useRolePalette } from '@/context/RolePaletteContext';
 import { loadGoogleFonts } from '@/lib/browser/googleFonts';
 
 export type TypographyCanvasViewProps = {
+  fontPairings: FontPair[];
   recommendedPairings: FontPair[];
   selectedPairing: FontPair | null;
   onSelectPairing: (pairing: FontPair) => void;
@@ -16,8 +18,10 @@ export type TypographyCanvasViewProps = {
 
 const DEFAULT_PAIRING: FontPair = {
   id: 'craftie-default-lora-nunito',
+  displayName: 'Craftie base',
   heading: {
     family: 'Lora',
+    googleFontsRef: 'https://fonts.google.com/specimen/Lora',
     classification: 'serif',
     contrast: 'medium',
     xHeight: 'medium',
@@ -26,6 +30,7 @@ const DEFAULT_PAIRING: FontPair = {
   },
   body: {
     family: 'Nunito',
+    googleFontsRef: 'https://fonts.google.com/specimen/Nunito',
     classification: 'sans-serif',
     contrast: 'low',
     xHeight: 'high',
@@ -34,6 +39,7 @@ const DEFAULT_PAIRING: FontPair = {
   },
   rationale: 'Par base de Craftie: contraste suficiente entre titular editorial y lectura continua.',
   mood: ['clara', 'precisa'],
+  character: ['editorial'],
 };
 
 const TYPE_SCALE = [
@@ -44,12 +50,12 @@ const TYPE_SCALE = [
 ] as const;
 
 export function TypographyCanvasView({
+  fontPairings,
   recommendedPairings,
   selectedPairing,
   onSelectPairing,
 }: TypographyCanvasViewProps) {
   const { rolePalette } = useRolePalette();
-  const [showPairings, setShowPairings] = useState(false);
   const activePairing = selectedPairing ?? recommendedPairings[0] ?? DEFAULT_PAIRING;
 
   useEffect(() => {
@@ -80,19 +86,9 @@ export function TypographyCanvasView({
             <div>
               <h2 className="text-[1rem] font-extrabold text-ink">Par tipográfico</h2>
               <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">
-                Vista independiente del sistema de fuentes aplicado a la paleta actual.
+                Biblioteca curada aplicada al sistema de fuentes de la paleta actual.
               </p>
             </div>
-
-            {recommendedPairings.length > 0 ? (
-              <button
-                type="button"
-                onClick={() => setShowPairings((open) => !open)}
-                className="rounded-md border border-border bg-bg px-3 py-2 text-[0.8125rem] font-semibold text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-              >
-                Cambiar fuentes
-              </button>
-            ) : null}
           </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -104,28 +100,13 @@ export function TypographyCanvasView({
             <FontSpecCard label="Cuerpo" family={activePairing.body.family} fontFamily={bodyFont} />
           </div>
 
-          {showPairings ? (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {recommendedPairings.map((pairing) => (
-                <button
-                  key={pairing.id}
-                  type="button"
-                  aria-pressed={activePairing.id === pairing.id}
-                  onClick={() => {
-                    onSelectPairing(pairing);
-                    setShowPairings(false);
-                  }}
-                  className={`rounded-md border px-3 py-2 text-left text-[0.75rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
-                    activePairing.id === pairing.id
-                      ? 'border-primary bg-bg text-ink ring-2 ring-primary/20'
-                      : 'border-border bg-bg text-muted hover:bg-surface-raised hover:text-ink'
-                  }`}
-                >
-                  {pairing.heading.family} + {pairing.body.family}
-                </button>
-              ))}
-            </div>
-          ) : null}
+          <div className="mt-5">
+            <PairingList
+              pairings={fontPairings}
+              selectedPairing={activePairing}
+              onSelectPairing={onSelectPairing}
+            />
+          </div>
         </section>
 
         <section className="rounded-xl border border-border bg-surface p-5">
@@ -201,12 +182,12 @@ function FontSpecCard({
   fontFamily: string;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-bg p-4">
+    <div className="rounded-lg border border-border bg-bg p-3">
       <p className="text-[0.75rem] font-semibold text-muted">{label}</p>
-      <p className="mt-3 text-[4rem] font-semibold leading-none text-ink" style={{ fontFamily }}>
+      <p className="mt-2 text-[2.75rem] font-semibold leading-none text-ink" style={{ fontFamily }}>
         Aa
       </p>
-      <p className="mt-3 truncate text-[0.9375rem] font-extrabold text-ink">{family}</p>
+      <p className="mt-2 truncate text-[0.875rem] font-extrabold text-ink">{family}</p>
     </div>
   );
 }

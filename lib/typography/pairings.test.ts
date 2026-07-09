@@ -11,6 +11,7 @@ import {
 
 function createFontMeta(overrides: Partial<FontMeta> & Pick<FontMeta, 'family'>): FontMeta {
   return {
+    googleFontsRef: `https://fonts.google.com/specimen/${overrides.family}`,
     classification: 'sans-serif',
     contrast: 'medium',
     xHeight: 'medium',
@@ -22,9 +23,11 @@ function createFontMeta(overrides: Partial<FontMeta> & Pick<FontMeta, 'family'>)
 
 function createPair(overrides: Partial<FontPair> & Pick<FontPair, 'id' | 'mood'>): FontPair {
   return {
+    displayName: overrides.id,
     heading: createFontMeta({ family: `${overrides.id}-heading`, bestFor: 'heading' }),
     body: createFontMeta({ family: `${overrides.id}-body`, bestFor: 'body' }),
     rationale: `Rationale for ${overrides.id}`,
+    character: overrides.mood,
     ...overrides,
   };
 }
@@ -118,8 +121,11 @@ function withMockPairs(run: (pairs: FontPair[]) => void): void {
 }
 
 describe('pairings', () => {
-  it('exports an empty curated pair list by default', () => {
-    expect(FONT_PAIRS).toEqual([]);
+  it('exports a curated library of about 20 pairs with character hooks', () => {
+    expect(FONT_PAIRS.length).toBeGreaterThanOrEqual(18);
+    expect(FONT_PAIRS.length).toBeLessThanOrEqual(22);
+    expect(FONT_PAIRS.every((pair) => pair.displayName && pair.character.length > 0)).toBe(true);
+    expect(FONT_PAIRS.every((pair) => pair.heading.googleFontsRef && pair.body.googleFontsRef)).toBe(true);
   });
 
   describe('getPairingsForStyle', () => {
