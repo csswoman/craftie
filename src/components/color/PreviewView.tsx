@@ -95,11 +95,9 @@ export function PreviewView({ recommendedPairings, selectedPairing, onEditRole }
 
   const previewWidthClass = family.id === 'illustration'
     ? 'max-w-5xl'
-    : activeMode === 'dashboard'
+    : activeMode === 'dashboard' || activeMode === 'landing' || activeMode === 'analytics' || activeMode === 'media'
       ? 'max-w-6xl'
-      : activeMode === 'analytics'
-        ? 'max-w-5xl'
-        : 'max-w-lg';
+      : 'max-w-lg';
 
   return (
     <div
