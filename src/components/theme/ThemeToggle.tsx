@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 
 const toggleClassName =
-  'inline-flex size-10 items-center justify-center rounded-lg text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25';
+  'inline-flex size-11 items-center justify-center rounded-lg text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25';
 
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();

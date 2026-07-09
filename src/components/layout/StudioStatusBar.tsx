@@ -6,6 +6,7 @@ import type { FontPair } from '@lib/typography/pairings';
 export type StudioStatusBarProps = {
   palette: GeneratedPalette | null;
   pairing: FontPair | null;
+  mobileDockOffset?: boolean;
 };
 
 const SWATCH_ROLES: { role: keyof GeneratedPalette; label: string }[] = [
@@ -17,13 +18,23 @@ const SWATCH_ROLES: { role: keyof GeneratedPalette; label: string }[] = [
   { role: 'neutralDark', label: 'Borde' },
 ];
 
-export function StudioStatusBar({ palette, pairing }: StudioStatusBarProps) {
+export function StudioStatusBar({
+  palette,
+  pairing,
+  mobileDockOffset = false,
+}: StudioStatusBarProps) {
   if (!palette) {
     return null;
   }
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-sticky flex justify-center px-4">
+    <div
+      className={`pointer-events-none fixed inset-x-0 z-sticky flex justify-center px-4 ${
+        mobileDockOffset
+          ? 'bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] xl:bottom-4'
+          : 'bottom-4'
+      }`}
+    >
       <div className="panel-float pointer-events-auto flex max-w-full items-center gap-4 rounded-full px-4 py-2.5">
         <div className="hidden min-w-0 items-center gap-3 sm:flex">
           <TypeChip label="Titular" value={pairing?.heading.family ?? 'Sin asignar'} />

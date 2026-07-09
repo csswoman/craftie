@@ -23,6 +23,10 @@ export const metadata: Metadata = {
     'Generate color palettes, validate WCAG accessibility, and explore font pairings.',
 };
 
+export const viewport = {
+  viewportFit: 'cover' as const,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{

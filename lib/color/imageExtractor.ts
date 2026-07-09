@@ -61,7 +61,7 @@ export function extractColorsFromRaster(
   const rgbSamples = samplePixels(raster, resolved.sampleStep, sampleOffset);
 
   if (rgbSamples.length === 0) {
-    throw new Error('No opaque pixels were available for color extraction.');
+    throw new Error('No encontramos píxeles suficientes en la imagen. Prueba con otra foto o un recorte distinto.');
   }
 
   const filteredSamples = filterNeutralSamples(rgbSamples);

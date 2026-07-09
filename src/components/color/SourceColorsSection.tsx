@@ -17,9 +17,10 @@ import { useRolePalette } from '@/context/RolePaletteContext';
 
 export type SourceColorsSectionProps = {
   colors: SelectableColor[];
+  embedded?: boolean;
 };
 
-export function SourceColorsSection({ colors }: SourceColorsSectionProps) {
+export function SourceColorsSection({ colors, embedded = false }: SourceColorsSectionProps) {
   const { rolePalette, activeRole, lockedRoles, replaceRole } = useRolePalette();
   const [pendingHex, setPendingHex] = useState<string | null>(null);
 
@@ -71,18 +72,12 @@ export function SourceColorsSection({ colors }: SourceColorsSectionProps) {
     setPendingHex((current) => (current === hex ? null : hex));
   }
 
-  return (
-    <CollapsibleSection
-      title="Colores fuente"
-      defaultOpen
-      trailing={
-        <span className="text-[0.6875rem] font-medium text-muted">
-          {uniqueColors.length} colores extraídos
-        </span>
-      }
-    >
-      <div className="space-y-3">
-        <ul className="grid grid-cols-2 gap-2" aria-label="Colores crudos extraídos">
+  const content = (
+    <div className="space-y-[var(--chrome-space-3)]">
+      <p className="font-sans text-tools-meta font-medium text-muted">
+        {uniqueColors.length} colores extraídos
+      </p>
+      <ul className="grid grid-cols-2 gap-[var(--chrome-space-2)]" aria-label="Colores crudos extraídos">
           {uniqueColors.map((color) => {
             const hex = normalizeHex(color.hex);
             const used = usedHexes.has(hex);
@@ -97,7 +92,7 @@ export function SourceColorsSection({ colors }: SourceColorsSectionProps) {
                   aria-pressed={used}
                   aria-label={`Asignar ${name}, ${hex}`}
                   onClick={() => handleColorClick(hex)}
-                  className={`flex w-full items-center gap-2 rounded-lg border bg-bg px-2 py-2 text-left transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+                  className={`flex w-full items-center gap-[var(--chrome-space-2)] rounded-[var(--chrome-radius-control)] border bg-bg px-[var(--chrome-space-2)] py-[var(--chrome-space-2)] text-left transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
                     activePending
                       ? 'border-primary ring-2 ring-primary/30'
                       : used
@@ -106,7 +101,7 @@ export function SourceColorsSection({ colors }: SourceColorsSectionProps) {
                   }`}
                 >
                   <span
-                    className={`relative flex size-7 shrink-0 items-center justify-center rounded-md ${
+                    className={`relative flex size-7 shrink-0 items-center justify-center rounded-[var(--chrome-radius-control)] ${
                       used ? 'ring-2 ring-primary ring-offset-1 ring-offset-bg' : ''
                     }`}
                     style={{ backgroundColor: hex }}
@@ -125,10 +120,10 @@ export function SourceColorsSection({ colors }: SourceColorsSectionProps) {
                     ) : null}
                   </span>
                   <span className="min-w-0">
-                    <span className="block truncate text-[0.75rem] font-semibold text-ink">
+                    <span className="block truncate font-sans text-tools-name font-medium text-ink">
                       {name}
                     </span>
-                    <span className="block font-mono text-[0.625rem] text-muted">
+                    <span className="block font-mono text-tools-meta text-muted">
                       {hex.toUpperCase()}
                     </span>
                   </span>
@@ -139,16 +134,16 @@ export function SourceColorsSection({ colors }: SourceColorsSectionProps) {
         </ul>
 
         {pendingHex ? (
-          <div className="rounded-lg border border-border bg-surface px-2.5 py-2">
-            <p className="text-[0.75rem] font-semibold text-ink">Asignar a rol</p>
-            <div className="mt-2 flex flex-wrap gap-1.5">
+          <div className="rounded-[var(--chrome-radius-card)] border border-border bg-surface px-[var(--chrome-space-2)] py-[var(--chrome-space-2)]">
+            <p className="font-sans text-tools-body font-medium text-ink">Asignar a rol</p>
+            <div className="mt-[var(--chrome-space-2)] flex flex-wrap gap-[var(--chrome-space-1)]">
               {PALETTE_ROLE_ORDER.map((role) => (
                 <button
                   key={role}
                   type="button"
                   disabled={lockedSet.has(role)}
                   onClick={() => assignToRole(role, pendingHex)}
-                  className="rounded-md border border-border bg-bg px-2 py-1 text-[0.6875rem] font-semibold text-ink transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+                  className="rounded-[var(--chrome-radius-control)] border border-border bg-bg px-[var(--chrome-space-2)] py-[var(--chrome-space-1)] font-sans text-tools-chip font-medium text-ink transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
                 >
                   {ROLE_LABELS[role]}
                 </button>
@@ -157,6 +152,44 @@ export function SourceColorsSection({ colors }: SourceColorsSectionProps) {
           </div>
         ) : null}
       </div>
+    );
+
+  if (embedded) {
+    return content;
+  }
+
+  return (
+    <CollapsibleSection
+      title="Colores fuente"
+      defaultOpen
+      variant="neutral"
+      icon={<SourceColorsIcon />}
+    >
+      {content}
     </CollapsibleSection>
+  );
+}
+
+function SourceColorsIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4">
+      <rect
+        x="3"
+        y="3"
+        width="10"
+        height="10"
+        rx="2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M5 11.5 11.5 5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }

@@ -34,7 +34,7 @@ export function ContrastBadge({
   if (compact) {
     return (
       <span
-        className="inline-flex shrink-0 items-center gap-1 rounded-full bg-black/55 px-2 py-0.5 font-mono text-[0.625rem] font-semibold text-white tabular-nums backdrop-blur-sm ring-1 ring-white/25"
+        className="inline-flex shrink-0 items-center gap-1 rounded-full bg-black/55 px-2 py-0.5 font-mono text-chrome-caption font-semibold text-white tabular-nums ring-1 ring-white/25"
         aria-label={`${contextLabel ? `${contextLabel}; ` : ''}Ratio ${ratio.toFixed(2)}; nivel ${levelLabel}; objetivo ${target}; ${STATUS_LABELS[status]}`}
       >
         {contextLabel ? (
@@ -52,10 +52,10 @@ export function ContrastBadge({
       className={`inline-flex flex-col items-end gap-0.5 rounded-md border px-3 py-2 text-right ${STATUS_CLASSES[status]}`}
       aria-label={`Ratio ${ratio.toFixed(2)}; nivel ${levelLabel}; objetivo ${target}; ${STATUS_LABELS[status]}`}
     >
-      <span className="font-mono text-[0.9375rem] font-semibold tabular-nums">
+      <span className="font-mono text-chrome-body font-semibold tabular-nums">
         {ratio.toFixed(2)}:1
       </span>
-      <span className="text-[0.75rem] font-medium">
+      <span className="text-chrome-caption font-medium">
         {levelLabel} · {STATUS_LABELS[status]}
       </span>
     </div>

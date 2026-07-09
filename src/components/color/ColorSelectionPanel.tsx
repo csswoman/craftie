@@ -60,7 +60,7 @@ export function ColorSelectionPanel({
       <div className="flex min-h-0 flex-1 flex-col">
         <SelectionPanelStatus extractedCount={0} />
         <div className="flex flex-1 items-center px-4 py-6">
-          <p className="text-[0.8125rem] text-muted">Analizando imagen…</p>
+          <p className="text-chrome-label text-muted">Extrayendo colores de la imagen…</p>
         </div>
       </div>
     );
@@ -71,8 +71,9 @@ export function ColorSelectionPanel({
       <div className="flex min-h-0 flex-1 flex-col">
         <SelectionPanelStatus extractedCount={0} />
         <div className="flex flex-1 items-center px-4 py-6">
-          <p className="text-[0.8125rem] leading-relaxed text-muted">
-            Sube una imagen a la izquierda o elige inspiración para asignar colores a cada rol.
+          <p className="text-chrome-label leading-relaxed text-muted">
+            Sube una imagen a la izquierda o elige un estilo curado para empezar a asignar colores a
+            cada rol.
           </p>
         </div>
       </div>
@@ -102,10 +103,10 @@ export function ColorSelectionPanel({
           trailing={
             <>
               {isRegenerating ? (
-                <p className="text-[0.6875rem] font-medium text-muted">Regenerando…</p>
+                <p className="text-chrome-caption font-medium text-muted">Regenerando…</p>
               ) : null}
               {colors.length > 0 ? (
-                <p className="text-[0.6875rem] font-medium text-muted">
+                <p className="text-chrome-caption font-medium text-muted">
                   {formatExtractedColorCount(colors.length)}
                 </p>
               ) : null}
@@ -144,7 +145,7 @@ function SelectionPanelStatus({
       {status ? (
         <div className="space-y-1">
           <p
-            className={`rounded-md px-2.5 py-1.5 text-[0.75rem] font-medium ${
+            className={`rounded-md px-2.5 py-1.5 text-chrome-caption font-medium ${
               status.ready ? 'bg-pass/10 text-pass' : 'bg-fail/10 text-fail'
             }`}
             role="status"
@@ -152,7 +153,7 @@ function SelectionPanelStatus({
             {status.message}
           </p>
           {status.suggestions.length > 0 ? (
-            <ul className="space-y-0.5 px-1 text-[0.6875rem] text-muted">
+            <ul className="space-y-0.5 px-1 text-chrome-caption text-muted">
               {status.suggestions.map((suggestion) => (
                 <li key={suggestion}>{suggestion}</li>
               ))}
@@ -160,15 +161,15 @@ function SelectionPanelStatus({
           ) : null}
         </div>
       ) : extractedCount === 0 && !isRegenerating ? (
-        <p className="text-[0.8125rem] font-semibold text-ink">Colores fuente</p>
+        <p className="text-chrome-label font-semibold text-ink">Colores fuente</p>
       ) : null}
       {catalogSource === 'image' ? (
-        <p className="mt-1 text-[0.6875rem] text-muted">
+        <p className="mt-1 text-chrome-caption text-muted">
           {activeRole
             ? catalogOpen
-              ? 'Toca un color para asignarlo al rol activo.'
-              : 'Despliega el catálogo para asignar un color al rol activo.'
-            : 'Elige un rol en el centro o a la izquierda, luego toca un color para asignarlo.'}
+              ? 'Toca un color del catálogo para asignarlo al rol activo.'
+              : 'Abre el catálogo de colores para asignar uno al rol activo.'
+            : 'Elige un rol en el lienzo y luego toca un color del catálogo para asignarlo.'}
         </p>
       ) : null}
     </>

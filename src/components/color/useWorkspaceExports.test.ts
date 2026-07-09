@@ -73,7 +73,7 @@ describe('useWorkspaceExports', () => {
       'text/markdown;charset=utf-8',
     );
     expect(setError).toHaveBeenCalledWith(null);
-    expect(setStatusMessage).toHaveBeenCalledWith('DESIGN.md descargado.');
+    expect(setStatusMessage).toHaveBeenCalledWith('DESIGN.md descargado en tu carpeta de descargas.');
   });
 
   it('surfaces download errors', () => {

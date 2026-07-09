@@ -19,7 +19,7 @@ export function useWorkspaceInspiration({
   setIsImageExtracting,
   setIsImageRegenerating,
   setPaletteCatalog,
-  setRightPanelOpen,
+  setRightPanelCollapsed,
   setSelectedStyleId,
 }: {
   assignFromHexes: (hexes: string[]) => void;
@@ -32,7 +32,7 @@ export function useWorkspaceInspiration({
   setIsImageExtracting: Dispatch<SetStateAction<boolean>>;
   setIsImageRegenerating: Dispatch<SetStateAction<boolean>>;
   setPaletteCatalog: Dispatch<SetStateAction<SelectableColor[]>>;
-  setRightPanelOpen: Dispatch<SetStateAction<boolean>>;
+  setRightPanelCollapsed: Dispatch<SetStateAction<boolean>>;
   setSelectedStyleId: Dispatch<SetStateAction<string | null>>;
 }) {
   function applyCuratedInspiration(hexes: string[], styleId: string | null) {
@@ -41,7 +41,7 @@ export function useWorkspaceInspiration({
     setSelectedStyleId(styleId);
     assignFromHexes(hexes);
     setGeneratedPalette(null);
-    setRightPanelOpen(true);
+    setRightPanelCollapsed(true);
     setError(null);
   }
 
@@ -74,7 +74,7 @@ export function useWorkspaceInspiration({
     setSelectedStyleId(null);
     assignFromExtracted(palette.extracted);
     setGeneratedPalette(null);
-    setRightPanelOpen(true);
+    setRightPanelCollapsed(true);
     setError(null);
   }
 

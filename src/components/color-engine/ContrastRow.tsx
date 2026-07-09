@@ -183,7 +183,7 @@ function PairSwatch({
             title="Fondo"
           />
         </div>
-        <div className="flex justify-between px-0.5 text-[0.625rem] font-medium text-muted">
+        <div className="flex justify-between px-0.5 text-chrome-caption font-medium text-muted">
           <span>Texto</span>
           <span>Fondo</span>
         </div>
@@ -213,7 +213,7 @@ function Swatch({ color, label }: { color: string; label: string }) {
         style={{ backgroundColor: color }}
         aria-hidden="true"
       />
-      <span className="text-[0.75rem] font-medium text-muted">{label}</span>
+      <span className="text-chrome-caption font-medium text-muted">{label}</span>
     </div>
   );
 }

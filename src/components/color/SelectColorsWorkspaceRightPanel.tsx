@@ -36,7 +36,13 @@ export function SelectColorsWorkspaceRightPanel({
   }
 
   if (rolePalette) {
-    return null;
+    return (
+      <div className="flex h-full min-h-0 flex-col justify-center p-6">
+        <p className="text-chrome-label leading-relaxed text-muted">
+          Elige un rol en el lienzo para revisar contraste, editar el color o ver las vistas previas.
+        </p>
+      </div>
+    );
   }
 
   return (

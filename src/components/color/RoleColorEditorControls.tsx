@@ -13,11 +13,11 @@ export function RoleHexInput({
 }) {
   return (
     <label className="block">
-      <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-muted">
+      <span className="text-chrome-label font-medium text-muted">
         HEX
       </span>
       <div className="mt-1 flex items-center overflow-hidden rounded-xl border border-border bg-bg/90 focus-within:ring-[3px] focus-within:ring-primary/20">
-        <span className="px-2.5 font-mono text-[0.8125rem] text-muted">#</span>
+        <span className="px-2.5 font-mono text-chrome-label text-muted">#</span>
         <input
           id={inputId}
           type="text"
@@ -27,7 +27,7 @@ export function RoleHexInput({
           maxLength={6}
           aria-label="Código HEX"
           onChange={(event) => onCommit(event.target.value)}
-          className="min-w-0 flex-1 bg-transparent py-2.5 pr-3 font-mono text-[0.875rem] uppercase text-ink placeholder:text-muted focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+          className="min-w-0 flex-1 bg-transparent py-2.5 pr-3 font-mono text-chrome-label uppercase text-ink placeholder:text-muted focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
         />
       </div>
     </label>
@@ -94,7 +94,7 @@ export function RoleLockToggle({ locked, onToggle }: { locked: boolean; onToggle
       aria-pressed={locked}
       aria-label={locked ? 'Desbloquear rol' : 'Bloquear rol'}
       title={locked ? 'Desbloquear' : 'Bloquear'}
-      className={`flex size-8 shrink-0 items-center justify-center rounded-xl border transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/20 ${
+      className={`flex size-11 shrink-0 items-center justify-center rounded-xl border transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/20 ${
         locked
           ? 'border-primary/40 bg-primary/10 text-primary'
           : 'border-border bg-bg text-muted hover:bg-surface-raised hover:text-ink'
@@ -122,18 +122,18 @@ export function RoleContrastBadge({ contrast }: { contrast: ActiveRoleContrastIn
       aria-live="polite"
     >
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-muted">
+        <p className="text-chrome-label font-medium text-muted">
           Contraste
         </p>
         <span
-          className={`rounded-full px-2.5 py-0.5 font-mono text-[0.8125rem] font-semibold tabular-nums ${
+          className={`rounded-full px-2.5 py-0.5 font-mono text-chrome-label font-semibold tabular-nums ${
             passes ? 'text-pass' : fails ? 'text-fail' : 'text-muted'
           }`}
         >
           {contrast.ratio.toFixed(2)}:1
         </span>
       </div>
-      <p className="mt-1 text-[0.8125rem] text-ink">{contrast.pairLabel}</p>
+      <p className="mt-1 text-chrome-label text-ink">{contrast.pairLabel}</p>
       <div className="mt-2 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <span
@@ -141,7 +141,7 @@ export function RoleContrastBadge({ contrast }: { contrast: ActiveRoleContrastIn
             style={{ backgroundColor: contrast.foregroundHex }}
             aria-hidden="true"
           />
-          <span className="text-[0.6875rem] text-muted">sobre</span>
+          <span className="text-chrome-caption text-muted">sobre</span>
           <span
             className="inline-block size-3.5 shrink-0 rounded-full ring-1 ring-inset ring-ink/10"
             style={{ backgroundColor: contrast.backgroundHex }}
@@ -149,7 +149,7 @@ export function RoleContrastBadge({ contrast }: { contrast: ActiveRoleContrastIn
           />
         </div>
         <span
-          className={`text-[0.6875rem] font-semibold ${
+          className={`text-chrome-caption font-semibold ${
             passes ? 'text-pass' : fails ? 'text-fail' : 'text-muted'
           }`}
         >
@@ -187,11 +187,11 @@ function OklchSlider({
       <div className="mb-1 flex items-baseline justify-between gap-2">
         <label
           htmlFor={id}
-          className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-muted"
+          className="text-chrome-label font-medium text-muted"
         >
           {label}
         </label>
-        <span className="font-mono text-[0.8125rem] tabular-nums text-muted">{displayValue}</span>
+        <span className="font-mono text-chrome-label tabular-nums text-muted">{displayValue}</span>
       </div>
       <input
         id={id}

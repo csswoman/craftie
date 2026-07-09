@@ -1,18 +1,22 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, type ReactNode } from 'react';
 
 import { PanelResizeHandle } from '@/components/layout/PanelResizeHandle';
 import { useStudioPanelLayout } from '@/components/layout/useStudioPanelLayout';
 import { useRolePaletteOptional } from '@/context/RolePaletteContext';
+import { useDialogAccessibility } from '@/lib/browser/useDialogAccessibility';
+import { useMinWidthQuery } from '@/lib/browser/useMinWidthQuery';
 
 export type StudioCanvasProps = {
   sidebar: ReactNode;
   main: ReactNode;
   rightPanel?: ReactNode;
+  mobileToolsDock?: ReactNode;
   showRightPanel?: boolean;
   /** Colapsa el panel derecho al elegir un rol; lo expande al volver a asignar. */
   syncRightPanelWithActiveRole?: boolean;
+  rightPanelCollapsed?: boolean;
   onRightPanelCollapsedChange?: (collapsed: boolean) => void;
 };
 
@@ -20,13 +24,17 @@ export function StudioCanvas({
   sidebar,
   main,
   rightPanel,
+  mobileToolsDock,
   showRightPanel = false,
   syncRightPanelWithActiveRole = false,
+  rightPanelCollapsed,
   onRightPanelCollapsedChange,
 }: StudioCanvasProps) {
   const rolePaletteContext = useRolePaletteOptional();
   const activeRole = rolePaletteContext?.activeRole ?? null;
   const previousActiveRole = useRef(activeRole);
+  const inspectorRef = useRef<HTMLElement>(null);
+  const isWideLayout = useMinWidthQuery(1280);
 
   const {
     sidebarWidth,
@@ -37,6 +45,24 @@ export function StudioCanvas({
     setRightCollapsed,
   } = useStudioPanelLayout();
 
+  const displayRightCollapsed = rightPanelCollapsed ?? rightCollapsed;
+
+  const updateRightCollapsed = useCallback(
+    (collapsed: boolean) => {
+      setRightCollapsed(collapsed);
+      onRightPanelCollapsedChange?.(collapsed);
+    },
+    [onRightPanelCollapsedChange, setRightCollapsed],
+  );
+
+  useEffect(() => {
+    if (rightPanelCollapsed !== undefined) {
+      return;
+    }
+
+    onRightPanelCollapsedChange?.(rightCollapsed);
+  }, [onRightPanelCollapsedChange, rightCollapsed, rightPanelCollapsed]);
+
   useEffect(() => {
     if (!syncRightPanelWithActiveRole) {
       return;
@@ -45,26 +71,32 @@ export function StudioCanvas({
     const previous = previousActiveRole.current;
 
     if (activeRole !== null && previous === null) {
-      setRightCollapsed(false);
+      updateRightCollapsed(false);
     }
 
     if (activeRole === null && previous !== null) {
-      setRightCollapsed(true);
+      updateRightCollapsed(true);
     }
 
     previousActiveRole.current = activeRole;
-  }, [activeRole, setRightCollapsed, syncRightPanelWithActiveRole]);
+  }, [activeRole, syncRightPanelWithActiveRole, updateRightCollapsed]);
 
-  useEffect(() => {
-    onRightPanelCollapsedChange?.(rightCollapsed);
-  }, [onRightPanelCollapsedChange, rightCollapsed]);
-
+  const showSidebarCollapsed = isWideLayout && sidebarCollapsed;
   const showRight = showRightPanel && rightPanel;
+  const inspectorOpen = Boolean(showRight && !displayRightCollapsed);
+
+  useDialogAccessibility({
+    open: inspectorOpen,
+    dialogRef: inspectorRef,
+    onClose: () => updateRightCollapsed(true),
+    initialFocusSelector: '[data-inspector-close]',
+    lockScroll: true,
+  });
 
   return (
     <div className="canvas-dots relative flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 lg:gap-5 lg:p-6 xl:flex-row">
-        {sidebarCollapsed ? (
+      <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:gap-5 lg:p-6 lg:pb-6 xl:flex-row xl:pb-6">
+        {showSidebarCollapsed ? (
           <aside aria-label="Herramientas" className="hidden shrink-0 xl:flex">
             <div className="panel-float flex h-full min-h-0 flex-col overflow-hidden">
               <PanelCollapseRail
@@ -77,10 +109,10 @@ export function StudioCanvas({
         ) : (
           <aside
             aria-label="Herramientas"
-            className="flex min-h-0 shrink-0 flex-col xl:h-full"
+            className="hidden min-h-0 shrink-0 flex-col xl:flex xl:h-full"
             style={{ width: sidebarWidth }}
           >
-            <div className="panel-float flex h-full max-h-[min(70vh,640px)] min-h-[240px] flex-col overflow-hidden xl:max-h-none xl:min-h-0">
+            <div className="panel-float flex h-full min-h-0 flex-col overflow-hidden">
               <PanelCollapseBar
                 align="end"
                 title="Herramientas"
@@ -97,43 +129,54 @@ export function StudioCanvas({
           </aside>
         )}
 
-        {!sidebarCollapsed ? (
+        {!showSidebarCollapsed ? (
           <PanelResizeHandle onResize={resizeSidebar} label="Redimensionar panel de herramientas" />
         ) : null}
 
-        <main aria-label="Vista del estudio" className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <div className="panel-float flex min-h-0 flex-1 flex-col overflow-hidden">{main}</div>
+        <main
+          aria-label="Vista del estudio"
+          className="flex min-h-0 min-w-0 flex-1 flex-col xl:min-h-0"
+        >
+          <div className="panel-float flex min-h-[min(52vh,560px)] flex-1 flex-col overflow-hidden xl:min-h-0">
+            {main}
+          </div>
         </main>
       </div>
+
+      {!isWideLayout && mobileToolsDock ? mobileToolsDock : null}
 
       {showRight ? (
         <div
           className={`absolute inset-0 z-30 transition-opacity duration-200 ${
-            rightCollapsed ? 'pointer-events-none opacity-0' : 'opacity-100'
+            displayRightCollapsed ? 'pointer-events-none opacity-0' : 'opacity-100'
           }`}
-          aria-hidden={rightCollapsed}
+          aria-hidden={displayRightCollapsed}
         >
           <button
             type="button"
             aria-label="Cerrar inspector"
-            className="absolute inset-0 cursor-default bg-ink/10 backdrop-blur-[1px]"
-            onClick={() => setRightCollapsed(true)}
+            className="absolute inset-0 cursor-default bg-ink/10"
+            onClick={() => updateRightCollapsed(true)}
           />
           <aside
+            ref={inspectorRef}
+            role="dialog"
+            aria-modal="true"
             aria-label="Inspector"
             className={`absolute right-4 top-4 bottom-4 flex w-[min(30rem,calc(100vw-2rem))] min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-bg shadow-[0_24px_80px_rgba(58,65,57,0.18)] transition-transform duration-200 motion-reduce:transition-none ${
-              rightCollapsed ? 'translate-x-[105%]' : 'translate-x-0'
+              displayRightCollapsed ? 'translate-x-[105%]' : 'translate-x-0'
             }`}
           >
             <PanelCollapseBar
               align="start"
               title="Inspector"
-              subtitle="Rol activo con edición y contraste."
+              subtitle="Edición de rol, contraste y vistas previas."
             >
               <PanelCollapseButton
                 label="Cerrar inspector"
                 direction="right"
-                onClick={() => setRightCollapsed(true)}
+                closeTarget
+                onClick={() => updateRightCollapsed(true)}
               />
             </PanelCollapseBar>
             <div className="min-h-0 flex-1 overflow-hidden">{rightPanel}</div>
@@ -163,8 +206,8 @@ function PanelCollapseBar({
     >
       <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
         <div className={`min-w-0 ${align === 'end' ? 'text-right' : 'text-left'}`}>
-          <p className="truncate text-[0.8125rem] font-semibold text-ink">{title}</p>
-          {subtitle ? <p className="truncate text-[0.6875rem] text-muted">{subtitle}</p> : null}
+          <p className="truncate text-chrome-label font-semibold text-ink">{title}</p>
+          {subtitle ? <p className="truncate text-chrome-caption text-muted">{subtitle}</p> : null}
         </div>
         <div className="shrink-0">{children}</div>
       </div>
@@ -175,19 +218,22 @@ function PanelCollapseBar({
 function PanelCollapseButton({
   label,
   direction,
+  closeTarget = false,
   onClick,
 }: {
   label: string;
   direction: 'left' | 'right';
+  closeTarget?: boolean;
   onClick: () => void;
 }) {
   return (
     <button
       type="button"
+      data-inspector-close={closeTarget ? '' : undefined}
       aria-label={label}
       title={label}
       onClick={onClick}
-      className="flex size-7 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+      className="flex size-11 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
     >
       <ChevronIcon direction={direction} />
     </button>
@@ -209,7 +255,7 @@ function PanelCollapseRail({
       aria-label={label}
       title={label}
       onClick={onClick}
-      className="flex h-full w-9 items-center justify-center text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+      className="flex h-full min-h-11 w-11 items-center justify-center text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
     >
       <ChevronIcon direction={direction} />
     </button>

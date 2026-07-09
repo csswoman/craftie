@@ -55,7 +55,7 @@ function useSetup(overrides: Partial<Parameters<typeof useWorkspacePaletteAction
     setError: vi.fn(),
     setGeneratedPalette: vi.fn(),
     setPaletteCatalog: vi.fn(),
-    setRightPanelOpen: vi.fn(),
+    setRightPanelCollapsed: vi.fn(),
     ...overrides,
   };
 
@@ -83,7 +83,7 @@ describe('useWorkspacePaletteActions', () => {
     expect(options.assignFromHexes).toHaveBeenCalledWith(
       expect.arrayContaining(['#123456']),
     );
-    expect(options.setRightPanelOpen).toHaveBeenCalledWith(true);
+    expect(options.setRightPanelCollapsed).not.toHaveBeenCalled();
     expect(options.setError).toHaveBeenCalledWith(null);
   });
 

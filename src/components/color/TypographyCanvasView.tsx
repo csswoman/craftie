@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo } from 'react';
 
+import { resolveActiveFontPair } from '@lib/typography/activePairing';
 import { buildFontFamilyStack } from '@lib/typography/googleFonts';
 import type { FontPair } from '@lib/typography/pairings';
 
@@ -14,32 +15,6 @@ export type TypographyCanvasViewProps = {
   recommendedPairings: FontPair[];
   selectedPairing: FontPair | null;
   onSelectPairing: (pairing: FontPair) => void;
-};
-
-const DEFAULT_PAIRING: FontPair = {
-  id: 'craftie-default-lora-nunito',
-  displayName: 'Craftie base',
-  heading: {
-    family: 'Lora',
-    googleFontsRef: 'https://fonts.google.com/specimen/Lora',
-    classification: 'serif',
-    contrast: 'medium',
-    xHeight: 'medium',
-    personality: ['editorial', 'clara'],
-    bestFor: 'heading',
-  },
-  body: {
-    family: 'Nunito',
-    googleFontsRef: 'https://fonts.google.com/specimen/Nunito',
-    classification: 'sans-serif',
-    contrast: 'low',
-    xHeight: 'high',
-    personality: ['legible', 'amable'],
-    bestFor: 'body',
-  },
-  rationale: 'Par base de Craftie: contraste suficiente entre titular editorial y lectura continua.',
-  mood: ['clara', 'precisa'],
-  character: ['editorial'],
 };
 
 const TYPE_SCALE = [
@@ -56,7 +31,7 @@ export function TypographyCanvasView({
   onSelectPairing,
 }: TypographyCanvasViewProps) {
   const { rolePalette } = useRolePalette();
-  const activePairing = selectedPairing ?? recommendedPairings[0] ?? DEFAULT_PAIRING;
+  const activePairing = resolveActiveFontPair(selectedPairing, recommendedPairings);
 
   useEffect(() => {
     loadGoogleFonts([activePairing, ...recommendedPairings]);
@@ -84,8 +59,8 @@ export function TypographyCanvasView({
         <section className="rounded-xl border border-border bg-surface p-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h2 className="text-[1rem] font-extrabold text-ink">Par tipográfico</h2>
-              <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">
+              <h2 className="text-chrome-title">Par tipográfico</h2>
+              <p className="prose-measure mt-1 text-chrome-label leading-relaxed text-muted">
                 Biblioteca curada aplicada al sistema de fuentes de la paleta actual.
               </p>
             </div>
@@ -110,14 +85,14 @@ export function TypographyCanvasView({
         </section>
 
         <section className="rounded-xl border border-border bg-surface p-5">
-          <h2 className="text-[1rem] font-extrabold text-ink">Escala tipográfica</h2>
+          <h2 className="text-chrome-title">Escala tipográfica</h2>
           <div className="mt-4 divide-y divide-border">
             {TYPE_SCALE.map((item) => (
               <div
                 key={item.label}
                 className="grid grid-cols-[5rem_minmax(0,1fr)_7rem] items-center gap-3 py-3"
               >
-                <span className="text-[0.8125rem] font-semibold text-muted">{item.label}</span>
+                <span className="text-chrome-label font-semibold text-muted">{item.label}</span>
                 <span
                   className="truncate text-ink"
                   style={{
@@ -146,7 +121,7 @@ export function TypographyCanvasView({
             style={{ backgroundColor: background, color: text }}
           >
             <p
-              className="text-[0.8125rem] font-semibold"
+              className="text-chrome-label font-semibold"
               style={{ color: primary, fontFamily: bodyFont }}
             >
               Legibilidad en contexto
@@ -187,7 +162,7 @@ function FontSpecCard({
       <p className="mt-2 text-[2.75rem] font-semibold leading-none text-ink" style={{ fontFamily }}>
         Aa
       </p>
-      <p className="mt-2 truncate text-[0.875rem] font-extrabold text-ink">{family}</p>
+      <p className="mt-2 truncate text-chrome-label font-semibold text-ink">{family}</p>
     </div>
   );
 }

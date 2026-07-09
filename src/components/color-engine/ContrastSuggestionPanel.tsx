@@ -36,7 +36,7 @@ export function ContrastSuggestionPanel({
         <Button
           type="button"
           variant="ghost"
-          className="h-auto px-0 py-1 text-[0.8125rem] font-semibold text-primary hover:bg-transparent"
+          className="h-auto min-h-11 px-0 py-1 text-chrome-label font-semibold text-primary hover:bg-transparent"
           onClick={onSuggest}
         >
           Sugerir variante accesible
@@ -47,7 +47,7 @@ export function ContrastSuggestionPanel({
 
   if (suggestion === null) {
     return (
-      <p className={`${className} text-[0.75rem] text-muted`}>
+      <p className={`${className} text-chrome-caption text-muted`}>
         No se encontró una variante accesible ajustando solo la luminosidad.
       </p>
     );
@@ -62,17 +62,17 @@ export function ContrastSuggestionPanel({
           aria-hidden="true"
         />
         <div className="min-w-0">
-          <p className="font-mono text-[0.8125rem] font-semibold tabular-nums text-ink">
+          <p className="font-mono text-chrome-label font-semibold tabular-nums text-ink">
             {suggestion.hex}
           </p>
-          <p className="text-[0.75rem] text-muted">
+          <p className="text-chrome-caption text-muted">
             Nuevo ratio {suggestion.ratio.toFixed(2)}:1 · {levelLabel(suggestion.normalText)}
           </p>
         </div>
       </div>
 
       <p
-        className="rounded-md px-2.5 py-2 text-[0.8125rem] leading-relaxed"
+        className="rounded-md px-2.5 py-2 text-chrome-label leading-relaxed"
         style={{ color: suggestion.hex, backgroundColor: backgroundHex }}
       >
         {CONTRAST_SAMPLE_TEXT}
@@ -83,7 +83,7 @@ export function ContrastSuggestionPanel({
           <Button
             type="button"
             variant="primary"
-            className="h-8 px-3 text-[0.75rem]"
+            className="min-h-11 px-3 text-chrome-caption"
             onClick={() => onApply(suggestion.hex)}
           >
             Aplicar a la paleta
@@ -92,7 +92,7 @@ export function ContrastSuggestionPanel({
         <Button
           type="button"
           variant="ghost"
-          className="h-8 border border-border px-3 text-[0.75rem]"
+          className="min-h-11 border border-border px-3 text-chrome-caption"
           onClick={onCopy}
         >
           {copied ? 'Copiado' : 'Copiar HEX'}

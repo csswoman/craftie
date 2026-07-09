@@ -55,7 +55,7 @@ describe('validateImageFile', () => {
   it('throws for unsupported file types', () => {
     const file = new File(['pixels'], 'notes.txt', { type: 'text/plain' });
 
-    expect(() => validateImageFile(file, 5)).toThrow(/Unsupported image format/i);
+    expect(() => validateImageFile(file, 5)).toThrow(/Formato no admitido/i);
   });
 
   it('throws when file size exceeds the limit', () => {
@@ -63,7 +63,7 @@ describe('validateImageFile', () => {
       type: 'image/png',
     });
 
-    expect(() => validateImageFile(file, 5)).toThrow(/exceeds maximum size/i);
+    expect(() => validateImageFile(file, 5)).toThrow(/supera el límite/i);
   });
 
   it('accepts common image mime types', () => {
@@ -142,7 +142,7 @@ describe('extractColorsFromRaster', () => {
     const raster = createRaster(20, 20, () => [0, 0, 0, 0]);
 
     expect(() => extractColorsFromRaster(raster, { count: 2, sampleStep: 2 })).toThrow(
-      /No opaque pixels/i,
+      /píxeles suficientes/i,
     );
   });
 

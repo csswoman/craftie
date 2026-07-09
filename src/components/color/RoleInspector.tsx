@@ -38,17 +38,15 @@ function RoleInspectorPanel({ role, onClose }: { role: PaletteRoleId; onClose: (
     >
       <header className="flex items-start justify-between gap-3 border-b border-border/70 pb-4">
         <div className="min-w-0">
-          <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-muted">
-            Inspector
-          </p>
-          <p className="mt-1 truncate text-[0.875rem] text-muted">{swatchName} · {ROLE_LABELS[role]}</p>
+          <h3 className="truncate text-chrome-title">{ROLE_LABELS[role]}</h3>
+          <p className="mt-0.5 truncate text-chrome-label text-muted">{swatchName}</p>
         </div>
         <div className="flex items-center gap-2">
           <RoleLockToggle locked={editor.locked} onToggle={editor.toggleLock} />
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 items-center rounded-md border border-border px-2.5 text-[0.75rem] font-semibold text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+            className="flex min-h-11 items-center rounded-md border border-border px-2.5 text-chrome-caption font-semibold text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           >
             Cerrar
           </button>
@@ -79,8 +77,7 @@ function RoleInspectorPanel({ role, onClose }: { role: PaletteRoleId; onClose: (
 function RoleInspectorEmpty() {
   return (
     <section className="rounded-2xl border border-dashed border-border bg-surface/60 px-4 py-4">
-      <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-muted">Inspector</p>
-      <p className="mt-2 text-[0.875rem] font-medium text-ink">Selecciona un rol para editarlo.</p>
+      <p className="text-chrome-label font-medium text-ink">Selecciona un rol para editarlo.</p>
     </section>
   );
 }

@@ -8,6 +8,8 @@ type PaletteColumnToolbarProps = {
   showShades: boolean;
   lightChrome: boolean;
   hoverGroup?: 'column' | 'slot';
+  alwaysVisible?: boolean;
+  layout?: 'overlay' | 'inline';
   onToggleLock: () => void;
   onMoveLeft: () => void;
   onMoveRight: () => void;
@@ -30,6 +32,8 @@ export function PaletteColumnToolbar({
   showShades,
   lightChrome,
   hoverGroup = 'column',
+  alwaysVisible = false,
+  layout = 'overlay',
   onToggleLock,
   onMoveLeft,
   onMoveRight,
@@ -38,22 +42,36 @@ export function PaletteColumnToolbar({
   onOpenInfo,
 }: PaletteColumnToolbarProps) {
   const slotMode = hoverGroup === 'slot';
+  const inlineLayout = layout === 'inline';
+  const visibilityClass = alwaysVisible
+    ? 'opacity-100'
+    : HOVER_VISIBILITY[hoverGroup];
 
   return (
     <div
-      className={`pointer-events-none absolute z-10 flex ${
-        slotMode ? 'inset-x-0 top-4 justify-center' : 'inset-x-0 top-[18%] justify-center'
-      } ${HOVER_VISIBILITY[hoverGroup]}`}
+      className={
+        inlineLayout
+          ? `relative z-10 flex shrink-0 ${visibilityClass}`
+          : `pointer-events-none absolute z-10 flex ${
+              slotMode ? 'inset-x-0 top-4 justify-center' : 'inset-x-0 top-[18%] justify-center'
+            } ${visibilityClass}`
+      }
     >
       <div
         className={`pointer-events-auto flex items-center ${
-          slotMode ? 'flex-row gap-1.5' : 'flex-col gap-2.5'
+          inlineLayout
+            ? 'flex-row flex-wrap justify-end gap-0.5'
+            : slotMode
+              ? 'flex-row gap-1.5'
+              : 'flex-col gap-2.5'
         }`}
       >
         <ToolbarIconButton
           label={showShades ? 'Ocultar shades' : 'Ver shades'}
           active={showShades}
           lightChrome={lightChrome}
+          compact={inlineLayout}
+          showTooltip={!alwaysVisible}
           onClick={onToggleShades}
         >
           <ShadesIcon />
@@ -65,6 +83,8 @@ export function PaletteColumnToolbar({
               label="Mover a la izquierda"
               disabled={!canMoveLeft || locked}
               lightChrome={lightChrome}
+              compact={inlineLayout}
+              showTooltip={!alwaysVisible}
               onClick={onMoveLeft}
             >
               <MoveLeftIcon />
@@ -73,6 +93,8 @@ export function PaletteColumnToolbar({
               label="Mover a la derecha"
               disabled={!canMoveRight || locked}
               lightChrome={lightChrome}
+              compact={inlineLayout}
+              showTooltip={!alwaysVisible}
               onClick={onMoveRight}
             >
               <MoveRightIcon />
@@ -80,11 +102,23 @@ export function PaletteColumnToolbar({
           </>
         ) : null}
 
-        <ToolbarIconButton label="Copiar HEX" lightChrome={lightChrome} onClick={onCopyHex}>
+        <ToolbarIconButton
+          label="Copiar HEX"
+          lightChrome={lightChrome}
+          compact={inlineLayout}
+          showTooltip={!alwaysVisible}
+          onClick={onCopyHex}
+        >
           <CopyIcon />
         </ToolbarIconButton>
 
-        <ToolbarIconButton label="Ver info del color" lightChrome={lightChrome} onClick={onOpenInfo}>
+        <ToolbarIconButton
+          label="Ver info del color"
+          lightChrome={lightChrome}
+          compact={inlineLayout}
+          showTooltip={!alwaysVisible}
+          onClick={onOpenInfo}
+        >
           <InfoIcon />
         </ToolbarIconButton>
 
@@ -93,6 +127,8 @@ export function PaletteColumnToolbar({
             label={locked ? 'Desbloquear color' : 'Bloquear color'}
             active={locked}
             lightChrome={lightChrome}
+            compact={inlineLayout}
+            showTooltip={!alwaysVisible}
             onClick={onToggleLock}
           >
             <LockIcon locked={locked} />
@@ -109,6 +145,8 @@ function ToolbarIconButton({
   disabled = false,
   active = false,
   lightChrome,
+  compact = false,
+  showTooltip = true,
   onClick,
 }: {
   label: string;
@@ -116,6 +154,8 @@ function ToolbarIconButton({
   disabled?: boolean;
   active?: boolean;
   lightChrome: boolean;
+  compact?: boolean;
+  showTooltip?: boolean;
   onClick: () => void;
 }) {
   const chromeClasses = lightChrome
@@ -136,16 +176,20 @@ function ToolbarIconButton({
         title={label}
         disabled={disabled}
         onClick={onClick}
-        className={`flex size-8 items-center justify-center rounded-md text-current transition-[opacity,transform,background-color] focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-35 ${chromeClasses.focus} ${chromeClasses.button}`}
+        className={`flex items-center justify-center rounded-md text-current transition-[opacity,transform,background-color] focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-35 ${
+          compact ? 'size-10' : 'size-11'
+        } ${chromeClasses.focus} ${chromeClasses.button}`}
       >
         {children}
       </button>
-      <span
-        role="tooltip"
-        className="pointer-events-none absolute left-1/2 top-[calc(100%+8px)] z-20 -translate-x-1/2 whitespace-nowrap rounded-md border border-border bg-ink px-2 py-1 text-[0.6875rem] font-medium text-bg opacity-0 shadow-md transition-opacity group-hover/tooltip:opacity-100 group-focus-within/tooltip:opacity-100"
-      >
-        {label}
-      </span>
+      {showTooltip ? (
+        <span
+          role="tooltip"
+          className="pointer-events-none absolute left-1/2 top-[calc(100%+8px)] z-20 -translate-x-1/2 whitespace-nowrap rounded-md border border-border bg-ink px-2 py-1 text-chrome-caption font-medium text-bg opacity-0 shadow-md transition-opacity group-hover/tooltip:opacity-100 group-focus-within/tooltip:opacity-100"
+        >
+          {label}
+        </span>
+      ) : null}
     </div>
   );
 }

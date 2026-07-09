@@ -57,7 +57,7 @@ export function ColorDetailActionRow({
         />
         <div className="min-w-0 text-center">
           <p className="truncate text-[0.75rem] font-semibold leading-tight text-ink">{name}</p>
-          <p className="font-mono text-[0.6875rem] leading-tight text-muted">{hex.toUpperCase()}</p>
+          <p className="font-mono text-chrome-caption leading-tight text-muted">{hex.toUpperCase()}</p>
         </div>
         <div className="flex justify-center gap-1">
           <IconActionButton
@@ -109,7 +109,7 @@ export function ColorDetailActionRow({
       />
       <div className="min-w-0 flex-1">
         <p className="truncate text-[0.75rem] font-semibold leading-tight text-ink">{name}</p>
-        <p className="font-mono text-[0.6875rem] leading-tight text-muted">{hex.toUpperCase()}</p>
+        <p className="font-mono text-chrome-caption leading-tight text-muted">{hex.toUpperCase()}</p>
       </div>
       <div className="flex shrink-0 gap-1">
         <IconActionButton

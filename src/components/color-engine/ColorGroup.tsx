@@ -36,7 +36,7 @@ export function ColorGroup({
     <section aria-label={title}>
       <div className="flex items-baseline justify-between gap-2">
         <h3 className="text-[0.8125rem] font-semibold text-ink">{title}</h3>
-        <p className="shrink-0 text-[0.6875rem] font-medium text-muted">
+        <p className="shrink-0 text-chrome-caption font-medium text-muted">
           {formatGroupSelectionLabel(groupId, selectedCount)}
         </p>
       </div>

@@ -38,6 +38,7 @@ export function AddHexColorForm({ onSubmit, compact = false }: AddHexColorFormPr
       <div className="mt-2 space-y-2">
         <input
           type="text"
+          name="hex"
           value={hexValue}
           onChange={(event) => {
             setHexValue(event.target.value);
@@ -45,6 +46,7 @@ export function AddHexColorForm({ onSubmit, compact = false }: AddHexColorFormPr
             setIsError(false);
           }}
           placeholder="#6986B8"
+          autoComplete="off"
           spellCheck={false}
           maxLength={7}
           aria-label="Código HEX"
@@ -53,6 +55,7 @@ export function AddHexColorForm({ onSubmit, compact = false }: AddHexColorFormPr
         <div>
           <input
             type="text"
+            name="customName"
             value={nameValue}
             onChange={(event) => {
               setNameValue(event.target.value);
@@ -60,13 +63,14 @@ export function AddHexColorForm({ onSubmit, compact = false }: AddHexColorFormPr
               setIsError(false);
             }}
             placeholder="Nombre opcional, p. ej. Azul acero"
+            autoComplete="off"
             spellCheck={false}
             maxLength={CUSTOM_COLOR_NAME_MAX_LENGTH}
             aria-describedby="custom-color-name-hint"
             aria-label="Nombre del color"
             className="w-full rounded-md border border-border bg-bg px-3 py-2 text-[0.8125rem] text-ink placeholder:text-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           />
-          <p id="custom-color-name-hint" className="mt-1 text-[0.6875rem] text-muted">
+          <p id="custom-color-name-hint" className="mt-1 text-chrome-caption text-muted">
             {compact ? 'Nombre opcional' : `Máximo ${CUSTOM_COLOR_NAME_MAX_LENGTH} caracteres. Acepta emoji y acentos.`}
           </p>
         </div>

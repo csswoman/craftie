@@ -46,28 +46,14 @@ export function PaletteColumn({
   const textColor = pickReadableTextColor(column.hex);
   const lightChrome = prefersLightSelectionRing(column.hex);
   const canApplyShade = editable && !locked;
+  const columnLabel = locked
+    ? `${column.name}, ${column.hex}, color bloqueado`
+    : `${column.name}, ${column.hex}`;
 
   return (
     <article
-      role="button"
-      tabIndex={0}
-      aria-label={`Ver detalles de ${column.name}`}
-      onClick={() => {
-        if (!showShades) {
-          onSelectColor(column.hex);
-        }
-      }}
-      onKeyDown={(event) => {
-        if (showShades) {
-          return;
-        }
-
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          onSelectColor(column.hex);
-        }
-      }}
-      className="group/column relative flex w-full cursor-pointer flex-col items-center justify-end px-3 pb-4 pt-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+      aria-label={columnLabel}
+      className="group/column relative flex w-full flex-col items-center justify-end px-3 pb-4 pt-8"
       style={{ backgroundColor: column.hex, color: textColor }}
     >
       {!showShades ? (
@@ -101,7 +87,8 @@ export function PaletteColumn({
       {locked ? (
         <span
           className="absolute right-3 top-3 z-10 size-2 rounded-full bg-white/80"
-          aria-label="Color bloqueado"
+          aria-hidden="true"
+          title="Color bloqueado"
         />
       ) : null}
 
@@ -122,7 +109,12 @@ export function PaletteColumn({
       ) : null}
 
       {!showShades ? (
-        <div className="mt-auto space-y-0.5 text-center">
+        <button
+          type="button"
+          onClick={() => onSelectColor(column.hex)}
+          aria-label={`Seleccionar ${column.name}`}
+          className="mt-auto w-full space-y-0.5 rounded-md text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+        >
           <p className="font-mono text-[clamp(0.875rem,2vw,1.25rem)] font-semibold tracking-[0.06em]">
             {column.hex.replace('#', '').toUpperCase()}
           </p>
@@ -130,9 +122,9 @@ export function PaletteColumn({
             {column.name}
           </p>
           {column.roleLabel ? (
-            <p className="text-[0.6875rem] font-medium opacity-75">{column.roleLabel}</p>
+            <p className="text-chrome-caption font-medium opacity-75">{column.roleLabel}</p>
           ) : null}
-        </div>
+        </button>
       ) : null}
     </article>
   );

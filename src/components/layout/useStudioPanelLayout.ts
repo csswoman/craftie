@@ -27,7 +27,7 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
-function readStoredLayout(): PanelLayout {
+export function readStudioPanelLayout(): PanelLayout {
   if (typeof window === 'undefined') {
     return { ...DEFAULTS };
   }
@@ -67,9 +67,30 @@ export function useStudioPanelLayout() {
   useEffect(() => {
     // The saved panel layout lives in localStorage, so it is only known after mount.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLayout(readStoredLayout());
+    setLayout(readStudioPanelLayout());
     setLayoutReady(true);
   }, []);
+
+  useEffect(() => {
+    if (!layoutReady) {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia('(min-width: 1280px)');
+
+    function keepSidebarVisibleOnNarrowViewports() {
+      if (!mediaQuery.matches) {
+        setLayout((current) =>
+          current.sidebarCollapsed ? { ...current, sidebarCollapsed: false } : current,
+        );
+      }
+    }
+
+    keepSidebarVisibleOnNarrowViewports();
+    mediaQuery.addEventListener('change', keepSidebarVisibleOnNarrowViewports);
+
+    return () => mediaQuery.removeEventListener('change', keepSidebarVisibleOnNarrowViewports);
+  }, [layoutReady]);
 
   useEffect(() => {
     if (!layoutReady) {

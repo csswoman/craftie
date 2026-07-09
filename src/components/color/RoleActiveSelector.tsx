@@ -13,8 +13,8 @@ export function RoleActiveSelector() {
 
   return (
     <div className="h-full overflow-y-auto px-3 py-3">
-      <p className="text-[1rem] font-extrabold text-ink">Rol activo</p>
-      <p className="mt-0.5 text-[0.875rem] leading-relaxed text-muted">
+      <h2 className="text-chrome-title">Rol activo</h2>
+      <p className="prose-measure mt-0.5 text-chrome-label leading-relaxed text-muted">
         Sincronizado con la paleta central.
       </p>
       <div className="mt-7 flex flex-col gap-2">
@@ -39,15 +39,15 @@ export function RoleActiveSelector() {
                 style={{ backgroundColor: slot.hex }}
               />
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[0.9375rem] font-extrabold text-ink">
+                <span className="block truncate text-chrome-body font-semibold text-ink">
                   {ROLE_LABELS[role]}
                 </span>
-                <span className="block truncate text-[0.8125rem] font-medium text-muted">
+                <span className="block truncate text-chrome-label font-medium text-muted">
                   {slot.name}
                 </span>
               </span>
               <span
-                className={`rounded-full px-2 py-0.5 text-[0.75rem] font-bold ${
+                className={`rounded-full px-2 py-0.5 text-chrome-caption font-semibold ${
                   isActive ? 'bg-bg/70 text-primary' : 'bg-surface text-primary'
                 }`}
               >

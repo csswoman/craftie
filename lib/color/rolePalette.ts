@@ -58,6 +58,7 @@ export type PaletteSeeds = {
   neutralHue: number;
   extracted?: ExtractedColor[];
   vibrancy?: number;
+  illustrationSeed?: number;
 };
 
 export function extractSeedsFromPalette(palette: RolePalette): PaletteSeeds {

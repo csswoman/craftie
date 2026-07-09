@@ -14,6 +14,7 @@ import { DESIGN_STYLES } from '@lib/styles/presets';
 import { FONT_PAIRS, getRecommendedPairings, type FontPair } from '@lib/typography/pairings';
 import type { StudioFlowStepId } from '@lib/studio/studioFlow';
 
+import { readStudioPanelLayout } from '@/components/layout/useStudioPanelLayout';
 import { useWorkspaceExports } from '@/components/color/useWorkspaceExports';
 import { useWorkspaceInspiration } from '@/components/color/useWorkspaceInspiration';
 import { useWorkspacePaletteActions } from '@/components/color/useWorkspacePaletteActions';
@@ -43,8 +44,9 @@ export function useSelectColorsWorkspaceController() {
   const [isImageExtracting, setIsImageExtracting] = useState(false);
   const [isImageRegenerating, setIsImageRegenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [rightPanelOpen, setRightPanelOpen] = useState(false);
-  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
+  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(
+    () => readStudioPanelLayout().rightCollapsed,
+  );
   const [inspirationModalOpen, setInspirationModalOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -183,7 +185,7 @@ export function useSelectColorsWorkspaceController() {
       setError(null);
       const nextPalette = generatePaletteFromRolePalette(rolePalette!);
       setGeneratedPalette(nextPalette);
-      setRightPanelOpen(true);
+      setRightPanelCollapsed(false);
       setStatusMessage('Guía de marca lista. Revisa contraste, tipografía y exporta tu Brand Kit.');
     } finally {
       generatingRef.current = false;
@@ -222,7 +224,7 @@ export function useSelectColorsWorkspaceController() {
     }
 
     if (stepId === 'adjust' || stepId === 'generate') {
-      setRightPanelOpen(true);
+      setRightPanelCollapsed(false);
     }
   }
 
@@ -248,7 +250,7 @@ export function useSelectColorsWorkspaceController() {
     setIsImageExtracting,
     setIsImageRegenerating,
     setPaletteCatalog,
-    setRightPanelOpen,
+    setRightPanelCollapsed,
     setSelectedStyleId,
   });
 
@@ -264,7 +266,7 @@ export function useSelectColorsWorkspaceController() {
       setError,
     setGeneratedPalette,
     setPaletteCatalog,
-    setRightPanelOpen,
+    setRightPanelCollapsed,
   });
 
   const { handleExportBrandKit, handleExportDesignMd } = useWorkspaceExports({
@@ -307,14 +309,12 @@ export function useSelectColorsWorkspaceController() {
     recommendedPairings,
     fontPairings,
     rightPanelCollapsed,
-    rightPanelOpen,
     rolePalette,
     selectedPairing,
     selectedStyleId,
     selectionReady,
     setInspirationModalOpen,
     setRightPanelCollapsed,
-    setRightPanelOpen,
     setSelectedPairing: handleSelectPairing,
     shortcutsRef,
     statusMessage,

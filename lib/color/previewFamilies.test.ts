@@ -24,20 +24,22 @@ describe('previewFamilies', () => {
 
     expect(illustration.id).toBe('illustration');
     expect(illustration.modes).toEqual([]);
-
     if (illustration.id !== 'illustration') {
       throw new Error('Expected illustration family');
     }
 
+    expect(illustration.styles.map((style) => style.id)).toEqual(['bento']);
     expect(illustration.contract.kind).toBe('full-palette-tonal-scales');
     expect(illustration.contract.rendererInput.tonalScales.primary).toContain('primary-500');
     expect(illustration.contract.rendererInput.tonalScales.secondary).toContain('secondary-500');
     expect(illustration.contract.rendererInput.tonalScales.accent).toContain('accent-500');
   });
 
-  it('only exposes populated families as selectable renderer families for now', () => {
-    const selectable = PREVIEW_FAMILIES.filter((family) => family.modes.length > 0);
+  it('exposes families with either UI modes or illustration styles as selectable renderers', () => {
+    const selectable = PREVIEW_FAMILIES.filter(
+      (family) => family.id === 'ui' || (family.id === 'illustration' && family.styles.length > 0),
+    );
 
-    expect(selectable.map((family) => family.id)).toEqual(['ui']);
+    expect(selectable.map((family) => family.id)).toEqual(['ui', 'illustration']);
   });
 });

@@ -8,10 +8,14 @@ export type StudioToolsPanelProps = {
 
 export function StudioToolsPanel({ children }: StudioToolsPanelProps) {
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col">
-      <div className="min-h-0 flex-1 overflow-y-auto p-3">
-        <div className="space-y-3">{children}</div>
+    <section
+      aria-label="Herramientas del estudio"
+      className="studio-tools-panel flex h-full min-h-0 flex-1 flex-col text-ink"
+    >
+      <h2 className="sr-only">Herramientas del estudio</h2>
+      <div className="flex min-h-0 flex-1 flex-col gap-[var(--chrome-space-4)] overflow-hidden px-[var(--chrome-space-3)] py-[var(--chrome-space-4)]">
+        {children}
       </div>
-    </div>
+    </section>
   );
 }

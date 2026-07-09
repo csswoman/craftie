@@ -33,11 +33,18 @@ export type IllustrationPaletteInput = {
   states: Pick<Record<SemanticTokenName, SemanticTokenName>, 'success' | 'warning' | 'error'>;
 };
 
+export type IllustrationStyleDefinition = {
+  id: 'bento';
+  label: string;
+  description: string;
+};
+
 export type IllustrationPreviewFamily = {
   id: 'illustration';
   label: string;
   description: string;
   modes: [];
+  styles: IllustrationStyleDefinition[];
   contract: {
     kind: 'full-palette-tonal-scales';
     rendererInput: IllustrationPaletteInput;
@@ -64,8 +71,15 @@ export const PREVIEW_FAMILIES: PreviewFamily[] = [
   {
     id: 'illustration',
     label: 'Illustration',
-    description: 'Future renderers consume bases and tonal scales directly, without UI slots.',
+    description: 'Generative compositions that consume bases and tonal scales directly.',
     modes: [],
+    styles: [
+      {
+        id: 'bento',
+        label: 'Bento',
+        description: 'Irregular grid composition with simple geometric shapes.',
+      },
+    ],
     contract: {
       kind: 'full-palette-tonal-scales',
       rendererInput: {

@@ -8,12 +8,12 @@ import { isPaletteRoleId, type PaletteRoleId } from '@lib/color/rolePalette';
 import type { FontPair } from '@lib/typography/pairings';
 
 import { ColorDetailsDrawer } from '@/components/color-engine/ColorDetailsDrawer';
+import { useTabListKeyboard } from '@/lib/browser/useTabListKeyboard';
 import { useRolePalette } from '@/context/RolePaletteContext';
 
 import { PaletteView } from './PaletteView';
 import { PaletteThemeToggle } from './PaletteThemeToggle';
 import { PreviewView } from './PreviewView';
-import { TypographyCanvasView } from './TypographyCanvasView';
 import {
   openRoleColorPopover,
   RoleColorPopover,
@@ -24,30 +24,26 @@ export type PaletteCanvasProps = {
   isLoading?: boolean;
   isUpdating?: boolean;
   editable?: boolean;
-  fontPairings?: FontPair[];
   onAddColorByHex?: (hex: string, customName?: string) => string | null;
   recommendedPairings?: FontPair[];
   selectedPairing?: FontPair | null;
-  onSelectPairing?: (pairing: FontPair) => void;
 };
 
-type CanvasTab = 'palette' | 'preview' | 'typography';
+type CanvasTab = 'palette' | 'preview';
 
-const CANVAS_TABS: Array<{ id: CanvasTab; label: string }> = [
-  { id: 'palette', label: 'Colores' },
-  { id: 'preview', label: 'Vista previa' },
-  { id: 'typography', label: 'Tipografía' },
+const CANVAS_TABS: Array<{ id: CanvasTab; label: string; shortLabel: string }> = [
+  { id: 'palette', label: 'Colores', shortLabel: 'Colores' },
+  { id: 'preview', label: 'Vista previa', shortLabel: 'Vista' },
 ];
+const CANVAS_TAB_IDS = CANVAS_TABS.map((tab) => tab.id);
 
 export function PaletteCanvas({
   isLoading = false,
   isUpdating = false,
   editable = false,
-  fontPairings = [],
   onAddColorByHex,
   recommendedPairings = [],
   selectedPairing = null,
-  onSelectPairing,
 }: PaletteCanvasProps) {
   const {
     rolePalette,
@@ -63,6 +59,11 @@ export function PaletteCanvas({
   const [selectedColorHex, setSelectedColorHex] = useState<string | null>(null);
   const [colorPopover, setColorPopover] = useState<RoleColorPopoverAnchor | null>(null);
   const liveRolePalette = previewRolePalette ?? rolePalette;
+  const { getTabProps } = useTabListKeyboard({
+    items: CANVAS_TAB_IDS,
+    activeId: activeTab,
+    onActivate: setActiveTab,
+  });
 
   const columns = useMemo(
     () => (liveRolePalette ? buildRolePaletteColumnsWithContrast(liveRolePalette) : []),
@@ -126,9 +127,9 @@ export function PaletteCanvas({
         <div
           role="tablist"
           aria-label="Vista del lienzo"
-          className="flex h-13 shrink-0 items-center justify-between gap-4 border-b border-border px-6"
+          className="flex h-11 shrink-0 items-center justify-between gap-2 border-b border-border px-3 sm:h-13 sm:gap-4 sm:px-6"
         >
-          <div className="flex h-full items-end gap-2">
+          <div className="flex h-full min-w-0 items-end gap-1 sm:gap-2">
             {CANVAS_TABS.map((tab) => {
               const selected = activeTab === tab.id;
 
@@ -137,15 +138,19 @@ export function PaletteCanvas({
                   key={tab.id}
                   type="button"
                   role="tab"
+                  id={`canvas-tab-${tab.id}`}
                   aria-selected={selected}
+                  aria-controls={`canvas-panel-${tab.id}`}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`border-b px-3 pb-3 pt-2 text-[0.9375rem] transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+                  {...getTabProps(tab.id)}
+                  className={`border-b px-2 pb-2 pt-1.5 text-[0.875rem] transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 sm:px-3 sm:pb-3 sm:pt-2 sm:text-chrome-body ${
                     selected
-                      ? 'border-primary font-extrabold text-ink'
+                      ? 'border-primary font-semibold text-ink'
                       : 'border-transparent font-medium text-muted hover:text-ink'
                   }`}
                 >
-                  {tab.label}
+                  <span className="sm:hidden">{tab.shortLabel}</span>
+                  <span className="hidden sm:inline">{tab.label}</span>
                 </button>
               );
             })}
@@ -160,7 +165,7 @@ export function PaletteCanvas({
             role="alert"
             className="absolute left-4 top-4 z-30 max-w-sm rounded-lg border border-fail/30 bg-bg/95 px-3 py-2 text-[0.75rem] font-semibold text-fail"
           >
-            Hay pares de contraste que no alcanzan AA.
+            Hay pares de contraste que no alcanzan AA. Revisa la pestaña Contraste en el inspector.
           </p>
         ) : null}
         {isLoading && !hasPalette ? (
@@ -169,11 +174,14 @@ export function PaletteCanvas({
           <EmptyCanvas />
         ) : (
           <>
-            <div
-              role="tabpanel"
-              className={`relative flex min-h-0 flex-1 flex-col transition-opacity duration-150 motion-reduce:transition-none ${
-                isUpdating ? 'opacity-60' : 'opacity-100'
-              }`}
+              <div
+                id={`canvas-panel-${activeTab}`}
+                role="tabpanel"
+                aria-labelledby={`canvas-tab-${activeTab}`}
+                tabIndex={0}
+                className={`relative flex min-h-0 flex-1 flex-col transition-opacity duration-150 motion-reduce:transition-none ${
+                  isUpdating ? 'opacity-60' : 'opacity-100'
+                }`}
             >
               {activeTab === 'palette' ? (
                 <PaletteView
@@ -181,21 +189,18 @@ export function PaletteCanvas({
                   onOpenDetails={setSelectedColorHex}
                   onEditRole={handleEditRole}
                 />
-              ) : activeTab === 'preview' ? (
-                <PreviewView onEditRole={handleEditRole} />
               ) : (
-                <TypographyCanvasView
-                  fontPairings={fontPairings}
+                <PreviewView
                   recommendedPairings={recommendedPairings}
                   selectedPairing={selectedPairing}
-                  onSelectPairing={onSelectPairing ?? (() => undefined)}
+                  onEditRole={handleEditRole}
                 />
               )}
             </div>
             {isUpdating ? (
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-0 bg-bg/10 backdrop-blur-[1px]"
+                className="pointer-events-none absolute inset-0 bg-bg/20"
               />
             ) : null}
           </>
@@ -218,9 +223,9 @@ export function PaletteCanvas({
 function EmptyCanvas() {
   return (
     <div className="flex h-full min-h-0 items-center justify-center bg-surface-raised/40 px-6 py-8">
-      <p className="max-w-xs text-center text-[0.8125rem] leading-relaxed text-muted">
-        Sube una imagen y la paleta se armará automáticamente por roles. Haz clic en una banda del
-        centro para elegir el rol activo.
+      <p className="prose-measure max-w-xs text-center text-chrome-label leading-relaxed text-muted">
+        Haz clic en una banda del lienzo para elegir el rol activo. Luego asigna colores desde el
+        panel de la izquierda.
       </p>
     </div>
   );
@@ -228,7 +233,8 @@ function EmptyCanvas() {
 
 function PaletteCanvasSkeleton() {
   return (
-    <div className="flex min-h-0 flex-1 flex-col" aria-busy="true" aria-label="Cargando paleta">
+    <div className="flex min-h-0 flex-1 flex-col" aria-busy="true" aria-label="Generando paleta">
+      <p className="sr-only">Generando paleta a partir de los roles asignados…</p>
       <div className="flex-1 animate-pulse bg-surface-raised" />
     </div>
   );

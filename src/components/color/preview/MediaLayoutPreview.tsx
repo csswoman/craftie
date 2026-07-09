@@ -1,6 +1,7 @@
 import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
+import { DEFAULT_PREVIEW_FONTS, type PreviewFonts } from './previewTypography';
 
 export const MEDIA_VISUAL_SLOTS = [
   'appBackground',
@@ -17,9 +18,11 @@ export const MEDIA_VISUAL_SLOTS = [
 
 export function MediaLayoutPreview({
   colors,
+  fonts = DEFAULT_PREVIEW_FONTS,
   onEditSlot,
 }: {
   colors: ResolvedLayoutColors;
+  fonts?: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
   return (
@@ -31,6 +34,7 @@ export function MediaLayoutPreview({
         backgroundColor: colors.appBackground,
         borderColor: colors.border,
         color: colors.text,
+        fontFamily: fonts.bodyFamily,
       }}
     >
       <div className="min-h-128 p-4 sm:p-5">
@@ -39,7 +43,7 @@ export function MediaLayoutPreview({
             <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem] font-bold" style={{ color: colors.mutedText }}>
               Evening queue
             </PreviewSlotTarget>
-            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1 font-body text-[1.125rem] font-extrabold tracking-normal">
+            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1 text-[1.125rem] font-extrabold tracking-normal" style={{ fontFamily: fonts.headingFamily }}>
               Studio radio
             </PreviewSlotTarget>
           </div>
@@ -76,7 +80,7 @@ export function MediaLayoutPreview({
           </PreviewSlotTarget>
 
           <div className="mt-4 text-center">
-            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="font-body text-[1rem] font-extrabold tracking-normal">Red Flower Static</PreviewSlotTarget>
+            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1rem] font-extrabold tracking-normal" style={{ fontFamily: fonts.headingFamily }}>Red Flower Static</PreviewSlotTarget>
             <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-1 text-[0.75rem]" style={{ color: colors.mutedText }}>
               Low-light mix · 42 min
             </PreviewSlotTarget>
@@ -118,7 +122,7 @@ export function MediaLayoutPreview({
         >
           <div className="flex items-center justify-between gap-3">
             <div>
-              <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="font-body text-[0.875rem] font-bold tracking-normal">Next up</PreviewSlotTarget>
+              <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[0.875rem] font-bold tracking-normal" style={{ fontFamily: fonts.headingFamily }}>Next up</PreviewSlotTarget>
               <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-1 text-[0.75rem]" style={{ color: colors.mutedText }}>
                 Atmospheric background, brighter controls.
               </PreviewSlotTarget>

@@ -19,6 +19,10 @@ import {
   type PaletteSeeds,
   type RolePalette,
 } from '@lib/color/rolePalette';
+import {
+  DEFAULT_ILLUSTRATION_SEED,
+  nextIllustrationSeed,
+} from '@lib/color/illustrationComposer';
 import type { ExtractedColor } from '@lib/color/imageExtractor';
 import { normalizeHex } from '@lib/color/normalizeHex';
 import { tokenNameForPaletteRole } from '@lib/color/semanticRoleProjection';
@@ -51,6 +55,7 @@ export type RolePaletteContextValue = {
   previewRolePalette: RolePalette | null;
   previewSemanticTokens: SemanticTokens | null;
   seeds: PaletteSeeds | null;
+  illustrationSeed: number;
   savedVibrancy: number;
   previewVibrancy: number;
   hasUnsavedVibrancy: boolean;
@@ -65,6 +70,7 @@ export type RolePaletteContextValue = {
   assignFromExtracted: (extracted: ExtractedColor[]) => void;
   setPreviewVibrancy: (value: number) => void;
   saveVibrancy: () => void;
+  regenerateIllustrationSeed: () => void;
   setNeutralStyle: (style: NeutralStyle) => void;
   setActiveTheme: (theme: ThemeId) => void;
   setActiveRole: (role: PaletteRoleId | null) => void;
@@ -89,6 +95,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   const [activeTheme, setActiveTheme] = useState<ThemeId>('light');
   const [savedVibrancy, setSavedVibrancy] = useState(VIBRANCY_MID);
   const [previewVibrancy, setPreviewVibrancyState] = useState(VIBRANCY_MID);
+  const [illustrationSeed, setIllustrationSeed] = useState(DEFAULT_ILLUSTRATION_SEED);
   const [neutralStyle, setNeutralStyle] = useState<NeutralStyle>(DEFAULT_NEUTRAL_STYLE);
   const [lockedRolesByTheme, setLockedRolesByTheme] =
     useState<Record<ThemeId, PaletteRoleId[]>>(EMPTY_LOCKED_BY_THEME);
@@ -143,9 +150,10 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
             ...extractSeedsFromPalette(rolePalette),
             extracted: extractedColors,
             vibrancy: savedVibrancy,
+            illustrationSeed,
           }
         : null,
-    [extractedColors, rolePalette, savedVibrancy],
+    [extractedColors, illustrationSeed, rolePalette, savedVibrancy],
   );
 
   const themes = useMemo<ThemesConfig>(() => EMPTY_THEMES, []);
@@ -160,6 +168,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
         setLockedRolesByTheme(EMPTY_LOCKED_BY_THEME);
         setSavedVibrancy(VIBRANCY_MID);
         setPreviewVibrancyState(VIBRANCY_MID);
+        setIllustrationSeed(DEFAULT_ILLUSTRATION_SEED);
         setNeutralStyle(DEFAULT_NEUTRAL_STYLE);
         return;
       }
@@ -173,6 +182,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       setTokenOverrides(rolePaletteAsSemanticOverrides(palette));
       setSavedVibrancy(VIBRANCY_MID);
       setPreviewVibrancyState(VIBRANCY_MID);
+      setIllustrationSeed(DEFAULT_ILLUSTRATION_SEED);
       setNeutralStyle(DEFAULT_NEUTRAL_STYLE);
     },
     [],
@@ -185,6 +195,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
     setLockedRolesByTheme(EMPTY_LOCKED_BY_THEME);
     setSavedVibrancy(VIBRANCY_MID);
     setPreviewVibrancyState(VIBRANCY_MID);
+    setIllustrationSeed(DEFAULT_ILLUSTRATION_SEED);
     setNeutralStyle(DEFAULT_NEUTRAL_STYLE);
     setActiveRole(null);
   }, []);
@@ -196,6 +207,10 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   const saveVibrancy = useCallback(() => {
     setSavedVibrancy(previewVibrancy);
   }, [previewVibrancy]);
+
+  const regenerateIllustrationSeed = useCallback(() => {
+    setIllustrationSeed((seed) => nextIllustrationSeed(seed));
+  }, []);
 
   const replaceRole = useCallback(
     (role: PaletteRoleId, hex: string) => {
@@ -269,6 +284,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
     setActiveTheme('light');
     setSavedVibrancy(VIBRANCY_MID);
     setPreviewVibrancyState(VIBRANCY_MID);
+    setIllustrationSeed(DEFAULT_ILLUSTRATION_SEED);
     setNeutralStyle(DEFAULT_NEUTRAL_STYLE);
     setActiveRole(null);
   }, []);
@@ -290,6 +306,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       );
       setSavedVibrancy(VIBRANCY_MID);
       setPreviewVibrancyState(VIBRANCY_MID);
+      setIllustrationSeed(DEFAULT_ILLUSTRATION_SEED);
       setNeutralStyle(DEFAULT_NEUTRAL_STYLE);
     },
     [],
@@ -304,6 +321,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       previewRolePalette,
       previewSemanticTokens,
       seeds,
+      illustrationSeed,
       savedVibrancy,
       previewVibrancy,
       hasUnsavedVibrancy,
@@ -318,6 +336,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       assignFromExtracted,
       setPreviewVibrancy,
       saveVibrancy,
+      regenerateIllustrationSeed,
       setNeutralStyle,
       setActiveTheme,
       setActiveRole,
@@ -334,6 +353,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       previewRolePalette,
       previewSemanticTokens,
       seeds,
+      illustrationSeed,
       savedVibrancy,
       previewVibrancy,
       hasUnsavedVibrancy,
@@ -348,6 +368,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       assignFromExtracted,
       setPreviewVibrancy,
       saveVibrancy,
+      regenerateIllustrationSeed,
       setNeutralStyle,
       replaceRole,
       replaceSemanticToken,

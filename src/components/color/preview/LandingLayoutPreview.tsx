@@ -1,6 +1,7 @@
 import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
+import { DEFAULT_PREVIEW_FONTS, type PreviewFonts } from './previewTypography';
 
 export const LANDING_VISUAL_SLOTS = [
   'appBackground',
@@ -24,9 +25,11 @@ export const LANDING_VISUAL_SLOTS = [
 
 export function LandingLayoutPreview({
   colors,
+  fonts = DEFAULT_PREVIEW_FONTS,
   onEditSlot,
 }: {
   colors: ResolvedLayoutColors;
+  fonts?: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
   return (
@@ -34,7 +37,12 @@ export function LandingLayoutPreview({
       slot="appBackground"
       onEditSlot={onEditSlot}
       className="overflow-hidden rounded-xl border"
-      style={{ backgroundColor: colors.appBackground, borderColor: colors.border, color: colors.text }}
+      style={{
+        backgroundColor: colors.appBackground,
+        borderColor: colors.border,
+        color: colors.text,
+        fontFamily: fonts.bodyFamily,
+      }}
     >
       <PreviewSlotTarget
         slot="chrome"
@@ -42,7 +50,7 @@ export function LandingLayoutPreview({
         className="flex items-center justify-between border-b px-4 py-3"
         style={{ backgroundColor: colors.chrome, borderColor: colors.divider }}
       >
-        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="font-body text-[0.8125rem] font-bold tracking-normal">Northstar</PreviewSlotTarget>
+        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[0.8125rem] font-bold tracking-normal" style={{ fontFamily: fonts.headingFamily }}>Northstar</PreviewSlotTarget>
         <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="hidden gap-4 text-[0.6875rem] font-bold sm:flex" style={{ color: colors.mutedText }}>
           <span>Product</span>
           <span>Stories</span>
@@ -61,7 +69,7 @@ export function LandingLayoutPreview({
       >
         <div className="max-w-sm">
           <PreviewSlotTarget slot="onHero" onEditSlot={onEditSlot} className="text-[0.75rem] font-bold opacity-80">Launch system</PreviewSlotTarget>
-          <PreviewSlotTarget slot="onHero" onEditSlot={onEditSlot} className="mt-2 font-body text-[1.75rem] font-extrabold leading-tight tracking-normal">
+          <PreviewSlotTarget slot="onHero" onEditSlot={onEditSlot} className="mt-2 text-[1.75rem] font-extrabold leading-tight tracking-normal" style={{ fontFamily: fonts.headingFamily }}>
             Ship the brand story with fewer loose ends.
           </PreviewSlotTarget>
           <PreviewSlotTarget slot="onHero" onEditSlot={onEditSlot} className="mt-3 text-[0.875rem] leading-relaxed opacity-85">
@@ -99,7 +107,7 @@ export function LandingLayoutPreview({
           className="rounded-lg border p-4"
           style={{ backgroundColor: colors.supportSurface ?? colors.surface, borderColor: colors.border }}
         >
-          <PreviewSlotTarget slot="supportSurfaceText" onEditSlot={onEditSlot} className="font-body text-[0.9375rem] font-bold tracking-normal">
+          <PreviewSlotTarget slot="supportSurfaceText" onEditSlot={onEditSlot} className="text-[0.9375rem] font-bold tracking-normal" style={{ fontFamily: fonts.headingFamily }}>
             Built for campaign teams
           </PreviewSlotTarget>
           <PreviewSlotTarget
@@ -117,7 +125,7 @@ export function LandingLayoutPreview({
           className="rounded-lg border p-4"
           style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
         >
-          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="font-body text-[0.9375rem] font-bold tracking-normal">Proof points</PreviewSlotTarget>
+          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[0.9375rem] font-bold tracking-normal" style={{ fontFamily: fonts.headingFamily }}>Proof points</PreviewSlotTarget>
           <div className="mt-4 space-y-3">
             {['Faster approval', 'Reusable launch kit', 'Accessible by default'].map((item, index) => (
               <div key={item} className="flex items-center gap-3">

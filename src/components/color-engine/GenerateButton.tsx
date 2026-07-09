@@ -14,8 +14,8 @@ export function GenerateButton({ onClick, disabled = false, busy = false }: Gene
       <Button type="button" onClick={onClick} disabled={disabled || busy} aria-busy={busy} className="w-full">
         {busy ? 'Creando guía…' : 'Crear guía de marca'}
       </Button>
-      <p className="text-center text-[0.6875rem] leading-relaxed text-muted">
-        Finaliza los roles y abre la vista de marca con exportación.
+      <p className="text-center text-chrome-caption leading-relaxed text-muted">
+        Asigna los 7 roles para crear la guía de marca y desbloquear la exportación.
       </p>
     </div>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import {
@@ -9,6 +9,7 @@ import {
 import type { SemanticTokenName } from '@lib/color/semanticTokens';
 
 import { computePopoverPosition } from '@/lib/browser/computePopoverPosition';
+import { useDialogAccessibility } from '@/lib/browser/useDialogAccessibility';
 import { SemanticTokenColorEditor } from './SemanticTokenColorEditor';
 
 export type SemanticTokenPopoverAnchor = {
@@ -25,6 +26,15 @@ export function SemanticTokenColorPopover({
 }) {
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
   const [mounted, setMounted] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const isOpen = anchor !== null && position !== null;
+
+  useDialogAccessibility({
+    open: isOpen,
+    dialogRef,
+    onClose,
+    initialFocusSelector: '[data-popover-close]',
+  });
 
   useEffect(() => {
     // Portals need to wait until the browser document exists.
@@ -48,22 +58,14 @@ export function SemanticTokenColorPopover({
       return;
     }
 
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    }
-
     function handleScroll() {
       onClose();
     }
 
-    window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('scroll', handleScroll, true);
     window.addEventListener('resize', onClose);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('scroll', handleScroll, true);
       window.removeEventListener('resize', onClose);
     };
@@ -75,13 +77,13 @@ export function SemanticTokenColorPopover({
 
   return createPortal(
     <>
-      <button
-        type="button"
-        className="fixed inset-0 z-50 bg-ink/15 backdrop-blur-[1px]"
-        aria-label="Cerrar editor de color"
+      <div
+        className="fixed inset-0 z-50 bg-ink/15"
+        aria-hidden="true"
         onClick={onClose}
       />
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="semantic-token-popover-title"
@@ -92,16 +94,17 @@ export function SemanticTokenColorPopover({
       >
         <header className="mb-3 flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p id="semantic-token-popover-title" className="text-[0.875rem] font-semibold text-ink">
+            <p id="semantic-token-popover-title" className="text-chrome-label font-semibold text-ink">
               {SEMANTIC_TOKEN_LABELS[anchor.tokenName]}
             </p>
-            <p className="text-[0.6875rem] text-muted">Editar token semántico</p>
+            <p className="text-chrome-caption text-muted">Editar token semántico</p>
           </div>
           <button
             type="button"
+            data-popover-close
             onClick={onClose}
             aria-label="Cerrar"
-            className="flex size-7 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+            className="flex size-11 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           >
             <span aria-hidden="true" className="text-lg leading-none">
               ×

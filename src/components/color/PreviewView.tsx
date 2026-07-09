@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import type { PaletteRoleId } from '@lib/color/rolePalette';
 import { buildPreviewTokens } from '@lib/color/previewTokens';
@@ -14,35 +14,62 @@ import {
 import {
   DEFAULT_PREVIEW_FAMILY_ID,
   getPreviewFamily,
-  PREVIEW_FAMILIES,
   type PreviewFamilyId,
 } from '@lib/color/previewFamilies';
 import type { SemanticTokenName } from '@lib/color/semanticTokens';
+import { resolveActiveFontPair } from '@lib/typography/activePairing';
+import { buildFontFamilyStack } from '@lib/typography/googleFonts';
+import type { FontPair } from '@lib/typography/pairings';
 
 import { useRolePalette } from '@/context/RolePaletteContext';
 import { AnalyticsLayoutPreview } from '@/components/color/preview/AnalyticsLayoutPreview';
 import { DashboardLayoutPreview } from '@/components/color/preview/DashboardLayoutPreview';
+import { IllustrationPreview } from '@/components/color/preview/IllustrationPreview';
 import { LandingLayoutPreview } from '@/components/color/preview/LandingLayoutPreview';
 import { MediaLayoutPreview } from '@/components/color/preview/MediaLayoutPreview';
 import { PreviewContrastWarnings } from '@/components/color/preview/PreviewChrome';
+import { PreviewNavigator } from '@/components/color/preview/PreviewNavigator';
+import type { PreviewFonts } from '@/components/color/preview/previewTypography';
 import {
   SemanticTokenColorPopover,
   type SemanticTokenPopoverAnchor,
 } from '@/components/color/SemanticTokenColorPopover';
+import { loadGoogleFonts } from '@/lib/browser/googleFonts';
 
 export type PreviewViewProps = {
+  recommendedPairings: FontPair[];
+  selectedPairing: FontPair | null;
   onEditRole?: (role: PaletteRoleId, element: HTMLElement) => void;
 };
 
-export function PreviewView({ onEditRole }: PreviewViewProps) {
-  const { rolePalette, semanticTokens, previewRolePalette, previewSemanticTokens } =
-    useRolePalette();
+export function PreviewView({ recommendedPairings, selectedPairing, onEditRole }: PreviewViewProps) {
+  const {
+    rolePalette,
+    semanticTokens,
+    previewRolePalette,
+    previewSemanticTokens,
+    illustrationSeed,
+    regenerateIllustrationSeed,
+  } = useRolePalette();
   const [activeFamily, setActiveFamily] = useState<PreviewFamilyId>(DEFAULT_PREVIEW_FAMILY_ID);
   const [activeMode, setActiveMode] = useState<UiLayoutModeId>('dashboard');
   const [tokenPopover, setTokenPopover] = useState<SemanticTokenPopoverAnchor | null>(null);
 
   const liveRolePalette = previewRolePalette ?? rolePalette;
   const liveSemanticTokens = previewSemanticTokens ?? semanticTokens;
+  const activePairing = resolveActiveFontPair(selectedPairing, recommendedPairings);
+
+  useEffect(() => {
+    loadGoogleFonts([activePairing]);
+  }, [activePairing]);
+
+  const fonts = useMemo<PreviewFonts>(
+    () => ({
+      headingFamily: buildFontFamilyStack(activePairing.heading),
+      bodyFamily: buildFontFamilyStack(activePairing.body),
+    }),
+    [activePairing],
+  );
 
   if (!liveRolePalette || !liveSemanticTokens) {
     return null;
@@ -66,106 +93,47 @@ export function PreviewView({ onEditRole }: PreviewViewProps) {
     setTokenPopover({ tokenName, rect: element.getBoundingClientRect() });
   }
 
+  const previewWidthClass = family.id === 'illustration'
+    ? 'max-w-5xl'
+    : activeMode === 'dashboard'
+      ? 'max-w-6xl'
+      : activeMode === 'analytics'
+        ? 'max-w-5xl'
+        : 'max-w-lg';
+
   return (
     <div
       className="min-h-0 flex-1 overflow-y-auto"
       style={{ backgroundColor: colors.appBackground }}
     >
-      <div className="mx-auto flex w-full max-w-lg flex-col gap-4 p-5 pb-8 sm:gap-5 sm:p-8">
+      <div className={`mx-auto flex w-full ${previewWidthClass} flex-col gap-4 p-5 pb-8 sm:gap-5 sm:p-8`}>
         {tokens.warnings.length > 0 ? <PreviewContrastWarnings warnings={tokens.warnings} /> : null}
-        <PreviewFamilySwitcher activeFamily={activeFamily} onChange={setActiveFamily} />
-        {family.id === 'ui' ? (
-          <LayoutModeSwitcher activeMode={activeMode} modes={family.modes} onChange={setActiveMode} />
-        ) : null}
-        <ActiveLayoutPreview mode={activeMode} colors={colors} onEditSlot={handleEditSlot} />
+        <PreviewNavigator
+          activeFamily={activeFamily}
+          activeMode={activeMode}
+          onSelectUi={(mode) => {
+            setActiveFamily('ui');
+            setActiveMode(mode);
+          }}
+          onSelectIllustration={() => setActiveFamily('illustration')}
+        />
+        {family.id === 'illustration' ? (
+          <IllustrationPreview
+            tokens={liveSemanticTokens}
+            paletteInput={family.contract.rendererInput}
+            seed={illustrationSeed}
+            onRegenerate={regenerateIllustrationSeed}
+          />
+        ) : (
+          <ActiveLayoutPreview
+            mode={activeMode}
+            colors={colors}
+            fonts={fonts}
+            onEditSlot={handleEditSlot}
+          />
+        )}
       </div>
       <SemanticTokenColorPopover anchor={tokenPopover} onClose={() => setTokenPopover(null)} />
-    </div>
-  );
-}
-
-function PreviewFamilySwitcher({
-  activeFamily,
-  onChange,
-}: {
-  activeFamily: PreviewFamilyId;
-  onChange: (family: PreviewFamilyId) => void;
-}) {
-  const selectableFamilies = PREVIEW_FAMILIES.filter((family) => family.modes.length > 0);
-
-  if (selectableFamilies.length <= 1) {
-    return null;
-  }
-
-  return (
-    <div
-      role="tablist"
-      aria-label="Familia de vista previa"
-      className="flex flex-wrap gap-1 rounded-lg border p-1"
-      style={{ backgroundColor: 'var(--color-bg)', borderColor: 'var(--color-border)' }}
-    >
-      {PREVIEW_FAMILIES.map((family) => {
-        const selected = activeFamily === family.id;
-        const disabled = family.modes.length === 0;
-
-        return (
-          <button
-            key={family.id}
-            type="button"
-            role="tab"
-            aria-selected={selected}
-            disabled={disabled}
-            onClick={() => onChange(family.id)}
-            className="rounded-md px-2.5 py-1.5 text-[0.6875rem] font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-            style={{
-              backgroundColor: selected ? 'var(--color-surface-raised)' : 'transparent',
-              color: 'var(--color-ink)',
-            }}
-          >
-            {family.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function LayoutModeSwitcher({
-  activeMode,
-  modes,
-  onChange,
-}: {
-  activeMode: UiLayoutModeId;
-  modes: Array<{ id: UiLayoutModeId; label: string }>;
-  onChange: (mode: UiLayoutModeId) => void;
-}) {
-  return (
-    <div
-      role="tablist"
-      aria-label="Modo de vista previa"
-      className="flex flex-wrap gap-1 rounded-lg border p-1"
-      style={{ backgroundColor: 'var(--color-bg)', borderColor: 'var(--color-border)' }}
-    >
-      {modes.map((mode) => {
-        const selected = activeMode === mode.id;
-
-        return (
-          <button
-            key={mode.id}
-            type="button"
-            role="tab"
-            aria-selected={selected}
-            onClick={() => onChange(mode.id)}
-            className="rounded-md px-2.5 py-1.5 text-[0.6875rem] font-bold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-            style={{
-              backgroundColor: selected ? 'var(--color-surface-raised)' : 'transparent',
-              color: 'var(--color-ink)',
-            }}
-          >
-            {mode.label}
-          </button>
-        );
-      })}
     </div>
   );
 }
@@ -173,21 +141,23 @@ function LayoutModeSwitcher({
 function ActiveLayoutPreview({
   mode,
   colors,
+  fonts,
   onEditSlot,
 }: {
   mode: UiLayoutModeId;
   colors: ResolvedLayoutColors;
+  fonts: PreviewFonts;
   onEditSlot: (slot: UiLayoutSlot, element: HTMLElement) => void;
 }) {
   switch (mode) {
     case 'landing':
-      return <LandingLayoutPreview colors={colors} onEditSlot={onEditSlot} />;
+      return <LandingLayoutPreview colors={colors} fonts={fonts} onEditSlot={onEditSlot} />;
     case 'media':
-      return <MediaLayoutPreview colors={colors} onEditSlot={onEditSlot} />;
+      return <MediaLayoutPreview colors={colors} fonts={fonts} onEditSlot={onEditSlot} />;
     case 'analytics':
-      return <AnalyticsLayoutPreview colors={colors} onEditSlot={onEditSlot} />;
+      return <AnalyticsLayoutPreview colors={colors} fonts={fonts} onEditSlot={onEditSlot} />;
     case 'dashboard':
     default:
-      return <DashboardLayoutPreview colors={colors} onEditSlot={onEditSlot} />;
+      return <DashboardLayoutPreview colors={colors} fonts={fonts} onEditSlot={onEditSlot} />;
   }
 }

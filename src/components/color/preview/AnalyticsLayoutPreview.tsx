@@ -1,6 +1,7 @@
 import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
+import { DEFAULT_PREVIEW_FONTS, type PreviewFonts } from './previewTypography';
 
 export const ANALYTICS_VISUAL_SLOTS = [
   'appBackground',
@@ -21,9 +22,11 @@ export const ANALYTICS_VISUAL_SLOTS = [
 
 export function AnalyticsLayoutPreview({
   colors,
+  fonts = DEFAULT_PREVIEW_FONTS,
   onEditSlot,
 }: {
   colors: ResolvedLayoutColors;
+  fonts?: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
   const series = [
@@ -39,7 +42,12 @@ export function AnalyticsLayoutPreview({
       slot="appBackground"
       onEditSlot={onEditSlot}
       className="overflow-hidden rounded-xl border"
-      style={{ backgroundColor: colors.appBackground, borderColor: colors.border, color: colors.text }}
+      style={{
+        backgroundColor: colors.appBackground,
+        borderColor: colors.border,
+        color: colors.text,
+        fontFamily: fonts.bodyFamily,
+      }}
     >
       <div className="min-h-128 p-4 sm:p-5">
         <PreviewSlotTarget
@@ -49,7 +57,7 @@ export function AnalyticsLayoutPreview({
           style={{ backgroundColor: colors.chrome, borderColor: colors.border }}
         >
           <div>
-            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="font-body text-[0.9375rem] font-extrabold tracking-normal">Traffic mix</PreviewSlotTarget>
+            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[0.9375rem] font-extrabold tracking-normal" style={{ fontFamily: fonts.headingFamily }}>Traffic mix</PreviewSlotTarget>
             <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-0.5 text-[0.6875rem]" style={{ color: colors.mutedText }}>
               Neutral chrome, categorical color only.
             </PreviewSlotTarget>
@@ -76,12 +84,12 @@ export function AnalyticsLayoutPreview({
         >
           <div className="flex items-start justify-between gap-3">
             <div>
-              <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="font-body text-[0.875rem] font-bold tracking-normal">Visitors by source</PreviewSlotTarget>
+              <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[0.875rem] font-bold tracking-normal" style={{ fontFamily: fonts.headingFamily }}>Visitors by source</PreviewSlotTarget>
               <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-1 text-[0.75rem]" style={{ color: colors.mutedText }}>
                 Series tokens provide the only expressive color.
               </PreviewSlotTarget>
             </div>
-            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1.25rem] font-bold leading-none">42.8k</PreviewSlotTarget>
+            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1.25rem] font-bold leading-none" style={{ fontFamily: fonts.headingFamily }}>42.8k</PreviewSlotTarget>
           </div>
 
           <div className="mt-5 flex h-24 items-end gap-2">
@@ -129,7 +137,7 @@ export function AnalyticsLayoutPreview({
               <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem] font-bold" style={{ color: colors.mutedText }}>
                 {label}
               </PreviewSlotTarget>
-              <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-2 block text-[1.125rem] font-bold">{index === 0 ? '71%' : '46%'}</PreviewSlotTarget>
+              <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-2 block text-[1.125rem] font-bold" style={{ fontFamily: fonts.headingFamily }}>{index === 0 ? '71%' : '46%'}</PreviewSlotTarget>
             </PreviewSlotTarget>
           ))}
         </section>

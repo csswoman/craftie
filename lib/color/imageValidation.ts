@@ -10,12 +10,12 @@ function isAcceptedImage(file: File): boolean {
 
 export function validateImageFile(file: File, maxFileSizeMB: number): void {
   if (!isAcceptedImage(file)) {
-    throw new Error('Unsupported image format. Accepted formats: JPG, PNG, and WebP.');
+    throw new Error('Formato no admitido. Usa JPG, PNG o WebP.');
   }
 
   const maxBytes = maxFileSizeMB * 1024 * 1024;
 
   if (file.size > maxBytes) {
-    throw new Error(`Image exceeds maximum size of ${maxFileSizeMB}MB.`);
+    throw new Error(`La imagen supera el límite de ${maxFileSizeMB} MB.`);
   }
 }

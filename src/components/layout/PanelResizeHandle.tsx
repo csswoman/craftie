@@ -6,12 +6,14 @@ export type PanelResizeHandleProps = {
   onResize: (deltaX: number) => void;
   onResizeEnd?: () => void;
   label?: string;
+  keyboardStep?: number;
 };
 
 export function PanelResizeHandle({
   onResize,
   onResizeEnd,
   label = 'Redimensionar panel',
+  keyboardStep = 16,
 }: PanelResizeHandleProps) {
   const draggingRef = useRef(false);
 
@@ -47,12 +49,28 @@ export function PanelResizeHandle({
     [onResize, onResizeEnd],
   );
 
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
+        return;
+      }
+
+      event.preventDefault();
+      onResize(event.key === 'ArrowLeft' ? -keyboardStep : keyboardStep);
+      onResizeEnd?.();
+    },
+    [keyboardStep, onResize, onResizeEnd],
+  );
+
   return (
     <div
       role="separator"
       aria-orientation="vertical"
       aria-label={label}
+      aria-keyshortcuts="ArrowLeft ArrowRight"
+      tabIndex={0}
       onPointerDown={handlePointerDown}
+      onKeyDown={handleKeyDown}
       className="group/handle relative hidden w-2 shrink-0 cursor-col-resize xl:block"
     >
       <span

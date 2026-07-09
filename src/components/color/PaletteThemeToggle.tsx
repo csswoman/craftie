@@ -8,32 +8,33 @@ export function PaletteThemeToggle({
   onChange: (theme: 'light' | 'dark') => void;
 }) {
   return (
-    <div className="flex shrink-0 flex-col items-end gap-1">
-      <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-muted">
-        Previsualizar en
-      </p>
-      <div
-        className="inline-flex rounded-lg border border-border bg-bg p-0.5"
-        role="group"
-        aria-label="Vista previa de la paleta en claro u oscuro"
-      >
-        {(['light', 'dark'] as const).map((theme) => (
+    <div
+      className="inline-flex shrink-0 rounded-lg border border-border bg-bg p-0.5"
+      role="group"
+      aria-label="Modo de la paleta: claro u oscuro"
+    >
+      {(['light', 'dark'] as const).map((theme) => {
+        const selected = activeTheme === theme;
+        const label = theme === 'light' ? 'Claro' : 'Oscuro';
+
+        return (
           <button
             key={theme}
             type="button"
-            aria-pressed={activeTheme === theme}
-            title={`Vista previa: ${theme === 'light' ? 'Claro' : 'Oscuro'}`}
+            aria-pressed={selected}
+            aria-label={`Paleta en modo ${label.toLowerCase()}`}
+            title={`Paleta en modo ${label.toLowerCase()}`}
             onClick={() => onChange(theme)}
-            className={`rounded-md px-3 py-1.5 text-[0.8125rem] font-extrabold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
-              activeTheme === theme
-                ? 'bg-ink text-bg'
+            className={`rounded-md px-2 py-1 text-[0.6875rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 sm:px-3 sm:py-1.5 sm:text-chrome-label ${
+              selected
+                ? 'bg-surface-raised text-ink ring-1 ring-border'
                 : 'text-muted hover:bg-surface-raised hover:text-ink'
             }`}
           >
-            {theme === 'light' ? 'Claro' : 'Oscuro'}
+            {label}
           </button>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }

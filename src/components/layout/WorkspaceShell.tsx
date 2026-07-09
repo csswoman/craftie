@@ -23,7 +23,7 @@ export function WorkspaceShell({
   showRightPanel = false,
   mobileRightPanelAvailable = false,
   rightPanelAriaLabel = 'Panel lateral',
-  rightPanelToggleLabels = { open: 'Ocultar panel', closed: 'Mostrar panel' },
+  rightPanelToggleLabels = { open: 'Ocultar inspector', closed: 'Mostrar inspector' },
 }: WorkspaceShellProps) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -68,7 +68,7 @@ export function WorkspaceShell({
             type="button"
             onClick={onRightPanelToggle}
             aria-expanded={rightPanelOpen}
-            className="rounded-md px-3 py-1.5 text-[0.8125rem] font-semibold text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+            className="rounded-md px-3 py-1.5 text-chrome-label font-semibold text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           >
             {rightPanelOpen ? rightPanelToggleLabels.open : rightPanelToggleLabels.closed}
           </button>

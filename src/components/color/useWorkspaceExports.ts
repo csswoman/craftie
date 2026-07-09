@@ -37,7 +37,7 @@ export function useWorkspaceExports({
     }
 
     setError(null);
-    setStatusMessage('DESIGN.md descargado.');
+    setStatusMessage('DESIGN.md descargado en tu carpeta de descargas.');
   }
 
   function handleExportBrandKit() {
@@ -55,7 +55,7 @@ export function useWorkspaceExports({
     }
 
     setError(null);
-    setStatusMessage('Brand Kit descargado.');
+    setStatusMessage('Brand kit (.json) descargado.');
   }
 
   return { handleExportBrandKit, handleExportDesignMd };

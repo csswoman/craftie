@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import {
   getColorDetails,
@@ -13,6 +13,7 @@ import { normalizeHex } from '@lib/color/normalizeHex';
 import { nameForHex } from '@lib/color/naming';
 import { pickReadableTextColor } from '@lib/color/readableText';
 
+import { useDialogAccessibility } from '@/lib/browser/useDialogAccessibility';
 import { ColorDetailActionRow } from './ColorDetailActionRow';
 
 export type ColorDetailsDrawerProps = {
@@ -32,6 +33,14 @@ export function ColorDetailsDrawer({
 }: ColorDetailsDrawerProps) {
   const [headerCopied, setHeaderCopied] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLElement>(null);
+
+  useDialogAccessibility({
+    open,
+    dialogRef,
+    onClose,
+    initialFocusSelector: '[data-drawer-close]',
+  });
 
   const details = useMemo<ColorDetails | null>(() => {
     if (!open || !colorHex) {
@@ -89,13 +98,13 @@ export function ColorDetailsDrawer({
 
   return (
     <div className="fixed inset-0 z-dropdown flex items-end justify-end bg-ink/20 p-3 sm:items-center sm:justify-center sm:p-4">
-      <button
-        type="button"
-        aria-label="Cerrar detalles del color"
+      <div
         className="absolute inset-0"
+        aria-hidden="true"
         onClick={onClose}
       />
       <aside
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label={`Detalles de ${details.name}`}
@@ -107,7 +116,7 @@ export function ColorDetailsDrawer({
         >
           <div className="min-w-0">
             <p className="truncate text-[0.8125rem] font-semibold">{details.name}</p>
-            <p className="font-mono text-[0.6875rem] opacity-90">{details.hex}</p>
+            <p className="font-mono text-chrome-caption opacity-90">{details.hex}</p>
           </div>
           <div className="flex shrink-0 items-center gap-0.5">
             <HeaderAction onClick={() => void handleCopyHeaderHex()}>
@@ -116,7 +125,7 @@ export function ColorDetailsDrawer({
             {onAddColor ? (
               <HeaderAction onClick={() => handleAdd(details.hex)}>Añadir</HeaderAction>
             ) : null}
-            <HeaderAction onClick={onClose} ariaLabel="Cerrar">
+            <HeaderAction onClick={onClose} ariaLabel="Cerrar" dataDrawerClose>
               ×
             </HeaderAction>
           </div>
@@ -127,7 +136,7 @@ export function ColorDetailsDrawer({
             <div className="space-y-3">
               {details.harmonies.map((harmony) => (
                 <div key={harmony.type}>
-                  <p className="mb-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.04em] text-muted">
+                  <p className="mb-1.5 text-[0.8125rem] font-medium text-muted">
                     {HARMONY_TYPE_LABELS[harmony.type]}
                   </p>
                   <ul className="flex gap-2">
@@ -198,17 +207,20 @@ function HeaderAction({
   children,
   onClick,
   ariaLabel,
+  dataDrawerClose = false,
 }: {
   children: React.ReactNode;
   onClick: () => void;
   ariaLabel?: string;
+  dataDrawerClose?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={ariaLabel ?? (typeof children === 'string' ? children : undefined)}
-      className="rounded px-1.5 py-0.5 text-[0.6875rem] font-semibold opacity-90 transition-colors hover:bg-black/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+      {...(dataDrawerClose ? { 'data-drawer-close': true } : {})}
+      className="rounded px-1.5 py-0.5 text-chrome-caption font-semibold opacity-90 transition-colors hover:bg-black/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
     >
       {children}
     </button>

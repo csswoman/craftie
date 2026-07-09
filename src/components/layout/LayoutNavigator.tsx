@@ -92,7 +92,7 @@ export function LayoutNavigator({ activeView, onViewChange }: LayoutNavigatorPro
         aria-expanded={open}
         aria-controls={menuId}
         onClick={() => setOpen((value) => !value)}
-        className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-border bg-bg px-3.5 py-2 text-[0.9375rem] font-semibold text-ink shadow-sm transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+        className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border bg-bg px-3.5 py-2 text-chrome-body font-semibold text-ink shadow-sm transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
       >
         <ViewIcon view={activeView} />
         <span className="max-w-[9rem] truncate sm:max-w-none">{activeGroupLabel}</span>
@@ -144,7 +144,7 @@ function MenuSection({
 }) {
   return (
     <div className="py-1">
-      <p className="px-2.5 py-1.5 text-[0.75rem] font-semibold text-muted">{title}</p>
+      <p className="px-2.5 py-1.5 text-chrome-caption font-semibold text-muted">{title}</p>
       <ul className="space-y-0.5">
         {views.map((view) => (
           <li key={view.id} role="none">
@@ -158,8 +158,8 @@ function MenuSection({
             >
               <ViewIcon view={view.id} />
               <span>
-                <span className="block text-[0.8125rem] font-semibold">{view.label}</span>
-                <span className="mt-0.5 block text-[0.75rem] leading-snug text-muted">
+                <span className="block text-chrome-label font-semibold">{view.label}</span>
+                <span className="mt-0.5 block text-chrome-caption leading-snug text-muted">
                   {view.description}
                 </span>
               </span>

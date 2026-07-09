@@ -71,7 +71,7 @@ export const StudioShortcutsHelp = forwardRef<StudioShortcutsHelpHandle>(functio
       aria-label="Atajos de teclado del estudio"
     >
       <summary
-        className="inline-flex min-h-10 min-w-10 cursor-pointer list-none items-center justify-center rounded-lg px-2.5 text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 [&::-webkit-details-marker]:hidden"
+        className="inline-flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center rounded-lg px-2.5 text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 [&::-webkit-details-marker]:hidden"
         title="Atajos de teclado"
       >
         <KeyboardIcon />
@@ -81,15 +81,15 @@ export const StudioShortcutsHelp = forwardRef<StudioShortcutsHelpHandle>(functio
         className="absolute right-0 top-full z-dropdown mt-2 w-[min(100vw-2rem,320px)] rounded-xl border border-border bg-bg p-3"
         style={{ boxShadow: 'var(--shadow-float)' }}
       >
-        <p className="text-[0.8125rem] font-semibold text-ink">Atajos de teclado</p>
+        <p className="text-chrome-label font-semibold text-ink">Atajos de teclado</p>
         <dl className="mt-3 space-y-3">
           {STUDIO_SHORTCUTS.map((shortcut) => (
             <div key={shortcut.keys}>
-              <dt className="font-mono text-[0.75rem] font-semibold text-ink">
+              <dt className="font-mono text-chrome-caption font-semibold text-ink">
                 {formatShortcutKeys(shortcut.keys)}
               </dt>
-              <dd className="mt-0.5 text-[0.8125rem] text-ink">{shortcut.label}</dd>
-              <dd className="text-[0.75rem] leading-relaxed text-muted">{shortcut.when}</dd>
+              <dd className="mt-0.5 text-chrome-label text-ink">{shortcut.label}</dd>
+              <dd className="text-chrome-caption leading-relaxed text-muted">{shortcut.when}</dd>
             </div>
           ))}
         </dl>

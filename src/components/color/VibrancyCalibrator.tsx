@@ -27,8 +27,8 @@ export function VibrancyCalibrator() {
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="text-[0.8125rem] font-bold text-ink">Vibrancia</h3>
-          <p className="text-[0.75rem] text-muted">
+          <h3 className="text-tools-section font-semibold text-ink">Vibrancia</h3>
+          <p className="text-tools-meta text-muted">
             Vista previa {previewVibrancy} · Guardado {savedVibrancy}
           </p>
         </div>
@@ -36,7 +36,7 @@ export function VibrancyCalibrator() {
           variant={hasUnsavedVibrancy ? 'primary' : 'ghost'}
           disabled={!hasUnsavedVibrancy}
           onClick={saveVibrancy}
-          className="min-h-9 px-3 py-2 text-[0.8125rem]"
+          className="min-h-11 px-3 py-2 text-tools-body"
         >
           Guardar
         </Button>
@@ -54,7 +54,7 @@ export function VibrancyCalibrator() {
           aria-valuetext={`${previewVibrancy} de 100`}
           className="h-2 w-full cursor-pointer accent-primary"
         />
-        <div className="mt-1 grid grid-cols-3 text-[0.6875rem] font-semibold text-muted">
+        <div className="mt-1 grid grid-cols-3 text-tools-meta font-semibold text-muted">
           {TICKS.map((tick, index) => (
             <span
               key={tick.value}

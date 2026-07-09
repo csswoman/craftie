@@ -33,7 +33,7 @@ export function PaletteShadesOverlay({
           onClick={onClose}
           aria-label="Cerrar selector de shades"
           title="Cerrar"
-          className="flex size-7 items-center justify-center rounded-md bg-black/35 text-white backdrop-blur-sm transition-colors hover:bg-black/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+          className="flex size-11 items-center justify-center rounded-md bg-black/45 text-white transition-colors hover:bg-black/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
         >
           <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3.5">
             <path

@@ -110,7 +110,7 @@ export function ColorSelectionRow({
             className="w-full rounded-md border border-border bg-bg px-2 py-1 text-[0.8125rem] font-semibold text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           />
         </label>
-        <span className="shrink-0 font-mono text-[0.6875rem] opacity-85">{color.hex.toUpperCase()}</span>
+        <span className="shrink-0 font-mono text-chrome-caption opacity-85">{color.hex.toUpperCase()}</span>
       </div>
     );
   }
@@ -143,11 +143,11 @@ export function ColorSelectionRow({
         >
           {displayName}
         </span>
-        <span className="block font-mono text-[0.6875rem] opacity-85">{color.hex.toUpperCase()}</span>
+        <span className="block font-mono text-chrome-caption opacity-85">{color.hex.toUpperCase()}</span>
         {activeAssignment ? (
           <span
-            className={`mt-0.5 block text-[0.625rem] font-semibold uppercase tracking-wide ${
-              selected ? 'opacity-90' : 'text-primary'
+            className={`mt-0.5 block text-chrome-caption font-medium ${
+              selected ? 'text-ink' : 'text-primary'
             }`}
           >
             Rol activo

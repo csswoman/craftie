@@ -19,20 +19,55 @@ const NEUTRAL_STYLE_OPTIONS: Array<{ value: NeutralStyle; label: string; descrip
   },
 ];
 
-export function PaletteAdjustmentsSection() {
+export type PaletteAdjustmentsSectionProps = {
+  defaultOpen?: boolean;
+  embedded?: boolean;
+};
+
+export function PaletteAdjustmentsSection({
+  defaultOpen = false,
+  embedded = false,
+}: PaletteAdjustmentsSectionProps) {
   const { rolePalette, neutralStyle, setNeutralStyle } = useRolePalette();
 
   if (!rolePalette) {
     return null;
   }
 
+  const content = (
+    <div className="space-y-[var(--chrome-space-3)]">
+      <NeutralStyleControl value={neutralStyle} onChange={setNeutralStyle} />
+      <VibrancyCalibrator />
+    </div>
+  );
+
+  if (embedded) {
+    return content;
+  }
+
   return (
-    <CollapsibleSection title="Ajustes de paleta" defaultOpen>
-      <div className="space-y-3">
-        <NeutralStyleControl value={neutralStyle} onChange={setNeutralStyle} />
-        <VibrancyCalibrator />
-      </div>
+    <CollapsibleSection
+      title="Ajustes de paleta"
+      defaultOpen={defaultOpen}
+      variant="neutral"
+      icon={<AdjustmentsIcon />}
+    >
+      {content}
     </CollapsibleSection>
+  );
+}
+
+function AdjustmentsIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4">
+      <path
+        d="M3 5h10M3 11h10M6 3.5v3M10 9.5v3"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
 
@@ -46,17 +81,17 @@ function NeutralStyleControl({
   return (
     <section
       aria-label="Estilo de neutros"
-      className="rounded-lg border border-border bg-bg p-3"
+      className="rounded-[var(--chrome-radius-card)] border border-border bg-bg p-[var(--chrome-space-3)]"
     >
       <div>
-        <h3 className="text-[0.8125rem] font-bold text-ink">Neutros</h3>
-        <p className="text-[0.75rem] text-muted">Define si las superficies quedan puras o teñidas.</p>
+        <h3 className="text-tools-section font-semibold text-ink">Neutros</h3>
+        <p className="text-tools-meta font-normal text-muted">Define si las superficies quedan puras o teñidas.</p>
       </div>
 
       <div
         role="radiogroup"
         aria-label="Estilo de neutros"
-        className="mt-3 grid grid-cols-2 gap-1 rounded-lg border border-border bg-surface p-1"
+        className="mt-[var(--chrome-space-3)] grid grid-cols-2 gap-[var(--chrome-space-1)] rounded-[var(--chrome-radius-card)] border border-border bg-surface p-[var(--chrome-space-1)]"
       >
         {NEUTRAL_STYLE_OPTIONS.map((option) => {
           const selected = value === option.value;
@@ -68,12 +103,12 @@ function NeutralStyleControl({
               role="radio"
               aria-checked={selected}
               onClick={() => onChange(option.value)}
-              className={`rounded-md px-2.5 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+              className={`rounded-[var(--chrome-radius-control)] px-[var(--chrome-space-2)] py-[var(--chrome-space-2)] text-left transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
                 selected ? 'bg-bg text-ink' : 'text-muted hover:bg-surface-raised hover:text-ink'
               }`}
             >
-              <span className="block text-[0.75rem] font-bold">{option.label}</span>
-              <span className="block text-[0.6875rem] font-medium">{option.description}</span>
+              <span className="block font-sans text-tools-body font-medium">{option.label}</span>
+              <span className="block font-sans text-tools-meta font-normal">{option.description}</span>
             </button>
           );
         })}

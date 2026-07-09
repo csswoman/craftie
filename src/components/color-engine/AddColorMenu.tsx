@@ -89,7 +89,7 @@ export function AddColorMenu({ onSubmit }: AddColorMenuProps) {
             Añadir
           </button>
           {feedback ? (
-            <p className="mt-1.5 text-[0.6875rem] font-medium text-fail" role="alert">
+            <p className="mt-1.5 text-chrome-caption font-medium text-fail" role="alert">
               {feedback}
             </p>
           ) : null}

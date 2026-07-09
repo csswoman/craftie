@@ -15,6 +15,7 @@ export type ImageUploaderProps = {
   showHeader?: boolean;
   showDropzone?: boolean;
   showChangeImageControl?: boolean;
+  previewVariant?: 'default' | 'compact';
 };
 
 export function ImageUploader({
@@ -28,6 +29,7 @@ export function ImageUploader({
   showHeader = true,
   showDropzone = true,
   showChangeImageControl = true,
+  previewVariant = 'default',
 }: ImageUploaderProps) {
   const isEmbedded = variant === 'embedded';
   const inputId = useId();
@@ -77,12 +79,24 @@ export function ImageUploader({
           fileName={fileName}
           isLoading={isLoading}
           onRegenerate={onRegenerate}
+          variant={previewVariant}
+          trailingControl={
+            showChangeImageControl && previewVariant === 'compact' ? (
+              <label
+                htmlFor={inputId}
+                className="inline-flex min-h-11 cursor-pointer items-center rounded-[var(--chrome-radius-control)] border border-border bg-surface px-[var(--chrome-space-2)] font-sans text-tools-body font-medium text-[var(--chrome-green)] transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+              >
+                Cambiar
+              </label>
+            ) : null
+          }
         />
       ) : null}
 
       <input
         id={inputId}
         type="file"
+        name="inspiration-image"
         accept=".jpg,.jpeg,.png,.webp"
         onChange={handleFileChange}
         className="sr-only"
@@ -113,7 +127,7 @@ export function ImageUploader({
         </div>
       ) : null}
 
-      {hasPreview && showChangeImageControl ? (
+      {hasPreview && showChangeImageControl && previewVariant !== 'compact' ? (
         <div className="pt-2">
           <label
             htmlFor={inputId}
