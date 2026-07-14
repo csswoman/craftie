@@ -4,7 +4,7 @@ import { tokenNameForPaletteRole } from './semanticRoleProjection';
 
 export function validateRolePalette(palette: RolePalette | null): { ok: true } | { ok: false; error: string } {
   if (!palette) {
-    return { ok: false, error: 'Sube una imagen o elige inspiración para armar tu paleta.' };
+    return { ok: false, error: 'Sube una imagen o elige un estilo para armar tu paleta.' };
   }
 
   return { ok: true };

@@ -39,7 +39,7 @@ export function SelectColorsWorkspaceRightPanel({
     return (
       <div className="flex h-full min-h-0 flex-col justify-center p-6">
         <p className="text-chrome-label leading-relaxed text-muted">
-          Elige un rol en el lienzo para revisar contraste, editar el color o ver las vistas previas.
+          Elige un rol en el lienzo para editar color, contraste o vistas previas.
         </p>
       </div>
     );

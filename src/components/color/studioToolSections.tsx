@@ -90,7 +90,7 @@ export function buildStudioToolSections(
           recommendedPairings={input.recommendedPairings}
           selectedPairing={input.selectedPairing}
           onSelectPairing={input.onSelectPairing}
-          embedded={target === 'mobile'}
+          embedded
         />
       ),
     },

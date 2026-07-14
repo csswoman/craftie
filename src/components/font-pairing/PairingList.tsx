@@ -19,9 +19,7 @@ const FILTERS = [
   { label: 'Editorial', value: 'editorial' },
   { label: 'Técnico', value: 'technical' },
   { label: 'Cálido', value: 'warm' },
-  { label: 'Geométrico', value: 'geometric' },
   { label: 'Minimal', value: 'minimal' },
-  { label: 'Audaz', value: 'bold' },
 ] as const;
 
 type FilterValue = (typeof FILTERS)[number]['value'];
@@ -52,9 +50,10 @@ export function PairingList({
 
   if (pairings.length === 0) {
     return (
-      <p className={`rounded-md border border-dashed border-border bg-bg px-4 py-8 text-center ${emptyClass} text-muted`}>
-        No hay parejas tipográficas disponibles para este estado de ánimo. Elige un estilo de
-        inspiración en la pestaña Colores.
+      <p
+        className={`rounded-md border border-dashed border-border bg-bg px-4 py-8 text-center ${emptyClass} text-muted`}
+      >
+        No hay pares tipográficos para este filtro. Prueba otro carácter o elige Todos.
       </p>
     );
   }
@@ -62,7 +61,7 @@ export function PairingList({
   return (
     <div className={isTools ? 'flex min-h-0 flex-1 flex-col gap-3' : 'space-y-3'}>
       <div
-        className="scrollbar-none -mx-1 flex shrink-0 gap-1.5 overflow-x-auto px-1"
+        className="flex shrink-0 flex-wrap gap-1.5"
         aria-label="Filtrar pares por carácter"
       >
         {FILTERS.map((filter) => (
@@ -71,10 +70,10 @@ export function PairingList({
             type="button"
             onClick={() => setActiveFilter(filter.value)}
             aria-pressed={activeFilter === filter.value}
-            className={`shrink-0 rounded-full border px-2.5 py-1.5 ${chipClass} font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+            className={`rounded-md px-2.5 py-1.5 ${chipClass} font-medium transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
               activeFilter === filter.value
-                ? 'border-primary bg-primary text-bg'
-                : 'border-border bg-bg text-muted hover:bg-surface-raised hover:text-ink'
+                ? 'bg-surface-raised text-ink'
+                : 'text-muted hover:bg-surface-raised/70 hover:text-ink'
             }`}
           >
             {filter.label}

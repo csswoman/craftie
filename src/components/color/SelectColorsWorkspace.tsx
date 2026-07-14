@@ -1,22 +1,29 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 import { DESIGN_STYLES } from '@lib/styles/presets';
 
 import { InspirationModal } from '@/components/color/InspirationModal';
 import { SelectColorsWorkspaceMain } from '@/components/color/SelectColorsWorkspaceMain';
 import { SelectColorsWorkspaceRightPanel } from '@/components/color/SelectColorsWorkspaceRightPanel';
+import { EmptyWorkspaceCard } from '@/components/color/EmptyWorkspaceCard';
 import {
   SelectColorsWorkspaceSidebar,
   useSelectColorsWorkspaceToolSections,
 } from '@/components/color/SelectColorsWorkspaceSidebar';
 import { StudioToolsMobileDock } from '@/components/color/StudioToolsMobileDock';
 import { useSelectColorsWorkspaceController } from '@/components/color/useSelectColorsWorkspaceController';
-import { ImageUploader } from '@/components/color-engine/ImageUploader';
 import { StyleGallery } from '@/components/color-engine/StyleGallery';
 import { StudioCanvas } from '@/components/layout/StudioCanvas';
+import { StudioFlowGuide } from '@/components/layout/StudioFlowGuide';
 import { StudioStatusBar } from '@/components/layout/StudioStatusBar';
 import { WorkspaceHeader } from '@/components/layout/WorkspaceHeader';
 import { RolePaletteProvider } from '@/context/RolePaletteContext';
+import {
+  readFlowGuideDismissed,
+  writeFlowGuideDismissed,
+} from '@/lib/browser/flowGuideDismiss';
 
 export function SelectColorsWorkspace() {
   return (
@@ -29,6 +36,27 @@ export function SelectColorsWorkspace() {
 function SelectColorsWorkspaceContent() {
   const workspace = useSelectColorsWorkspaceController();
   const hasInspirationSource = workspace.catalogSource !== 'none';
+  const [flowGuideDismissed, setFlowGuideDismissed] = useState(false);
+
+  useEffect(() => {
+    // The flow hint preference lives in localStorage, so it is only known after mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFlowGuideDismissed(readFlowGuideDismissed());
+  }, []);
+
+  function handleFlowGuideToggle() {
+    setFlowGuideDismissed((current) => {
+      const next = !current;
+      writeFlowGuideDismissed(next);
+      return next;
+    });
+  }
+
+  function handleFlowGuideDismiss() {
+    writeFlowGuideDismissed(true);
+    setFlowGuideDismissed(true);
+  }
+
   const toolSectionsInput = {
     catalogSource: workspace.catalogSource,
     fileName: workspace.imageFileName,
@@ -69,9 +97,10 @@ function SelectColorsWorkspaceContent() {
 
       <WorkspaceHeader
         canExport={workspace.isReviewPhase}
+        flowGuideVisible={hasInspirationSource && !flowGuideDismissed}
+        onFlowGuideToggle={hasInspirationSource ? handleFlowGuideToggle : undefined}
         onExportDesignMd={workspace.handleExportDesignMd}
         onExportBrandKit={workspace.handleExportBrandKit}
-        shortcutsRef={workspace.shortcutsRef}
       />
 
       {workspace.error ? (
@@ -98,6 +127,7 @@ function SelectColorsWorkspaceContent() {
             isImageBusy={workspace.isImageBusy}
             onImageFileSelected={workspace.handleImageFileSelected}
             onImageRegenerate={workspace.handleImageRegenerate}
+            onOpenInspiration={() => workspace.setInspirationModalOpen(true)}
           />
         </div>
 
@@ -109,6 +139,16 @@ function SelectColorsWorkspaceContent() {
   return (
     <div className="canvas-dots flex h-dvh flex-col overflow-hidden">
       {sharedChrome}
+
+      {!flowGuideDismissed ? (
+        <StudioFlowGuide
+          hasGeneratedPalette={workspace.generatedPalette !== null}
+          hasSelection={workspace.rolePalette !== null}
+          selectionReady={workspace.selectionReady}
+          onStepFocus={workspace.handleFlowStepFocus}
+          onDismiss={handleFlowGuideDismiss}
+        />
+      ) : null}
 
       <StudioCanvas
         showRightPanel
@@ -149,52 +189,5 @@ function SelectColorsWorkspaceContent() {
 
       {inspirationModal}
     </div>
-  );
-}
-
-function EmptyWorkspaceCard({
-  fileName,
-  hasPreview,
-  imagePreviewUrl,
-  isImageBusy,
-  onImageFileSelected,
-  onImageRegenerate,
-}: {
-  fileName: string | null;
-  hasPreview: boolean;
-  imagePreviewUrl: string | null;
-  isImageBusy: boolean;
-  onImageFileSelected: (file: File) => void;
-  onImageRegenerate: () => void;
-}) {
-  return (
-    <section
-      aria-labelledby="workspace-empty-title"
-      className="w-full max-w-xl rounded-xl border border-border bg-surface p-4 shadow-sm"
-    >
-      <div className="mx-auto max-w-md">
-        <h2 id="workspace-empty-title" className="text-chrome-title font-semibold text-ink">
-          Empieza con una inspiración
-        </h2>
-        <p className="prose-measure mt-1 text-chrome-label text-muted">
-          Sube una imagen o elige un estilo curado. Craftie extraerá colores y te ayudará a
-          asignarlos a los 7 roles de tu marca.
-        </p>
-        <div className="mt-4">
-        <ImageUploader
-          fileName={fileName}
-          hasPreview={hasPreview}
-          isLoading={isImageBusy}
-          previewUrl={imagePreviewUrl}
-          onFileSelected={onImageFileSelected}
-          onRegenerate={onImageRegenerate}
-          variant="embedded"
-          showHeader={false}
-          showDropzone={!hasPreview}
-          showChangeImageControl={false}
-        />
-        </div>
-      </div>
-    </section>
   );
 }

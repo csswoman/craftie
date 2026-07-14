@@ -19,7 +19,6 @@ import { useWorkspaceExports } from '@/components/color/useWorkspaceExports';
 import { useWorkspaceInspiration } from '@/components/color/useWorkspaceInspiration';
 import { useWorkspacePaletteActions } from '@/components/color/useWorkspacePaletteActions';
 import { useWorkspaceShortcuts } from '@/components/color/useWorkspaceShortcuts';
-import type { StudioShortcutsHelpHandle } from '@/components/layout/StudioShortcutsHelp';
 import { useRolePalette } from '@/context/RolePaletteContext';
 import { extractPaletteColorsFromImage } from '@/lib/browser/imageExtractor';
 import { readSelectedFontPairId, writeSelectedFontPairId } from '@/lib/browser/selectedFontPair';
@@ -56,7 +55,6 @@ export function useSelectColorsWorkspaceController() {
   const [imageRegenerateIndex, setImageRegenerateIndex] = useState(0);
   const generatingRef = useRef(false);
   const imagePreviewUrlRef = useRef<string | null>(null);
-  const shortcutsRef = useRef<StudioShortcutsHelpHandle>(null);
 
   useEffect(() => {
     const storedPairId = readSelectedFontPairId();
@@ -186,7 +184,7 @@ export function useSelectColorsWorkspaceController() {
       const nextPalette = generatePaletteFromRolePalette(rolePalette!);
       setGeneratedPalette(nextPalette);
       setRightPanelCollapsed(false);
-      setStatusMessage('Guía de marca lista. Revisa contraste, tipografía y exporta tu Brand Kit.');
+      setStatusMessage('Guía de marca lista. Revisa contraste y tipografía, luego exporta.');
     } finally {
       generatingRef.current = false;
       setIsGenerating(false);
@@ -202,7 +200,7 @@ export function useSelectColorsWorkspaceController() {
     return () => window.clearTimeout(timer);
   }, [statusMessage]);
 
-  useWorkspaceShortcuts({ handleGenerate, isReviewPhase, selectionReady, shortcutsRef });
+  useWorkspaceShortcuts({ handleGenerate, isReviewPhase, selectionReady });
 
   function exitReviewPhase() {
     setGeneratedPalette(null);
@@ -316,7 +314,6 @@ export function useSelectColorsWorkspaceController() {
     setInspirationModalOpen,
     setRightPanelCollapsed,
     setSelectedPairing: handleSelectPairing,
-    shortcutsRef,
     statusMessage,
   };
 }

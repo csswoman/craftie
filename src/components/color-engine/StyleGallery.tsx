@@ -18,6 +18,9 @@ export type StyleGalleryProps = {
   showHeader?: boolean;
 };
 
+/** Only show mood filters when the list is large enough to need them. */
+const MOOD_FILTER_MIN_STYLES = 8;
+
 export function StyleGallery({
   styles,
   selectedStyleId = null,
@@ -28,9 +31,10 @@ export function StyleGallery({
   const isEmbedded = variant === 'embedded';
   const [activeMood, setActiveMood] = useState<string | null>(null);
   const moods = useMemo(() => collectMoods(styles), [styles]);
+  const showMoodFilters = styles.length >= MOOD_FILTER_MIN_STYLES && moods.length > 0;
   const visibleStyles = useMemo(
-    () => filterStylesByMood(styles, activeMood),
-    [styles, activeMood],
+    () => (showMoodFilters ? filterStylesByMood(styles, activeMood) : styles),
+    [styles, activeMood, showMoodFilters],
   );
 
   return (
@@ -60,9 +64,9 @@ export function StyleGallery({
         </p>
       ) : (
         <>
-          {moods.length > 0 ? (
+          {showMoodFilters ? (
             <div
-              className={`flex flex-wrap gap-2 ${showHeader ? 'mt-4' : ''}`}
+              className={`flex flex-wrap gap-1.5 ${showHeader ? 'mt-4' : ''}`}
               role="group"
               aria-label="Filtrar por estado de ánimo"
             >
@@ -88,7 +92,7 @@ export function StyleGallery({
             </p>
           ) : (
             <ul
-              className={`mt-4 grid gap-3 ${
+              className={`${showMoodFilters || showHeader ? 'mt-4' : ''} grid gap-3 ${
                 isEmbedded
                   ? 'grid-cols-1'
                   : 'grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4'
@@ -125,10 +129,10 @@ function MoodChip({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`rounded-full border px-3 py-1 text-[0.8125rem] font-medium transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+      className={`rounded-md px-2.5 py-1.5 text-[0.8125rem] font-medium transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
         active
-          ? 'border-primary bg-primary text-white'
-          : 'border-border bg-surface text-muted hover:bg-surface-raised hover:text-ink'
+          ? 'bg-surface-raised text-ink'
+          : 'text-muted hover:bg-surface-raised/70 hover:text-ink'
       }`}
     >
       {label}

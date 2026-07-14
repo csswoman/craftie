@@ -11,7 +11,13 @@ export type PairCardProps = {
   variant?: 'default' | 'tools';
 };
 
-export function PairCard({ pairing, selected, fontsReady, onSelect, variant = 'default' }: PairCardProps) {
+export function PairCard({
+  pairing,
+  selected,
+  fontsReady,
+  onSelect,
+  variant = 'default',
+}: PairCardProps) {
   const isTools = variant === 'tools';
   const headingFont = buildFontFamilyStack(pairing.heading);
   const bodyFont = buildFontFamilyStack(pairing.body);
@@ -32,7 +38,13 @@ export function PairCard({ pairing, selected, fontsReady, onSelect, variant = 'd
       }`}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className={`min-w-0 truncate font-semibold text-ink ${nameClass}`}>{pairing.displayName}</p>
+        <p
+          className={`min-w-0 font-semibold text-ink ${
+            isTools ? 'text-pretty' : 'truncate'
+          } ${nameClass}`}
+        >
+          {pairing.displayName}
+        </p>
         {selected ? (
           <span
             aria-hidden="true"
@@ -44,7 +56,9 @@ export function PairCard({ pairing, selected, fontsReady, onSelect, variant = 'd
       </div>
 
       <div
-        className={`mt-2 overflow-hidden rounded-md border border-border/50 ${fontsReady ? '' : 'animate-pulse'}`}
+        className={`mt-2 overflow-hidden rounded-md border border-border/50 ${
+          fontsReady ? '' : 'animate-pulse'
+        }`}
       >
         <FontRolePreview
           label="Headline"
@@ -53,6 +67,7 @@ export function PairCard({ pairing, selected, fontsReady, onSelect, variant = 'd
           fontsReady={fontsReady}
           labelClass={metaClass}
           nameClass={`${headlineClass} font-semibold`}
+          allowWrap={isTools}
         />
         <div className="h-px bg-border/60" aria-hidden="true" />
         <FontRolePreview
@@ -62,6 +77,7 @@ export function PairCard({ pairing, selected, fontsReady, onSelect, variant = 'd
           fontsReady={fontsReady}
           labelClass={metaClass}
           nameClass={bodyClass}
+          allowWrap={isTools}
         />
       </div>
     </button>
@@ -75,6 +91,7 @@ function FontRolePreview({
   fontsReady,
   labelClass,
   nameClass,
+  allowWrap = false,
 }: {
   label: string;
   family: string;
@@ -82,12 +99,15 @@ function FontRolePreview({
   fontsReady: boolean;
   labelClass: string;
   nameClass: string;
+  allowWrap?: boolean;
 }) {
   return (
-    <div className="px-2.5 py-2">
+    <div className={allowWrap ? 'px-3 py-2.5' : 'px-2.5 py-2'}>
       <p className={`font-medium uppercase tracking-[0.08em] text-muted ${labelClass}`}>{label}</p>
       <p
-        className={`mt-1 truncate leading-none text-ink ${nameClass}`}
+        className={`mt-1 text-ink ${
+          allowWrap ? 'text-pretty leading-snug' : 'truncate leading-none'
+        } ${nameClass}`}
         style={{ fontFamily: fontsReady ? fontStack : undefined }}
       >
         {family}

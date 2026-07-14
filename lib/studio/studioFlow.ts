@@ -9,23 +9,23 @@ export type StudioFlowStep = {
 export const STUDIO_FLOW_STEPS: StudioFlowStep[] = [
   {
     id: 'inspire',
-    label: 'Inspírate',
-    hint: 'Elige un estilo curado o sube una imagen.',
+    label: 'Elegir inspiración',
+    hint: 'Sube una imagen o elige un estilo curado.',
   },
   {
     id: 'adjust',
-    label: 'Ajusta',
-    hint: 'Refina cada rol en el panel derecho o en el lienzo.',
+    label: 'Ajustar roles',
+    hint: 'Toca un rol en el lienzo y ajústalo en el Inspector.',
   },
   {
     id: 'generate',
-    label: 'Guía de marca',
-    hint: 'Crea la guía de marca y abre la vista de exportación.',
+    label: 'Generar guía',
+    hint: 'Crea la guía de marca para desbloquear la exportación.',
   },
   {
     id: 'review',
-    label: 'Revisa',
-    hint: 'Explora contraste, tipografía, mockups y exporta.',
+    label: 'Revisar y exportar',
+    hint: 'Revisa contraste y tipografía, luego exporta.',
   },
 ];
 

@@ -165,7 +165,7 @@ export function PaletteCanvas({
             role="alert"
             className="absolute left-4 top-4 z-30 max-w-sm rounded-lg border border-fail/30 bg-bg/95 px-3 py-2 text-[0.75rem] font-semibold text-fail"
           >
-            Hay pares de contraste que no alcanzan AA. Revisa la pestaña Contraste en el inspector.
+            Hay pares de contraste que no alcanzan AA. Ábrelos en Contraste dentro del Inspector.
           </p>
         ) : null}
         {isLoading && !hasPalette ? (
@@ -224,8 +224,7 @@ function EmptyCanvas() {
   return (
     <div className="flex h-full min-h-0 items-center justify-center bg-surface-raised/40 px-6 py-8">
       <p className="prose-measure max-w-xs text-center text-chrome-label leading-relaxed text-muted">
-        Haz clic en una banda del lienzo para elegir el rol activo. Luego asigna colores desde el
-        panel de la izquierda.
+        Elige un rol en el lienzo para editarlo en el Inspector.
       </p>
     </div>
   );

@@ -75,7 +75,7 @@ export function SourceColorsSection({ colors, embedded = false }: SourceColorsSe
   const content = (
     <div className="space-y-[var(--chrome-space-3)]">
       <p className="font-sans text-tools-meta font-medium text-muted">
-        {uniqueColors.length} colores extraídos
+        {uniqueColors.length} colores fuente
       </p>
       <ul className="grid grid-cols-2 gap-[var(--chrome-space-2)]" aria-label="Colores crudos extraídos">
           {uniqueColors.map((color) => {

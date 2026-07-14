@@ -29,7 +29,7 @@ export function TypographyPreview({
         }`}
       >
         <p className="max-w-xs text-[0.9375rem] leading-relaxed text-muted">
-          Genera una paleta en la pestaña Colores para previsualizar tipografía con tus colores.
+          Genera la guía de marca para ver tipografía con tus colores.
         </p>
       </section>
     );

@@ -15,7 +15,7 @@ export function GenerateButton({ onClick, disabled = false, busy = false }: Gene
         {busy ? 'Creando guía…' : 'Crear guía de marca'}
       </Button>
       <p className="text-center text-chrome-caption leading-relaxed text-muted">
-        Asigna los 7 roles para crear la guía de marca y desbloquear la exportación.
+        Completa los 7 roles para crear la guía y poder exportar.
       </p>
     </div>
   );

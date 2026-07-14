@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { suggestSelectionFromHexes } from '../color/selectableColors';
+import { normalizeHex } from '../color/normalizeHex';
+import {
+  SELECTABLE_COLORS,
+  buildCuratedSourceCatalog,
+  suggestSelectionFromHexes,
+} from '../color/selectableColors';
 
 import {
   collectMoods,
@@ -38,6 +43,18 @@ describe('presets', () => {
     for (const style of DESIGN_STYLES) {
       const result = suggestSelectionFromHexes(style.seeds);
       expect(result.ok, style.id).toBe(true);
+    }
+  });
+
+  it('builds source catalog from curated seeds only, not the full catalog', () => {
+    for (const style of DESIGN_STYLES) {
+      const catalog = buildCuratedSourceCatalog(style.seeds);
+      const seedHexes = [...new Set(style.seeds.map((hex) => normalizeHex(hex)))].sort();
+      const catalogHexes = catalog.map((color) => normalizeHex(color.hex)).sort();
+
+      expect(catalog.length, style.id).toBeGreaterThan(0);
+      expect(catalog.length, style.id).toBeLessThan(SELECTABLE_COLORS.length);
+      expect(catalogHexes, style.id).toEqual(seedHexes);
     }
   });
 
