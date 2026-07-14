@@ -72,8 +72,7 @@ export function ColorSelectionPanel({
         <SelectionPanelStatus extractedCount={0} />
         <div className="flex flex-1 items-center px-4 py-6">
           <p className="text-chrome-label leading-relaxed text-muted">
-            Sube una imagen a la izquierda o elige un estilo curado para empezar a asignar colores a
-            cada rol.
+            Sube una imagen o elige un estilo para empezar a asignar colores a cada rol.
           </p>
         </div>
       </div>
@@ -167,9 +166,9 @@ function SelectionPanelStatus({
         <p className="mt-1 text-chrome-caption text-muted">
           {activeRole
             ? catalogOpen
-              ? 'Toca un color del catálogo para asignarlo al rol activo.'
-              : 'Abre el catálogo de colores para asignar uno al rol activo.'
-            : 'Elige un rol en el lienzo y luego toca un color del catálogo para asignarlo.'}
+              ? 'Elige un color fuente para asignarlo al rol activo.'
+              : 'Abre Colores fuente para asignar un color al rol activo.'
+            : 'Elige un rol en el lienzo y luego un color fuente.'}
         </p>
       ) : null}
     </>

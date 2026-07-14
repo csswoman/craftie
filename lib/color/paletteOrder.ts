@@ -255,7 +255,7 @@ export function addColorToPalette(
       ok: true,
       catalog: nextCatalog,
       selected,
-      message: 'Color añadido al catálogo. Libera un hueco en su grupo para seleccionarlo.',
+      message: 'Color añadido a Colores fuente. Libera un hueco en su grupo para seleccionarlo.',
     };
   }
 
@@ -266,7 +266,7 @@ export function addColorToPalette(
       ok: true,
       catalog: nextCatalog,
       selected,
-      message: 'Color añadido al catálogo. Libera un hueco en su grupo para seleccionarlo.',
+      message: 'Color añadido a Colores fuente. Libera un hueco en su grupo para seleccionarlo.',
     };
   }
 

@@ -5,14 +5,14 @@ import { useCallback, useEffect, useState } from 'react';
 const STORAGE_KEY = 'craftie-studio-panel-layout';
 
 const DEFAULTS = {
-  sidebarWidth: 220,
+  sidebarWidth: 360,
   rightWidth: 400,
   sidebarCollapsed: false,
   rightCollapsed: true,
 };
 
 const LIMITS = {
-  sidebar: { min: 200, max: 360 },
+  sidebar: { min: 300, max: 480 },
   right: { min: 320, max: 560 },
 } as const;
 
@@ -40,10 +40,12 @@ export function readStudioPanelLayout(): PanelLayout {
 
     const parsed = JSON.parse(raw) as Partial<PanelLayout>;
     const storedRight = parsed.rightWidth ?? DEFAULTS.rightWidth;
+    const storedSidebar = parsed.sidebarWidth ?? DEFAULTS.sidebarWidth;
 
     return {
       sidebarWidth: clamp(
-        parsed.sidebarWidth ?? DEFAULTS.sidebarWidth,
+        // Migrate older narrow sidebar defaults so fonts/tabs have room.
+        storedSidebar < LIMITS.sidebar.min ? DEFAULTS.sidebarWidth : storedSidebar,
         LIMITS.sidebar.min,
         LIMITS.sidebar.max,
       ),

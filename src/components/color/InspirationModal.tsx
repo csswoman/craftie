@@ -17,7 +17,7 @@ export function InspirationModal({ open, onClose, children }: InspirationModalPr
     open,
     dialogRef,
     onClose,
-    initialFocusSelector: '[data-modal-close]',
+    initialFocusSelector: '[data-style-card]',
     lockScroll: true,
   });
 
@@ -45,7 +45,7 @@ export function InspirationModal({ open, onClose, children }: InspirationModalPr
               Elegir inspiración
             </h2>
             <p className="prose-measure mt-0.5 text-chrome-label leading-relaxed text-muted">
-              Selecciona un estilo curado para cargar colores semilla en los 7 roles.
+              Elige un estilo para cargar colores semilla en tu paleta.
             </p>
           </div>
           <button

@@ -12,7 +12,7 @@ const EXPORT_OPTIONS = [
   {
     id: 'brand-kit',
     label: 'Brand kit (.json)',
-    description: 'Colores, tipografía y tokens listos para código.',
+    description: 'Colores, tipografía y tokens en un JSON listo para usar.',
   },
   {
     id: 'design-md',
@@ -20,6 +20,11 @@ const EXPORT_OPTIONS = [
     description: 'Guía de diseño en Markdown para documentación.',
   },
 ] as const;
+
+const TRIGGER_BASE =
+  'inline-flex min-h-11 items-center gap-2 rounded-lg font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25';
+const TRIGGER_READY = `${TRIGGER_BASE} bg-primary px-4 py-2 text-chrome-body text-white hover:bg-primary-hover`;
+const TRIGGER_GATED = `${TRIGGER_BASE} border border-border bg-transparent px-3 py-2 text-chrome-label text-muted disabled:cursor-not-allowed`;
 
 export function ExportMenu({ canExport, onExportBrandKit, onExportDesignMd }: ExportMenuProps) {
   const [open, setOpen] = useState(false);
@@ -134,8 +139,26 @@ export function ExportMenu({ canExport, onExportBrandKit, onExportDesignMd }: Ex
     onExportDesignMd();
   }
 
+  const disabledHintId = `${menuId}-hint`;
+  const exportHint = canExport
+    ? 'Descargar Brand kit (.json) o DESIGN.md'
+    : 'Se habilita al crear la guía de marca';
+
   return (
-    <div className="relative z-dropdown">
+    <div className="relative z-dropdown flex min-w-0 items-center gap-2">
+      {!canExport ? (
+        <>
+          <span id={disabledHintId} className="sr-only">
+            Se habilita al crear la guía de marca
+          </span>
+          <span
+            aria-hidden="true"
+            className="hidden max-w-[9.5rem] text-right text-chrome-caption leading-snug text-muted sm:block"
+          >
+            Se habilita al crear la guía
+          </span>
+        </>
+      ) : null}
       <button
         ref={triggerRef}
         type="button"
@@ -143,22 +166,16 @@ export function ExportMenu({ canExport, onExportBrandKit, onExportDesignMd }: Ex
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
-        title={
-          canExport
-            ? 'Descargar brand kit o DESIGN.md'
-            : 'Crea la guía de marca para habilitar la exportación'
-        }
+        aria-describedby={!canExport ? disabledHintId : undefined}
+        title={exportHint}
         onClick={() => {
-          if (!canExport) {
-            return;
-          }
-          setOpen((value) => !value);
+          if (canExport) setOpen((value) => !value);
         }}
-        className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-4 py-2 text-chrome-body font-semibold text-white transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-45"
+        className={canExport ? TRIGGER_READY : TRIGGER_GATED}
       >
         <DownloadIcon />
         <span className="hidden sm:inline">Exportar</span>
-        <ChevronDownIcon open={open} />
+        {canExport ? <ChevronDownIcon open={open} /> : null}
       </button>
 
       {open && menuPosition ? (

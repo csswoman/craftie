@@ -15,7 +15,7 @@ export function SelectionPaletteStrip({ rolePalette }: SelectionPaletteStripProp
 
   return (
     <section aria-label="Paleta por roles">
-      <p className="text-chrome-caption font-semibold text-muted">7 roles asignados</p>
+      <p className="text-chrome-caption font-semibold text-muted">Roles listos</p>
       <ul className="mt-1.5 flex flex-wrap gap-1.5">
         {columns.map((column) => {
           const textColor = pickReadableTextColor(column.hex);

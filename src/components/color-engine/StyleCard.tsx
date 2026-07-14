@@ -12,6 +12,7 @@ export function StyleCard({ style, selected, onSelect }: StyleCardProps) {
   return (
     <button
       type="button"
+      data-style-card
       onClick={() => onSelect(style)}
       aria-pressed={selected}
       className={`flex h-full w-full flex-col rounded-lg border border-border bg-surface p-4 text-left transition-[box-shadow,background-color] hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
@@ -35,17 +36,11 @@ export function StyleCard({ style, selected, onSelect }: StyleCardProps) {
       <p className="mt-1 line-clamp-3 flex-1 text-[0.8125rem] leading-relaxed text-muted">
         {style.description}
       </p>
-
-      <ul className="mt-3 flex flex-wrap gap-1.5" aria-label={`Estado de ánimo: ${style.name}`}>
-        {style.mood.map((tag) => (
-          <li
-            key={`${style.id}-${tag}`}
-            className="rounded-full border border-border bg-bg px-2.5 py-0.5 text-[0.75rem] font-medium text-muted"
-          >
-            {tag}
-          </li>
-        ))}
-      </ul>
+      {style.mood.length > 0 ? (
+        <p className="mt-3 text-[0.75rem] leading-snug text-muted">
+          {style.mood.join(' · ')}
+        </p>
+      ) : null}
     </button>
   );
 }

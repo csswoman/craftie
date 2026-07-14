@@ -121,11 +121,26 @@ function withMockPairs(run: (pairs: FontPair[]) => void): void {
 }
 
 describe('pairings', () => {
-  it('exports a curated library of about 20 pairs with character hooks', () => {
-    expect(FONT_PAIRS.length).toBeGreaterThanOrEqual(18);
-    expect(FONT_PAIRS.length).toBeLessThanOrEqual(22);
+  it('exports a curated Google Fonts library with character hooks', () => {
+    expect(FONT_PAIRS.length).toBeGreaterThanOrEqual(70);
     expect(FONT_PAIRS.every((pair) => pair.displayName && pair.character.length > 0)).toBe(true);
-    expect(FONT_PAIRS.every((pair) => pair.heading.googleFontsRef && pair.body.googleFontsRef)).toBe(true);
+    expect(
+      FONT_PAIRS.every((pair) => pair.heading.googleFontsRef && pair.body.googleFontsRef),
+    ).toBe(true);
+    expect(
+      FONT_PAIRS.every((pair) =>
+        pair.heading.googleFontsRef.startsWith('https://fonts.google.com/specimen/') &&
+        pair.body.googleFontsRef.startsWith('https://fonts.google.com/specimen/'),
+      ),
+    ).toBe(true);
+
+    const familyKeys = FONT_PAIRS.map((pair) =>
+      [pair.heading.family, pair.body.family].sort().join('::'),
+    );
+    expect(new Set(familyKeys).size).toBe(familyKeys.length);
+
+    const ids = FONT_PAIRS.map((pair) => pair.id);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
   describe('getPairingsForStyle', () => {

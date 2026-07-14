@@ -197,9 +197,9 @@ function ensureMinimumSelection(colors: SelectableColor[]): SelectableColor[] {
 }
 
 /**
- * Maps seed HEX values to curated selectable colors and fills gaps to satisfy group rules.
+ * Maps curated style seeds to catalog entries — exactly the source colors for that style.
  */
-export function suggestSelectionFromHexes(hexes: string[]): SelectionSuggestionResult {
+export function buildCuratedSourceCatalog(hexes: string[]): SelectableColor[] {
   const matched: SelectableColor[] = [];
 
   for (const hex of hexes) {
@@ -215,7 +215,14 @@ export function suggestSelectionFromHexes(hexes: string[]): SelectionSuggestionR
     }
   }
 
-  const selection = ensureMinimumSelection(matched);
+  return sortSelectedColors(matched);
+}
+
+/**
+ * Maps seed HEX values to curated selectable colors and fills gaps to satisfy group rules.
+ */
+export function suggestSelectionFromHexes(hexes: string[]): SelectionSuggestionResult {
+  const selection = ensureMinimumSelection(buildCuratedSourceCatalog(hexes));
 
   return { ok: true, colors: selection };
 }

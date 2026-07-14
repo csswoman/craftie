@@ -1,5 +1,15 @@
 'use client';
 
+import { PaletteToolbarIconButton } from './PaletteToolbarIconButton';
+import {
+  CopyIcon,
+  InfoIcon,
+  LockIcon,
+  MoveLeftIcon,
+  MoveRightIcon,
+  ShadesIcon,
+} from './paletteToolbarIcons';
+
 type PaletteColumnToolbarProps = {
   locked: boolean;
   editable: boolean;
@@ -66,7 +76,7 @@ export function PaletteColumnToolbar({
               : 'flex-col gap-2.5'
         }`}
       >
-        <ToolbarIconButton
+        <PaletteToolbarIconButton
           label={showShades ? 'Ocultar shades' : 'Ver shades'}
           active={showShades}
           lightChrome={lightChrome}
@@ -75,11 +85,11 @@ export function PaletteColumnToolbar({
           onClick={onToggleShades}
         >
           <ShadesIcon />
-        </ToolbarIconButton>
+        </PaletteToolbarIconButton>
 
         {editable && (canMoveLeft || canMoveRight) ? (
           <>
-            <ToolbarIconButton
+            <PaletteToolbarIconButton
               label="Mover a la izquierda"
               disabled={!canMoveLeft || locked}
               lightChrome={lightChrome}
@@ -88,8 +98,8 @@ export function PaletteColumnToolbar({
               onClick={onMoveLeft}
             >
               <MoveLeftIcon />
-            </ToolbarIconButton>
-            <ToolbarIconButton
+            </PaletteToolbarIconButton>
+            <PaletteToolbarIconButton
               label="Mover a la derecha"
               disabled={!canMoveRight || locked}
               lightChrome={lightChrome}
@@ -98,11 +108,11 @@ export function PaletteColumnToolbar({
               onClick={onMoveRight}
             >
               <MoveRightIcon />
-            </ToolbarIconButton>
+            </PaletteToolbarIconButton>
           </>
         ) : null}
 
-        <ToolbarIconButton
+        <PaletteToolbarIconButton
           label="Copiar HEX"
           lightChrome={lightChrome}
           compact={inlineLayout}
@@ -110,9 +120,9 @@ export function PaletteColumnToolbar({
           onClick={onCopyHex}
         >
           <CopyIcon />
-        </ToolbarIconButton>
+        </PaletteToolbarIconButton>
 
-        <ToolbarIconButton
+        <PaletteToolbarIconButton
           label="Ver info del color"
           lightChrome={lightChrome}
           compact={inlineLayout}
@@ -120,10 +130,10 @@ export function PaletteColumnToolbar({
           onClick={onOpenInfo}
         >
           <InfoIcon />
-        </ToolbarIconButton>
+        </PaletteToolbarIconButton>
 
         {editable ? (
-          <ToolbarIconButton
+          <PaletteToolbarIconButton
             label={locked ? 'Desbloquear color' : 'Bloquear color'}
             active={locked}
             lightChrome={lightChrome}
@@ -132,144 +142,9 @@ export function PaletteColumnToolbar({
             onClick={onToggleLock}
           >
             <LockIcon locked={locked} />
-          </ToolbarIconButton>
+          </PaletteToolbarIconButton>
         ) : null}
       </div>
     </div>
-  );
-}
-
-function ToolbarIconButton({
-  label,
-  children,
-  disabled = false,
-  active = false,
-  lightChrome,
-  compact = false,
-  showTooltip = true,
-  onClick,
-}: {
-  label: string;
-  children: React.ReactNode;
-  disabled?: boolean;
-  active?: boolean;
-  lightChrome: boolean;
-  compact?: boolean;
-  showTooltip?: boolean;
-  onClick: () => void;
-}) {
-  const chromeClasses = lightChrome
-    ? {
-        button: active ? 'bg-white/20' : 'hover:bg-white/10 hover:scale-105',
-        focus: 'focus-visible:ring-white/70',
-      }
-    : {
-        button: active ? 'bg-black/15' : 'hover:bg-black/10 hover:scale-105',
-        focus: 'focus-visible:ring-black/30',
-      };
-
-  return (
-    <div className="group/tooltip relative">
-      <button
-        type="button"
-        aria-label={label}
-        title={label}
-        disabled={disabled}
-        onClick={onClick}
-        className={`flex items-center justify-center rounded-md text-current transition-[opacity,transform,background-color] focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-35 ${
-          compact ? 'size-10' : 'size-11'
-        } ${chromeClasses.focus} ${chromeClasses.button}`}
-      >
-        {children}
-      </button>
-      {showTooltip ? (
-        <span
-          role="tooltip"
-          className="pointer-events-none absolute left-1/2 top-[calc(100%+8px)] z-20 -translate-x-1/2 whitespace-nowrap rounded-md border border-border bg-ink px-2 py-1 text-chrome-caption font-medium text-bg opacity-0 shadow-md transition-opacity group-hover/tooltip:opacity-100 group-focus-within/tooltip:opacity-100"
-        >
-          {label}
-        </span>
-      ) : null}
-    </div>
-  );
-}
-
-function IconFrame({ children }: { children: React.ReactNode }) {
-  return (
-    <svg viewBox="0 0 20 20" className="size-5" fill="none" aria-hidden="true">
-      {children}
-    </svg>
-  );
-}
-
-function ShadesIcon() {
-  return (
-    <IconFrame>
-      <path d="M4 6h12M4 10h12M4 14h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </IconFrame>
-  );
-}
-
-function MoveLeftIcon() {
-  return (
-    <IconFrame>
-      <path
-        d="M12 5 7 10l5 5M13 10H7"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </IconFrame>
-  );
-}
-
-function MoveRightIcon() {
-  return (
-    <IconFrame>
-      <path
-        d="m8 5 5 5-5 5M7 10h6"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </IconFrame>
-  );
-}
-
-function CopyIcon() {
-  return (
-    <IconFrame>
-      <rect x="7" y="7" width="9" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M6 13H5a1.5 1.5 0 0 1-1.5-1.5V5A1.5 1.5 0 0 1 5 3.5h6.5A1.5 1.5 0 0 1 13 5v1" stroke="currentColor" strokeWidth="1.5" />
-    </IconFrame>
-  );
-}
-
-function InfoIcon() {
-  return (
-    <IconFrame>
-      <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M10 9v5M10 6.5v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </IconFrame>
-  );
-}
-
-function LockIcon({ locked }: { locked: boolean }) {
-  return (
-    <IconFrame>
-      {locked ? (
-        <>
-          <rect x="5.5" y="9" width="9" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-          <path d="M7 9V7a3 3 0 0 1 6 0v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-        </>
-      ) : (
-        <>
-          <rect x="5.5" y="9" width="9" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-          <path d="M7 9V7a3 3 0 1 1 6 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-        </>
-      )}
-    </IconFrame>
   );
 }

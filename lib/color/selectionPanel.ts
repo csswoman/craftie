@@ -22,7 +22,7 @@ export function getRolePalettePanelStatus(palette: RolePalette | null): Selectio
   if (!palette) {
     return {
       ready: false,
-      message: 'Sube una imagen o elige inspiración para armar tu paleta.',
+      message: 'Sube una imagen o elige un estilo para armar tu paleta.',
       suggestions: [],
     };
   }
@@ -37,7 +37,7 @@ export function getRolePalettePanelStatus(palette: RolePalette | null): Selectio
   const contrastWarnings = getRolePaletteContrastWarnings(palette);
   const suggestions = [
     ...(derivedCount > 0
-      ? ['Algunos roles se completaron con colores derivados. Puedes sustituirlos desde el catálogo.']
+      ? ['Algunos roles usan colores derivados. Puedes cambiarlos desde Colores fuente.']
       : []),
     ...contrastWarnings,
   ];
@@ -48,7 +48,7 @@ export function getRolePalettePanelStatus(palette: RolePalette | null): Selectio
       contrastWarnings.length > 0
         ? 'Revisa el contraste de texto sobre fondo y superficie.'
         : derivedCount > 0
-          ? 'Colores fuente asignados. Revisa roles en el lienzo central.'
+          ? 'Colores fuente listos. Revisa los roles en el lienzo.'
           : 'Lista para crear la guía de marca.',
     suggestions,
   };
