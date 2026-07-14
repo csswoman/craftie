@@ -6,7 +6,7 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { PreviewIcon } from './previewIcons';
-import { EqualizerBars, LiveDot, ProgressBar, tint } from './previewPrimitives';
+import { EqualizerBars, LiveDot, ProgressBar, Tag, tint } from './previewPrimitives';
 import { DEFAULT_PREVIEW_FONTS, type PreviewFonts } from './previewTypography';
 
 export const MEDIA_VISUAL_SLOTS = [
@@ -20,13 +20,22 @@ export const MEDIA_VISUAL_SLOTS = [
   'primaryAction',
   'primaryActionText',
   'accent',
+  'data1',
+  'data2',
+  'data3',
 ] as const;
 
 const QUEUE = [
-  { track: 'Night bloom', time: '3:18' },
-  { track: 'Granite pulse', time: '4:02' },
-  { track: 'Signal afterglow', time: '4:02' },
+  { track: 'Night bloom', time: '3:18', artist: 'Faye Torres' },
+  { track: 'Granite pulse', time: '4:02', artist: 'Kilo Season' },
+  { track: 'Signal afterglow', time: '4:02', artist: 'Marlowe' },
 ] as const;
+
+const MOODS = [
+  { label: 'Low-light', slot: 'data1' as const },
+  { label: 'Focus', slot: 'data2' as const },
+  { label: 'Downtempo', slot: 'data3' as const },
+];
 
 export function MediaLayoutPreview({
   colors,
@@ -91,6 +100,11 @@ export function MediaLayoutPreview({
                 <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-2 max-w-sm text-[0.8125rem] leading-relaxed" style={{ color: colors.mutedText }}>
                   Low-light mix for focused sessions, with calmer chrome and brighter transport controls.
                 </PreviewSlotTarget>
+                <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                  {MOODS.map((mood) => (
+                    <Tag key={mood.label} label={mood.label} color={colors[mood.slot]} slot={mood.slot} onEditSlot={onEditSlot} />
+                  ))}
+                </div>
                 <div className="mt-5 flex items-center gap-3 text-[0.6875rem] tabular-nums" style={{ color: colors.mutedText }}>
                   <span>1:42</span>
                   <div className="flex-1">
@@ -128,6 +142,12 @@ export function MediaLayoutPreview({
                   >
                     <PreviewIcon name="skipForward" size={15} />
                   </PreviewSlotTarget>
+                  <div className="ml-2 flex flex-1 items-center gap-2">
+                    <PreviewIcon name="sparkles" size={13} style={{ color: colors.mutedText }} />
+                    <div className="flex-1">
+                      <ProgressBar value={68} color={colors.accent} slot="accent" onEditSlot={onEditSlot} />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -175,19 +195,32 @@ export function MediaLayoutPreview({
                 <PreviewSlotTarget slot="accent" onEditSlot={onEditSlot} className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: colors.accent }} />
               </div>
               <div className="mt-4 space-y-3">
-                {QUEUE.map((item) => (
-                  <div key={item.track} className="group flex items-center justify-between gap-3 text-[0.75rem]">
-                    <span className="flex min-w-0 items-center gap-2">
-                      <PreviewIcon name="play" size={10} className="shrink-0 opacity-0 transition-opacity group-hover:opacity-70" />
-                      <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="truncate font-bold">
-                        {item.track}
+                {QUEUE.map((item, index) => {
+                  const dotColor = [colors.data1, colors.data2, colors.data3][index % 3]!;
+
+                  return (
+                    <div key={item.track} className="group flex items-center gap-3 text-[0.75rem]">
+                      <span
+                        className="h-7 w-7 shrink-0 rounded-lg"
+                        style={{ backgroundImage: `radial-gradient(circle at 30% 30%, ${tint(dotColor, 70)}, ${tint(dotColor, 25)})` }}
+                      />
+                      <span className="flex min-w-0 flex-1 items-center gap-2">
+                        <PreviewIcon name="play" size={10} className="shrink-0 opacity-0 transition-opacity group-hover:opacity-70" />
+                        <span className="min-w-0">
+                          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="block truncate font-bold">
+                            {item.track}
+                          </PreviewSlotTarget>
+                          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="block truncate text-[0.6875rem]" style={{ color: colors.mutedText }}>
+                            {item.artist}
+                          </PreviewSlotTarget>
+                        </span>
+                      </span>
+                      <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="shrink-0" style={{ color: colors.mutedText }}>
+                        {item.time}
                       </PreviewSlotTarget>
-                    </span>
-                    <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="shrink-0" style={{ color: colors.mutedText }}>
-                      {item.time}
-                    </PreviewSlotTarget>
-                  </div>
-                ))}
+                    </div>
+                  );
+                })}
               </div>
             </PreviewSlotTarget>
           </div>
