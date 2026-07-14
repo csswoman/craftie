@@ -1,4 +1,4 @@
-import type { FontPair } from '../pairings';
+import type { FontPair } from '../fontPairTypes';
 
 export const SINGLE_FAMILY_PAIRS: FontPair[] = [
   {

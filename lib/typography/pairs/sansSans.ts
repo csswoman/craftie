@@ -1,4 +1,4 @@
-import type { FontPair } from '../pairings';
+import type { FontPair } from '../fontPairTypes';
 
 export const SANS_SANS_PAIRS: FontPair[] = [
   {

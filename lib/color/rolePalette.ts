@@ -20,6 +20,7 @@ import {
   validateRolePalette,
 } from './rolePaletteGenerated';
 import { recomputeDerivedRoles } from './rolePaletteDerived';
+import type { PaletteType } from './paletteClassification';
 export {
   assignColorToRolePalette,
   isPaletteRoleId,
@@ -149,8 +150,9 @@ export function finalizeRolePalette(palette: RolePalette): RolePalette {
 export function assignRolesFromExtracted(
   extracted: ExtractedColor[],
   theme: 'light' | 'dark' = 'light',
+  paletteType?: PaletteType,
 ): RolePalette {
-  return projectSemanticTokensToRolePalette(deriveSemanticTokens({ extracted, theme }));
+  return projectSemanticTokensToRolePalette(deriveSemanticTokens({ extracted, theme, paletteType }));
 }
 
 export function assignRolesFromHexes(hexes: string[]): RolePalette {

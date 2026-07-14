@@ -26,7 +26,7 @@ export function useWorkspaceInspiration({
   setSelectedStyleId,
 }: {
   assignFromHexes: (hexes: string[]) => void;
-  assignFromExtracted: (extracted: ExtractedColor[]) => void;
+  assignFromExtracted: (extracted: ExtractedColor[], paletteType?: ImagePaletteBuildResult['classification']['type']) => void;
   clearRolePalette: () => void;
   setCatalogSource: Dispatch<SetStateAction<'none' | 'curated' | 'image'>>;
   setError: Dispatch<SetStateAction<string | null>>;
@@ -75,7 +75,11 @@ export function useWorkspaceInspiration({
     setCatalogSource('image');
     setPaletteCatalog(palette.catalog);
     setSelectedStyleId(null);
-    assignFromExtracted(palette.extracted);
+    if (palette.mode === 'ui') {
+      assignFromExtracted(palette.extracted, palette.classification.type);
+    } else {
+      clearRolePalette();
+    }
     setGeneratedPalette(null);
     setRightPanelCollapsed(false);
     setError(null);

@@ -30,14 +30,14 @@ export function DashboardChannelPanel({
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1.125rem]" style={headingStyle(fonts)}>
+          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
             Channel performance
           </PreviewSlotTarget>
-          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-1 text-[0.8125rem]" style={bodyStyle(fonts, colors.mutedText)}>
+          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-1" style={bodyStyle(fonts, colors.mutedText)}>
             Trailing {range} · updates live
           </PreviewSlotTarget>
         </div>
-        <Tag label="Live" color={colors.accent} slot="accent" onEditSlot={onEditSlot} />
+        <Tag label="Live" color={colors.accent} surfaceHex={colors.surface} slot="accent" onEditSlot={onEditSlot} />
       </div>
       <div className="mt-4">
         <AreaChart values={[14, 22, 18, 28, 24, 33, 29, 38, 34, 42]} color={colors.accent} surfaceHex={colors.surface} />

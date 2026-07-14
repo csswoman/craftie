@@ -40,7 +40,7 @@ export function PairingPanel({
 
       <PairingList
         pairings={pairings}
-        selectedPairing={selectedPairing}
+        selectedCatalogPairId={selectedPairing?.id ?? null}
         onSelectPairing={onSelectPairing}
       />
 

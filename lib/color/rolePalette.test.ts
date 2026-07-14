@@ -20,6 +20,24 @@ import { hasAdequateSurfaceFillSeparation } from '../utils/surfaceFillSeparation
 
 const toOklch = converter('oklch');
 
+function hueDistance(left: number, right: number): number {
+  const distance = Math.abs(left - right) % 360;
+  return distance > 180 ? 360 - distance : distance;
+}
+
+function prominenceWeightedHue(colors: Array<{ hex: string; prominence: number }>): number {
+  const vector = colors.reduce((total, color) => {
+    const hue = toOklch(color.hex)?.h ?? 0;
+    const radians = (hue * Math.PI) / 180;
+    return {
+      x: total.x + Math.cos(radians) * color.prominence,
+      y: total.y + Math.sin(radians) * color.prominence,
+    };
+  }, { x: 0, y: 0 });
+
+  return ((Math.atan2(vector.y, vector.x) * 180) / Math.PI + 360) % 360;
+}
+
 describe('rolePalette', () => {
   it('fills all seven role slots from extracted colors', () => {
     const palette = assignRolesFromExtracted([
@@ -197,7 +215,7 @@ describe('rolePalette', () => {
     ).toBe(true);
   });
 
-  it('keeps derived structural neutrals pure when no source neutral fits', () => {
+  it('keeps derived structural neutrals tied to the dominant image hue', () => {
     const palette = assignRolesFromExtracted([
       { hex: '#F7F7F5', prominence: 0.35 },
       { hex: '#3366CC', prominence: 0.35 },
@@ -206,7 +224,14 @@ describe('rolePalette', () => {
 
     expect(palette.superficie.source).toBe('derived');
     expect(palette.borde.source).toBe('derived');
-    expect(toOklch(palette.superficie.hex)?.c ?? 1).toBeLessThan(0.004);
+    const surface = toOklch(palette.superficie.hex);
+    const dominantHue = prominenceWeightedHue([
+      { hex: '#3366CC', prominence: 0.35 },
+      { hex: '#E8D44D', prominence: 0.3 },
+    ]);
+    expect(surface?.c ?? 0).toBeGreaterThan(0.01);
+    expect(surface?.c ?? 1).toBeLessThanOrEqual(0.02);
+    expect(hueDistance(surface?.h ?? 0, dominantHue)).toBeLessThanOrEqual(3);
     expect(
       hasAdequateSurfaceFillSeparation(palette.superficie.hex, palette.primario.hex),
     ).toBe(true);

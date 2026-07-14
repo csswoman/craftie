@@ -39,25 +39,25 @@ export function AnalyticsAsidePanels({
         className="rounded-xl border p-4 lg:p-5 transition-transform duration-200 hover:-translate-y-0.5"
         style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
       >
-        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1.125rem]" style={headingStyle(fonts)}>
+        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
           Source summary
         </PreviewSlotTarget>
         <div className="mt-4 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
           {SUMMARY_CARDS.map((item) => (
             <div key={item.label} className="flex items-center justify-between gap-2">
               <div>
-                <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem]" style={labelStyle(fonts, colors.mutedText)}>
+                <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={labelStyle(fonts, colors.mutedText)}>
                   {item.label}
                 </PreviewSlotTarget>
-                <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1 block text-[1.25rem] tabular-nums" style={displayStyle(fonts)}>
+                <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1 block tabular-nums" style={displayStyle(fonts)}>
                   {item.value}
                 </PreviewSlotTarget>
               </div>
               <StatDelta
                 value={item.trend}
                 direction={item.dir}
-                color={item.dir === 'up' ? colors.success : colors.data4}
-                slot={item.dir === 'up' ? 'success' : 'data4'}
+                color={item.dir === 'up' ? colors.success : colors.error}
+                slot={item.dir === 'up' ? 'success' : 'error'}
                 onEditSlot={onEditSlot}
               />
             </div>
@@ -71,7 +71,7 @@ export function AnalyticsAsidePanels({
         className="rounded-xl border p-4 lg:p-5 transition-transform duration-200 hover:-translate-y-0.5"
         style={{ backgroundColor: colors.surface, borderColor: colors.border }}
       >
-        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1.125rem]" style={headingStyle(fonts)}>
+        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
           Mix breakdown
         </PreviewSlotTarget>
         <div className="mt-4">
@@ -85,17 +85,19 @@ export function AnalyticsAsidePanels({
         className="rounded-xl border p-4 lg:p-5 transition-transform duration-200 hover:-translate-y-0.5"
         style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
       >
-        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1.125rem]" style={headingStyle(fonts)}>
+        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
           Top pages
         </PreviewSlotTarget>
         <div className="mt-4 space-y-3">
           {TOP_PAGES.map((page) => (
             <div key={page.label}>
-              <div className="flex items-center justify-between gap-2 text-[0.75rem]">
+              <div className="flex items-center justify-between gap-2">
                 <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="truncate" style={titleStyle(fonts)}>
                   {page.label}
                 </PreviewSlotTarget>
-                <span className="shrink-0 tabular-nums opacity-60">{page.share}%</span>
+                <span className="shrink-0 tabular-nums opacity-60" style={labelStyle(fonts)}>
+                  {page.share}%
+                </span>
               </div>
               <div className="mt-1.5">
                 <ProgressBar value={page.share} color={colors[page.slot]} slot={page.slot} onEditSlot={onEditSlot} />

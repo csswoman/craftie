@@ -14,6 +14,8 @@ export type RoleSlot = {
   hex: string;
   name: string;
   source: ColorSource;
+  originalHex?: string;
+  gap?: string;
 };
 
 export type RolePalette = Record<PaletteRoleId, RoleSlot>;

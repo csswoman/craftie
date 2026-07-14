@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export function PanelCollapseBar({
   align,
@@ -50,7 +51,7 @@ export function PanelCollapseButton({
       onClick={onClick}
       className="flex size-11 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
     >
-      <ChevronIcon direction={direction} />
+      <PanelChevron direction={direction} />
     </button>
   );
 }
@@ -72,24 +73,13 @@ export function PanelCollapseRail({
       onClick={onClick}
       className="flex h-full min-h-11 w-11 items-center justify-center text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
     >
-      <ChevronIcon direction={direction} />
+      <PanelChevron direction={direction} />
     </button>
   );
 }
 
-function ChevronIcon({ direction }: { direction: 'left' | 'right' }) {
-  const path = direction === 'left' ? 'M10 4l-4 4 4 4' : 'M6 4l4 4-4 4';
+function PanelChevron({ direction }: { direction: 'left' | 'right' }) {
+  const Icon = direction === 'left' ? ChevronLeft : ChevronRight;
 
-  return (
-    <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4">
-      <path
-        d={path}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
+  return <Icon size={16} strokeWidth={2} absoluteStrokeWidth aria-hidden="true" />;
 }

@@ -17,9 +17,15 @@ import {
   type PreviewFamilyId,
 } from '@lib/color/previewFamilies';
 import type { SemanticTokenName } from '@lib/color/semanticTokens';
+import { statusColorCssVariables } from '@lib/color/uiStatusColors';
 import { resolveActiveFontPair } from '@lib/typography/activePairing';
 import { buildFontFamilyStack } from '@lib/typography/googleFonts';
 import type { FontPair } from '@lib/typography/pairings';
+import {
+  buildTypeScaleReadout,
+  type TypeScaleBase,
+  type TypeScaleRatio,
+} from '@lib/typography/typeScale';
 
 import { useRolePalette } from '@/context/RolePaletteContext';
 import { AnalyticsLayoutPreview } from '@/components/color/preview/AnalyticsLayoutPreview';
@@ -39,15 +45,28 @@ import { loadGoogleFonts } from '@/lib/browser/googleFonts';
 export type PreviewViewProps = {
   recommendedPairings: FontPair[];
   selectedPairing: FontPair | null;
+  hoveredPairing?: FontPair | null;
+  isTypePreviewing?: boolean;
+  typeScaleBase?: TypeScaleBase;
+  typeScaleRatio?: TypeScaleRatio;
   onEditRole?: (role: PaletteRoleId, element: HTMLElement) => void;
 };
 
-export function PreviewView({ recommendedPairings, selectedPairing, onEditRole }: PreviewViewProps) {
+export function PreviewView({
+  recommendedPairings,
+  selectedPairing,
+  hoveredPairing = null,
+  isTypePreviewing = false,
+  typeScaleBase = 16,
+  typeScaleRatio = 1.25,
+  onEditRole,
+}: PreviewViewProps) {
   const {
     rolePalette,
     semanticTokens,
     previewRolePalette,
     previewSemanticTokens,
+    statusColors,
     illustrationSeed,
     regenerateIllustrationSeed,
   } = useRolePalette();
@@ -58,17 +77,24 @@ export function PreviewView({ recommendedPairings, selectedPairing, onEditRole }
   const liveRolePalette = previewRolePalette ?? rolePalette;
   const liveSemanticTokens = previewSemanticTokens ?? semanticTokens;
   const activePairing = resolveActiveFontPair(selectedPairing, recommendedPairings);
+  const previewPairing = hoveredPairing ?? activePairing;
+  const sizes = useMemo(
+    () => buildTypeScaleReadout(typeScaleBase, typeScaleRatio),
+    [typeScaleBase, typeScaleRatio],
+  );
 
   useEffect(() => {
-    loadGoogleFonts([activePairing]);
-  }, [activePairing]);
+    loadGoogleFonts([previewPairing]);
+  }, [previewPairing]);
 
   const fonts = useMemo<PreviewFonts>(
     () => ({
-      headingFamily: buildFontFamilyStack(activePairing.heading),
-      bodyFamily: buildFontFamilyStack(activePairing.body),
+      headingFamily: buildFontFamilyStack(previewPairing.heading),
+      bodyFamily: buildFontFamilyStack(previewPairing.body),
+      headingWeight: previewPairing.heading.defaultWeight ?? 700,
+      bodyWeight: previewPairing.body.defaultWeight ?? 400,
     }),
-    [activePairing],
+    [previewPairing],
   );
 
   if (!liveRolePalette || !liveSemanticTokens) {
@@ -99,11 +125,37 @@ export function PreviewView({ recommendedPairings, selectedPairing, onEditRole }
       ? 'max-w-6xl'
       : 'max-w-lg';
 
+  const typeTokenStyle = {
+    ['--font-heading' as string]: fonts.headingFamily,
+    ['--font-body' as string]: fonts.bodyFamily,
+    ['--weight-heading' as string]: String(fonts.headingWeight ?? 700),
+    ['--weight-body' as string]: String(fonts.bodyWeight ?? 400),
+    ['--weight-ui' as string]: '600',
+    ['--size-h1' as string]: `${sizes.h1}px`,
+    ['--size-h2' as string]: `${sizes.h2}px`,
+    ['--size-h3' as string]: `${sizes.h3}px`,
+    ['--size-body' as string]: `${sizes.body}px`,
+    ['--size-small' as string]: `${sizes.small}px`,
+  };
+  const statusTokenStyle = statusColors ? statusColorCssVariables(statusColors) : {};
+
   return (
     <div
-      className="min-h-0 flex-1 overflow-y-auto"
-      style={{ backgroundColor: colors.appBackground }}
+      className="relative min-h-0 flex-1 overflow-y-auto motion-reduce:transition-none"
+      style={{ backgroundColor: colors.appBackground, ...typeTokenStyle, ...statusTokenStyle }}
     >
+      <div
+        className="pointer-events-none sticky top-3 z-20 flex justify-center px-4"
+        aria-hidden={!isTypePreviewing}
+      >
+        <p
+          className={`rounded-full border border-border bg-bg/95 px-3 py-1 text-chrome-caption font-medium text-ink shadow-none backdrop-blur-sm transition-opacity ${
+            isTypePreviewing ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          ● Vista previa — clic para aplicar
+        </p>
+      </div>
       <div className={`mx-auto flex w-full ${previewWidthClass} flex-col gap-4 p-5 pb-8 sm:gap-5 sm:p-8`}>
         {tokens.warnings.length > 0 ? <PreviewContrastWarnings warnings={tokens.warnings} /> : null}
         <PreviewNavigator

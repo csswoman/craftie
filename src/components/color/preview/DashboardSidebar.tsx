@@ -41,14 +41,14 @@ export function DashboardSidebar({
             <PreviewIcon name="zap" size={16} />
           </PreviewSlotTarget>
           <div className="min-w-0">
-            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="truncate text-[0.8125rem]" style={headingStyle(fonts)}>
+            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="truncate" style={headingStyle(fonts)}>
               Craftie Ops
             </PreviewSlotTarget>
             <LiveDot color={colors.success} slot="success" onEditSlot={onEditSlot} label="All systems live" />
           </div>
         </div>
 
-        <nav className="mt-6 space-y-1 text-[0.8125rem]" style={labelStyle(fonts)}>
+        <nav className="mt-6 space-y-1" style={labelStyle(fonts)}>
           {DASHBOARD_NAV.map((item, index) => (
             <PreviewSlotTarget
               key={item.label}
@@ -58,7 +58,7 @@ export function DashboardSidebar({
               style={{
                 backgroundColor: index === 0 ? colors.surfaceElevated : 'transparent',
                 color: index === 0 ? colors.primaryAction : colors.text,
-                fontWeight: index === 0 ? 600 : 500,
+                fontWeight: index === 0 ? 'var(--weight-ui)' : 500,
               }}
             >
               <PreviewIcon name={item.icon} size={15} />
@@ -73,10 +73,10 @@ export function DashboardSidebar({
           className="mt-auto rounded-xl border p-3"
           style={{ backgroundColor: colors.surface, borderColor: colors.border }}
         >
-          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem]" style={labelStyle(fonts, colors.mutedText)}>
+          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={labelStyle(fonts, colors.mutedText)}>
             This week
           </PreviewSlotTarget>
-          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1 text-[1.125rem]" style={headingStyle(fonts)}>
+          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1" style={headingStyle(fonts)}>
             92% on track
           </PreviewSlotTarget>
           <div className="mt-2">

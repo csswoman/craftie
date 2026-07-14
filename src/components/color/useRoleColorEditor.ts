@@ -76,6 +76,7 @@ export function useRoleColorEditor(role: PaletteRoleId) {
     contrast,
     updateOklch,
     handleHexCommit,
+    revertTo: (hex: string) => replaceRole(role, hex),
     toggleLock: () => toggleLock(role),
   };
 }

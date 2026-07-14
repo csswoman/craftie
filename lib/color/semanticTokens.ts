@@ -2,6 +2,9 @@ import { converter } from 'culori';
 
 import type { ExtractedColor } from './imageExtractor';
 import { normalizeHex } from './normalizeHex';
+import { classifyPalette, type PaletteType } from './paletteClassification';
+import { deriveForegroundForBackground } from './pairedForeground';
+import { remainsDistinctWithColorVisionDeficiency } from './colorVision';
 import { brandScore, type FitnessColor } from './roleFitness';
 import {
   deriveTonalScale,
@@ -69,6 +72,8 @@ export type SemanticTokenSource = 'extracted' | 'derived' | 'corrected' | 'overr
 export type SemanticToken = {
   hex: string;
   source: SemanticTokenSource;
+  originalHex?: string;
+  gap?: string;
 };
 
 export type SemanticTokens = Record<SemanticTokenName, SemanticToken>;
@@ -85,6 +90,7 @@ export type SemanticTokenDerivationInput = {
   synthesisStrategy?: ExpressiveSynthesisStrategy;
   neutralStyle?: NeutralStyle;
   vibrancy?: number;
+  paletteType?: PaletteType;
 };
 
 const toOklch = converter('oklch');
@@ -92,28 +98,37 @@ const toOklch = converter('oklch');
 const AA_RATIO = 4.5;
 const EXPRESSIVE_CHROMA_MIN = 0.055;
 const ACHROMATIC_CHROMA_MAX = 0.01;
-const NEUTRAL_CHROMA = 0.012;
-const LIGHT_NEUTRAL = {
-  background: 0.98,
-  surface: 0.955,
-  elevated: 0.992,
-  border: 0.88,
-  divider: 0.92,
+type NeutralRamp = {
+  background: readonly [number, number];
+  surface: readonly [number, number];
+  elevated: readonly [number, number];
+  border: readonly [number, number];
+  divider: readonly [number, number];
+  textMuted: readonly [number, number];
+  text: readonly [number, number];
 };
-const INVERSE_NEUTRAL = {
-  background: 0.18,
-  surface: 0.23,
-  elevated: 0.29,
+
+const LIGHT_NEUTRAL: NeutralRamp = {
+  background: [0.98, 0.008],
+  surface: [0.96, 0.012],
+  elevated: [0.94, 0.016],
+  border: [0.88, 0.02],
+  divider: [0.92, 0.018],
+  // 0.53 is the nearest AA-safe realization of the 0.55 design target on
+  // the 0.96 surface after sRGB/HEX round-trip.
+  textMuted: [0.53, 0.03],
+  text: [0.25, 0.03],
 };
-const INVERSE_CHROMA = 0.035;
-export const DEFAULT_NEUTRAL_STYLE: NeutralStyle = 'pure';
-const DARK_NEUTRAL = {
-  background: 0.15,
-  surface: 0.2,
-  elevated: 0.26,
-  border: 0.34,
-  divider: 0.28,
+const DARK_NEUTRAL: NeutralRamp = {
+  background: [0.15, 0.02],
+  surface: [0.19, 0.024],
+  elevated: [0.23, 0.028],
+  border: [0.32, 0.03],
+  divider: [0.27, 0.03],
+  textMuted: [0.7, 0.03],
+  text: [0.92, 0.02],
 };
+export const DEFAULT_NEUTRAL_STYLE: NeutralStyle = 'tinted';
 const STANDARD_STATE_HUES = {
   success: 145,
   warning: 82,
@@ -188,37 +203,57 @@ function mixHue(baseHue: number, targetHue: number, targetWeight: number): numbe
 }
 
 function dominantHue(candidates: FitnessColor[]): { hue: number; achromatic: boolean } {
-  const chromatic = [...candidates]
-    .filter((candidate) => candidate.chroma > ACHROMATIC_CHROMA_MAX)
-    .sort((left, right) => right.prominence - left.prominence);
+  const chromatic = candidates.filter((candidate) => candidate.chroma > ACHROMATIC_CHROMA_MAX);
 
   if (chromatic.length === 0) {
-    return { hue: 0, achromatic: true };
+    return { hue: 0, achromatic: false };
   }
 
-  return { hue: chromatic[0]!.hue, achromatic: false };
+  const vector = chromatic.reduce(
+    (total, candidate) => {
+      const radians = (candidate.hue * Math.PI) / 180;
+      return {
+        x: total.x + Math.cos(radians) * candidate.prominence,
+        y: total.y + Math.sin(radians) * candidate.prominence,
+      };
+    },
+    { x: 0, y: 0 },
+  );
+  const hue = (Math.atan2(vector.y, vector.x) * 180) / Math.PI;
+
+  return { hue: (hue + 360) % 360, achromatic: false };
 }
 
 function neutralHex(
   lightness: number,
+  chroma: number,
   hue: number,
-  achromatic: boolean,
-  neutralStyle: NeutralStyle,
 ): string {
-  return oklchChannelsToHex(lightness, achromatic || neutralStyle === 'pure' ? 0 : NEUTRAL_CHROMA, hue);
+  let best = oklchChannelsToHex(lightness, chroma, hue);
+  let bestDistance = hueDistance(toOklch(best)?.h ?? hue, hue);
+
+  // Near-white gamut clipping and 8-bit HEX quantization can rotate very low
+  // chroma colors. Search a small requested-hue window for the closest
+  // realized hue so the published token preserves the image hue.
+  for (let offset = -30; offset <= 30; offset += 0.5) {
+    const candidate = oklchChannelsToHex(lightness, chroma, (hue + offset + 360) % 360);
+    const distance = hueDistance(toOklch(candidate)?.h ?? hue, hue);
+
+    if (distance < bestDistance) {
+      best = candidate;
+      bestDistance = distance;
+    }
+  }
+
+  return best;
 }
 
-function inverseNeutralHex(
-  lightness: number,
-  hue: number,
-  achromatic: boolean,
-  neutralStyle: NeutralStyle,
-): string {
-  return oklchChannelsToHex(lightness, achromatic || neutralStyle === 'pure' ? 0 : INVERSE_CHROMA, hue);
-}
-
-function token(hex: string, source: SemanticTokenSource): SemanticToken {
-  return { hex: normalizeHex(hex), source };
+function token(
+  hex: string,
+  source: SemanticTokenSource,
+  details?: Pick<SemanticToken, 'originalHex' | 'gap'>,
+): SemanticToken {
+  return { hex: normalizeHex(hex), source, ...details };
 }
 
 function expressiveTokenWithVibrancy(
@@ -284,7 +319,9 @@ function adjustExpressiveForSurface(hex: string, surfaceHex: string): SemanticTo
     return token(hex, 'extracted');
   }
 
-  return token(adjustLightnessForContrast(hex, surfaceHex, AA_RATIO), 'corrected');
+  return token(adjustLightnessForContrast(hex, surfaceHex, AA_RATIO), 'corrected', {
+    originalHex: normalizeHex(hex),
+  });
 }
 
 function pickExpressive(
@@ -336,18 +373,6 @@ function pickState(
   const synthesized = oklchChannelsToHex(theme === 'dark' ? 0.72 : 0.43, 0.12, tintedStateHue);
 
   return token(adjustLightnessForContrast(synthesized, surfaceHex, AA_RATIO), 'derived');
-}
-
-function readablePairToken(
-  backgroundHex: string,
-  hue: number,
-  achromatic: boolean,
-  neutralStyle: NeutralStyle,
-): SemanticToken {
-  return token(
-    readableOn(neutralHex(0.96, hue, achromatic, neutralStyle), backgroundHex),
-    'derived',
-  );
 }
 
 function tonalTokenEntries(
@@ -609,87 +634,84 @@ function materializeSeries(
  * extracted colors + user overrides -> token derivation -> tokens ->
  * projection -> legacy RolePalette -> editor/export.
  *
- * Tuning constants are intentionally local: `EXPRESSIVE_CHROMA_MIN` controls
- * extracted expressive eligibility, `NEUTRAL_CHROMA` controls tinted-neutral
- * strength when `neutralStyle` is `tinted`, the lightness ramps above define
- * structural surfaces, `DEFAULT_NEUTRAL_STYLE` keeps UI chrome pure by
- * default, `EXPRESSIVE_SYNTHESIS` defines fallback hue strategy/ranges, and
- * the vibrancy endpoints/midpoint live in `vibrancy.ts`.
+ * The structural ramps above define a fixed area-aware chroma budget. Source
+ * colors remain unchanged on small expressive roles; legacy synthesis is used
+ * only when a caller explicitly requests a synthesis strategy.
  */
-export function deriveSemanticTokens(input: SemanticTokenDerivationInput): SemanticTokens {
+function deriveBaseSemanticTokens(input: SemanticTokenDerivationInput): SemanticTokens {
   const theme = input.theme ?? 'light';
   const overrides = input.overrides ?? {};
   const strategy = input.synthesisStrategy ?? EXPRESSIVE_SYNTHESIS.synthesisStrategy;
-  const neutralStyle = input.neutralStyle ?? DEFAULT_NEUTRAL_STYLE;
   const vibrancy = normalizeVibrancy(input.vibrancy);
   const candidates = uniqueCandidates(input.extracted);
-  const { hue, achromatic } = dominantHue(candidates);
+  const { hue } = dominantHue(candidates);
   const ramp = theme === 'dark' ? DARK_NEUTRAL : LIGHT_NEUTRAL;
+  const inverseRamp = theme === 'dark' ? LIGHT_NEUTRAL : DARK_NEUTRAL;
   const offsets = synthesisOffsets(strategy);
 
   const background = applyOverride(
     'background',
-    token(neutralHex(ramp.background, hue, achromatic, neutralStyle), 'derived'),
+    token(neutralHex(ramp.background[0], ramp.background[1], hue), 'derived'),
     overrides,
   );
   const surface = applyOverride(
     'surface',
-    token(neutralHex(ramp.surface, hue, achromatic, neutralStyle), 'derived'),
+    token(neutralHex(ramp.surface[0], ramp.surface[1], hue), 'derived'),
     overrides,
   );
   const surfaceElevated = applyOverride(
     'surface-elevated',
-    token(neutralHex(ramp.elevated, hue, achromatic, neutralStyle), 'derived'),
+    token(neutralHex(ramp.elevated[0], ramp.elevated[1], hue), 'derived'),
     overrides,
   );
   const backgroundInverse = applyOverride(
     'background-inverse',
-    token(inverseNeutralHex(INVERSE_NEUTRAL.background, hue, achromatic, neutralStyle), 'derived'),
+    token(neutralHex(inverseRamp.background[0], inverseRamp.background[1], hue), 'derived'),
     overrides,
   );
   const surfaceInverse = applyOverride(
     'surface-inverse',
-    token(inverseNeutralHex(INVERSE_NEUTRAL.surface, hue, achromatic, neutralStyle), 'derived'),
+    token(neutralHex(inverseRamp.surface[0], inverseRamp.surface[1], hue), 'derived'),
     overrides,
   );
   const surfaceInverseElevated = applyOverride(
     'surface-inverse-elevated',
-    token(inverseNeutralHex(INVERSE_NEUTRAL.elevated, hue, achromatic, neutralStyle), 'derived'),
+    token(neutralHex(inverseRamp.elevated[0], inverseRamp.elevated[1], hue), 'derived'),
     overrides,
   );
   const onBackground = applyOverride(
     'on-background',
-    token(readableOn(neutralHex(theme === 'dark' ? 0.96 : 0.14, hue, achromatic, neutralStyle), background.hex), 'derived'),
+    token(neutralHex(ramp.text[0], ramp.text[1], hue), 'derived'),
     overrides,
   );
   const onSurface = applyOverride(
     'on-surface',
-    token(readableOn(onBackground.hex, surface.hex), 'derived'),
+    token(neutralHex(ramp.text[0], ramp.text[1], hue), 'derived'),
     overrides,
   );
   const onSurfaceMuted = applyOverride(
     'on-surface-muted',
-    mutedOnSurface(surface.hex, onSurface.hex),
+    token(neutralHex(ramp.textMuted[0], ramp.textMuted[1], hue), 'derived'),
     overrides,
   );
   const onBackgroundInverse = applyOverride(
     'on-background-inverse',
-    readablePairToken(backgroundInverse.hex, hue, achromatic, neutralStyle),
+    token(neutralHex(inverseRamp.text[0], inverseRamp.text[1], hue), 'derived'),
     overrides,
   );
   const onSurfaceInverse = applyOverride(
     'on-surface-inverse',
-    readablePairToken(surfaceInverse.hex, hue, achromatic, neutralStyle),
+    token(neutralHex(inverseRamp.text[0], inverseRamp.text[1], hue), 'derived'),
     overrides,
   );
   const border = applyOverride(
     'border',
-    token(neutralHex(ramp.border, hue, achromatic, neutralStyle), 'derived'),
+    token(neutralHex(ramp.border[0], ramp.border[1], hue), 'derived'),
     overrides,
   );
   const divider = applyOverride(
     'divider',
-    token(neutralHex(ramp.divider, hue, achromatic, neutralStyle), 'derived'),
+    token(neutralHex(ramp.divider[0], ramp.divider[1], hue), 'derived'),
     overrides,
   );
 
@@ -807,4 +829,173 @@ export function deriveSemanticTokens(input: SemanticTokenDerivationInput): Seman
     'data-6': applyOverride('data-6', dataToken(5, error), overrides),
     ...tonalTokens,
   };
+}
+
+function routedExpressiveCandidates(candidates: FitnessColor[]): FitnessColor[] {
+  const maximumProminence = Math.max(...candidates.map((candidate) => candidate.prominence), 0);
+  const areaFloor = maximumProminence * 0.12;
+
+  return candidates
+    .filter((candidate) => candidate.chroma >= 0.03 && candidate.prominence >= areaFloor)
+    .sort((left, right) => right.chroma - left.chroma || right.prominence - left.prominence);
+}
+
+function derivedPair(background: SemanticToken): SemanticToken {
+  const foreground = deriveForegroundForBackground(background.hex).hex;
+  const safeForeground = contrastRatio(foreground, background.hex) >= AA_RATIO
+    ? foreground
+    : adjustLightnessForContrast(foreground, background.hex, AA_RATIO);
+
+  return token(safeForeground, 'derived');
+}
+
+function sourceDataSeries(
+  expressive: FitnessColor[],
+  backgroundHex: string,
+  theme: 'light' | 'dark',
+  fallback: SemanticToken,
+): SemanticToken[] {
+  const lightnessTargets = theme === 'dark'
+    ? [0.58, 0.73, 0.88, 0.43]
+    : [0.62, 0.47, 0.32, 0.77];
+  const picked: SemanticToken[] = [];
+
+  for (const source of expressive) {
+    for (const lightness of [source.lightness, ...lightnessTargets]) {
+      const candidateHex = oklchChannelsToHex(lightness, source.chroma, source.hue);
+      const candidate = toOklch(candidateHex);
+
+      if (contrastRatio(candidateHex, backgroundHex) < DATA_SERIES_MIN_CONTRAST) {
+        continue;
+      }
+
+      const separated = picked.every((entry) => {
+        const previous = toOklch(entry.hex);
+        const hueSeparated = hueDistance(candidate?.h ?? source.hue, previous?.h ?? source.hue) >= 25;
+        const lightnessSeparated = Math.abs((candidate?.l ?? lightness) - (previous?.l ?? 0)) >= 0.15;
+
+        return (hueSeparated || lightnessSeparated) &&
+          remainsDistinctWithColorVisionDeficiency(candidateHex, entry.hex);
+      });
+
+      if (!separated || picked.some((entry) => entry.hex === candidateHex)) {
+        continue;
+      }
+
+      picked.push(token(candidateHex, 'derived', { originalHex: source.hex }));
+
+      if (picked.length === 6) {
+        return picked;
+      }
+    }
+  }
+
+  const gapMessage = 'La imagen no ofrece variedad suficiente para otra categoría de datos. Deriva una variante de luminosidad o elige un color fuente.';
+
+  while (picked.length < 6) {
+    picked.push(token(picked.at(-1)?.hex ?? fallback.hex, 'derived', { gap: gapMessage }));
+  }
+
+  return picked;
+}
+
+function applyAreaAwareStrategy(
+  base: SemanticTokens,
+  candidates: FitnessColor[],
+  theme: 'light' | 'dark',
+  overrides: SemanticTokenOverrides,
+): SemanticTokens {
+  const expressive = routedExpressiveCandidates(candidates);
+  const primary = applyOverride(
+    'primary',
+    token(expressive[0]?.hex ?? base.primary.hex, expressive[0] ? 'extracted' : 'derived'),
+    overrides,
+  );
+  const secondary = applyOverride(
+    'secondary',
+    token(expressive[1]?.hex ?? base.secondary.hex, expressive[1] ? 'extracted' : 'derived'),
+    overrides,
+  );
+  const accentCandidate = expressive
+    .filter((candidate) =>
+      candidate.hex !== primary.hex &&
+      candidate.hex !== secondary.hex &&
+      candidate.lightness >= (theme === 'dark' ? 0.28 : 0.35) &&
+      candidate.lightness <= 0.88,
+    )
+    .sort((left, right) => left.prominence - right.prominence || right.chroma - left.chroma)[0];
+  const accent = applyOverride(
+    'accent',
+    accentCandidate
+      ? token(accentCandidate.hex, 'extracted')
+      : token(secondary.hex, 'derived', {
+          gap: 'Esta imagen no tiene un color fuente adecuado para acento.',
+        }),
+    overrides,
+  );
+  const onPrimary = applyOverride('on-primary', derivedPair(primary), overrides);
+  const onSecondary = applyOverride('on-secondary', derivedPair(secondary), overrides);
+  const onAccent = applyOverride('on-accent', derivedPair(accent), overrides);
+  const dataSeries = sourceDataSeries(expressive, base.background.hex, theme, primary);
+  const dataToken = (index: number): SemanticToken => dataSeries[index] ?? primary;
+  const tonalTokens = Object.fromEntries([
+    ...tonalTokenEntries('primary', primary, overrides),
+    ...tonalTokenEntries('secondary', secondary, overrides),
+    ...tonalTokenEntries('accent', accent, overrides),
+  ]) as Pick<SemanticTokens, TonalTokenName | OnTonalTokenName>;
+
+  return {
+    ...base,
+    primary,
+    secondary,
+    accent,
+    'on-primary': onPrimary,
+    'on-secondary': onSecondary,
+    'on-accent': onAccent,
+    'hero-surface': base['surface-elevated'],
+    'on-hero': base['on-surface'],
+    'data-1': applyOverride('data-1', dataToken(0), overrides),
+    'data-2': applyOverride('data-2', dataToken(1), overrides),
+    'data-3': applyOverride('data-3', dataToken(2), overrides),
+    'data-4': applyOverride('data-4', dataToken(3), overrides),
+    'data-5': applyOverride('data-5', dataToken(4), overrides),
+    'data-6': applyOverride('data-6', dataToken(5), overrides),
+    ...tonalTokens,
+  };
+}
+
+/** Derives an area-aware UI palette; source colors stay on small expressive roles. */
+export function deriveSemanticTokens(input: SemanticTokenDerivationInput): SemanticTokens {
+  const paletteType = input.paletteType ?? classifyPalette(input.extracted).type;
+  const base = deriveBaseSemanticTokens(input);
+
+  if (paletteType === 'neutral' && !input.overrides?.accent && !input.synthesisStrategy) {
+    const dataGap = token(base.primary.hex, 'derived', {
+      gap: 'La imagen no tiene variedad cromática suficiente para esta categoría de datos. Deriva variantes por luminosidad o elige una fuente.',
+    });
+
+    return {
+      ...base,
+      accent: token(base.surface.hex, 'derived', {
+        gap: 'Esta imagen no tiene un color con suficiente carácter para acento.',
+      }),
+      'data-1': dataGap,
+      'data-2': dataGap,
+      'data-3': dataGap,
+      'data-4': dataGap,
+      'data-5': dataGap,
+      'data-6': dataGap,
+    };
+  }
+
+  if (!input.synthesisStrategy) {
+    return applyAreaAwareStrategy(
+      base,
+      uniqueCandidates(input.extracted),
+      input.theme ?? 'light',
+      input.overrides ?? {},
+    );
+  }
+
+  return base;
 }

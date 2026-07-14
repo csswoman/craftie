@@ -17,7 +17,7 @@ import {
 } from './dashboardPreviewData';
 import { onVividFill, vividFill } from './previewColor';
 import { SegmentedControl } from './previewPrimitives';
-import { DEFAULT_PREVIEW_FONTS, displayStyle, eyebrowStyle, labelStyle, type PreviewFonts } from './previewTypography';
+import { DEFAULT_PREVIEW_FONTS, displayStyle, eyebrowStyle, labelStyle, previewRootTypeStyle, type PreviewFonts } from './previewTypography';
 
 export const DASHBOARD_VISUAL_SLOTS = [
   'appBackground',
@@ -53,7 +53,7 @@ export function DashboardLayoutPreview({ colors, fonts = DEFAULT_PREVIEW_FONTS, 
       slot="appBackground"
       onEditSlot={onEditSlot}
       className="overflow-hidden rounded-xl border"
-      style={{ backgroundColor: colors.appBackground, borderColor: colors.border, color: colors.text, fontFamily: fonts.bodyFamily }}
+      style={{ backgroundColor: colors.appBackground, borderColor: colors.border, color: colors.text, ...previewRootTypeStyle() }}
     >
       <div className="flex min-h-[34rem]">
         <DashboardSidebar
@@ -67,10 +67,10 @@ export function DashboardLayoutPreview({ colors, fonts = DEFAULT_PREVIEW_FONTS, 
         <main className="min-w-0 flex-1 p-4 sm:p-5 lg:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0">
-              <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem]" style={eyebrowStyle(fonts, colors.mutedText)}>
+              <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={eyebrowStyle(fonts, colors.mutedText)}>
                 Week overview
               </PreviewSlotTarget>
-              <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1.5 text-[1.5rem] sm:text-[1.75rem]" style={{ ...displayStyle(fonts), textWrap: 'balance' }}>
+              <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1.5" style={{ ...displayStyle(fonts), textWrap: 'balance' }}>
                 Revenue operations
               </PreviewSlotTarget>
             </div>
@@ -89,8 +89,8 @@ export function DashboardLayoutPreview({ colors, fonts = DEFAULT_PREVIEW_FONTS, 
               <PreviewSlotTarget
                 slot="primaryAction"
                 onEditSlot={onEditSlot}
-                className="rounded-lg px-3.5 py-2 text-[0.75rem] transition-transform duration-200 hover:-translate-y-0.5"
-                style={{ ...labelStyle(fonts), fontWeight: 600, backgroundColor: primaryFill, color: onPrimaryFill }}
+                className="rounded-lg px-3.5 py-2 transition-transform duration-200 hover:-translate-y-0.5"
+                style={{ ...labelStyle(fonts), backgroundColor: primaryFill, color: onPrimaryFill }}
               >
                 Export
               </PreviewSlotTarget>

@@ -36,9 +36,12 @@ export function SelectColorsWorkspaceSidebar(props: SelectColorsWorkspaceSidebar
       <StudioToolsPanel>
         <nav
           aria-label="Secciones de herramientas"
-          className="shrink-0 border-b border-border/70 pb-3"
+          className="shrink-0 pb-3"
         >
-          <ul className="flex gap-1" role="tablist">
+          <ul
+            className="flex gap-0.5 rounded-xl bg-surface-raised p-1"
+            role="tablist"
+          >
             {TOOLS_TABS.map((tab) => {
               const selected = activeTab === tab.id;
 
@@ -52,10 +55,10 @@ export function SelectColorsWorkspaceSidebar(props: SelectColorsWorkspaceSidebar
                     aria-controls={`tools-panel-${tab.id}`}
                     onClick={() => setActiveTab(tab.id)}
                     {...getTabProps(tab.id)}
-                    className={`flex min-h-11 w-full items-center justify-center rounded-lg px-3 py-2 text-tools-section font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+                    className={`flex min-h-10 w-full items-center justify-center rounded-lg px-3 py-2 text-tools-section font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
                       selected
-                        ? 'bg-[var(--chrome-green-soft)] text-ink'
-                        : 'text-muted hover:bg-surface-raised hover:text-ink'
+                        ? 'bg-bg text-ink shadow-sm'
+                        : 'text-muted hover:text-ink'
                     }`}
                   >
                     {tab.label}
@@ -91,11 +94,11 @@ export function SelectColorsWorkspaceSidebar(props: SelectColorsWorkspaceSidebar
           tabIndex={activeTab === 'typography' ? 0 : undefined}
           className={
             activeTab === 'typography'
-              ? 'flex min-h-0 flex-1 flex-col overflow-hidden'
+              ? 'scrollbar-chrome min-h-0 flex-1 overflow-x-hidden overflow-y-auto'
               : 'hidden'
           }
         >
-          {sectionById.typography}
+          <div className="min-w-0 max-w-full">{sectionById.typography}</div>
         </section>
       </StudioToolsPanel>
     </div>

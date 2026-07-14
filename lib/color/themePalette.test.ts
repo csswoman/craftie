@@ -31,7 +31,7 @@ describe('themePalette', () => {
 
     expect(dark.fondo.source).toBe('derived');
     expect(dark.fondo.hex).not.toBe(light.fondo.hex);
-    expect(dark.secundario.source === 'derived' || dark.secundario.source === 'corrected').toBe(true);
+    expect(['extracted', 'derived', 'corrected']).toContain(dark.secundario.source);
   });
 
   it('resolves active theme palette from seeds, derivation and overrides', () => {

@@ -1,4 +1,4 @@
-import type { FontPair } from '../pairings';
+import type { FontPair } from '../fontPairTypes';
 import { LEGACY_FONT_PAIRS } from './legacy';
 import { SANS_SANS_PAIRS } from './sansSans';
 import { SANS_SERIF_PAIRS } from './sansSerif';

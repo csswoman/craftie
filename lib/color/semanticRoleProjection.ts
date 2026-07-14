@@ -50,6 +50,8 @@ export function projectSemanticTokensToRolePalette(
       hex: normalized,
       name: names?.[role] ?? generatedNames.get(normalized) ?? ROLE_LABELS[role],
       source: projectSource(semantic.source),
+      ...(semantic.originalHex ? { originalHex: semantic.originalHex } : {}),
+      ...(semantic.gap ? { gap: semantic.gap } : {}),
     };
 
     palette[role] = slot;

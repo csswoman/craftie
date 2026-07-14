@@ -30,7 +30,7 @@ export function DashboardMetricCard({ colors, fonts, metric, onEditSlot }: {
       style={{ backgroundColor: colors.surface, borderColor: colors.border }}
     >
       <div className="flex items-start justify-between gap-2">
-        <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem]" style={labelStyle(fonts, colors.mutedText)}>
+        <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={labelStyle(fonts, colors.mutedText)}>
           {metric.label}
         </PreviewSlotTarget>
         <StatDelta value={metric.trend} direction={metric.dir} color={trendColor} slot={metric.trendSlot} onEditSlot={onEditSlot} />
@@ -38,7 +38,7 @@ export function DashboardMetricCard({ colors, fonts, metric, onEditSlot }: {
       <PreviewSlotTarget
         slot="text"
         onEditSlot={onEditSlot}
-        className="mt-2 text-[1.5rem] tabular-nums xl:text-[1.75rem]"
+        className="mt-2 tabular-nums"
         style={displayStyle(fonts)}
       >
         {metric.value}

@@ -10,6 +10,7 @@ export type ImageExtractionOptions = {
   maxCount?: number;
   sampleOffset?: number;
   centroidSeed?: number;
+  publication?: 'centroid' | 'medoid';
 };
 
 export type ResolvedImageExtractionOptions = {

@@ -101,8 +101,8 @@ export const UI_LAYOUT_MODES: UiLayoutModeDefinition[] = [
       surfaceElevated: 'surface-inverse-elevated',
       text: 'on-surface-inverse',
       mutedText: 'on-surface-inverse',
-      primaryAction: 'accent',
-      primaryActionText: 'on-accent',
+      primaryAction: 'primary',
+      primaryActionText: 'on-primary',
     },
     modeSlots: {
       secondaryAction: 'surface-inverse',

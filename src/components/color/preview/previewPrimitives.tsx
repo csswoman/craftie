@@ -1,6 +1,8 @@
 import type { CSSProperties } from 'react';
 
 import type { UiLayoutSlot } from '@lib/color/layoutModes';
+import { deriveForegroundForBackground } from '@lib/color/pairedForeground';
+import { adjustLightnessForContrast, contrastRatio, mix } from '@lib/utils/colorMath';
 
 import { PreviewIcon, type PreviewIconName } from './previewIcons';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
@@ -47,13 +49,20 @@ export function Tag({
   slot,
   onEditSlot,
   icon,
-}: SlotColorProps & { label: string; icon?: PreviewIconName }) {
+  surfaceHex,
+}: SlotColorProps & { label: string; icon?: PreviewIconName; surfaceHex?: string }) {
+  const backgroundColor = surfaceHex ? mix(color, surfaceHex, 0.85) : color;
+  const pairedForeground = deriveForegroundForBackground(backgroundColor).hex;
+  const foregroundColor = contrastRatio(pairedForeground, backgroundColor) >= 4.5
+    ? pairedForeground
+    : adjustLightnessForContrast(pairedForeground, backgroundColor, 4.5);
+
   return (
     <PreviewSlotTarget
       slot={slot}
       onEditSlot={onEditSlot}
       className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold"
-      style={{ backgroundColor: tint(color, 15), color }}
+      style={{ backgroundColor, color: foregroundColor }}
     >
       {icon ? <PreviewIcon name={icon} size={11} strokeWidth={2.25} /> : null}
       {label}

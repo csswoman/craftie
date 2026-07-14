@@ -67,11 +67,29 @@ function SelectColorsWorkspaceContent() {
     fontPairings: workspace.fontPairings,
     paletteCatalog: workspace.paletteCatalog,
     recommendedPairings: workspace.recommendedPairings,
-    selectedPairing: workspace.selectedPairing,
+    appliedTypography: workspace.appliedTypography,
+    selectedCatalogPairId: workspace.selectedCatalogPairId,
+    pinHeading: workspace.pinHeading,
+    pinBody: workspace.pinBody,
+    typeScaleBase: workspace.typeScaleBase,
+    typeScaleRatio: workspace.typeScaleRatio,
     onImageFileSelected: workspace.handleImageFileSelected,
     onImageRegenerate: workspace.handleImageRegenerate,
     onOpenInspiration: () => workspace.setInspirationModalOpen(true),
     onSelectPairing: workspace.setSelectedPairing,
+    onPreviewPairing: workspace.previewPairing,
+    onClearPreview: workspace.clearTypePreview,
+    onTogglePinHeading: workspace.togglePinHeading,
+    onTogglePinBody: workspace.togglePinBody,
+    onTypeScaleBaseChange: workspace.setTypeScaleBase,
+    onTypeScaleRatioChange: workspace.setTypeScaleRatio,
+    customFonts: workspace.customFonts,
+    imageMode: workspace.imageMode,
+    imagePaletteType: workspace.imagePaletteType,
+    paletteTypeOverride: workspace.paletteTypeOverride,
+    onImageModeChange: workspace.handleImageModeChange,
+    onPaletteTypeChange: workspace.handlePaletteTypeChange,
+    onApplyCustomFont: workspace.applyCustomFont,
   };
   const mobileToolSections = useSelectColorsWorkspaceToolSections(toolSectionsInput, 'mobile');
   const inspirationModal = (
@@ -128,6 +146,8 @@ function SelectColorsWorkspaceContent() {
             onImageFileSelected={workspace.handleImageFileSelected}
             onImageRegenerate={workspace.handleImageRegenerate}
             onOpenInspiration={() => workspace.setInspirationModalOpen(true)}
+            imageMode={workspace.imageMode}
+            onImageModeChange={workspace.handleImageModeChange}
           />
         </div>
 
@@ -163,7 +183,13 @@ function SelectColorsWorkspaceContent() {
             isImageRegenerating={workspace.isImageRegenerating}
             recommendedPairings={workspace.recommendedPairings}
             selectedPairing={workspace.selectedPairing}
+            hoveredPairing={workspace.hoveredPairing}
+            isTypePreviewing={workspace.isTypePreviewing}
+            typeScaleBase={workspace.typeScaleBase}
+            typeScaleRatio={workspace.typeScaleRatio}
             onAddColorByHex={workspace.handleAddColorByHex}
+            imageMode={workspace.imageMode}
+            paletteCatalog={workspace.paletteCatalog}
           />
         }
         rightPanel={
