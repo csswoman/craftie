@@ -6,7 +6,7 @@ import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTar
 import { onVividFill, vividFill } from './previewColor';
 import { PLANS } from './landingPreviewData';
 import { Tag } from './previewPrimitives';
-import type { PreviewFonts } from './previewTypography';
+import { bodyStyle, displayStyle, titleStyle, type PreviewFonts } from './previewTypography';
 
 type LandingPricingPlansProps = {
   colors: ResolvedLayoutColors;
@@ -35,14 +35,14 @@ export function LandingPricingPlans({ colors, fonts, onEditSlot }: LandingPricin
             }
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[0.75rem] font-bold">{plan.name}</span>
+              <span className="text-[0.8125rem]" style={{ ...titleStyle(fonts), fontWeight: 600 }}>{plan.name}</span>
               {featured ? <Tag label="Popular" color={onVividFill(fill)} slot="primaryActionText" onEditSlot={onEditSlot} /> : null}
             </div>
-            <div className="mt-2 text-[1.375rem] font-extrabold leading-none" style={{ fontFamily: fonts.headingFamily }}>
+            <div className="mt-2 text-[1.5rem] tabular-nums" style={displayStyle(fonts)}>
               {plan.price}
-              <span className="text-[0.6875rem] font-semibold opacity-70">/mo</span>
+              <span className="text-[0.6875rem] opacity-70" style={{ ...titleStyle(fonts), fontWeight: 500 }}>/mo</span>
             </div>
-            <p className="mt-2 text-[0.6875rem] leading-snug opacity-80">{plan.tagline}</p>
+            <p className="mt-2 text-[0.6875rem] leading-snug opacity-80" style={bodyStyle(fonts)}>{plan.tagline}</p>
           </PreviewSlotTarget>
         );
       })}

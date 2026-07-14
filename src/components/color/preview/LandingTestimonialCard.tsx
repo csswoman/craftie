@@ -6,13 +6,15 @@ import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTar
 import { PROOF_POINTS } from './landingPreviewData';
 import { PreviewIcon } from './previewIcons';
 import { Avatar, StatDelta } from './previewPrimitives';
+import { bodyStyle, labelStyle, titleStyle, type PreviewFonts } from './previewTypography';
 
 type LandingTestimonialCardProps = {
   colors: ResolvedLayoutColors;
+  fonts: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 };
 
-export function LandingTestimonialCard({ colors, onEditSlot }: LandingTestimonialCardProps) {
+export function LandingTestimonialCard({ colors, fonts, onEditSlot }: LandingTestimonialCardProps) {
   return (
     <PreviewSlotTarget
       slot="surfaceElevated"
@@ -24,10 +26,10 @@ export function LandingTestimonialCard({ colors, onEditSlot }: LandingTestimonia
         <div className="flex items-center gap-3">
           <Avatar initials="JM" color={colors.primaryAction} slot="primaryAction" onEditSlot={onEditSlot} />
           <div className="min-w-0">
-            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[0.8125rem] font-bold">
+            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[0.8125rem]" style={{ ...titleStyle(fonts), fontWeight: 600 }}>
               Jordan Mejía
             </PreviewSlotTarget>
-            <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem]" style={{ color: colors.mutedText }}>
+            <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem]" style={labelStyle(fonts, colors.mutedText)}>
               Head of Brand, Aster
             </PreviewSlotTarget>
           </div>
@@ -39,7 +41,7 @@ export function LandingTestimonialCard({ colors, onEditSlot }: LandingTestimonia
           <PreviewIcon key={index} name="heart" size={11} strokeWidth={2} />
         ))}
       </PreviewSlotTarget>
-      <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-3 text-[0.8125rem] leading-relaxed">
+      <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-3 text-[0.875rem]" style={{ ...bodyStyle(fonts), fontStyle: 'italic' }}>
         &ldquo;Shortened our launch cycle by half without losing the parts of our brand that make it recognizable.&rdquo;
       </PreviewSlotTarget>
       <div className="mt-4 space-y-3 border-t pt-4" style={{ borderColor: colors.border }}>
@@ -51,7 +53,7 @@ export function LandingTestimonialCard({ colors, onEditSlot }: LandingTestimonia
               className="mt-1 h-2.5 w-2.5 rounded-full"
               style={{ backgroundColor: [colors.data1, colors.data2, colors.data3][index] }}
             />
-            <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem] leading-relaxed" style={{ color: colors.mutedText }}>
+            <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem]" style={bodyStyle(fonts, colors.mutedText)}>
               {item.label}
             </PreviewSlotTarget>
           </div>

@@ -27,7 +27,7 @@ export function Avatar({
     <PreviewSlotTarget
       slot={slot}
       onEditSlot={onEditSlot}
-      className="grid shrink-0 place-items-center rounded-full font-bold"
+      className="grid shrink-0 place-items-center rounded-full font-semibold"
       style={{
         width: size,
         height: size,
@@ -52,7 +52,7 @@ export function Tag({
     <PreviewSlotTarget
       slot={slot}
       onEditSlot={onEditSlot}
-      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.6875rem] font-bold"
+      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold"
       style={{ backgroundColor: tint(color, 15), color }}
     >
       {icon ? <PreviewIcon name={icon} size={11} strokeWidth={2.25} /> : null}
@@ -72,7 +72,7 @@ export function StatDelta({
     <PreviewSlotTarget
       slot={slot}
       onEditSlot={onEditSlot}
-      className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[0.6875rem] font-bold tabular-nums"
+      className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[0.6875rem] font-semibold tabular-nums"
       style={{ backgroundColor: tint(color, 15), color }}
     >
       <PreviewIcon name={direction === 'up' ? 'arrowUp' : 'arrowDown'} size={11} strokeWidth={2.5} />
@@ -101,7 +101,7 @@ export function LiveDot({
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5 text-[0.6875rem] font-bold" style={{ color }}>
+    <span className="inline-flex items-center gap-1.5 text-[0.6875rem] font-medium" style={{ color }}>
       {dot}
       {label}
     </span>
@@ -148,7 +148,7 @@ export function SegmentedControl({
               event.stopPropagation();
               onChange(option);
             }}
-            className="rounded-full px-2.5 py-1 text-[0.6875rem] font-bold transition-colors duration-200 ease-out"
+            className="rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold transition-colors duration-200 ease-out"
             style={{
               backgroundColor: active ? activeColor : 'transparent',
               color: active ? activeText : mutedText,

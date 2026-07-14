@@ -7,7 +7,7 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { PreviewIcon } from './previewIcons';
 import { EqualizerBars, LiveDot, ProgressBar, Tag, tint } from './previewPrimitives';
-import { DEFAULT_PREVIEW_FONTS, type PreviewFonts } from './previewTypography';
+import { bodyStyle, DEFAULT_PREVIEW_FONTS, displayStyle, eyebrowStyle, headingStyle, labelStyle, titleStyle, type PreviewFonts } from './previewTypography';
 
 export const MEDIA_VISUAL_SLOTS = [
   'appBackground',
@@ -58,10 +58,10 @@ export function MediaLayoutPreview({
       <div className="min-h-[32rem] p-4 sm:p-5 lg:p-6">
         <header className="mb-5 flex items-center justify-between gap-3">
           <div>
-            <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem] font-bold" style={{ color: colors.mutedText }}>
+            <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem]" style={eyebrowStyle(fonts, colors.mutedText)}>
               Evening queue
             </PreviewSlotTarget>
-            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1 text-[1.25rem] font-extrabold" style={{ fontFamily: fonts.headingFamily }}>
+            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1 text-[1.375rem]" style={displayStyle(fonts)}>
               Studio radio
             </PreviewSlotTarget>
           </div>
@@ -91,13 +91,13 @@ export function MediaLayoutPreview({
               </PreviewSlotTarget>
 
               <div className="min-w-0">
-                <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem] font-bold" style={{ color: colors.mutedText }}>
+                <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.625rem]" style={eyebrowStyle(fonts, colors.mutedText)}>
                   Now playing
                 </PreviewSlotTarget>
-                <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-2 text-[1.5rem] font-extrabold" style={{ fontFamily: fonts.headingFamily }}>
+                <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-2 text-[1.625rem]" style={{ ...displayStyle(fonts), textWrap: 'balance' }}>
                   Red Flower Static
                 </PreviewSlotTarget>
-                <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-2 max-w-sm text-[0.8125rem] leading-relaxed" style={{ color: colors.mutedText }}>
+                <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-2 max-w-[46ch] text-[0.8125rem]" style={bodyStyle(fonts, colors.mutedText)}>
                   Low-light mix for focused sessions, with calmer chrome and brighter transport controls.
                 </PreviewSlotTarget>
                 <div className="mt-3 flex flex-wrap items-center gap-1.5">
@@ -160,16 +160,16 @@ export function MediaLayoutPreview({
               className="rounded-xl border p-4 transition-transform duration-200 hover:-translate-y-0.5"
               style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
             >
-              <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1rem] font-bold" style={{ fontFamily: fonts.headingFamily }}>
+              <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1.125rem]" style={headingStyle(fonts)}>
                 Queue status
               </PreviewSlotTarget>
               <div className="mt-4 grid grid-cols-2 gap-3">
                 {[{ label: 'Queued', value: '18' }, { label: 'Saved', value: '64' }].map((item) => (
                   <div key={item.label}>
-                    <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem] font-bold" style={{ color: colors.mutedText }}>
+                    <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem]" style={labelStyle(fonts, colors.mutedText)}>
                       {item.label}
                     </PreviewSlotTarget>
-                    <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1 block text-[1.125rem] font-bold" style={{ fontFamily: fonts.headingFamily }}>
+                    <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1 block text-[1.25rem] tabular-nums" style={displayStyle(fonts)}>
                       {item.value}
                     </PreviewSlotTarget>
                   </div>
@@ -185,10 +185,10 @@ export function MediaLayoutPreview({
             >
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[0.9375rem] font-bold" style={{ fontFamily: fonts.headingFamily }}>
+                  <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1rem]" style={headingStyle(fonts)}>
                     Next up
                   </PreviewSlotTarget>
-                  <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-1 text-[0.75rem]" style={{ color: colors.mutedText }}>
+                  <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-1 text-[0.75rem]" style={bodyStyle(fonts, colors.mutedText)}>
                     Atmospheric background, brighter controls.
                   </PreviewSlotTarget>
                 </div>
@@ -207,10 +207,10 @@ export function MediaLayoutPreview({
                       <span className="flex min-w-0 flex-1 items-center gap-2">
                         <PreviewIcon name="play" size={10} className="shrink-0 opacity-0 transition-opacity group-hover:opacity-70" />
                         <span className="min-w-0">
-                          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="block truncate font-bold">
+                          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="block truncate text-[0.8125rem]" style={titleStyle(fonts)}>
                             {item.track}
                           </PreviewSlotTarget>
-                          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="block truncate text-[0.6875rem]" style={{ color: colors.mutedText }}>
+                          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="block truncate text-[0.6875rem]" style={bodyStyle(fonts, colors.mutedText)}>
                             {item.artist}
                           </PreviewSlotTarget>
                         </span>

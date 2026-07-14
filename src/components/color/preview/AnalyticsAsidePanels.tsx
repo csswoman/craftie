@@ -5,7 +5,7 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { DataLegend, type ChartSeries } from './previewCharts';
 import { ProgressBar, StatDelta } from './previewPrimitives';
-import type { PreviewFonts } from './previewTypography';
+import { displayStyle, headingStyle, labelStyle, titleStyle, type PreviewFonts } from './previewTypography';
 
 const TOP_PAGES = [
   { label: '/pricing', share: 82, slot: 'data1' as const },
@@ -39,17 +39,17 @@ export function AnalyticsAsidePanels({
         className="rounded-xl border p-4 lg:p-5 transition-transform duration-200 hover:-translate-y-0.5"
         style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
       >
-        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1rem] font-bold" style={{ fontFamily: fonts.headingFamily }}>
+        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1.125rem]" style={headingStyle(fonts)}>
           Source summary
         </PreviewSlotTarget>
         <div className="mt-4 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
           {SUMMARY_CARDS.map((item) => (
             <div key={item.label} className="flex items-center justify-between gap-2">
               <div>
-                <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem] font-bold" style={{ color: colors.mutedText }}>
+                <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem]" style={labelStyle(fonts, colors.mutedText)}>
                   {item.label}
                 </PreviewSlotTarget>
-                <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1 block text-[1.125rem] font-bold" style={{ fontFamily: fonts.headingFamily }}>
+                <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1 block text-[1.25rem] tabular-nums" style={displayStyle(fonts)}>
                   {item.value}
                 </PreviewSlotTarget>
               </div>
@@ -71,7 +71,7 @@ export function AnalyticsAsidePanels({
         className="rounded-xl border p-4 lg:p-5 transition-transform duration-200 hover:-translate-y-0.5"
         style={{ backgroundColor: colors.surface, borderColor: colors.border }}
       >
-        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1rem] font-bold" style={{ fontFamily: fonts.headingFamily }}>
+        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1.125rem]" style={headingStyle(fonts)}>
           Mix breakdown
         </PreviewSlotTarget>
         <div className="mt-4">
@@ -85,14 +85,14 @@ export function AnalyticsAsidePanels({
         className="rounded-xl border p-4 lg:p-5 transition-transform duration-200 hover:-translate-y-0.5"
         style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
       >
-        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1rem] font-bold" style={{ fontFamily: fonts.headingFamily }}>
+        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1.125rem]" style={headingStyle(fonts)}>
           Top pages
         </PreviewSlotTarget>
         <div className="mt-4 space-y-3">
           {TOP_PAGES.map((page) => (
             <div key={page.label}>
               <div className="flex items-center justify-between gap-2 text-[0.75rem]">
-                <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="truncate font-semibold">
+                <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="truncate" style={titleStyle(fonts)}>
                   {page.label}
                 </PreviewSlotTarget>
                 <span className="shrink-0 tabular-nums opacity-60">{page.share}%</span>

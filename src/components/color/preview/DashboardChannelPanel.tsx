@@ -6,7 +6,7 @@ import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTar
 import type { DashboardRange } from './dashboardPreviewData';
 import { AreaChart } from './previewCharts';
 import { Tag } from './previewPrimitives';
-import type { PreviewFonts } from './previewTypography';
+import { bodyStyle, headingStyle, type PreviewFonts } from './previewTypography';
 
 type DashboardChannelPanelProps = {
   colors: ResolvedLayoutColors;
@@ -30,10 +30,10 @@ export function DashboardChannelPanel({
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1rem] font-bold" style={{ fontFamily: fonts.headingFamily }}>
+          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1.125rem]" style={headingStyle(fonts)}>
             Channel performance
           </PreviewSlotTarget>
-          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-1 text-[0.75rem]" style={{ color: colors.mutedText }}>
+          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-1 text-[0.8125rem]" style={bodyStyle(fonts, colors.mutedText)}>
             Trailing {range} · updates live
           </PreviewSlotTarget>
         </div>

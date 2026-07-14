@@ -6,7 +6,7 @@ import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTar
 import { onVividFill, vividFill } from './previewColor';
 import { BILLING, PROOF_POINTS, type LandingBilling } from './landingPreviewData';
 import { SegmentedControl, Tag, tint } from './previewPrimitives';
-import type { PreviewFonts } from './previewTypography';
+import { bodyStyle, displayStyle, heroStyle, labelStyle, type PreviewFonts } from './previewTypography';
 
 type LandingHeroProps = {
   colors: ResolvedLayoutColors;
@@ -40,20 +40,20 @@ export function LandingHero({
           <PreviewSlotTarget
             slot="onHero"
             onEditSlot={onEditSlot}
-            className="preview-rise mt-3 max-w-2xl text-[2rem] font-extrabold leading-[1.02] tracking-[-0.02em] sm:text-[2.4rem] lg:text-[3rem]"
-            style={{ fontFamily: fonts.headingFamily }}
+            className="preview-rise mt-3 max-w-2xl text-[2rem] sm:text-[2.4rem] lg:text-[3rem]"
+            style={heroStyle(fonts)}
           >
             Ship the brand story with fewer loose ends.
           </PreviewSlotTarget>
-          <PreviewSlotTarget slot="onHero" onEditSlot={onEditSlot} className="mt-4 max-w-xl text-[0.9375rem] leading-relaxed opacity-85 lg:text-[1rem]">
+          <PreviewSlotTarget slot="onHero" onEditSlot={onEditSlot} className="mt-4 max-w-[52ch] text-[0.9375rem] opacity-85 lg:text-[1rem]" style={bodyStyle(fonts)}>
             A focused landing experience where the primary tone carries the hero, the call to action stays obvious, and supporting surfaces keep the message calm.
           </PreviewSlotTarget>
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <PreviewSlotTarget
               slot="primaryAction"
               onEditSlot={onEditSlot}
-              className="rounded-lg px-4 py-2.5 text-[0.8125rem] font-bold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(0,0,0,0.14)]"
-              style={{ backgroundColor: primaryFill, color: onVividFill(primaryFill) }}
+              className="rounded-lg px-4 py-2.5 text-[0.8125rem] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(0,0,0,0.14)]"
+              style={{ ...labelStyle(fonts), fontWeight: 600, backgroundColor: primaryFill, color: onVividFill(primaryFill) }}
             >
               Start trial
             </PreviewSlotTarget>
@@ -68,7 +68,7 @@ export function LandingHero({
               trackSlot="onHero"
               onEditSlot={onEditSlot}
             />
-            <span className="text-[0.75rem] font-bold tabular-nums opacity-90">{price}/mo</span>
+            <span className="text-[0.75rem] tabular-nums opacity-90" style={{ ...labelStyle(fonts), fontWeight: 600 }}>{price}/mo</span>
           </div>
         </div>
 
@@ -78,10 +78,10 @@ export function LandingHero({
           className="rounded-xl border p-4 transition-transform duration-200 hover:-translate-y-0.5"
           style={{ backgroundColor: colors.supportSurface ?? colors.surface, borderColor: colors.onHero ?? colors.primaryActionText, color: colors.supportSurfaceText ?? colors.text }}
         >
-          <PreviewSlotTarget slot="supportSurfaceText" onEditSlot={onEditSlot} className="text-[0.6875rem] font-bold opacity-75">
+          <PreviewSlotTarget slot="supportSurfaceText" onEditSlot={onEditSlot} className="text-[0.625rem] opacity-75" style={{ ...labelStyle(fonts), letterSpacing: '0.05em', textTransform: 'uppercase' }}>
             This quarter
           </PreviewSlotTarget>
-          <PreviewSlotTarget slot="supportSurfaceText" onEditSlot={onEditSlot} className="mt-2 text-[1.375rem] font-bold leading-none" style={{ fontFamily: fonts.headingFamily }}>
+          <PreviewSlotTarget slot="supportSurfaceText" onEditSlot={onEditSlot} className="mt-2 text-[1.5rem]" style={displayStyle(fonts)}>
             38 launches
           </PreviewSlotTarget>
           <div className="mt-4 grid grid-cols-3 gap-2">
@@ -93,7 +93,7 @@ export function LandingHero({
                   className="h-2.5 w-2.5 rounded-full"
                   style={{ backgroundColor: [colors.data1, colors.data2, colors.data3][index] }}
                 />
-                <PreviewSlotTarget slot="supportSurfaceText" onEditSlot={onEditSlot} className="mt-3 text-[0.6875rem] font-semibold leading-snug opacity-90">
+                <PreviewSlotTarget slot="supportSurfaceText" onEditSlot={onEditSlot} className="mt-3 text-[0.6875rem] leading-snug opacity-90" style={labelStyle(fonts)}>
                   {item.label}
                 </PreviewSlotTarget>
               </div>
