@@ -4,11 +4,12 @@ import { useState } from 'react';
 
 import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
+import { AnalyticsAsidePanels } from './AnalyticsAsidePanels';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { onVividFill, vividFill } from './previewColor';
-import { DataLegend, DonutChart, Sparkline, type ChartSeries } from './previewCharts';
+import { DonutChart, Sparkline, type ChartSeries } from './previewCharts';
 import { PreviewIcon } from './previewIcons';
-import { ProgressBar, StatDelta, tint } from './previewPrimitives';
+import { StatDelta, tint } from './previewPrimitives';
 import { DEFAULT_PREVIEW_FONTS, type PreviewFonts } from './previewTypography';
 
 export const ANALYTICS_VISUAL_SLOTS = [
@@ -31,12 +32,12 @@ export const ANALYTICS_VISUAL_SLOTS = [
   'data6',
 ] as const;
 
-const TOP_PAGES = [
-  { label: '/pricing', share: 82, slot: 'data1' as const },
-  { label: '/product-tour', share: 61, slot: 'data2' as const },
-  { label: '/docs/getting-started', share: 44, slot: 'data3' as const },
-  { label: '/changelog', share: 27, slot: 'data4' as const },
-] as const;
+const KPIS = [
+  { label: 'Sessions', value: '128k', trend: '5.4%', dir: 'up' as const, slot: 'data1' as const, spark: [10, 14, 12, 18, 16, 21, 19] },
+  { label: 'Bounce rate', value: '31.2%', trend: '1.1%', dir: 'down' as const, slot: 'data4' as const, spark: [40, 38, 36, 34, 33, 31, 31] },
+  { label: 'Avg. duration', value: '3m 42s', trend: '9.8%', dir: 'up' as const, slot: 'data2' as const, spark: [6, 7, 6, 8, 9, 10, 11] },
+  { label: 'New signups', value: '2,184', trend: '2.3%', dir: 'up' as const, slot: 'data6' as const, spark: [3, 5, 4, 6, 7, 6, 8] },
+];
 
 export function AnalyticsLayoutPreview({
   colors,
@@ -55,17 +56,6 @@ export function AnalyticsLayoutPreview({
     { label: 'Email', value: 18, display: '18%', color: colors.data3, slot: 'data3' },
     { label: 'Paid', value: 12, display: '12%', color: colors.data4, slot: 'data4' },
     { label: 'Direct', value: 8, display: '8%', color: colors.data5, slot: 'data5' },
-  ];
-  const summaryCards = [
-    { label: 'Visitors', value: '42.8k', trend: '8.2%', dir: 'up' as const },
-    { label: 'Qualified', value: '11.3k', trend: '4.1%', dir: 'up' as const },
-    { label: 'Intent', value: '7.4%', trend: '0.6%', dir: 'down' as const },
-  ];
-  const kpis = [
-    { label: 'Sessions', value: '128k', trend: '5.4%', dir: 'up' as const, slot: 'data1' as const, spark: [10, 14, 12, 18, 16, 21, 19] },
-    { label: 'Bounce rate', value: '31.2%', trend: '1.1%', dir: 'down' as const, slot: 'data4' as const, spark: [40, 38, 36, 34, 33, 31, 31] },
-    { label: 'Avg. duration', value: '3m 42s', trend: '9.8%', dir: 'up' as const, slot: 'data2' as const, spark: [6, 7, 6, 8, 9, 10, 11] },
-    { label: 'New signups', value: '2,184', trend: '2.3%', dir: 'up' as const, slot: 'data6' as const, spark: [3, 5, 4, 6, 7, 6, 8] },
   ];
 
   return (
@@ -102,7 +92,7 @@ export function AnalyticsLayoutPreview({
         </PreviewSlotTarget>
 
         <section className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {kpis.map((kpi) => {
+          {KPIS.map((kpi) => {
             const kpiColor = colors[kpi.slot];
 
             return (
@@ -180,79 +170,7 @@ export function AnalyticsLayoutPreview({
             </div>
           </PreviewSlotTarget>
 
-          <div className="grid gap-4">
-            <PreviewSlotTarget
-              slot="surfaceElevated"
-              onEditSlot={onEditSlot}
-              className="rounded-xl border p-4 lg:p-5 transition-transform duration-200 hover:-translate-y-0.5"
-              style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
-            >
-              <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1rem] font-bold" style={{ fontFamily: fonts.headingFamily }}>
-                Source summary
-              </PreviewSlotTarget>
-              <div className="mt-4 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-                {summaryCards.map((item) => (
-                  <div key={item.label} className="flex items-center justify-between gap-2">
-                    <div>
-                      <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem] font-bold" style={{ color: colors.mutedText }}>
-                        {item.label}
-                      </PreviewSlotTarget>
-                      <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1 block text-[1.125rem] font-bold" style={{ fontFamily: fonts.headingFamily }}>
-                        {item.value}
-                      </PreviewSlotTarget>
-                    </div>
-                    <StatDelta
-                      value={item.trend}
-                      direction={item.dir}
-                      color={item.dir === 'up' ? colors.success : colors.data4}
-                      slot={item.dir === 'up' ? 'success' : 'data4'}
-                      onEditSlot={onEditSlot}
-                    />
-                  </div>
-                ))}
-              </div>
-            </PreviewSlotTarget>
-
-            <PreviewSlotTarget
-              slot="surface"
-              onEditSlot={onEditSlot}
-              className="rounded-xl border p-4 lg:p-5 transition-transform duration-200 hover:-translate-y-0.5"
-              style={{ backgroundColor: colors.surface, borderColor: colors.border }}
-            >
-              <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1rem] font-bold" style={{ fontFamily: fonts.headingFamily }}>
-                Mix breakdown
-              </PreviewSlotTarget>
-              <div className="mt-4">
-                <DataLegend segments={series} onEditSlot={onEditSlot} interactive />
-              </div>
-            </PreviewSlotTarget>
-
-            <PreviewSlotTarget
-              slot="surfaceElevated"
-              onEditSlot={onEditSlot}
-              className="rounded-xl border p-4 lg:p-5 transition-transform duration-200 hover:-translate-y-0.5"
-              style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
-            >
-              <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1rem] font-bold" style={{ fontFamily: fonts.headingFamily }}>
-                Top pages
-              </PreviewSlotTarget>
-              <div className="mt-4 space-y-3">
-                {TOP_PAGES.map((page) => (
-                  <div key={page.label}>
-                    <div className="flex items-center justify-between gap-2 text-[0.75rem]">
-                      <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="truncate font-semibold">
-                        {page.label}
-                      </PreviewSlotTarget>
-                      <span className="shrink-0 tabular-nums opacity-60">{page.share}%</span>
-                    </div>
-                    <div className="mt-1.5">
-                      <ProgressBar value={page.share} color={colors[page.slot]} slot={page.slot} onEditSlot={onEditSlot} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </PreviewSlotTarget>
-          </div>
+          <AnalyticsAsidePanels colors={colors} fonts={fonts} series={series} onEditSlot={onEditSlot} />
         </section>
       </div>
     </PreviewSlotTarget>
