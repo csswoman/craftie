@@ -24,7 +24,6 @@ export function useWorkspacePaletteActions({
   setError,
   setGeneratedPalette,
   setPaletteCatalog,
-  setRightPanelCollapsed,
 }: {
   assignFromHexes: (hexes: string[]) => void;
   generatedPalette: GeneratedPalette | null;
@@ -36,7 +35,6 @@ export function useWorkspacePaletteActions({
   setError: Dispatch<SetStateAction<string | null>>;
   setGeneratedPalette: Dispatch<SetStateAction<GeneratedPalette | null>>;
   setPaletteCatalog: Dispatch<SetStateAction<SelectableColor[]>>;
-  setRightPanelCollapsed: Dispatch<SetStateAction<boolean>>;
 }) {
   function handleReplacePreviewColor(columnId: string, newHex: string): string | null {
     if (!generatedPalette) {

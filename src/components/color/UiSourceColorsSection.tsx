@@ -75,7 +75,7 @@ export function UiSourceColorsSection({
                   type="button"
                   aria-expanded={open}
                   onClick={() => toggleRow(hex)}
-                  className={`min-h-8 rounded-full px-2 text-[0.625rem] font-medium focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${roles.length === 0 ? 'bg-surface-raised text-muted' : 'border border-border text-ink hover:bg-surface-raised'}`}
+                  className={`min-h-11 rounded-full px-2 text-[0.625rem] font-medium focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${roles.length === 0 ? 'bg-surface-raised text-muted' : 'border border-border text-ink hover:bg-surface-raised'}`}
                 >
                   {roles.length === 0 ? 'libre' : 'Usar'} {open ? '↑' : '↓'}
                 </button>
@@ -107,7 +107,7 @@ export function UiSourceColorsSection({
                               onAssignRole(role.token, hex);
                               setMessage(`${name} asignado a ${role.label}.`);
                             }}
-                            className="min-h-8 rounded-md border border-border bg-bg px-2 text-[0.625rem] font-medium text-ink hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+                            className="min-h-11 rounded-md border border-border bg-bg px-2 text-[0.625rem] font-medium text-ink hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
                           >
                             {role.label}
                           </button>
@@ -127,7 +127,7 @@ export function UiSourceColorsSection({
                             onAssignStatus(status.role, hex);
                             setMessage(`${name} ofrecido como base de ${status.label}.`);
                           }}
-                          className="min-h-8 rounded-md border border-border bg-bg px-1.5 text-[0.625rem] font-medium text-ink hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+                          className="min-h-11 rounded-md border border-border bg-bg px-1.5 text-[0.625rem] font-medium text-ink hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
                         >
                           {status.label}
                         </button>

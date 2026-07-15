@@ -110,7 +110,7 @@ export function UiDataSection({
               aria-pressed={selected}
               aria-label={missing ? `Elegir candidato para serie ${index + 1}` : `Seleccionar serie ${index + 1} para reemplazar ${tokens[name].hex}`}
               onClick={() => selectSlot(index)}
-              className={`relative h-[38px] min-w-0 flex-1 cursor-pointer rounded-md text-left ring-offset-2 ring-offset-bg focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${missing ? 'border border-dashed border-muted/60' : 'ring-1 ring-inset ring-ink/10'} ${selected ? 'ring-2 ring-[var(--chrome-green)]' : ''}`}
+              className={`relative h-11 min-w-0 flex-1 cursor-pointer rounded-md text-left ring-offset-2 ring-offset-bg focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${missing ? 'border border-dashed border-muted/60' : 'ring-1 ring-inset ring-ink/10'} ${selected ? 'ring-2 ring-[var(--chrome-green)]' : ''}`}
               style={missing ? {
                 backgroundImage: 'repeating-linear-gradient(135deg, transparent 0 4px, color-mix(in oklch, var(--color-muted) 22%, transparent) 4px 6px)',
                 backgroundColor: 'var(--color-surface-raised)',

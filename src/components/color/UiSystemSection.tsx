@@ -18,12 +18,19 @@ import { InlineSystemRolePicker } from './InlineSystemRolePicker';
 import { UiColorComposition } from './UiColorComposition';
 import { UiColorSectionHeader } from './UiColorSectionHeader';
 
+const SYSTEM_ROLE_GROUPS = [
+  { label: 'Fundaciones', roles: UI_SYSTEM_ROLES.slice(0, 3) },
+  { label: 'Texto', roles: UI_SYSTEM_ROLES.slice(3, 5) },
+  { label: 'Color de marca', roles: UI_SYSTEM_ROLES.slice(5) },
+] as const;
+
 export function UiSystemSection({
   tokens,
   colors,
   neutralSteps,
   openToken,
   loadPercent,
+  mobile = false,
   onToggle,
   onSelect,
 }: {
@@ -32,6 +39,7 @@ export function UiSystemSection({
   neutralSteps: Array<{ lightness: number; hex: string }>;
   openToken: SemanticTokenName | null;
   loadPercent: number;
+  mobile?: boolean;
   onToggle: (token: SemanticTokenName) => void;
   onSelect: (token: SemanticTokenName, hex: string) => void;
 }) {
@@ -56,20 +64,31 @@ export function UiSystemSection({
 
   return (
     <section aria-labelledby="ui-system-title">
-      <UiColorSectionHeader title="Sistema" />
-      <h2 id="ui-system-title" className="sr-only">Sistema de color</h2>
-      <UiColorComposition tokens={tokens} loadPercent={loadPercent} />
-      {unassignedRoles.length > 0 ? (
-        <button
-          type="button"
-          onClick={jumpToFirstGap}
-          className="mt-2 min-h-9 w-full rounded-md bg-[#FFF4D6] px-2.5 text-left text-tools-meta font-semibold text-[#6B4700] hover:bg-[#FCE9B6] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 dark:bg-[#4A3A16] dark:text-[#F7D98A]"
-        >
-          <span aria-hidden="true">⚠ </span>{unassignedRoles.length} {unassignedRoles.length === 1 ? 'rol sin asignar' : 'roles sin asignar'} · revisar
-        </button>
-      ) : null}
-      <ul className="mt-2 overflow-hidden rounded-lg border border-border bg-bg">
-        {UI_SYSTEM_ROLES.map((role, index) => {
+      <div className={`${mobile ? '' : 'sticky top-0 z-sticky '} -mx-1 border-b border-border bg-bg px-1 pb-3`}>
+        <UiColorSectionHeader title="Sistema" />
+        <h2 id="ui-system-title" className="sr-only">Sistema de color</h2>
+        <UiColorComposition tokens={tokens} loadPercent={loadPercent} />
+        {unassignedRoles.length > 0 ? (
+          <button
+            type="button"
+            onClick={jumpToFirstGap}
+            className="mt-2 min-h-9 w-full rounded-md bg-[#FFF4D6] px-2.5 text-left text-tools-meta font-semibold text-[#6B4700] hover:bg-[#FCE9B6] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 dark:bg-[#4A3A16] dark:text-[#F7D98A]"
+          >
+            <span aria-hidden="true">⚠ </span>{unassignedRoles.length} {unassignedRoles.length === 1 ? 'rol sin asignar' : 'roles sin asignar'} · revisar
+          </button>
+        ) : null}
+      </div>
+      <div className="mt-4 space-y-4">
+        {SYSTEM_ROLE_GROUPS.map((group) => (
+          <section key={group.label} aria-labelledby={`ui-role-group-${group.label.replaceAll(' ', '-').toLowerCase()}`}>
+            <h3
+              id={`ui-role-group-${group.label.replaceAll(' ', '-').toLowerCase()}`}
+              className="mb-2 text-tools-meta font-semibold text-ink"
+            >
+              {group.label}
+            </h3>
+            <ul className="overflow-hidden rounded-lg border border-border bg-bg">
+              {group.roles.map((role, index) => {
           const token = tokens[role.token];
           const contrast = role.contrast
             ? getSemanticTokenContrastInfo(tokens, role.token)
@@ -115,12 +134,15 @@ export function UiSystemSection({
                     {unassigned ? 'Sin asignar' : token.hex.toUpperCase()}
                   </span>
                 </span>
-                {!unassigned ? <span className={`hidden rounded-full px-1.5 py-0.5 text-[0.625rem] font-medium sm:inline ${origin === 'fuente' ? 'bg-[var(--chrome-green-soft)] text-[var(--chrome-green)]' : 'bg-surface-raised text-muted'}`}>
+                {!unassigned ? <span className={`hidden rounded-full px-1.5 py-0.5 text-[0.625rem] font-medium sm:inline ${origin === 'fuente' ? 'text-[var(--chrome-green)]' : 'text-muted'}`}>
                   {origin}
                 </span> : null}
                 {!unassigned ? (
-                  <span className={`shrink-0 rounded-md px-1.5 py-1 text-[0.625rem] font-semibold ${fitness.result.ok ? 'bg-[var(--chrome-green-soft)] text-[var(--chrome-green)]' : 'bg-surface-raised text-muted'}`}>
-                    {fitness.result.ok ? '✓' : '✕'} {useLabel}{fitnessRatio === undefined ? '' : ` · ${fitnessRatio.toFixed(1)}:1`}
+                  <span
+                    className={`shrink-0 rounded-md px-1.5 py-1 text-[0.625rem] font-semibold ${fitness.result.ok ? 'bg-[var(--chrome-green-soft)] text-[var(--chrome-green)]' : 'bg-surface-raised text-muted'}`}
+                    aria-label={`${fitness.result.ok ? 'Apto' : 'No apto'} para ${useLabel}${fitnessRatio === undefined ? '' : `, contraste ${fitnessRatio.toFixed(1)} a 1`}`}
+                  >
+                    {fitness.result.ok ? '✓' : '✕'}<span className={isOpen ? '' : 'sr-only'}> {useLabel}{fitnessRatio === undefined ? '' : ` · ${fitnessRatio.toFixed(1)}:1`}</span>
                   </span>
                 ) : null}
                 <Chevron open={isOpen} />
@@ -142,8 +164,11 @@ export function UiSystemSection({
               ) : null}
             </li>
           );
-        })}
-      </ul>
+              })}
+            </ul>
+          </section>
+        ))}
+      </div>
     </section>
   );
 }

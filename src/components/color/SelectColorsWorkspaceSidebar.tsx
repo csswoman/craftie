@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { StudioToolsPanel } from '@/components/color/StudioToolsPanel';
 import {
@@ -8,6 +8,10 @@ import {
   type StudioToolsInput,
 } from '@/components/color/studioToolSections';
 import { useTabListKeyboard } from '@/lib/browser/useTabListKeyboard';
+import {
+  STUDIO_TOOL_FOCUS_EVENT,
+  type StudioToolSectionFocusId,
+} from '@/lib/browser/studioToolFocus';
 
 export type SelectColorsWorkspaceSidebarProps = StudioToolsInput;
 
@@ -30,6 +34,28 @@ export function SelectColorsWorkspaceSidebar(props: SelectColorsWorkspaceSidebar
   });
 
   const sectionById = Object.fromEntries(sections.map((section) => [section.id, section.content]));
+
+  useEffect(() => {
+    function handleToolFocus(event: Event) {
+      const sectionId = (event as CustomEvent<{ sectionId: StudioToolSectionFocusId }>).detail
+        ?.sectionId;
+
+      if (!sectionId) {
+        return;
+      }
+
+      setActiveTab(sectionId === 'typography' ? 'typography' : 'colors');
+      window.requestAnimationFrame(() => {
+        const target = sectionId === 'source'
+          ? document.getElementById('generate-brand-guide')
+          : document.getElementById(`tools-panel-${sectionId === 'typography' ? 'typography' : 'colors'}`);
+        target?.focus();
+      });
+    }
+
+    window.addEventListener(STUDIO_TOOL_FOCUS_EVENT, handleToolFocus);
+    return () => window.removeEventListener(STUDIO_TOOL_FOCUS_EVENT, handleToolFocus);
+  }, []);
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col">
@@ -55,7 +81,7 @@ export function SelectColorsWorkspaceSidebar(props: SelectColorsWorkspaceSidebar
                     aria-controls={`tools-panel-${tab.id}`}
                     onClick={() => setActiveTab(tab.id)}
                     {...getTabProps(tab.id)}
-                    className={`flex min-h-10 w-full items-center justify-center rounded-lg px-3 py-2 text-tools-section font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+                    className={`flex min-h-11 w-full items-center justify-center rounded-lg px-3 py-2 text-tools-section font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
                       selected
                         ? 'bg-bg text-ink shadow-sm'
                         : 'text-muted hover:text-ink'

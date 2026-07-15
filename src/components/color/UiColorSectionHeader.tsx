@@ -9,7 +9,7 @@ export function UiColorSectionHeader({
 }) {
   return (
     <div className="flex items-center gap-2">
-      <h2 className="shrink-0 font-sans text-tools-meta font-semibold uppercase tracking-[0.08em] text-muted">
+      <h2 className="shrink-0 font-sans text-tools-meta font-medium text-muted">
         {title}
       </h2>
       <span className="h-px min-w-3 flex-1 bg-border" aria-hidden="true" />

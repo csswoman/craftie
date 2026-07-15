@@ -6,7 +6,6 @@ import { DESIGN_STYLES } from '@lib/styles/presets';
 
 import { InspirationModal } from '@/components/color/InspirationModal';
 import { SelectColorsWorkspaceMain } from '@/components/color/SelectColorsWorkspaceMain';
-import { SelectColorsWorkspaceRightPanel } from '@/components/color/SelectColorsWorkspaceRightPanel';
 import { EmptyWorkspaceCard } from '@/components/color/EmptyWorkspaceCard';
 import {
   SelectColorsWorkspaceSidebar,
@@ -17,7 +16,6 @@ import { useSelectColorsWorkspaceController } from '@/components/color/useSelect
 import { StyleGallery } from '@/components/color-engine/StyleGallery';
 import { StudioCanvas } from '@/components/layout/StudioCanvas';
 import { StudioFlowGuide } from '@/components/layout/StudioFlowGuide';
-import { StudioStatusBar } from '@/components/layout/StudioStatusBar';
 import { WorkspaceHeader } from '@/components/layout/WorkspaceHeader';
 import { RolePaletteProvider } from '@/context/RolePaletteContext';
 import {
@@ -90,6 +88,9 @@ function SelectColorsWorkspaceContent() {
     onImageModeChange: workspace.handleImageModeChange,
     onPaletteTypeChange: workspace.handlePaletteTypeChange,
     onApplyCustomFont: workspace.applyCustomFont,
+    isGenerating: workspace.isGenerating,
+    selectionReady: workspace.selectionReady,
+    onGenerate: workspace.handleGenerate,
   };
   const mobileToolSections = useSelectColorsWorkspaceToolSections(toolSectionsInput, 'mobile');
   const inspirationModal = (
@@ -171,10 +172,6 @@ function SelectColorsWorkspaceContent() {
       ) : null}
 
       <StudioCanvas
-        showRightPanel
-        syncRightPanelWithActiveRole
-        rightPanelCollapsed={workspace.rightPanelCollapsed}
-        onRightPanelCollapsedChange={workspace.setRightPanelCollapsed}
         sidebar={<SelectColorsWorkspaceSidebar {...toolSectionsInput} />}
         mobileToolsDock={<StudioToolsMobileDock sections={mobileToolSections} />}
         main={
@@ -192,25 +189,6 @@ function SelectColorsWorkspaceContent() {
             paletteCatalog={workspace.paletteCatalog}
           />
         }
-        rightPanel={
-          <SelectColorsWorkspaceRightPanel
-            catalogSource={workspace.catalogSource}
-            isGenerating={workspace.isGenerating}
-            isImageExtracting={workspace.isImageExtracting}
-            isImageRegenerating={workspace.isImageRegenerating}
-            paletteCatalog={workspace.paletteCatalog}
-            rightPanelCollapsed={workspace.rightPanelCollapsed}
-            onAddColorByHex={workspace.handleAddColorByHex}
-            onGenerate={workspace.handleGenerate}
-            onRenameColor={workspace.handleRenameColor}
-          />
-        }
-      />
-
-      <StudioStatusBar
-        palette={workspace.generatedPalette}
-        pairing={workspace.selectedPairing}
-        mobileDockOffset
       />
 
       {inspirationModal}

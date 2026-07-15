@@ -56,7 +56,7 @@ export function ColorCandidateRow({
               type="button"
               aria-expanded={variantsExpanded}
               onClick={onToggleVariants}
-              className="min-h-8 shrink-0 rounded-md bg-surface-raised px-2 text-[0.625rem] font-semibold text-muted hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+              className="min-h-11 shrink-0 rounded-md bg-surface-raised px-2 text-[0.625rem] font-semibold text-muted hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
             >
               {variantsExpanded ? 'Ocultar' : `+${variantCount} variantes`}
             </button>

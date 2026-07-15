@@ -34,7 +34,10 @@ export function PaletteView({ editable = true, onOpenDetails, onEditRole }: Pale
   }
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col">
+    <div
+      data-flow-target="role-palette"
+      className="relative flex min-h-0 flex-1 flex-col"
+    >
       <RoleSlotStrip
         columns={columns}
         activeRole={activeRole}

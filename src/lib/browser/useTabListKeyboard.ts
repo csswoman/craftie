@@ -19,8 +19,16 @@ export function useTabListKeyboard<T extends string>({
   orientation?: 'horizontal' | 'vertical';
 }) {
   const tabRefs = useRef<Partial<Record<T, HTMLButtonElement | null>>>({});
+  const previousActiveId = useRef(activeId);
 
   useEffect(() => {
+    const previous = previousActiveId.current;
+    previousActiveId.current = activeId;
+
+    if (previous === activeId) {
+      return;
+    }
+
     const node = tabRefs.current[activeId];
 
     if (!node) {

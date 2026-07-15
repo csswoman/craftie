@@ -20,11 +20,13 @@
   --radius-md: 10px;
   --radius-lg: 14px;
 
-  --shadow-float: 0 1px 2px oklch(0.19 0.008 160 / 0.06), 0 8px 24px oklch(0.19 0.008 160 / 0.08);
+  --shadow-float: 0 1px 3px oklch(0.19 0.008 160 / 0.08);
   --scrollbar-thumb: oklch(0.82 0.004 160);
   --scrollbar-thumb-hover: oklch(0.68 0.008 160);
   --z-dropdown: 40;
   --z-sticky: 30;
+  --z-modal-backdrop: 50;
+  --z-modal: 60;
 }
 
 @layer theme {
@@ -40,13 +42,16 @@
     --chrome-space-8: 32px;
     --chrome-green: #2e5d3b;
     --chrome-green-soft: color-mix(in oklch, var(--chrome-green) 9%, white);
+    --status-hue-error: oklch(0.58 0.16 25);
+    --status-hue-warning: oklch(0.7 0.14 70);
+    --status-hue-success: oklch(0.58 0.13 140);
     --chrome-text-caption: 0.75rem;
     --chrome-text-label: 0.8125rem;
     --chrome-text-body: 1rem;
     --chrome-text-title: 1rem;
     --chrome-text-section: 1.125rem;
     --chrome-text-display: 1.75rem;
-    --canvas-dot: oklch(0.72 0.008 160 / 0.45);
+    --canvas-dot: oklch(0.72 0.008 160 / 0.24);
     --tools-section: var(--chrome-text-label);
     --tools-name: var(--chrome-text-label);
     --tools-body: var(--chrome-text-label);
@@ -78,12 +83,15 @@
     --color-accent: oklch(0.65 0.12 230);
     --color-pass: oklch(0.72 0.12 150);
     --color-fail: oklch(0.72 0.16 25);
-    --shadow-float: 0 1px 2px oklch(0 0 0 / 0.35), 0 8px 24px oklch(0 0 0 / 0.45);
+    --shadow-float: 0 1px 3px oklch(0 0 0 / 0.28);
     --scrollbar-thumb: oklch(0.34 0.01 160);
     --scrollbar-thumb-hover: oklch(0.46 0.012 160);
-    --canvas-dot: oklch(0.45 0.01 160 / 0.35);
+    --canvas-dot: oklch(0.45 0.01 160 / 0.24);
     --chrome-green: oklch(0.68 0.11 150);
     --chrome-green-soft: color-mix(in oklch, var(--chrome-green) 24%, var(--color-surface-raised));
+    --status-hue-error: oklch(0.62 0.14 25);
+    --status-hue-warning: oklch(0.72 0.12 70);
+    --status-hue-success: oklch(0.62 0.11 140);
   }
 }
 
@@ -191,6 +199,14 @@
 
   .z-dropdown {
     z-index: var(--z-dropdown);
+  }
+
+  .z-modal-backdrop {
+    z-index: var(--z-modal-backdrop);
+  }
+
+  .z-modal {
+    z-index: var(--z-modal);
   }
 
   .z-sticky {

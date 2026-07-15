@@ -33,7 +33,7 @@ export function StudioFlowGuide({
   return (
     <section
       aria-label="Progreso del flujo de paleta"
-      className="relative mx-4 mt-3 shrink-0 rounded-xl border border-border bg-bg px-3 py-3 lg:mx-7 lg:mt-4 lg:px-4"
+      className="relative mx-4 mt-3 shrink-0 rounded-xl border border-border bg-bg px-3 py-2.5 lg:mx-7 lg:mt-4 lg:px-4"
     >
       <button
         type="button"
@@ -45,17 +45,29 @@ export function StudioFlowGuide({
         <CloseIcon />
       </button>
 
-      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-        <div className="min-w-0 pr-10 xl:pr-12">
-          <p className="text-chrome-caption text-muted">Flujo</p>
+      <div className="flex flex-col gap-2.5 xl:flex-row xl:items-center xl:justify-between">
+        <div className="min-w-0 pr-10 xl:max-w-[24rem] xl:pr-12">
+          <p className="text-chrome-caption font-semibold uppercase tracking-[0.08em] text-muted">
+            Siguiente paso
+          </p>
           {current ? (
-            <p className="mt-0.5 text-chrome-label text-ink">
-              <span className="font-semibold">Ahora:</span> {current.hint}
+            <p className="mt-0.5 text-chrome-label leading-snug text-ink">
+              <span className="font-semibold">{current.label}.</span> {current.hint}
             </p>
           ) : null}
         </div>
 
-        <ol className="flex min-w-0 items-center gap-1.5 overflow-x-auto pb-1 sm:gap-2 xl:pb-0">
+        {current && onStepFocus && current.id !== 'review' ? (
+          <button
+            type="button"
+            onClick={() => onStepFocus(current.id)}
+            className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-raised px-3 text-chrome-label font-semibold text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 xl:order-2"
+          >
+            Ir al paso
+          </button>
+        ) : null}
+
+        <ol className="flex min-w-0 items-center gap-1.5 overflow-x-auto pb-1 sm:gap-2 xl:order-1 xl:pb-0">
           {STUDIO_FLOW_STEPS.map((step, index) => {
             const status = getStepStatus(index, activeIndex);
             const canFocus = index <= activeIndex && onStepFocus !== undefined;

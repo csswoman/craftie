@@ -9,14 +9,23 @@ import { buildDataCandidates } from '@lib/color/uiColorCandidates';
 import { buildTintedNeutralRamp } from '@lib/color/uiColorPanel';
 
 import { useRolePalette } from '@/context/RolePaletteContext';
+import { useTabListKeyboard } from '@/lib/browser/useTabListKeyboard';
 
-import { TintedNeutralsSection } from './TintedNeutralsSection';
 import { UiDataSection } from './UiDataSection';
 import { UiSourceColorsSection } from './UiSourceColorsSection';
 import { UiStatusColorsSection } from './UiStatusColorsSection';
 import { UiSystemSection } from './UiSystemSection';
 
-export function UiColorPanel({ colors }: { colors: SelectableColor[] }) {
+const UI_COLOR_VIEWS = ['system', 'data'] as const;
+type UiColorView = (typeof UI_COLOR_VIEWS)[number];
+
+export function UiColorPanel({
+  colors,
+  mobile = false,
+}: {
+  colors: SelectableColor[];
+  mobile?: boolean;
+}) {
   const {
     semanticTokens,
     statusColors,
@@ -31,6 +40,12 @@ export function UiColorPanel({ colors }: { colors: SelectableColor[] }) {
   const [openRole, setOpenRole] = useState<{ revision: number; token: SemanticTokenName | null }>({
     revision: paletteRevision,
     token: null,
+  });
+  const [activeView, setActiveView] = useState<UiColorView>('system');
+  const { getTabProps } = useTabListKeyboard({
+    items: UI_COLOR_VIEWS,
+    activeId: activeView,
+    onActivate: setActiveView,
   });
   const ramp = useMemo(() => buildTintedNeutralRamp(colors), [colors]);
   const colorLoad = useMemo(
@@ -57,44 +72,74 @@ export function UiColorPanel({ colors }: { colors: SelectableColor[] }) {
   }
 
   return (
-    <div className="space-y-5 pb-2">
-      <UiSystemSection
-        tokens={resolvedTokens}
-        colors={colors}
-        neutralSteps={ramp.steps}
-        openToken={openToken}
-        loadPercent={loadPercent}
-        onToggle={toggleToken}
-        onSelect={selectForToken}
-      />
-      <UiDataSection
-        tokens={resolvedTokens}
-        colors={colors}
-        onReplace={replaceSemanticToken}
-        onClear={clearSemanticToken}
-      />
-      <UiStatusColorsSection
-        colors={colors}
-        statusColors={statusColors}
-        backgroundHex={resolvedTokens.background.hex}
-        onGenerate={generateStatusColors}
-        onSelect={selectStatusColor}
-      />
-      <UiSourceColorsSection
-        tokens={resolvedTokens}
-        colors={colors}
-        onAssignRole={replaceSemanticToken}
-        onAssignData={assignSourceToData}
-        onAssignStatus={assignSourceToStatus}
-      />
-      <TintedNeutralsSection
-        hue={ramp.hue}
-        steps={ramp.steps}
-        openToken={openToken}
-        onSelect={(hex) => {
-          if (openToken) selectForToken(openToken, hex);
-        }}
-      />
+    <div className="space-y-4 pb-2">
+      <div className="grid grid-cols-2 gap-1 rounded-lg bg-surface-raised p-1" role="tablist" aria-label="Vistas de color">
+        {UI_COLOR_VIEWS.map((view) => {
+          const selected = activeView === view;
+          return (
+            <button
+              key={view}
+              type="button"
+              role="tab"
+              id={`ui-color-tab-${view}`}
+              aria-controls={`ui-color-panel-${view}`}
+              aria-selected={selected}
+              onClick={() => setActiveView(view)}
+              {...getTabProps(view)}
+              className={`min-h-11 rounded-md px-3 text-tools-meta font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${selected ? 'bg-bg text-ink ring-1 ring-border' : 'text-muted hover:text-ink'}`}
+            >
+              {view === 'system' ? 'Sistema' : 'Datos'}
+            </button>
+          );
+        })}
+      </div>
+
+      {activeView === 'system' ? (
+        <div
+          id="ui-color-panel-system"
+          role="tabpanel"
+          aria-labelledby="ui-color-tab-system"
+          className="space-y-5"
+        >
+          <UiSystemSection
+            tokens={resolvedTokens}
+            colors={colors}
+            neutralSteps={ramp.steps}
+            openToken={openToken}
+            loadPercent={loadPercent}
+            mobile={mobile}
+            onToggle={toggleToken}
+            onSelect={selectForToken}
+          />
+          <UiStatusColorsSection
+            colors={colors}
+            statusColors={statusColors}
+            backgroundHex={resolvedTokens.background.hex}
+            onGenerate={generateStatusColors}
+            onSelect={selectStatusColor}
+          />
+          <UiSourceColorsSection
+            tokens={resolvedTokens}
+            colors={colors}
+            onAssignRole={replaceSemanticToken}
+            onAssignData={assignSourceToData}
+            onAssignStatus={assignSourceToStatus}
+          />
+        </div>
+      ) : (
+        <div
+          id="ui-color-panel-data"
+          role="tabpanel"
+          aria-labelledby="ui-color-tab-data"
+        >
+          <UiDataSection
+            tokens={resolvedTokens}
+            colors={colors}
+            onReplace={replaceSemanticToken}
+            onClear={clearSemanticToken}
+          />
+        </div>
+      )}
     </div>
   );
 

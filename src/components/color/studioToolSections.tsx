@@ -9,6 +9,7 @@ import type { ImageExtractionMode } from '@lib/color/imagePalette';
 import type { PaletteType } from '@lib/color/paletteClassification';
 
 import { ImageUploader } from '@/components/color-engine/ImageUploader';
+import { GenerateButton } from '@/components/color-engine/GenerateButton';
 import { PaletteAdjustmentsSection } from '@/components/color/PaletteAdjustmentsSection';
 import { SidebarTypographySection } from '@/components/color/SidebarTypographySection';
 import { SourceColorsSection } from '@/components/color/SourceColorsSection';
@@ -57,6 +58,9 @@ export type StudioToolsInput = {
   onTypeScaleBaseChange: (base: TypeScaleBase) => void;
   onTypeScaleRatioChange: (ratio: TypeScaleRatio) => void;
   onApplyCustomFont: (input: CustomFontSubmitInput) => Promise<void>;
+  isGenerating: boolean;
+  selectionReady: boolean;
+  onGenerate: () => void;
 };
 
 export function buildStudioToolSections(
@@ -96,25 +100,42 @@ export function buildStudioToolSections(
     </>
   );
 
-  return [
+  const sections: StudioToolSection[] = [
     { id: 'image', label: 'Imagen', content: imageSection },
     { id: 'source', label: 'Colores', content: (
-      input.imageMode === 'ui'
-        ? <UiColorPanel colors={input.paletteCatalog} />
-        : <SourceColorsSection colors={input.paletteCatalog} embedded={target === 'mobile'} />
+      <div className="space-y-[var(--chrome-space-4)]">
+        {input.imageMode === 'ui'
+          ? <UiColorPanel colors={input.paletteCatalog} mobile={target === 'mobile'} />
+          : <SourceColorsSection colors={input.paletteCatalog} embedded={target === 'mobile'} />}
+        {!input.isReviewPhase ? (
+          <div
+            className={`sticky bottom-0 z-sticky border-t border-border bg-bg pt-[var(--chrome-space-3)] ${
+              target === 'mobile'
+                ? '-mx-[var(--chrome-space-3)] -mb-[var(--chrome-space-3)] px-[var(--chrome-space-3)] pb-[var(--chrome-space-3)]'
+                : ''
+            }`}
+          >
+            <GenerateButton
+              onClick={input.onGenerate}
+              disabled={!input.selectionReady}
+              busy={input.isGenerating}
+            />
+          </div>
+        ) : null}
+      </div>
     ) },
-    {
-      id: 'adjustments',
-      label: 'Ajustes',
-      content: (
-        input.imageMode === 'paint' ? (
-          <PaletteAdjustmentsSection
-            defaultOpen={target === 'mobile'}
-            embedded={target === 'mobile'}
-          />
-        ) : null
-      ),
-    },
+    ...(input.imageMode === 'paint'
+      ? [{
+          id: 'adjustments' as const,
+          label: 'Ajustes',
+          content: (
+            <PaletteAdjustmentsSection
+              defaultOpen={target === 'mobile'}
+              embedded={target === 'mobile'}
+            />
+          ),
+        }]
+      : []),
     {
       id: 'typography',
       label: 'Tipografía',
@@ -142,4 +163,6 @@ export function buildStudioToolSections(
       ),
     },
   ];
+
+  return sections;
 }

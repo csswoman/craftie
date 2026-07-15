@@ -15,7 +15,7 @@ export const STUDIO_FLOW_STEPS: StudioFlowStep[] = [
   {
     id: 'adjust',
     label: 'Ajustar roles',
-    hint: 'Toca un rol en el lienzo y ajústalo en el Inspector.',
+    hint: 'Toca un rol en la paleta para editar su color y contraste.',
   },
   {
     id: 'generate',

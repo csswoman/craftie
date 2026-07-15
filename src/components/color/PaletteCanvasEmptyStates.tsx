@@ -2,7 +2,7 @@ export function EmptyCanvas() {
   return (
     <div className="flex h-full min-h-0 items-center justify-center bg-surface-raised/40 px-6 py-8">
       <p className="prose-measure max-w-xs text-center text-chrome-label leading-relaxed text-muted">
-        Elige un rol en el lienzo para editarlo en el Inspector.
+        Elige una inspiración para crear el sistema de color y editarlo directamente en el lienzo.
       </p>
     </div>
   );

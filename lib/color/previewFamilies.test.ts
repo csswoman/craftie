@@ -28,7 +28,7 @@ describe('previewFamilies', () => {
       throw new Error('Expected illustration family');
     }
 
-    expect(illustration.styles.map((style) => style.id)).toEqual(['bento']);
+    expect(illustration.styles.map((style) => style.id)).toEqual(['color-studio']);
     expect(illustration.contract.kind).toBe('full-palette-tonal-scales');
     expect(illustration.contract.rendererInput.tonalScales.primary).toContain('primary-500');
     expect(illustration.contract.rendererInput.tonalScales.secondary).toContain('secondary-500');

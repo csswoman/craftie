@@ -28,7 +28,6 @@ import {
 } from '@lib/typography/customFonts';
 import type { TypeScaleBase, TypeScaleRatio } from '@lib/typography/typeScale';
 
-import { readStudioPanelLayout } from '@/components/layout/useStudioPanelLayout';
 import { useWorkspaceExports } from '@/components/color/useWorkspaceExports';
 import { useWorkspaceInspiration } from '@/components/color/useWorkspaceInspiration';
 import { useWorkspacePaletteActions } from '@/components/color/useWorkspacePaletteActions';
@@ -44,6 +43,7 @@ import {
 import type { CustomFontSubmitInput } from '@/components/font-pairing/CustomFontEntry';
 import { extractPaletteColorsFromImage } from '@/lib/browser/imageExtractor';
 import { readSelectedFontPairId, writeSelectedFontPairId } from '@/lib/browser/selectedFontPair';
+import { requestStudioToolFocus } from '@/lib/browser/studioToolFocus';
 
 export function useSelectColorsWorkspaceController() {
   const [generatedPalette, setGeneratedPalette] = useState<GeneratedPalette | null>(null);
@@ -65,9 +65,6 @@ export function useSelectColorsWorkspaceController() {
   const [isImageExtracting, setIsImageExtracting] = useState(false);
   const [isImageRegenerating, setIsImageRegenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(
-    () => readStudioPanelLayout().rightCollapsed,
-  );
   const [inspirationModalOpen, setInspirationModalOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -93,7 +90,6 @@ export function useSelectColorsWorkspaceController() {
         customFonts: sessionFonts.filter((entry) => entry.source === 'google'),
       });
     } else if (sessionFonts.length > 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTypeUi((current) => ({
         ...current,
         customFonts: sessionFonts.filter((entry) => entry.source === 'google'),
@@ -251,7 +247,6 @@ export function useSelectColorsWorkspaceController() {
       setError(null);
       const nextPalette = generatePaletteFromRolePalette(rolePalette!);
       setGeneratedPalette(nextPalette);
-      setRightPanelCollapsed(false);
       setStatusMessage('Guía de marca lista. Revisa contraste y tipografía, luego exporta.');
     } finally {
       generatingRef.current = false;
@@ -289,8 +284,17 @@ export function useSelectColorsWorkspaceController() {
       return;
     }
 
-    if (stepId === 'adjust' || stepId === 'generate') {
-      setRightPanelCollapsed(false);
+    if (stepId === 'adjust') {
+      window.requestAnimationFrame(() => {
+        document
+          .querySelector<HTMLElement>('[data-flow-target="role-palette"] button')
+          ?.focus();
+      });
+      return;
+    }
+
+    if (stepId === 'generate') {
+      requestStudioToolFocus('source');
     }
   }
 
@@ -403,7 +407,6 @@ export function useSelectColorsWorkspaceController() {
     setIsImageExtracting,
     setIsImageRegenerating,
     setPaletteCatalog,
-    setRightPanelCollapsed,
     setSelectedStyleId,
   });
 
@@ -416,10 +419,9 @@ export function useSelectColorsWorkspaceController() {
       renameRole,
       rolePalette,
       setCatalogSource,
-      setError,
+    setError,
     setGeneratedPalette,
     setPaletteCatalog,
-    setRightPanelCollapsed,
   });
 
   const { handleExportBrandKit, handleExportDesignMd } = useWorkspaceExports({
@@ -466,7 +468,6 @@ export function useSelectColorsWorkspaceController() {
     paletteCatalog,
     recommendedPairings,
     fontPairings,
-    rightPanelCollapsed,
     rolePalette,
     selectedPairing,
     hoveredPairing,
@@ -481,7 +482,6 @@ export function useSelectColorsWorkspaceController() {
     selectedStyleId,
     selectionReady,
     setInspirationModalOpen,
-    setRightPanelCollapsed,
     setSelectedPairing: handleSelectPairing,
     previewPairing: handlePreviewPairing,
     clearTypePreview: handleClearPreview,

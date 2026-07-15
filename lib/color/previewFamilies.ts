@@ -34,7 +34,7 @@ export type IllustrationPaletteInput = {
 };
 
 export type IllustrationStyleDefinition = {
-  id: 'bento';
+  id: 'color-studio';
   label: string;
   description: string;
 };
@@ -75,9 +75,9 @@ export const PREVIEW_FAMILIES: PreviewFamily[] = [
     modes: [],
     styles: [
       {
-        id: 'bento',
-        label: 'Bento',
-        description: 'Irregular grid composition with simple geometric shapes.',
+        id: 'color-studio',
+        label: 'Estudio de color',
+        description: 'Editorial poster, typography specimen, and physical color swatches.',
       },
     ],
     contract: {

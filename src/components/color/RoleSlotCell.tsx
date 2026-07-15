@@ -110,6 +110,7 @@ export function RoleSlotCell({
                 status={badge.status}
                 target="AA"
                 compact
+                dense={mobileExpanded}
                 contextLabel={badge.label}
               />
             ))}
@@ -149,20 +150,25 @@ export function RoleSlotCell({
             </span>
             {expanded ? (
               <>
-                <p
-                  className={`mt-0.5 max-w-full truncate font-semibold leading-tight ${
-                    mobileExpanded ? 'text-[1.0625rem]' : 'text-[1.375rem]'
-                  }`}
-                >
-                  {column.name}
-                </p>
-                <p
-                  className={`font-mono font-semibold tracking-normal opacity-90 ${
-                    mobileExpanded ? 'text-[0.75rem]' : 'text-[0.875rem]'
-                  }`}
-                >
-                  {column.hex.toUpperCase()}
-                </p>
+                {mobileExpanded ? (
+                  <div className="flex min-w-0 items-baseline gap-1.5">
+                    <p className="min-w-0 truncate text-[1rem] font-semibold leading-tight">
+                      {column.name}
+                    </p>
+                    <p className="shrink-0 font-mono text-[0.6875rem] font-semibold tracking-normal opacity-90">
+                      {column.hex.toUpperCase()}
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <p className="mt-0.5 max-w-full truncate text-[1.375rem] font-semibold leading-tight">
+                      {column.name}
+                    </p>
+                    <p className="font-mono text-[0.875rem] font-semibold tracking-normal opacity-90">
+                      {column.hex.toUpperCase()}
+                    </p>
+                  </>
+                )}
                 {column.contrastBadges && column.contrastBadges.length > 0 ? (
                   <div
                     className={`flex flex-wrap items-center ${

@@ -49,8 +49,8 @@ export function InlineSystemRolePicker({
 
   if (expressive) {
     return (
-      <div className="space-y-3 bg-surface px-3 pb-3 pt-2">
-        <h3 className="text-tools-name font-semibold text-ink">Elegir {roleLabel}</h3>
+      <div className="space-y-4 bg-surface px-3 pb-4 pt-3">
+        <PickerContext roleLabel={roleLabel} currentHex={currentHex} />
         {unassigned ? <p className="text-tools-meta leading-relaxed text-muted">
           Craftie no encontró un candidato fuente con suficiente carácter. Los neutrales no pueden ocupar este rol.
         </p> : null}
@@ -59,14 +59,14 @@ export function InlineSystemRolePicker({
             <button
               type="button"
               onClick={onContinueWithout}
-              className="min-h-10 rounded-md border border-border bg-bg px-2 text-tools-meta font-semibold text-ink hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+              className="min-h-11 rounded-md border border-border bg-bg px-2 text-tools-meta font-semibold text-ink hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
             >
               Dejar sin asignar
             </button>
             <button
               type="button"
               onClick={onDeriveFromPrimary}
-              className="min-h-10 rounded-md bg-[var(--chrome-green)] px-2 text-tools-meta font-semibold text-white hover:brightness-95 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+              className="min-h-11 rounded-md bg-[var(--chrome-green)] px-2 text-tools-meta font-semibold text-white hover:brightness-95 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
             >
               Derivar del primario
             </button>
@@ -83,8 +83,8 @@ export function InlineSystemRolePicker({
   }
 
   return (
-    <div className="space-y-3 bg-surface px-3 pb-3 pt-2">
-      <h3 className="text-tools-name font-semibold text-ink">Elegir {roleLabel}</h3>
+    <div className="space-y-4 bg-surface px-3 pb-4 pt-3">
+      <PickerContext roleLabel={roleLabel} currentHex={currentHex} />
       <DotGroup
         label="Colores fuente"
         items={colors.map((color) => ({ hex: color.hex, label: color.name || color.hex }))}
@@ -101,11 +101,35 @@ export function InlineSystemRolePicker({
         type="button"
         aria-expanded={deriving}
         onClick={startDerivation}
-        className="min-h-10 w-full rounded-md border border-dashed border-border bg-bg px-3 text-tools-meta font-semibold text-ink transition-colors hover:border-primary hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+        className="min-h-11 w-full rounded-md border border-dashed border-border bg-bg px-3 text-tools-meta font-semibold text-ink transition-colors hover:border-primary hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
       >
         Derivar variante de este color…
       </button>
-      {deriving ? <InlineTokenDerivationEditor tokenName={tokenName} originalHex={derivationBase} /> : null}
+        {deriving ? (
+          <InlineTokenDerivationEditor
+            tokenName={tokenName}
+            originalHex={derivationBase}
+            onApply={onSelect}
+          />
+        ) : null}
+    </div>
+  );
+}
+
+function PickerContext({ roleLabel, currentHex }: { roleLabel: string; currentHex: string }) {
+  return (
+    <div className="flex items-center gap-2.5 border-b border-border pb-3">
+      <span
+        className="size-9 shrink-0 rounded-md ring-1 ring-inset ring-ink/10"
+        style={{ backgroundColor: currentHex }}
+        aria-hidden="true"
+      />
+      <div className="min-w-0">
+        <h3 className="truncate text-tools-name font-semibold text-ink">Editando {roleLabel}</h3>
+        <p className="font-mono text-tools-meta tabular-nums text-muted">
+          Actual · {currentHex.toUpperCase()}
+        </p>
+      </div>
     </div>
   );
 }
@@ -122,9 +146,9 @@ function DotGroup({
   onSelect: (hex: string) => void;
 }) {
   return (
-    <div>
-      <p className="mb-2 text-tools-meta font-medium text-muted">{label}</p>
-      <div className="flex flex-wrap gap-2">
+    <section aria-label={label}>
+      <p className="mb-2 text-tools-meta font-semibold text-ink">{label}</p>
+      <div className="flex flex-wrap gap-2.5">
         {items.map((item, index) => {
           const selected = item.hex.toUpperCase() === currentHex.toUpperCase();
           return (
@@ -135,12 +159,12 @@ function DotGroup({
               aria-pressed={selected}
               title={`${item.label} · ${item.hex.toUpperCase()}`}
               onClick={() => onSelect(item.hex)}
-              className={`size-[26px] rounded-md ring-offset-2 ring-offset-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${selected ? 'ring-2 ring-primary' : 'ring-1 ring-inset ring-ink/10'}`}
+              className={`size-11 rounded-md ring-offset-2 ring-offset-surface transition-transform focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 motion-reduce:transition-none ${selected ? 'ring-2 ring-primary' : 'ring-1 ring-inset ring-ink/10 hover:scale-[1.04]'}`}
               style={{ backgroundColor: item.hex }}
             />
           );
         })}
       </div>
-    </div>
+    </section>
   );
 }

@@ -42,7 +42,7 @@ export function PaletteAddGap({ insertIndex, options, onInsert, className = '' }
           aria-label="Añadir color"
           aria-expanded={open}
           onClick={() => setOpen((value) => !value)}
-          className="pointer-events-auto flex size-8 items-center justify-center rounded-full border-2 border-white bg-surface-raised text-lg font-light text-ink opacity-0 shadow-md transition-opacity hover:bg-bg focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 group-hover/add:opacity-100 group-hover/column-wrap:opacity-100"
+          className="pointer-events-auto flex size-11 items-center justify-center rounded-full border-2 border-white bg-surface-raised text-lg font-light text-ink opacity-70 shadow-md transition-opacity hover:bg-bg hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
         >
           +
         </button>
@@ -63,7 +63,7 @@ export function PaletteAddGap({ insertIndex, options, onInsert, className = '' }
                         onInsert(insertIndex, color);
                         setOpen(false);
                       }}
-                      className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                      className="flex min-h-11 w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
                     >
                       <span
                         className="size-4 shrink-0 rounded-sm border border-white/20"

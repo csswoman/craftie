@@ -5,7 +5,8 @@ import { useCallback, useEffect, useState } from 'react';
 const STORAGE_KEY = 'craftie-studio-panel-layout';
 
 const DEFAULTS = {
-  sidebarWidth: 360,
+  // Keep the editing canvas dominant while leaving enough room for tool labels.
+  sidebarWidth: 320,
   rightWidth: 400,
   sidebarCollapsed: false,
   rightCollapsed: true,
@@ -78,7 +79,7 @@ export function useStudioPanelLayout() {
       return;
     }
 
-    const mediaQuery = window.matchMedia('(min-width: 1280px)');
+    const mediaQuery = window.matchMedia('(min-width: 1024px)');
 
     function keepSidebarVisibleOnNarrowViewports() {
       if (!mediaQuery.matches) {

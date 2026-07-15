@@ -28,7 +28,7 @@ export function UiStatusColorCard({
             {status.hex.toUpperCase()} · hue {Math.round(status.resultHue)}°
           </span>
         </span>
-        <span className={`rounded-full px-1.5 py-0.5 text-[0.625rem] font-medium ${status.origin !== 'synthetic' ? 'bg-[var(--chrome-green-soft)] text-[var(--chrome-green)]' : 'bg-surface-raised text-muted'}`}>
+        <span className={`rounded-full px-1.5 py-0.5 text-[0.625rem] font-medium ${status.origin !== 'synthetic' ? 'text-[var(--chrome-green)]' : 'text-muted'}`}>
           {status.origin === 'found'
             ? `encontrado · ${sourceName ?? 'fuente'}`
             : status.origin === 'found-adjusted' ? 'encontrado · ajustado' : 'sintético'}
@@ -52,7 +52,7 @@ export function UiStatusColorCard({
                 aria-label={`Usar ${candidateName}, ${candidate.hex}, hue ${Math.round(candidate.resultHue)} grados`}
                 title={`${candidateName} · ${candidate.origin === 'found' ? 'encontrado' : candidate.origin === 'found-adjusted' ? 'encontrado · ajustado' : 'sintético'} · Δhue ${Math.round(candidate.hueDrift)}°`}
                 onClick={() => onSelect(candidate)}
-                className={`size-9 rounded-md ring-offset-2 ring-offset-bg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 motion-reduce:transition-none ${selected ? 'ring-2 ring-ink' : 'ring-1 ring-inset ring-ink/15'}`}
+                className={`size-11 rounded-md ring-offset-2 ring-offset-bg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 motion-reduce:transition-none ${selected ? 'ring-2 ring-ink' : 'ring-1 ring-inset ring-ink/15'}`}
                 style={{ backgroundColor: candidate.hex }}
               />
             );
@@ -63,7 +63,7 @@ export function UiStatusColorCard({
       <div className="mt-3">
         <div
           className="relative h-2 rounded-full ring-1 ring-inset ring-ink/10"
-          style={{ background: 'linear-gradient(90deg, oklch(0.58 0.16 25), oklch(0.7 0.14 70), oklch(0.58 0.13 140))' }}
+          style={{ background: 'linear-gradient(90deg, var(--status-hue-error), var(--status-hue-warning), var(--status-hue-success))' }}
           aria-label={`Ancla ${status.anchorHue} grados; resultado ${Math.round(status.resultHue)} grados`}
         >
           <span className="absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-bg bg-ink" style={{ left: `${anchorPosition}%` }} title={`Ancla ${status.anchorHue}°`} />

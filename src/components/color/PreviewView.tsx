@@ -141,8 +141,8 @@ export function PreviewView({
 
   return (
     <div
-      className="relative min-h-0 flex-1 overflow-y-auto motion-reduce:transition-none"
-      style={{ backgroundColor: colors.appBackground, ...typeTokenStyle, ...statusTokenStyle }}
+      className="canvas-dots relative min-h-0 flex-1 overflow-y-auto motion-reduce:transition-none"
+      style={{ ...typeTokenStyle, ...statusTokenStyle }}
     >
       <div
         className="pointer-events-none sticky top-3 z-20 flex justify-center px-4"

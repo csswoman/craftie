@@ -25,7 +25,7 @@ export function PaletteThemeToggle({
             aria-label={`Paleta en modo ${label.toLowerCase()}`}
             title={`Paleta en modo ${label.toLowerCase()}`}
             onClick={() => onChange(theme)}
-            className={`rounded-md px-2 py-1 text-[0.6875rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 sm:px-3 sm:py-1.5 sm:text-chrome-label ${
+            className={`min-h-11 rounded-md px-2 py-1 text-[0.6875rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 sm:px-3 sm:py-1.5 sm:text-chrome-label ${
               selected
                 ? 'bg-surface-raised text-ink ring-1 ring-border'
                 : 'text-muted hover:bg-surface-raised hover:text-ink'

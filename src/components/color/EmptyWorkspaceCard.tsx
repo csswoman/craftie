@@ -84,7 +84,7 @@ export function EmptyWorkspaceCard({
       </div>
 
       <p className="mt-5 text-chrome-caption leading-relaxed text-muted">
-        Después: ajusta los roles en el Inspector y revisa el contraste.
+        Después: toca cualquier rol para ajustar su color y revisar el contraste en contexto.
       </p>
     </section>
   );
