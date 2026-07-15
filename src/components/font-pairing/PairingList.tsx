@@ -39,10 +39,11 @@ export function PairingList({
   const isTools = variant === 'tools';
   const emptyClass = isTools ? 'text-tools-body' : 'text-[0.9375rem]';
   const showSearch = shouldShowPairingSearch(pairings.length);
+  const searchQuery = showSearch ? query : '';
 
   const filteredPairings = useMemo(
-    () => filterFontPairs(pairings, { category, query: showSearch ? query : '' }),
-    [pairings, category, query, showSearch],
+    () => filterFontPairs(pairings, { category, query: searchQuery }),
+    [pairings, category, searchQuery],
   );
 
   const recommendedIds = useMemo(
@@ -75,12 +76,6 @@ export function PairingList({
     }
     loadGoogleFonts(filteredPairings.slice(0, 12));
   }, [filteredPairings]);
-
-  useEffect(() => {
-    if (!showSearch && query !== '') {
-      setQuery('');
-    }
-  }, [showSearch, query]);
 
   const clearFilters = () => {
     setQuery('');
