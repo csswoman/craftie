@@ -40,8 +40,16 @@ function collectFamilies(pairs: FontPair[]): Map<string, Set<number>> {
   const families = new Map<string, Set<number>>();
 
   for (const pair of pairs) {
-    addWeights(families, pair.heading.family, HEADING_WEIGHTS);
-    addWeights(families, pair.body.family, BODY_WEIGHTS);
+    const headingWeights = [
+      ...HEADING_WEIGHTS,
+      pair.heading.defaultWeight ?? 700,
+    ];
+    const bodyWeights = [
+      ...BODY_WEIGHTS,
+      pair.body.defaultWeight ?? 400,
+    ];
+    addWeights(families, pair.heading.family, headingWeights);
+    addWeights(families, pair.body.family, bodyWeights);
   }
 
   return families;
@@ -83,5 +91,17 @@ export function buildGoogleFontsUrl(pairs: FontPair[]): string {
     .map(([family, weights]) => buildFamilyParam(family, weights));
 
   return `${GOOGLE_FONTS_BASE}?${familyParams.join('&')}&display=swap`;
+}
+
+const CUSTOM_LOAD_WEIGHTS = [400, 500, 600, 700] as const;
+
+/** CSS API URL for a single family (custom Google Font entry). */
+export function buildSingleFamilyGoogleFontsUrl(family: string): string {
+  const name = family.trim();
+  if (name === '') {
+    return '';
+  }
+
+  return `${GOOGLE_FONTS_BASE}?${buildFamilyParam(name, new Set(CUSTOM_LOAD_WEIGHTS))}&display=swap`;
 }
 

@@ -9,6 +9,8 @@ export type SelectableColor = {
   group: ColorGroupId;
   /** When true, the user-provided name is preserved instead of auto-generated. */
   customName?: boolean;
+  /** Area share when this color came from image extraction. */
+  prominence?: number;
 };
 export const SELECTABLE_COLORS: SelectableColor[] = [
   { id: 'porcelain', name: 'Porcelain', hex: '#F7F7F5', group: 'light-neutral' },

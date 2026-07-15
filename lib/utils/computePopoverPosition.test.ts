@@ -31,4 +31,10 @@ describe('computePopoverPosition', () => {
 
     expect(position.top).toBeLessThan(anchor.top);
   });
+
+  it('keeps the popover inside a very narrow viewport', () => {
+    const position = computePopoverPosition(anchorRect(100, 0), { width: 300, height: 640 });
+
+    expect(position.left).toBe(8);
+  });
 });

@@ -1,60 +1,83 @@
 'use client';
 
-import { resolveActiveFontPair } from '@lib/typography/activePairing';
+import type { AppliedTypography } from '@lib/typography/typeState';
+import type { TypeScaleBase, TypeScaleRatio } from '@lib/typography/typeScale';
 import type { FontPair } from '@lib/typography/pairings';
+import type { CustomFont } from '@lib/typography/customFonts';
 
+import { AppliedTypeZone } from '@/components/font-pairing/AppliedTypeZone';
+import {
+  CustomFontEntry,
+  type CustomFontSubmitInput,
+} from '@/components/font-pairing/CustomFontEntry';
 import { PairingList } from '@/components/font-pairing/PairingList';
-import { CollapsibleSection } from '@/components/layout/CollapsibleSection';
 
 export type SidebarTypographySectionProps = {
   fontPairings: FontPair[];
   recommendedPairings: FontPair[];
-  selectedPairing: FontPair | null;
+  applied: AppliedTypography;
+  selectedCatalogPairId: string | null;
+  pinHeading: boolean;
+  pinBody: boolean;
+  base: TypeScaleBase;
+  ratio: TypeScaleRatio;
+  customFonts: CustomFont[];
   onSelectPairing: (pairing: FontPair) => void;
+  onPreviewPairing: (pairing: FontPair) => void;
+  onClearPreview: () => void;
+  onTogglePinHeading: () => void;
+  onTogglePinBody: () => void;
+  onBaseChange: (base: TypeScaleBase) => void;
+  onRatioChange: (ratio: TypeScaleRatio) => void;
+  onApplyCustomFont: (input: CustomFontSubmitInput) => Promise<void>;
   embedded?: boolean;
 };
 
 export function SidebarTypographySection({
   fontPairings,
   recommendedPairings,
-  selectedPairing,
+  applied,
+  selectedCatalogPairId,
+  pinHeading,
+  pinBody,
+  base,
+  ratio,
+  customFonts,
   onSelectPairing,
-  embedded = false,
+  onPreviewPairing,
+  onClearPreview,
+  onTogglePinHeading,
+  onTogglePinBody,
+  onBaseChange,
+  onRatioChange,
+  onApplyCustomFont,
 }: SidebarTypographySectionProps) {
-  const activePairing = resolveActiveFontPair(selectedPairing, recommendedPairings);
-
-  const content = (
-    <PairingList
-      pairings={fontPairings}
-      selectedPairing={activePairing}
-      onSelectPairing={onSelectPairing}
-      variant="tools"
-    />
-  );
-
-  if (embedded) {
-    return content;
-  }
+  const listInert = pinHeading && pinBody;
 
   return (
-    <CollapsibleSection
-      title="Tipografía"
-      defaultOpen
-      collapsible={false}
-      variant="neutral"
-      className="flex min-h-0 flex-1 flex-col"
-      contentClassName="flex min-h-0 flex-1 flex-col"
-      icon={<TypeIcon />}
-    >
-      {content}
-    </CollapsibleSection>
-  );
-}
-
-function TypeIcon() {
-  return (
-    <span aria-hidden="true" className="text-tools-section font-medium leading-none">
-      Aa
-    </span>
+    <div className="min-w-0 space-y-4">
+      <AppliedTypeZone
+        applied={applied}
+        pinHeading={pinHeading}
+        pinBody={pinBody}
+        base={base}
+        ratio={ratio}
+        onTogglePinHeading={onTogglePinHeading}
+        onTogglePinBody={onTogglePinBody}
+        onBaseChange={onBaseChange}
+        onRatioChange={onRatioChange}
+      />
+      <PairingList
+        pairings={fontPairings}
+        recommendedPairings={recommendedPairings}
+        selectedCatalogPairId={selectedCatalogPairId}
+        listInert={listInert}
+        onSelectPairing={onSelectPairing}
+        onPreviewPairing={onPreviewPairing}
+        onClearPreview={onClearPreview}
+        variant="tools"
+      />
+      <CustomFontEntry customFonts={customFonts} onApply={onApplyCustomFont} />
+    </div>
   );
 }

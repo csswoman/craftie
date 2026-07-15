@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { StudioToolsPanel } from '@/components/color/StudioToolsPanel';
 import {
@@ -8,6 +8,10 @@ import {
   type StudioToolsInput,
 } from '@/components/color/studioToolSections';
 import { useTabListKeyboard } from '@/lib/browser/useTabListKeyboard';
+import {
+  STUDIO_TOOL_FOCUS_EVENT,
+  type StudioToolSectionFocusId,
+} from '@/lib/browser/studioToolFocus';
 
 export type SelectColorsWorkspaceSidebarProps = StudioToolsInput;
 
@@ -31,14 +35,39 @@ export function SelectColorsWorkspaceSidebar(props: SelectColorsWorkspaceSidebar
 
   const sectionById = Object.fromEntries(sections.map((section) => [section.id, section.content]));
 
+  useEffect(() => {
+    function handleToolFocus(event: Event) {
+      const sectionId = (event as CustomEvent<{ sectionId: StudioToolSectionFocusId }>).detail
+        ?.sectionId;
+
+      if (!sectionId) {
+        return;
+      }
+
+      setActiveTab(sectionId === 'typography' ? 'typography' : 'colors');
+      window.requestAnimationFrame(() => {
+        const target = sectionId === 'source'
+          ? document.getElementById('generate-brand-guide')
+          : document.getElementById(`tools-panel-${sectionId === 'typography' ? 'typography' : 'colors'}`);
+        target?.focus();
+      });
+    }
+
+    window.addEventListener(STUDIO_TOOL_FOCUS_EVENT, handleToolFocus);
+    return () => window.removeEventListener(STUDIO_TOOL_FOCUS_EVENT, handleToolFocus);
+  }, []);
+
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col">
       <StudioToolsPanel>
         <nav
           aria-label="Secciones de herramientas"
-          className="shrink-0 border-b border-border/70 pb-3"
+          className="shrink-0 pb-3"
         >
-          <ul className="flex gap-1" role="tablist">
+          <ul
+            className="flex gap-0.5 rounded-xl bg-surface-raised p-1"
+            role="tablist"
+          >
             {TOOLS_TABS.map((tab) => {
               const selected = activeTab === tab.id;
 
@@ -54,8 +83,8 @@ export function SelectColorsWorkspaceSidebar(props: SelectColorsWorkspaceSidebar
                     {...getTabProps(tab.id)}
                     className={`flex min-h-11 w-full items-center justify-center rounded-lg px-3 py-2 text-tools-section font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
                       selected
-                        ? 'bg-[var(--chrome-green-soft)] text-ink'
-                        : 'text-muted hover:bg-surface-raised hover:text-ink'
+                        ? 'bg-bg text-ink shadow-sm'
+                        : 'text-muted hover:text-ink'
                     }`}
                   >
                     {tab.label}
@@ -91,11 +120,11 @@ export function SelectColorsWorkspaceSidebar(props: SelectColorsWorkspaceSidebar
           tabIndex={activeTab === 'typography' ? 0 : undefined}
           className={
             activeTab === 'typography'
-              ? 'flex min-h-0 flex-1 flex-col overflow-hidden'
+              ? 'scrollbar-chrome min-h-0 flex-1 overflow-x-hidden overflow-y-auto'
               : 'hidden'
           }
         >
-          {sectionById.typography}
+          <div className="min-w-0 max-w-full">{sectionById.typography}</div>
         </section>
       </StudioToolsPanel>
     </div>

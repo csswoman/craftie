@@ -1,4 +1,4 @@
-import type { FontPair } from '../pairings';
+import type { FontPair } from '../fontPairTypes';
 
 export const LEGACY_FONT_PAIRS: FontPair[] = [
   {
@@ -12,6 +12,7 @@ export const LEGACY_FONT_PAIRS: FontPair[] = [
       xHeight: 'medium',
       personality: ['editorial', 'serena'],
       bestFor: 'heading',
+      defaultWeight: 600,
     },
     body: {
       family: 'Inter',
@@ -21,6 +22,7 @@ export const LEGACY_FONT_PAIRS: FontPair[] = [
       xHeight: 'high',
       personality: ['legible', 'neutral'],
       bestFor: 'body',
+      defaultWeight: 400,
     },
     rationale: 'Serif editorial con lectura digital compacta.',
     mood: ['editorial', 'sereno'],

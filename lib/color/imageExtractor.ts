@@ -51,6 +51,27 @@ function labCentroidToHex(centroid: [number, number, number]): string {
   return normalizeHex(hex);
 }
 
+function labDistanceSquared(left: [number, number, number], right: [number, number, number]): number {
+  return left.reduce((sum, channel, index) => {
+    const delta = channel - right[index]!;
+    return sum + delta * delta;
+  }, 0);
+}
+
+function clusterMedoidHex(cluster: { centroid: [number, number, number]; members: LabSample[] }): string {
+  const medoid = cluster.members.reduce((closest, sample) =>
+    labDistanceSquared(sample.lab, cluster.centroid) < labDistanceSquared(closest.lab, cluster.centroid)
+      ? sample
+      : closest,
+  );
+
+  return normalizeHex(
+    `#${[medoid.rgb.r, medoid.rgb.g, medoid.rgb.b]
+      .map((channel) => channel.toString(16).padStart(2, '0'))
+      .join('')}`,
+  );
+}
+
 export function extractColorsFromRaster(
   raster: RasterData,
   options?: ImageExtractionOptions,
@@ -73,7 +94,9 @@ export function extractColorsFromRaster(
   const merged = new Map<string, number>();
 
   for (const cluster of clusters) {
-    const hex = labCentroidToHex(cluster.centroid);
+    const hex = options?.publication === 'medoid'
+      ? clusterMedoidHex(cluster)
+      : labCentroidToHex(cluster.centroid);
     const prominence = cluster.members.length / totalSamples;
     merged.set(hex, (merged.get(hex) ?? 0) + prominence);
   }

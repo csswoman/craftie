@@ -29,6 +29,6 @@ export function generatePaletteFromRolePalette(palette: RolePalette): GeneratedP
   const base = rolePaletteToGeneratedPalette(palette);
 
   return finalizePalette(base, palette.primario.hex, {
-    skipGeneratedAccent: palette.acento.source !== 'derived',
+    skipGeneratedAccent: palette.acento.source !== 'derived' || Boolean(palette.acento.gap),
   });
 }

@@ -4,7 +4,7 @@ import { UI_LAYOUT_MODES } from './layoutModes';
 import { getPreviewFamily, PREVIEW_FAMILIES } from './previewFamilies';
 
 describe('previewFamilies', () => {
-  it('keeps existing layout modes under the ui family with pure neutral chrome by default', () => {
+  it('keeps existing layout modes under the ui family with tinted neutral chrome by default', () => {
     const ui = getPreviewFamily('ui');
 
     expect(ui.id).toBe('ui');
@@ -16,7 +16,7 @@ describe('previewFamilies', () => {
 
     expect(ui.contract.kind).toBe('slot-token-map');
     expect(ui.contract.neutralChromeRule).toBe('structural-neutrals-only-for-large-surfaces');
-    expect(ui.contract.neutralStyle).toBe('pure');
+    expect(ui.contract.neutralStyle).toBe('tinted');
   });
 
   it('declares illustration as a full-palette family without UI slots or modes', () => {
@@ -28,7 +28,7 @@ describe('previewFamilies', () => {
       throw new Error('Expected illustration family');
     }
 
-    expect(illustration.styles.map((style) => style.id)).toEqual(['bento']);
+    expect(illustration.styles.map((style) => style.id)).toEqual(['color-studio']);
     expect(illustration.contract.kind).toBe('full-palette-tonal-scales');
     expect(illustration.contract.rendererInput.tonalScales.primary).toContain('primary-500');
     expect(illustration.contract.rendererInput.tonalScales.secondary).toContain('secondary-500');

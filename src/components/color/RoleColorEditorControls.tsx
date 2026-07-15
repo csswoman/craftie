@@ -1,4 +1,5 @@
 import type { ActiveRoleContrastInfo } from '@lib/color/roleInspectorContrast';
+import { apcaContrast } from '@lib/color/apca';
 
 export function RoleHexInput({
   hex,
@@ -108,6 +109,9 @@ export function RoleLockToggle({ locked, onToggle }: { locked: boolean; onToggle
 export function RoleContrastBadge({ contrast }: { contrast: ActiveRoleContrastInfo }) {
   const passes = contrast.status === 'pass';
   const fails = contrast.status === 'fail';
+  const apca = apcaContrast(contrast.foregroundHex, contrast.backgroundHex);
+  const apcaPasses = Math.abs(apca) >= 60;
+  const standardsDisagree = (contrast.status === 'pass') !== apcaPasses;
 
   return (
     <div
@@ -134,6 +138,10 @@ export function RoleContrastBadge({ contrast }: { contrast: ActiveRoleContrastIn
         </span>
       </div>
       <p className="mt-1 text-chrome-label text-ink">{contrast.pairLabel}</p>
+      <p className="mt-1 font-mono text-chrome-caption text-muted">
+        APCA Lc {Math.round(apca)} · {apcaPasses ? 'legible para texto' : 'por debajo de Lc 60'}
+        {standardsDisagree ? ' · ⚠ WCAG y APCA discrepan' : ''}
+      </p>
       <div className="mt-2 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <span

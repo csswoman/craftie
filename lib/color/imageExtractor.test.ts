@@ -182,6 +182,22 @@ describe('extractColorsFromRaster', () => {
     expect(baseline.length).toBeGreaterThan(0);
     expect(alternate.length).toBeGreaterThan(0);
   });
+
+  it('publishes only sampled pixel colors when medoids are requested', () => {
+    const pixels = ['#1478C8', '#1E82D2', '#F0B414'];
+    const raster = createRaster(30, 30, (x) => {
+      if (x < 10) return [20, 120, 200, 255];
+      if (x < 20) return [30, 130, 210, 255];
+      return [240, 180, 20, 255];
+    });
+    const colors = extractColorsFromRaster(raster, {
+      count: 2,
+      sampleStep: 1,
+      publication: 'medoid',
+    });
+
+    expect(colors.every((color) => pixels.includes(color.hex))).toBe(true);
+  });
 });
 
 describe('clusterSamples', () => {

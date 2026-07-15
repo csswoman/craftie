@@ -6,7 +6,6 @@ import { DESIGN_STYLES } from '@lib/styles/presets';
 
 import { InspirationModal } from '@/components/color/InspirationModal';
 import { SelectColorsWorkspaceMain } from '@/components/color/SelectColorsWorkspaceMain';
-import { SelectColorsWorkspaceRightPanel } from '@/components/color/SelectColorsWorkspaceRightPanel';
 import { EmptyWorkspaceCard } from '@/components/color/EmptyWorkspaceCard';
 import {
   SelectColorsWorkspaceSidebar,
@@ -17,7 +16,6 @@ import { useSelectColorsWorkspaceController } from '@/components/color/useSelect
 import { StyleGallery } from '@/components/color-engine/StyleGallery';
 import { StudioCanvas } from '@/components/layout/StudioCanvas';
 import { StudioFlowGuide } from '@/components/layout/StudioFlowGuide';
-import { StudioStatusBar } from '@/components/layout/StudioStatusBar';
 import { WorkspaceHeader } from '@/components/layout/WorkspaceHeader';
 import { RolePaletteProvider } from '@/context/RolePaletteContext';
 import {
@@ -67,11 +65,32 @@ function SelectColorsWorkspaceContent() {
     fontPairings: workspace.fontPairings,
     paletteCatalog: workspace.paletteCatalog,
     recommendedPairings: workspace.recommendedPairings,
-    selectedPairing: workspace.selectedPairing,
+    appliedTypography: workspace.appliedTypography,
+    selectedCatalogPairId: workspace.selectedCatalogPairId,
+    pinHeading: workspace.pinHeading,
+    pinBody: workspace.pinBody,
+    typeScaleBase: workspace.typeScaleBase,
+    typeScaleRatio: workspace.typeScaleRatio,
     onImageFileSelected: workspace.handleImageFileSelected,
     onImageRegenerate: workspace.handleImageRegenerate,
     onOpenInspiration: () => workspace.setInspirationModalOpen(true),
     onSelectPairing: workspace.setSelectedPairing,
+    onPreviewPairing: workspace.previewPairing,
+    onClearPreview: workspace.clearTypePreview,
+    onTogglePinHeading: workspace.togglePinHeading,
+    onTogglePinBody: workspace.togglePinBody,
+    onTypeScaleBaseChange: workspace.setTypeScaleBase,
+    onTypeScaleRatioChange: workspace.setTypeScaleRatio,
+    customFonts: workspace.customFonts,
+    imageMode: workspace.imageMode,
+    imagePaletteType: workspace.imagePaletteType,
+    paletteTypeOverride: workspace.paletteTypeOverride,
+    onImageModeChange: workspace.handleImageModeChange,
+    onPaletteTypeChange: workspace.handlePaletteTypeChange,
+    onApplyCustomFont: workspace.applyCustomFont,
+    isGenerating: workspace.isGenerating,
+    selectionReady: workspace.selectionReady,
+    onGenerate: workspace.handleGenerate,
   };
   const mobileToolSections = useSelectColorsWorkspaceToolSections(toolSectionsInput, 'mobile');
   const inspirationModal = (
@@ -128,6 +147,8 @@ function SelectColorsWorkspaceContent() {
             onImageFileSelected={workspace.handleImageFileSelected}
             onImageRegenerate={workspace.handleImageRegenerate}
             onOpenInspiration={() => workspace.setInspirationModalOpen(true)}
+            imageMode={workspace.imageMode}
+            onImageModeChange={workspace.handleImageModeChange}
           />
         </div>
 
@@ -151,10 +172,6 @@ function SelectColorsWorkspaceContent() {
       ) : null}
 
       <StudioCanvas
-        showRightPanel
-        syncRightPanelWithActiveRole
-        rightPanelCollapsed={workspace.rightPanelCollapsed}
-        onRightPanelCollapsedChange={workspace.setRightPanelCollapsed}
         sidebar={<SelectColorsWorkspaceSidebar {...toolSectionsInput} />}
         mobileToolsDock={<StudioToolsMobileDock sections={mobileToolSections} />}
         main={
@@ -163,28 +180,15 @@ function SelectColorsWorkspaceContent() {
             isImageRegenerating={workspace.isImageRegenerating}
             recommendedPairings={workspace.recommendedPairings}
             selectedPairing={workspace.selectedPairing}
+            hoveredPairing={workspace.hoveredPairing}
+            isTypePreviewing={workspace.isTypePreviewing}
+            typeScaleBase={workspace.typeScaleBase}
+            typeScaleRatio={workspace.typeScaleRatio}
             onAddColorByHex={workspace.handleAddColorByHex}
-          />
-        }
-        rightPanel={
-          <SelectColorsWorkspaceRightPanel
-            catalogSource={workspace.catalogSource}
-            isGenerating={workspace.isGenerating}
-            isImageExtracting={workspace.isImageExtracting}
-            isImageRegenerating={workspace.isImageRegenerating}
+            imageMode={workspace.imageMode}
             paletteCatalog={workspace.paletteCatalog}
-            rightPanelCollapsed={workspace.rightPanelCollapsed}
-            onAddColorByHex={workspace.handleAddColorByHex}
-            onGenerate={workspace.handleGenerate}
-            onRenameColor={workspace.handleRenameColor}
           />
         }
-      />
-
-      <StudioStatusBar
-        palette={workspace.generatedPalette}
-        pairing={workspace.selectedPairing}
-        mobileDockOffset
       />
 
       {inspirationModal}

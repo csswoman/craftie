@@ -78,7 +78,7 @@ export function TypographyCanvasView({
           <div className="mt-5">
             <PairingList
               pairings={fontPairings}
-              selectedPairing={activePairing}
+              selectedCatalogPairId={activePairing.id}
               onSelectPairing={onSelectPairing}
             />
           </div>

@@ -91,22 +91,12 @@ export const UI_LAYOUT_MODES: UiLayoutModeDefinition[] = [
   },
   {
     id: 'media',
-    label: 'Music/media',
-    description: 'Atmospheric dark surface with vibrant controls and restrained elevated panels.',
-    commonSlots: {
-      ...baseCommonSlots,
-      appBackground: 'background-inverse',
-      chrome: 'surface-inverse',
-      surface: 'surface-inverse',
-      surfaceElevated: 'surface-inverse-elevated',
-      text: 'on-surface-inverse',
-      mutedText: 'on-surface-inverse',
-      primaryAction: 'accent',
-      primaryActionText: 'on-accent',
-    },
+    label: 'Reproductor',
+    description: 'Theme-aware player surface with vibrant controls and restrained elevated panels.',
+    commonSlots: baseCommonSlots,
     modeSlots: {
-      secondaryAction: 'surface-inverse',
-      secondaryActionText: 'on-surface-inverse',
+      secondaryAction: 'surface',
+      secondaryActionText: 'on-surface',
     },
   },
   {

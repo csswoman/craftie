@@ -1,10 +1,14 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { StudioToolDockIcon } from '@/components/color/studioToolDockIcons';
 import type { StudioToolSection, StudioToolSectionId } from '@/components/color/studioToolSections';
 import { useDialogAccessibility } from '@/lib/browser/useDialogAccessibility';
+import {
+  STUDIO_TOOL_FOCUS_EVENT,
+  type StudioToolSectionFocusId,
+} from '@/lib/browser/studioToolFocus';
 
 export type StudioToolsMobileDockProps = {
   sections: StudioToolSection[];
@@ -28,6 +32,25 @@ export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) 
     lockScroll: false,
   });
 
+  useEffect(() => {
+    function handleToolFocus(event: Event) {
+      const sectionId = (event as CustomEvent<{ sectionId: StudioToolSectionFocusId }>).detail
+        ?.sectionId;
+
+      if (!sectionId || !sections.some((section) => section.id === sectionId)) {
+        return;
+      }
+
+      setActiveSectionId(sectionId);
+      window.requestAnimationFrame(() => {
+        document.querySelector<HTMLElement>('[data-tools-sheet-close]')?.focus();
+      });
+    }
+
+    window.addEventListener(STUDIO_TOOL_FOCUS_EVENT, handleToolFocus);
+    return () => window.removeEventListener(STUDIO_TOOL_FOCUS_EVENT, handleToolFocus);
+  }, [sections]);
+
   function handleSectionPress(sectionId: StudioToolSectionId) {
     setActiveSectionId((current) => (current === sectionId ? null : sectionId));
   }
@@ -38,7 +61,7 @@ export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) 
         <button
           type="button"
           aria-label="Cerrar herramientas"
-          className="fixed inset-0 z-[25] bg-ink/15 backdrop-blur-md motion-reduce:backdrop-blur-none motion-reduce:transition-none xl:hidden"
+          className="fixed inset-0 z-[25] bg-ink/20 motion-reduce:transition-none xl:hidden"
           onClick={closeSheet}
         />
       ) : null}
@@ -53,7 +76,7 @@ export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) 
             role="dialog"
             aria-modal="true"
             aria-label={activeSection.label}
-            className="mx-2 mb-2 flex max-h-[min(58vh,28rem)] min-h-0 flex-col overflow-hidden rounded-2xl border border-border bg-bg shadow-[var(--shadow-float)] motion-reduce:transition-none"
+            className="flex max-h-[min(58vh,28rem)] min-h-0 flex-col overflow-hidden rounded-t-2xl border border-b-0 border-border bg-bg shadow-[var(--shadow-float)] motion-reduce:transition-none"
           >
             <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border/70 px-4 py-2.5">
               <p className="min-w-0 truncate text-tools-section font-semibold text-ink">

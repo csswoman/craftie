@@ -10,7 +10,7 @@ import { onVividFill, vividFill } from './previewColor';
 import { DonutChart, Sparkline, type ChartSeries } from './previewCharts';
 import { PreviewIcon } from './previewIcons';
 import { StatDelta, tint } from './previewPrimitives';
-import { DEFAULT_PREVIEW_FONTS, type PreviewFonts } from './previewTypography';
+import { bodyStyle, DEFAULT_PREVIEW_FONTS, displayStyle, headingStyle, labelStyle, previewRootTypeStyle, type PreviewFonts } from './previewTypography';
 
 export const ANALYTICS_VISUAL_SLOTS = [
   'appBackground',
@@ -24,6 +24,7 @@ export const ANALYTICS_VISUAL_SLOTS = [
   'primaryAction',
   'primaryActionText',
   'success',
+  'error',
   'data1',
   'data2',
   'data3',
@@ -63,7 +64,7 @@ export function AnalyticsLayoutPreview({
       slot="appBackground"
       onEditSlot={onEditSlot}
       className="overflow-hidden rounded-xl border"
-      style={{ backgroundColor: colors.appBackground, borderColor: colors.border, color: colors.text, fontFamily: fonts.bodyFamily }}
+      style={{ backgroundColor: colors.appBackground, borderColor: colors.border, color: colors.text, ...previewRootTypeStyle() }}
     >
       <div className="min-h-[32rem] p-4 sm:p-5 lg:p-6">
         <PreviewSlotTarget
@@ -73,18 +74,18 @@ export function AnalyticsLayoutPreview({
           style={{ backgroundColor: colors.chrome, borderColor: colors.border }}
         >
           <div>
-            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1rem] font-extrabold" style={{ fontFamily: fonts.headingFamily }}>
+            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
               Traffic mix
             </PreviewSlotTarget>
-            <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-0.5 text-[0.6875rem]" style={{ color: colors.mutedText }}>
+            <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-0.5" style={bodyStyle(fonts, colors.mutedText)}>
               Neutral chrome, categorical color only.
             </PreviewSlotTarget>
           </div>
           <PreviewSlotTarget
             slot="primaryAction"
             onEditSlot={onEditSlot}
-            className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[0.75rem] font-bold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(0,0,0,0.08)]"
-            style={{ backgroundColor: filterFill, borderColor: 'transparent', color: onVividFill(filterFill) }}
+            className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(0,0,0,0.08)]"
+            style={{ ...labelStyle(fonts), backgroundColor: filterFill, borderColor: 'transparent', color: onVividFill(filterFill) }}
           >
             <PreviewIcon name="filter" size={13} />
             Filter
@@ -94,6 +95,8 @@ export function AnalyticsLayoutPreview({
         <section className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {KPIS.map((kpi) => {
             const kpiColor = colors[kpi.slot];
+            const trendColor = kpi.dir === 'up' ? colors.success : colors.error;
+            const trendSlot = kpi.dir === 'up' ? 'success' as const : 'error' as const;
 
             return (
               <PreviewSlotTarget
@@ -104,16 +107,16 @@ export function AnalyticsLayoutPreview({
                 style={{ backgroundColor: colors.surface, borderColor: colors.border }}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem] font-semibold" style={{ color: colors.mutedText }}>
+                  <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={labelStyle(fonts, colors.mutedText)}>
                     {kpi.label}
                   </PreviewSlotTarget>
-                  <StatDelta value={kpi.trend} direction={kpi.dir} color={kpiColor} slot={kpi.slot} onEditSlot={onEditSlot} />
+                  <StatDelta value={kpi.trend} direction={kpi.dir} color={trendColor} slot={trendSlot} onEditSlot={onEditSlot} />
                 </div>
                 <PreviewSlotTarget
                   slot="text"
                   onEditSlot={onEditSlot}
-                  className="mt-2 text-[1.25rem] font-bold leading-none xl:text-[1.375rem]"
-                  style={{ fontFamily: fonts.headingFamily }}
+                  className="mt-2 tabular-nums"
+                  style={displayStyle(fonts)}
                 >
                   {kpi.value}
                 </PreviewSlotTarget>
@@ -134,22 +137,22 @@ export function AnalyticsLayoutPreview({
           >
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="text-[1rem] font-bold" style={{ fontFamily: fonts.headingFamily }}>
+                <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
                   Visitors by source
                 </PreviewSlotTarget>
-                <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-1 text-[0.75rem]" style={{ color: colors.mutedText }}>
+                <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-1" style={bodyStyle(fonts, colors.mutedText)}>
                   Hover a segment or legend row to trace it.
                 </PreviewSlotTarget>
               </div>
               <div className="flex items-center gap-4">
                 <DonutChart segments={series} centerLabel="Total" centerValue="42.8k" surfaceHex={colors.surface} size={132} />
-                <ul className="space-y-1.5 text-[0.75rem]">
+                <ul className="space-y-1.5" style={labelStyle(fonts)}>
                   {series.map((item) => (
                     <li
                       key={item.label}
                       onMouseEnter={() => setHovered(item.label)}
                       onMouseLeave={() => setHovered(null)}
-                      className="flex items-center gap-2 rounded-md px-1.5 py-0.5 font-semibold transition-[background-color,opacity] duration-150"
+                      className="flex items-center gap-2 rounded-md px-1.5 py-0.5 transition-[background-color,opacity] duration-150"
                       style={{
                         backgroundColor: hovered === item.label ? tint(item.color, 14) : 'transparent',
                         opacity: hovered && hovered !== item.label ? 0.45 : 1,

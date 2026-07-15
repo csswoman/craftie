@@ -13,7 +13,6 @@ import {
 } from './rolePalette';
 
 const toOklch = converter('oklch');
-const EXPECTED_DATA_SERIES_MIN_CHROMA = 0.1;
 
 function hueDistance(left: number, right: number): number {
   const diff = Math.abs(left - right) % 360;
@@ -32,19 +31,16 @@ function tokenChroma(hex: string): number {
   return toOklch(hex)?.c ?? 0;
 }
 
-function averageChroma(hexes: string[]): number {
-  return hexes.reduce((total, hex) => total + tokenChroma(hex), 0) / hexes.length;
-}
+function weightedHue(colors: Array<{ hex: string; prominence: number }>): number {
+  const vector = colors.reduce((total, color) => {
+    const radians = (tokenHue(color.hex) * Math.PI) / 180;
+    return {
+      x: total.x + Math.cos(radians) * color.prominence,
+      y: total.y + Math.sin(radians) * color.prominence,
+    };
+  }, { x: 0, y: 0 });
 
-function dataSeries(tokens: ReturnType<typeof deriveSemanticTokens>) {
-  return [
-    tokens['data-1'].hex,
-    tokens['data-2'].hex,
-    tokens['data-3'].hex,
-    tokens['data-4'].hex,
-    tokens['data-5'].hex,
-    tokens['data-6'].hex,
-  ];
+  return ((Math.atan2(vector.y, vector.x) * 180) / Math.PI + 360) % 360;
 }
 
 const STRUCTURAL_NEUTRAL_TOKENS = [
@@ -70,21 +66,6 @@ const EXPRESSIVE_SAMPLE = [
   { hex: '#8C4BC7', prominence: 0.16 },
 ];
 
-function expectPairwiseDataDistinguishable(series: string[]) {
-  for (let left = 0; left < series.length; left += 1) {
-    for (let right = left + 1; right < series.length; right += 1) {
-      const hueSeparated = hueDistance(tokenHue(series[left]!), tokenHue(series[right]!)) >= 24;
-      const lightnessSeparated =
-        Math.abs(tokenLightness(series[left]!) - tokenLightness(series[right]!)) >= 0.02;
-
-      expect(
-        hueSeparated || lightnessSeparated,
-        `${series[left]} (${tokenLightness(series[left]!).toFixed(3)}) vs ${series[right]} (${tokenLightness(series[right]!).toFixed(3)})`,
-      ).toBe(true);
-    }
-  }
-}
-
 function nearMonochromeExtracted() {
   return [
     { hex: oklchChannelsToHex(0.45, 0.025, 20), prominence: 0.5 },
@@ -101,6 +82,46 @@ function derivedWithStrategy(strategy: ExpressiveSynthesisStrategy) {
 }
 
 describe('deriveSemanticTokens', () => {
+  it('builds a complete synthetic neutral ramp from the weighted image hue', () => {
+    const extracted = [
+      { hex: '#B6E4E6', prominence: 0.4 },
+      { hex: '#EDC3DB', prominence: 0.3 },
+      { hex: '#D0C4F4', prominence: 0.2 },
+      { hex: '#89DFE7', prominence: 0.1 },
+    ];
+    const tokens = deriveSemanticTokens({ extracted, paletteType: 'pastel' });
+    const hue = weightedHue(extracted);
+
+    expect(tokenLightness(tokens.background.hex)).toBeCloseTo(0.98, 1);
+    expect(tokenLightness(tokens.surface.hex)).toBeCloseTo(0.96, 1);
+    expect(tokenLightness(tokens['surface-elevated'].hex)).toBeCloseTo(0.94, 1);
+    expect(tokenLightness(tokens.border.hex)).toBeCloseTo(0.88, 1);
+    expect(tokenLightness(tokens['on-background'].hex)).toBeCloseTo(0.25, 1);
+    expect(tokenLightness(tokens['on-surface-muted'].hex)).toBeCloseTo(0.53, 1);
+    expect(tokenChroma(tokens.background.hex)).toBeGreaterThan(0);
+
+    for (const name of STRUCTURAL_NEUTRAL_TOKENS) {
+      expect(hueDistance(tokenHue(tokens[name].hex), hue), name).toBeLessThanOrEqual(3);
+      expect(tokenChroma(tokens[name].hex), name).toBeGreaterThan(0);
+      expect(tokens[name].hex, name).not.toBe('#FFFFFF');
+      expect(tokens[name].hex, name).not.toBe('#000000');
+    }
+
+    const sources = extracted.map((color) => color.hex);
+    expect(sources).toContain(tokens.primary.hex);
+    expect(sources).toContain(tokens.accent.hex);
+  });
+
+  it('uses the specified tinted neutral ramp for dark UI', () => {
+    const tokens = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, theme: 'dark' });
+
+    expect(tokenLightness(tokens.background.hex)).toBeCloseTo(0.15, 1);
+    expect(tokenLightness(tokens.surface.hex)).toBeCloseTo(0.19, 1);
+    expect(tokenLightness(tokens['surface-elevated'].hex)).toBeCloseTo(0.23, 1);
+    expect(tokenLightness(tokens.border.hex)).toBeCloseTo(0.32, 1);
+    expect(tokenLightness(tokens['on-background'].hex)).toBeCloseTo(0.92, 1);
+    expect(tokenLightness(tokens['on-surface-muted'].hex)).toBeCloseTo(0.7, 1);
+  });
   it('always derives structural neutrals instead of taking extracted colors directly', () => {
     const tokens = deriveSemanticTokens({
       extracted: [
@@ -119,7 +140,7 @@ describe('deriveSemanticTokens', () => {
     expect(toOklch(tokens.background.hex)?.c ?? 1).toBeLessThanOrEqual(0.02);
   });
 
-  it('uses pure neutral chrome by default', () => {
+  it('derives subtly tinted neutral chrome from the dominant image hue by default', () => {
     const tokens = deriveSemanticTokens({
       extracted: [
         { hex: '#F7F7F5', prominence: 0.5 },
@@ -128,12 +149,14 @@ describe('deriveSemanticTokens', () => {
       ],
     });
 
-    expect(toOklch(tokens.background.hex)?.c ?? 1).toBeLessThan(0.004);
-    expect(toOklch(tokens.surface.hex)?.c ?? 1).toBeLessThan(0.004);
-    expect(toOklch(tokens['background-inverse'].hex)?.c ?? 1).toBeLessThan(0.004);
+    const dominantHue = tokenHue('#3366CC');
+
+    expect(toOklch(tokens.background.hex)?.c ?? 0).toBeGreaterThan(0.004);
+    expect(hueDistance(tokenHue(tokens.background.hex), dominantHue)).toBeLessThanOrEqual(3);
+    expect(hueDistance(tokenHue(tokens.surface.hex), dominantHue)).toBeLessThanOrEqual(3);
   });
 
-  it('uses pure achromatic neutrals only when the image is achromatic', () => {
+  it('keeps a chroma trace even when the image is achromatic', () => {
     const tokens = deriveSemanticTokens({
       extracted: [
         { hex: '#EFEFEF', prominence: 0.6 },
@@ -141,7 +164,8 @@ describe('deriveSemanticTokens', () => {
       ],
     });
 
-    expect(toOklch(tokens.background.hex)?.c ?? 1).toBeLessThan(0.004);
+    expect(toOklch(tokens.background.hex)?.c ?? 0).toBeGreaterThan(0);
+    expect(tokens.background.hex).not.toBe('#FFFFFF');
   });
 
   it('filters low-chroma extracted colors out of expressive roles before assignment', () => {
@@ -159,7 +183,7 @@ describe('deriveSemanticTokens', () => {
     expect(tokens.accent.hex).not.toBe('#8B8E87');
   });
 
-  it('corrects expressive lightness until it passes on surface', () => {
+  it('keeps pastel expressive surfaces intact and derives readable foregrounds', () => {
     const tokens = deriveSemanticTokens({
       extracted: [
         { hex: '#9ADBD6', prominence: 0.5 },
@@ -168,9 +192,10 @@ describe('deriveSemanticTokens', () => {
       ],
     });
 
-    expect(contrastRatio(tokens.primary.hex, tokens.surface.hex)).toBeGreaterThanOrEqual(4.5);
-    expect(contrastRatio(tokens.accent.hex, tokens.surface.hex)).toBeGreaterThanOrEqual(4.5);
+    expect(['#9ADBD6', '#E8D44D', '#F4A261']).toContain(tokens.primary.hex);
+    expect(tokens.primary.source).toBe('extracted');
     expect(contrastRatio(tokens['on-primary'].hex, tokens.primary.hex)).toBeGreaterThanOrEqual(4.5);
+    expect(hueDistance(tokenHue(tokens['on-primary'].hex), tokenHue(tokens.primary.hex))).toBeLessThanOrEqual(3);
   });
 
   it('uses suitable extracted state hues and synthesizes missing state hues', () => {
@@ -292,203 +317,66 @@ describe('deriveSemanticTokens', () => {
     expect(tokens.accent.source === 'extracted' || tokens.accent.source === 'corrected').toBe(true);
   });
 
-  it('selects data-series tonal steps that contrast and stay distinguishable on light chrome', () => {
-    const tokens = deriveSemanticTokens({
-      extracted: [
-        { hex: '#C03A2B', prominence: 0.28 },
-        { hex: '#2468C8', prominence: 0.24 },
-        { hex: '#1F8A4C', prominence: 0.2 },
-        { hex: '#8C4BC7', prominence: 0.16 },
-        { hex: '#C58A1F', prominence: 0.12 },
-      ],
-      theme: 'light',
-    });
-    const series = dataSeries(tokens);
-
-    for (const hex of series) {
-      expect(contrastRatio(hex, tokens.surface.hex)).toBeGreaterThanOrEqual(3);
-      expect(tokenChroma(hex)).toBeGreaterThanOrEqual(EXPECTED_DATA_SERIES_MIN_CHROMA - 0.01);
-      expect(tokenLightness(hex)).toBeGreaterThanOrEqual(0.35);
-      expect(tokenLightness(hex)).toBeLessThanOrEqual(0.65);
-    }
-
-    expectPairwiseDataDistinguishable(series);
-  });
-
-  it('selects data-series tonal steps that contrast and stay distinguishable on dark chrome', () => {
-    const tokens = deriveSemanticTokens({
-      extracted: [
-        { hex: '#C03A2B', prominence: 0.28 },
-        { hex: '#2468C8', prominence: 0.24 },
-        { hex: '#1F8A4C', prominence: 0.2 },
-        { hex: '#8C4BC7', prominence: 0.16 },
-        { hex: '#C58A1F', prominence: 0.12 },
-      ],
-      theme: 'dark',
-    });
-    const series = dataSeries(tokens);
-
-    for (const hex of series) {
-      expect(contrastRatio(hex, tokens.surface.hex)).toBeGreaterThanOrEqual(3);
-      expect(tokenChroma(hex)).toBeGreaterThanOrEqual(EXPECTED_DATA_SERIES_MIN_CHROMA - 0.01);
-    }
-
-    expectPairwiseDataDistinguishable(series);
-  });
-
-  it('uses vivid bounded-hue data series instead of complementary invented hues for near-monochrome input', () => {
+  it('derives data colors only from source hues and keeps them legible', () => {
     for (const theme of ['light', 'dark'] as const) {
-      const tokens = deriveSemanticTokens({
-        extracted: nearMonochromeExtracted(),
-        theme,
-      });
-      const series = dataSeries(tokens).slice(0, 5);
-      const primaryHue = tokenHue(tokens.primary.hex);
+      const tokens = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, theme });
+      const entries = ['data-1', 'data-2', 'data-3', 'data-4', 'data-5', 'data-6'] as const;
+      const usable = entries.map((name) => tokens[name]).filter((entry) => !entry.gap);
 
-      for (const hex of series) {
-        expect(contrastRatio(hex, tokens.surface.hex)).toBeGreaterThanOrEqual(3);
-        expect(tokenChroma(hex)).toBeGreaterThanOrEqual(EXPECTED_DATA_SERIES_MIN_CHROMA - 0.01);
-        expect(hueDistance(primaryHue, tokenHue(hex))).toBeLessThanOrEqual(90);
+      for (const entry of usable) {
+        expect(entry.originalHex).toBeTruthy();
+        expect(hueDistance(tokenHue(entry.hex), tokenHue(entry.originalHex!))).toBeLessThanOrEqual(3);
+        expect(contrastRatio(entry.hex, tokens.background.hex)).toBeGreaterThanOrEqual(3);
       }
 
-      expectPairwiseDataDistinguishable(series);
-      expect(hueDistance(primaryHue, tokenHue(tokens['data-6'].hex))).toBeLessThanOrEqual(90);
-    }
-  });
-
-  it('boosts data-series chroma for deliberately desaturated source images at bright vibrancy', () => {
-    for (const theme of ['light', 'dark'] as const) {
-      const tokens = deriveSemanticTokens({
-        extracted: [
-          { hex: oklchChannelsToHex(0.52, 0.018, 210), prominence: 0.45 },
-          { hex: oklchChannelsToHex(0.46, 0.016, 214), prominence: 0.35 },
-          { hex: oklchChannelsToHex(0.38, 0.014, 206), prominence: 0.2 },
-        ],
-        theme,
-        vibrancy: 100,
-      });
-
-      for (const hex of dataSeries(tokens)) {
-        expect(tokenChroma(hex)).toBeGreaterThanOrEqual(EXPECTED_DATA_SERIES_MIN_CHROMA - 0.01);
-        expect(contrastRatio(hex, tokens.surface.hex)).toBeGreaterThanOrEqual(3);
+      for (let left = 0; left < usable.length; left += 1) {
+        for (let right = left + 1; right < usable.length; right += 1) {
+          const hueSeparated = hueDistance(tokenHue(usable[left]!.hex), tokenHue(usable[right]!.hex)) >= 25;
+          const lightnessSeparated = Math.abs(tokenLightness(usable[left]!.hex) - tokenLightness(usable[right]!.hex)) >= 0.15;
+          expect(hueSeparated || lightnessSeparated).toBe(true);
+        }
       }
     }
   });
 
-  it('lowers data-series chroma at pastel vibrancy without clamping above expressive chroma', () => {
-    const midpoint = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, vibrancy: 50 });
-    const pastel = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, vibrancy: 0 });
-    const pastelSeries = dataSeries(pastel);
-    const maxPastelExpressiveChroma = Math.max(
-      tokenChroma(pastel.primary.hex),
-      tokenChroma(pastel.secondary.hex),
-      tokenChroma(pastel.accent.hex),
-    );
+  it('declares data gaps instead of inventing hues for neutral input', () => {
+    const tokens = deriveSemanticTokens({ extracted: nearMonochromeExtracted() });
 
-    expect(averageChroma(pastelSeries)).toBeLessThan(averageChroma(dataSeries(midpoint)));
-
-    for (const hex of pastelSeries) {
-      expect(tokenChroma(hex)).toBeLessThanOrEqual(maxPastelExpressiveChroma + 0.01);
-      expect(contrastRatio(hex, pastel.surface.hex)).toBeGreaterThanOrEqual(3);
+    for (const name of ['data-1', 'data-2', 'data-3', 'data-4', 'data-5', 'data-6'] as const) {
+      expect(tokens[name].gap).toBeTruthy();
     }
   });
 
-  it('keeps pastel data series distinguishable with hue or lightness separation', () => {
-    const pastel = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, vibrancy: 0 });
-    const series = dataSeries(pastel);
-
-    expectPairwiseDataDistinguishable(series);
-
-    for (const hex of series) {
-      expect(contrastRatio(hex, pastel.surface.hex)).toBeGreaterThanOrEqual(3);
-    }
-  });
-
-  it('preserves vivid chroma for already saturated source colors in data series', () => {
+  it('preserves manual data overrides for neutral input', () => {
     const tokens = deriveSemanticTokens({
-      extracted: [
-        { hex: '#00E676', prominence: 0.34 },
-        { hex: '#7B61FF', prominence: 0.28 },
-        { hex: '#FF4D8D', prominence: 0.22 },
-        { hex: '#FFB000', prominence: 0.16 },
-      ],
-      theme: 'light',
+      extracted: nearMonochromeExtracted(),
+      overrides: { 'data-1': '#5566AA' },
     });
-    const sourceChroma = ['#00E676', '#7B61FF', '#FF4D8D', '#FFB000'].map(tokenChroma);
-    const sourceFloor = Math.min(...sourceChroma) * 0.75;
 
-    for (const hex of dataSeries(tokens).slice(0, 4)) {
-      expect(tokenChroma(hex)).toBeGreaterThanOrEqual(Math.max(EXPECTED_DATA_SERIES_MIN_CHROMA - 0.01, sourceFloor - 0.01));
-      expect(contrastRatio(hex, tokens.surface.hex)).toBeGreaterThanOrEqual(3);
-    }
+    expect(tokens['data-1']).toEqual({ hex: '#5566AA', source: 'override' });
+    expect(tokens['data-2'].gap).toBeTruthy();
   });
 
-  it('calibrates pastel expressive tokens to high-lightness low-chroma colors with readable on-* pairs', () => {
-    const midpoint = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, vibrancy: 50 });
+  it('preserves extracted expressive tokens at every vibrancy setting', () => {
     const pastel = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, vibrancy: 0 });
-
-    for (const tokenName of ['primary', 'secondary', 'accent'] as const) {
-      expect(tokenLightness(pastel[tokenName].hex)).toBeGreaterThan(0.72);
-      expect(tokenChroma(pastel[tokenName].hex)).toBeLessThan(tokenChroma(midpoint[tokenName].hex));
-      expect(tokenChroma(pastel[tokenName].hex)).toBeLessThanOrEqual(0.1);
-    }
-
-    expect(contrastRatio(pastel['on-primary'].hex, pastel.primary.hex)).toBeGreaterThanOrEqual(4.5);
-    expect(contrastRatio(pastel['on-secondary'].hex, pastel.secondary.hex)).toBeGreaterThanOrEqual(4.5);
-    expect(contrastRatio(pastel['on-accent'].hex, pastel.accent.hex)).toBeGreaterThanOrEqual(4.5);
-    expect(contrastRatio(pastel['on-hero'].hex, pastel['hero-surface'].hex)).toBeGreaterThanOrEqual(4.5);
-  });
-
-  it('calibrates bright expressive tokens and data series to high chroma above the series floor', () => {
-    const midpoint = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, vibrancy: 50 });
     const bright = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, vibrancy: 100 });
+    const sourceHexes = EXPRESSIVE_SAMPLE.map((color) => color.hex);
 
     for (const tokenName of ['primary', 'secondary', 'accent'] as const) {
-      expect(tokenChroma(bright[tokenName].hex)).toBeGreaterThan(tokenChroma(midpoint[tokenName].hex));
-      expect(tokenLightness(bright[tokenName].hex)).toBeGreaterThanOrEqual(0.5);
-      expect(tokenLightness(bright[tokenName].hex)).toBeLessThanOrEqual(0.66);
-    }
-
-    for (const hex of dataSeries(bright)) {
-      expect(tokenChroma(hex)).toBeGreaterThanOrEqual(EXPECTED_DATA_SERIES_MIN_CHROMA);
-      expect(contrastRatio(hex, bright.surface.hex)).toBeGreaterThanOrEqual(3);
+      expect(sourceHexes).toContain(pastel[tokenName].hex);
+      expect(bright[tokenName].hex).toBe(pastel[tokenName].hex);
+      expect(contrastRatio(pastel[`on-${tokenName}`].hex, pastel[tokenName].hex)).toBeGreaterThanOrEqual(4.5);
     }
   });
 
-  it('does not mutate raw extracted source colors when vibrancy changes', () => {
-    const extracted = EXPRESSIVE_SAMPLE.map((color) => ({ ...color }));
-    const originalHexes = extracted.map((color) => color.hex);
-
-    const pastel = deriveSemanticTokens({ extracted, vibrancy: 0 });
-    const bright = deriveSemanticTokens({ extracted, vibrancy: 100 });
-
-    expect(extracted.map((color) => color.hex)).toEqual(originalHexes);
-    expect(pastel.primary.hex).not.toBe(bright.primary.hex);
-  });
-
-  it('applies vibrancy to both light and dark theme branches', () => {
-    for (const theme of ['light', 'dark'] as const) {
-      const midpoint = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, theme, vibrancy: 50 });
-      const bright = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, theme, vibrancy: 100 });
-
-      expect(bright.primary.hex).not.toBe(midpoint.primary.hex);
-      expect(bright.secondary.hex).not.toBe(midpoint.secondary.hex);
-      expect(bright.accent.hex).not.toBe(midpoint.accent.hex);
-      expect(contrastRatio(bright['on-primary'].hex, bright.primary.hex)).toBeGreaterThanOrEqual(4.5);
-      expect(contrastRatio(bright['on-secondary'].hex, bright.secondary.hex)).toBeGreaterThanOrEqual(4.5);
-      expect(contrastRatio(bright['on-accent'].hex, bright.accent.hex)).toBeGreaterThanOrEqual(4.5);
-    }
-  });
-
-  it('applies neutralStyle to both light and dark theme branches', () => {
+  it('does not allow neutralStyle to remove the image tint', () => {
     for (const theme of ['light', 'dark'] as const) {
       const pure = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, theme, neutralStyle: 'pure' });
       const tinted = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, theme, neutralStyle: 'tinted' });
 
-      expect(tinted.background.hex).not.toBe(pure.background.hex);
-      expect(tinted.surface.hex).not.toBe(pure.surface.hex);
-      expect(tinted.border.hex).not.toBe(pure.border.hex);
-      expect(tinted.divider.hex).not.toBe(pure.divider.hex);
+      expect(pure.background.hex).toBe(tinted.background.hex);
+      expect(tokenChroma(pure.background.hex)).toBeGreaterThan(0);
+      expect(pure.background.hex).not.toBe(theme === 'light' ? '#FFFFFF' : '#000000');
     }
   });
 

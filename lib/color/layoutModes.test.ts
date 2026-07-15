@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { LAYOUT_MODES, layoutModeTokenEntries, type LayoutSlot } from './layoutModes';
-import type { SemanticTokenName } from './semanticTokens';
+import {
+  LAYOUT_MODES,
+  layoutModeTokenEntries,
+  resolveLayoutColors,
+  type LayoutSlot,
+} from './layoutModes';
+import { deriveSemanticTokens, type SemanticTokenName } from './semanticTokens';
 
 const PAIRS: Array<[LayoutSlot, LayoutSlot]> = [
   ['surface', 'text'],
@@ -49,5 +54,21 @@ describe('layoutModes', () => {
     expect(entries.get('primaryAction')).toBe('primary');
     expect(entries.get('data4')).toBe('data-4');
     expect(entries.get('appBackground')).toBe('background');
+  });
+
+  it('maps the media player to the active theme instead of inverse surfaces', () => {
+    const media = LAYOUT_MODES.find((mode) => mode.id === 'media')!;
+    const source = [{ hex: '#3366CC', prominence: 1 }];
+
+    for (const theme of ['light', 'dark'] as const) {
+      const tokens = deriveSemanticTokens({ extracted: source, theme });
+      const colors = resolveLayoutColors(media, tokens);
+
+      expect(colors.appBackground).toBe(tokens.background.hex);
+      expect(colors.surface).toBe(tokens.surface.hex);
+      expect(colors.surfaceElevated).toBe(tokens['surface-elevated'].hex);
+      expect(colors.text).toBe(tokens['on-surface'].hex);
+      expect(colors.mutedText).toBe(tokens['on-surface-muted'].hex);
+    }
   });
 });

@@ -6,6 +6,7 @@ import {
 import { namePalette } from './naming';
 import { normalizeHex } from './normalizeHex';
 import { assignRolesFromExtracted, type RolePalette } from './rolePalette';
+import { classifyPalette, type PaletteClassification, type PaletteType } from './paletteClassification';
 import {
   type ColorGroupId,
   type SelectableColor,
@@ -26,30 +27,24 @@ const GROUP_LABELS: Record<ColorGroupId, string> = {
   'dark-neutral': 'Oscuro',
 };
 
-export const DEFAULT_IMAGE_LIGHT_NEUTRAL_HEX = '#FFFFFF';
+export type ImageExtractionMode = 'paint' | 'ui';
 
-export function createDefaultLightNeutralColor(): SelectableColor {
-  return {
-    id: 'image-light-neutral-FFFFFF',
-    name: 'Blanco',
-    hex: DEFAULT_IMAGE_LIGHT_NEUTRAL_HEX,
-    group: 'light-neutral',
-  };
-}
+export type PaintPaletteBuildResult = {
+  mode: 'paint';
+  catalog: SelectableColor[];
+  extracted: ExtractedColor[];
+  classification: PaletteClassification;
+};
 
-function ensureLightNeutralInCatalog(catalog: SelectableColor[]): SelectableColor[] {
-  if (catalog.some((color) => color.group === 'light-neutral')) {
-    return catalog;
-  }
-
-  return [createDefaultLightNeutralColor(), ...catalog];
-}
-
-export type ImagePaletteBuildResult = {
+export type UiPaletteBuildResult = {
+  mode: 'ui';
   catalog: SelectableColor[];
   extracted: ExtractedColor[];
   rolePalette: RolePalette;
+  classification: PaletteClassification;
 };
+
+export type ImagePaletteBuildResult = PaintPaletteBuildResult | UiPaletteBuildResult;
 
 export function classifyHexToGroup(hex: string): ColorGroupId {
   return classifyColorToGroup(hex, DEFAULT_COLOR_GROUP_THRESHOLDS);
@@ -91,6 +86,7 @@ export function buildSelectableColorsFromExtracted(extracted: ExtractedColor[]):
         name: '',
         hex: color.hex,
         group,
+        prominence: color.prominence,
       });
     });
   }
@@ -106,9 +102,33 @@ export function buildSelectableColorsFromExtracted(extracted: ExtractedColor[]):
   }));
 }
 
-export function buildImagePalette(extracted: ExtractedColor[]): ImagePaletteBuildResult {
-  const catalog = ensureLightNeutralInCatalog(buildSelectableColorsFromExtracted(extracted));
-  const rolePalette = assignRolesFromExtracted(extracted);
+export function buildImagePalette(extracted: ExtractedColor[]): UiPaletteBuildResult;
+export function buildImagePalette(
+  extracted: ExtractedColor[],
+  options: { mode: 'paint'; paletteType?: PaletteType },
+): PaintPaletteBuildResult;
+export function buildImagePalette(
+  extracted: ExtractedColor[],
+  options: { mode?: 'ui'; paletteType?: PaletteType },
+): UiPaletteBuildResult;
+export function buildImagePalette(
+  extracted: ExtractedColor[],
+  options: { mode: ImageExtractionMode; paletteType?: PaletteType },
+): ImagePaletteBuildResult;
+export function buildImagePalette(
+  extracted: ExtractedColor[],
+  options: { mode?: ImageExtractionMode; paletteType?: PaletteType } = {},
+): ImagePaletteBuildResult {
+  const mode = options.mode ?? 'ui';
+  const catalog = buildSelectableColorsFromExtracted(extracted);
+  const detected = classifyPalette(extracted);
+  const classification = options.paletteType ? { ...detected, type: options.paletteType } : detected;
 
-  return { catalog, extracted, rolePalette };
+  if (mode === 'paint') {
+    return { mode, catalog, extracted, classification };
+  }
+
+  const rolePalette = assignRolesFromExtracted(extracted, 'light', classification.type);
+
+  return { mode, catalog, extracted, rolePalette, classification };
 }

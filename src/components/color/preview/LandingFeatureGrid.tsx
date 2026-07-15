@@ -2,6 +2,7 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { PreviewIcon, type PreviewIconName } from './previewIcons';
+import { bodyStyle, labelStyle, type PreviewFonts } from './previewTypography';
 
 const FEATURES: Array<{ title: string; text: string; icon: PreviewIconName }> = [
   { title: 'Story', text: 'Clear hero hierarchy for launches and announcements.', icon: 'sparkles' },
@@ -9,9 +10,9 @@ const FEATURES: Array<{ title: string; text: string; icon: PreviewIconName }> = 
   { title: 'Trust', text: 'Accessible defaults that keep the interface credible.', icon: 'shield' },
 ];
 
-export function LandingFeatureGrid({ colors, headingFamily, onEditSlot }: {
+export function LandingFeatureGrid({ colors, fonts, onEditSlot }: {
   colors: ResolvedLayoutColors;
-  headingFamily: string;
+  fonts: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
   return (
@@ -32,10 +33,10 @@ export function LandingFeatureGrid({ colors, headingFamily, onEditSlot }: {
           >
             <PreviewIcon name={item.icon} size={15} />
           </PreviewSlotTarget>
-          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-3 text-[0.8125rem] font-bold" style={{ fontFamily: headingFamily }}>
+          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-3" style={labelStyle(fonts)}>
             {item.title}
           </PreviewSlotTarget>
-          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-2 text-[0.75rem] leading-relaxed" style={{ color: colors.mutedText }}>
+          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-2" style={bodyStyle(fonts, colors.mutedText)}>
             {item.text}
           </PreviewSlotTarget>
         </PreviewSlotTarget>

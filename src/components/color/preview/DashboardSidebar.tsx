@@ -6,7 +6,7 @@ import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTar
 import { DASHBOARD_NAV } from './dashboardPreviewData';
 import { PreviewIcon } from './previewIcons';
 import { LiveDot, ProgressBar } from './previewPrimitives';
-import type { PreviewFonts } from './previewTypography';
+import { headingStyle, labelStyle, type PreviewFonts } from './previewTypography';
 
 type DashboardSidebarProps = {
   colors: ResolvedLayoutColors;
@@ -41,21 +41,25 @@ export function DashboardSidebar({
             <PreviewIcon name="zap" size={16} />
           </PreviewSlotTarget>
           <div className="min-w-0">
-            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="truncate text-[0.8125rem] font-bold">
+            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="truncate" style={headingStyle(fonts)}>
               Craftie Ops
             </PreviewSlotTarget>
             <LiveDot color={colors.success} slot="success" onEditSlot={onEditSlot} label="All systems live" />
           </div>
         </div>
 
-        <nav className="mt-6 space-y-1 text-[0.75rem] font-semibold">
+        <nav className="mt-6 space-y-1" style={labelStyle(fonts)}>
           {DASHBOARD_NAV.map((item, index) => (
             <PreviewSlotTarget
               key={item.label}
               slot={index === 0 ? 'surfaceElevated' : 'chrome'}
               onEditSlot={onEditSlot}
               className="flex items-center gap-2.5 rounded-lg px-3 py-2 transition-colors duration-150"
-              style={{ backgroundColor: index === 0 ? colors.surfaceElevated : 'transparent', color: index === 0 ? colors.primaryAction : colors.text }}
+              style={{
+                backgroundColor: index === 0 ? colors.surfaceElevated : 'transparent',
+                color: index === 0 ? colors.primaryAction : colors.text,
+                fontWeight: index === 0 ? 'var(--weight-ui)' : 500,
+              }}
             >
               <PreviewIcon name={item.icon} size={15} />
               {item.label}
@@ -69,10 +73,10 @@ export function DashboardSidebar({
           className="mt-auto rounded-xl border p-3"
           style={{ backgroundColor: colors.surface, borderColor: colors.border }}
         >
-          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem] font-semibold" style={{ color: colors.mutedText }}>
+          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={labelStyle(fonts, colors.mutedText)}>
             This week
           </PreviewSlotTarget>
-          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1 text-[1rem] font-bold" style={{ fontFamily: fonts.headingFamily }}>
+          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1" style={headingStyle(fonts)}>
             92% on track
           </PreviewSlotTarget>
           <div className="mt-2">

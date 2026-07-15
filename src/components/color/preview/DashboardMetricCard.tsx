@@ -3,7 +3,7 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { Sparkline } from './previewCharts';
 import { StatDelta } from './previewPrimitives';
-import type { PreviewFonts } from './previewTypography';
+import { displayStyle, labelStyle, type PreviewFonts } from './previewTypography';
 
 export type DashboardMetric = {
   label: string;
@@ -30,7 +30,7 @@ export function DashboardMetricCard({ colors, fonts, metric, onEditSlot }: {
       style={{ backgroundColor: colors.surface, borderColor: colors.border }}
     >
       <div className="flex items-start justify-between gap-2">
-        <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="text-[0.6875rem] font-semibold" style={{ color: colors.mutedText }}>
+        <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={labelStyle(fonts, colors.mutedText)}>
           {metric.label}
         </PreviewSlotTarget>
         <StatDelta value={metric.trend} direction={metric.dir} color={trendColor} slot={metric.trendSlot} onEditSlot={onEditSlot} />
@@ -38,8 +38,8 @@ export function DashboardMetricCard({ colors, fonts, metric, onEditSlot }: {
       <PreviewSlotTarget
         slot="text"
         onEditSlot={onEditSlot}
-        className="mt-2 text-[1.25rem] font-bold leading-none xl:text-[1.375rem]"
-        style={{ fontFamily: fonts.headingFamily }}
+        className="mt-2 tabular-nums"
+        style={displayStyle(fonts)}
       >
         {metric.value}
       </PreviewSlotTarget>

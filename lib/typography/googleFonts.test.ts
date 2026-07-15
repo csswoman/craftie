@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { FontPair } from './pairings';
-import { buildGoogleFontsUrl, getGoogleFontsLinkId } from './googleFonts';
+import { buildGoogleFontsUrl, buildSingleFamilyGoogleFontsUrl, getGoogleFontsLinkId } from './googleFonts';
 
 function createPair(overrides: Partial<FontPair> & Pick<FontPair, 'id'>): FontPair {
   return {
@@ -122,8 +122,44 @@ describe('googleFonts', () => {
     expect(url).toContain('family=Source+Sans+3:wght@');
   });
 
-  it('returns an empty URL when no pairings are provided', () => {
-    expect(buildGoogleFontsUrl([])).toBe('');
+  it('includes per-pair default weights in the CSS URL', () => {
+    const url = buildGoogleFontsUrl([
+      createPair({
+        id: 'lora-inter',
+        heading: {
+          family: 'Lora',
+          googleFontsRef: 'https://fonts.google.com/specimen/Lora',
+          classification: 'serif',
+          contrast: 'medium',
+          xHeight: 'medium',
+          personality: ['editorial'],
+          bestFor: 'heading',
+          defaultWeight: 600,
+        },
+        body: {
+          family: 'Inter',
+          googleFontsRef: 'https://fonts.google.com/specimen/Inter',
+          classification: 'sans-serif',
+          contrast: 'medium',
+          xHeight: 'high',
+          personality: ['legible'],
+          bestFor: 'body',
+          defaultWeight: 400,
+        },
+      }),
+    ]);
+
+    expect(url).toContain('family=Lora:wght@');
+    expect(url).toMatch(/family=Lora:wght@[0-9;]*600/);
+    expect(url).toContain('family=Inter:wght@');
+  });
+
+  it('builds a single-family custom load URL', () => {
+    const url = buildSingleFamilyGoogleFontsUrl('Space Grotesk');
+
+    expect(url).toContain('family=Space+Grotesk:wght@400;500;600;700');
+    expect(url).toContain('display=swap');
+    expect(buildSingleFamilyGoogleFontsUrl('   ')).toBe('');
   });
 
   it('creates a stable link id from the generated URL', () => {

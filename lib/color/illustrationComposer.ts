@@ -6,33 +6,11 @@ import type {
 } from './semanticTokens';
 import type { IllustrationPaletteInput } from './previewFamilies';
 
-export type IllustrationStyleId = 'bento';
-
-export type IllustrationShapeKind = 'circle' | 'half-circle' | 'rounded-rect' | 'triangle';
+export type IllustrationStyleId = 'color-studio';
 
 export type IllustrationPaint = {
   token: SemanticTokenName;
   hex: string;
-};
-
-export type IllustrationShape = {
-  kind: IllustrationShapeKind;
-  paint: IllustrationPaint;
-  rotation: number;
-  inset: number;
-  alignX: number;
-  alignY: number;
-};
-
-export type IllustrationCell = {
-  id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  radius: number;
-  paint: IllustrationPaint;
-  shape: IllustrationShape | null;
 };
 
 export type IllustrationComposition = {
@@ -40,9 +18,20 @@ export type IllustrationComposition = {
   seed: number;
   width: number;
   height: number;
-  gap: number;
+  variant: 0 | 1 | 2;
+  posterRotation: number;
+  swatchRotation: number;
   background: IllustrationPaint;
-  cells: IllustrationCell[];
+  paper: IllustrationPaint;
+  paperElevated: IllustrationPaint;
+  ink: IllustrationPaint;
+  mutedInk: IllustrationPaint;
+  border: IllustrationPaint;
+  divider: IllustrationPaint;
+  featured: [IllustrationPaint, IllustrationPaint, IllustrationPaint];
+  pawToes: [IllustrationPaint, IllustrationPaint, IllustrationPaint, IllustrationPaint];
+  soft: [IllustrationPaint, IllustrationPaint, IllustrationPaint];
+  scale: IllustrationPaint[];
 };
 
 export type IllustrationComposerInput = {
@@ -51,40 +40,17 @@ export type IllustrationComposerInput = {
   paletteInput: IllustrationPaletteInput;
 };
 
-type BentoGridCell = {
-  column: number;
-  row: number;
-  columnSpan: number;
-  rowSpan: number;
-};
-
 type IllustrationComposer = (input: IllustrationComposerInput) => IllustrationComposition;
 
-export const DEFAULT_ILLUSTRATION_STYLE_ID: IllustrationStyleId = 'bento';
+export const DEFAULT_ILLUSTRATION_STYLE_ID: IllustrationStyleId = 'color-studio';
 export const DEFAULT_ILLUSTRATION_SEED = 1729;
 
-const BENTO_WIDTH = 640;
-const BENTO_HEIGHT = 460;
-const BENTO_COLUMNS = 6;
-const BENTO_ROWS = 5;
-const BENTO_GAP = 10;
-const SHAPE_KINDS = [
-  'circle',
-  'half-circle',
-  'rounded-rect',
-  'triangle',
-] as const satisfies readonly IllustrationShapeKind[];
-const BENTO_SPANS = [
-  [2, 2],
-  [2, 1],
-  [1, 2],
-  [1, 1],
-] as const;
-const TONAL_ACCENT_STEPS = [200, 300, 400, 500, 600] as const;
-const TONAL_BACKGROUND_STEPS = [50, 100, 200] as const;
+const WIDTH = 720;
+const HEIGHT = 480;
+const BASES = ['primary', 'secondary', 'accent'] as const satisfies readonly ExpressiveScaleBase[];
 
 export const ILLUSTRATION_STYLES: Record<IllustrationStyleId, IllustrationComposer> = {
-  bento: composeBentoIllustration,
+  'color-studio': composeColorStudio,
 };
 
 export function nextIllustrationSeed(seed: number): number {
@@ -106,13 +72,14 @@ export function resolveIllustrationPaints(
   cellPaints: IllustrationPaint[];
   shapePaints: IllustrationPaint[];
 } {
-  const bases = Object.keys(input.bases) as ExpressiveScaleBase[];
-  const basePaints = bases.map((base) => paint(input.bases[base], tokens));
-  const tonalPaints = bases.flatMap((base) =>
-    TONAL_ACCENT_STEPS.map((step) => paint(`${base}-${step}` as TonalTokenName, tokens)),
+  const basePaints = BASES.map((base) => paint(input.bases[base], tokens));
+  const tonalPaints = BASES.flatMap((base) =>
+    [200, 300, 400, 500, 600].map((step) =>
+      paint(`${base}-${step}` as TonalTokenName, tokens),
+    ),
   );
-  const lightPaints = bases.flatMap((base) =>
-    TONAL_BACKGROUND_STEPS.map((step) => paint(`${base}-${step}` as TonalTokenName, tokens)),
+  const lightPaints = BASES.flatMap((base) =>
+    [50, 100, 200].map((step) => paint(`${base}-${step}` as TonalTokenName, tokens)),
   );
   const statePaints = Object.values(input.states).map((name) => paint(name, tokens));
 
@@ -123,103 +90,67 @@ export function resolveIllustrationPaints(
   };
 }
 
-function composeBentoIllustration(input: IllustrationComposerInput): IllustrationComposition {
+function composeColorStudio(input: IllustrationComposerInput): IllustrationComposition {
   const random = seededRandom(input.seed);
-  const paints = resolveIllustrationPaints(input.tokens, input.paletteInput);
-  const grid = buildBentoGrid(random);
-  const cellWidth = (BENTO_WIDTH - BENTO_GAP * (BENTO_COLUMNS + 1)) / BENTO_COLUMNS;
-  const cellHeight = (BENTO_HEIGHT - BENTO_GAP * (BENTO_ROWS + 1)) / BENTO_ROWS;
-  const dominantPaint = pick(paints.backgroundPaints, random);
+  const order = shuffle([...BASES], random);
+  const [first, second, third] = order;
+  const featured: IllustrationComposition['featured'] = [
+    paint(input.paletteInput.bases[first], input.tokens),
+    paint(input.paletteInput.bases[second], input.tokens),
+    paint(input.paletteInput.bases[third], input.tokens),
+  ];
+  const soft: IllustrationComposition['soft'] = [first, second, third].map((base) =>
+    tonalPaint(base, 100, input.tokens),
+  ) as IllustrationComposition['soft'];
+  const scaleBase = pick(order, random);
+  const variant = Math.floor(random() * 3) as 0 | 1 | 2;
+  const toePaints: IllustrationComposition['pawToes'] = [
+    featured[0],
+    featured[1],
+    featured[2],
+    tonalPaint(third, 300, input.tokens),
+  ];
+  const pawToes = rotateTuple(toePaints, variant);
 
   return {
-    style: 'bento',
+    style: 'color-studio',
     seed: input.seed,
-    width: BENTO_WIDTH,
-    height: BENTO_HEIGHT,
-    gap: BENTO_GAP,
-    background: dominantPaint,
-    cells: grid.map((cell, index) => {
-      const x = BENTO_GAP + cell.column * (cellWidth + BENTO_GAP);
-      const y = BENTO_GAP + cell.row * (cellHeight + BENTO_GAP);
-      const width = cell.columnSpan * cellWidth + (cell.columnSpan - 1) * BENTO_GAP;
-      const height = cell.rowSpan * cellHeight + (cell.rowSpan - 1) * BENTO_GAP;
-      const cellPaint = index < 2 ? dominantPaint : pick(paints.cellPaints, random);
-      const includeShape = index > 1 && random() > 0.28;
-
-      return {
-        id: `bento-${cell.column}-${cell.row}`,
-        x,
-        y,
-        width,
-        height,
-        radius: Math.min(22, Math.max(10, Math.min(width, height) * 0.14)),
-        paint: cellPaint,
-        shape: includeShape ? buildShape(random, paints.shapePaints) : null,
-      };
-    }),
+    width: WIDTH,
+    height: HEIGHT,
+    variant,
+    posterRotation: -1.5 + random() * 3,
+    swatchRotation: -3 + random() * 6,
+    background: paint('background', input.tokens),
+    paper: paint('surface', input.tokens),
+    paperElevated: paint('surface-elevated', input.tokens),
+    ink: paint('on-surface', input.tokens),
+    mutedInk: paint('on-surface-muted', input.tokens),
+    border: paint('border', input.tokens),
+    divider: paint('divider', input.tokens),
+    featured,
+    pawToes,
+    soft,
+    scale: [100, 200, 300, 400, 500, 600, 700].map((step) =>
+      tonalPaint(scaleBase, step, input.tokens),
+    ),
   };
 }
 
-function buildBentoGrid(random: () => number): BentoGridCell[] {
-  const occupied = Array.from({ length: BENTO_ROWS }, () => Array(BENTO_COLUMNS).fill(false));
-  const cells: BentoGridCell[] = [];
-
-  for (let row = 0; row < BENTO_ROWS; row += 1) {
-    for (let column = 0; column < BENTO_COLUMNS; column += 1) {
-      if (occupied[row]![column]) {
-        continue;
-      }
-
-      const shuffledSpans = [...BENTO_SPANS].sort(() => random() - 0.5);
-      const [columnSpan, rowSpan] =
-        shuffledSpans.find(([candidateColumns, candidateRows]) =>
-          canPlace(occupied, column, row, candidateColumns, candidateRows),
-        ) ?? [1, 1];
-
-      for (let y = row; y < row + rowSpan; y += 1) {
-        for (let x = column; x < column + columnSpan; x += 1) {
-          occupied[y]![x] = true;
-        }
-      }
-
-      cells.push({ column, row, columnSpan, rowSpan });
-    }
-  }
-
-  return cells;
+function rotateTuple<T>(values: [T, T, T, T], offset: number): [T, T, T, T] {
+  return [
+    values[offset % 4]!,
+    values[(offset + 1) % 4]!,
+    values[(offset + 2) % 4]!,
+    values[(offset + 3) % 4]!,
+  ];
 }
 
-function buildShape(random: () => number, paints: IllustrationPaint[]): IllustrationShape {
-  return {
-    kind: pick([...SHAPE_KINDS], random),
-    paint: pick(paints, random),
-    rotation: pick([0, 90, 180, 270], random),
-    inset: 0.18 + random() * 0.18,
-    alignX: 0.42 + random() * 0.16,
-    alignY: 0.42 + random() * 0.16,
-  };
-}
-
-function canPlace(
-  occupied: boolean[][],
-  column: number,
-  row: number,
-  columnSpan: number,
-  rowSpan: number,
-): boolean {
-  if (column + columnSpan > BENTO_COLUMNS || row + rowSpan > BENTO_ROWS) {
-    return false;
-  }
-
-  for (let y = row; y < row + rowSpan; y += 1) {
-    for (let x = column; x < column + columnSpan; x += 1) {
-      if (occupied[y]![x]) {
-        return false;
-      }
-    }
-  }
-
-  return true;
+function tonalPaint(
+  base: ExpressiveScaleBase,
+  step: number,
+  tokens: SemanticTokens,
+): IllustrationPaint {
+  return paint(`${base}-${step}` as TonalTokenName, tokens);
 }
 
 function paint(name: SemanticTokenName, tokens: SemanticTokens): IllustrationPaint {
@@ -228,6 +159,15 @@ function paint(name: SemanticTokenName, tokens: SemanticTokens): IllustrationPai
 
 function pick<T>(items: T[], random: () => number): T {
   return items[Math.floor(random() * items.length)]!;
+}
+
+function shuffle<T>(items: T[], random: () => number): T[] {
+  for (let index = items.length - 1; index > 0; index -= 1) {
+    const target = Math.floor(random() * (index + 1));
+    [items[index], items[target]] = [items[target]!, items[index]!];
+  }
+
+  return items;
 }
 
 function seededRandom(seed: number): () => number {

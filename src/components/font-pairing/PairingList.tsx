@@ -1,171 +1,176 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import type { FontPair } from '@lib/typography/pairings';
+import {
+  filterFontPairs,
+  shouldShowPairingSearch,
+  type PairingCategoryValue,
+} from '@lib/typography/pairingFilters';
 
 import { loadGoogleFonts } from '@/lib/browser/googleFonts';
-import { PairCard } from './PairCard';
+import { PairingFilterChips } from './PairingFilterChips';
+import { PairGroup } from './PairingListRows';
 
 export type PairingListProps = {
   pairings: FontPair[];
-  selectedPairing: FontPair | null;
+  recommendedPairings?: FontPair[];
+  selectedCatalogPairId: string | null;
+  listInert?: boolean;
   onSelectPairing: (pairing: FontPair) => void;
+  onPreviewPairing?: (pairing: FontPair) => void;
+  onClearPreview?: () => void;
   variant?: 'default' | 'tools';
 };
 
-const FILTERS = [
-  { label: 'Todos', value: 'all' },
-  { label: 'Editorial', value: 'editorial' },
-  { label: 'Técnico', value: 'technical' },
-  { label: 'Cálido', value: 'warm' },
-  { label: 'Minimal', value: 'minimal' },
-] as const;
-
-type FilterValue = (typeof FILTERS)[number]['value'];
-
 export function PairingList({
   pairings,
-  selectedPairing,
+  recommendedPairings = [],
+  selectedCatalogPairId,
+  listInert = false,
   onSelectPairing,
+  onPreviewPairing,
+  onClearPreview,
   variant = 'default',
 }: PairingListProps) {
-  const [activeFilter, setActiveFilter] = useState<FilterValue>('all');
+  const [category, setCategory] = useState<PairingCategoryValue>('all');
+  const [query, setQuery] = useState('');
   const isTools = variant === 'tools';
-  const chipClass = isTools ? 'text-tools-chip' : 'text-[0.75rem]';
   const emptyClass = isTools ? 'text-tools-body' : 'text-[0.9375rem]';
-  const filteredPairings = useMemo(() => {
-    if (activeFilter === 'all') {
-      return pairings;
-    }
+  const showSearch = shouldShowPairingSearch(pairings.length);
 
-    return pairings.filter((pairing) => pairing.character.includes(activeFilter));
-  }, [activeFilter, pairings]);
+  const filteredPairings = useMemo(
+    () => filterFontPairs(pairings, { category, query: showSearch ? query : '' }),
+    [pairings, category, query, showSearch],
+  );
+
+  const recommendedIds = useMemo(
+    () => new Set(recommendedPairings.map((pair) => pair.id)),
+    [recommendedPairings],
+  );
+
+  const suggested = useMemo(
+    () => filteredPairings.filter((pair) => recommendedIds.has(pair.id)),
+    [filteredPairings, recommendedIds],
+  );
+
+  const catalog = useMemo(
+    () => filteredPairings.filter((pair) => !recommendedIds.has(pair.id)),
+    [filteredPairings, recommendedIds],
+  );
 
   useEffect(() => {
-    if (selectedPairing !== null) {
-      loadGoogleFonts([selectedPairing]);
+    if (selectedCatalogPairId) {
+      const selected = pairings.find((pair) => pair.id === selectedCatalogPairId);
+      if (selected) {
+        loadGoogleFonts([selected]);
+      }
     }
-  }, [selectedPairing]);
+  }, [pairings, selectedCatalogPairId]);
+
+  useEffect(() => {
+    if (filteredPairings.length === 0) {
+      return;
+    }
+    loadGoogleFonts(filteredPairings.slice(0, 12));
+  }, [filteredPairings]);
+
+  useEffect(() => {
+    if (!showSearch && query !== '') {
+      setQuery('');
+    }
+  }, [showSearch, query]);
+
+  const clearFilters = () => {
+    setQuery('');
+    setCategory('all');
+  };
 
   if (pairings.length === 0) {
     return (
       <p
         className={`rounded-md border border-dashed border-border bg-bg px-4 py-8 text-center ${emptyClass} text-muted`}
       >
-        No hay pares tipográficos para este filtro. Prueba otro carácter o elige Todos.
+        No hay pares tipográficos disponibles.
       </p>
     );
   }
 
+  const selectHandler = listInert ? () => undefined : onSelectPairing;
+  const previewHandler = listInert ? undefined : onPreviewPairing;
+  const clearHandler = listInert ? undefined : onClearPreview;
+
   return (
-    <div className={isTools ? 'flex min-h-0 flex-1 flex-col gap-3' : 'space-y-3'}>
-      <div
-        className="flex shrink-0 flex-wrap gap-1.5"
-        aria-label="Filtrar pares por carácter"
-      >
-        {FILTERS.map((filter) => (
-          <button
-            key={filter.value}
-            type="button"
-            onClick={() => setActiveFilter(filter.value)}
-            aria-pressed={activeFilter === filter.value}
-            className={`rounded-md px-2.5 py-1.5 ${chipClass} font-medium transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
-              activeFilter === filter.value
-                ? 'bg-surface-raised text-ink'
-                : 'text-muted hover:bg-surface-raised/70 hover:text-ink'
-            }`}
-          >
-            {filter.label}
-          </button>
-        ))}
+    <div className={`min-w-0 space-y-3 ${listInert ? 'opacity-60' : ''}`}>
+      <div className="space-y-2">
+        <PairingFilterChips value={category} onChange={setCategory} isTools={isTools} />
+
+        {showSearch ? (
+          <div role="search">
+            <label className="sr-only" htmlFor="pairing-search-input">
+              Buscar pares tipográficos
+            </label>
+            <input
+              id="pairing-search-input"
+              type="search"
+              value={query}
+              placeholder="Buscar pares…"
+              autoComplete="off"
+              disabled={listInert}
+              onChange={(event) => setQuery(event.target.value)}
+              className={`w-full rounded-lg border border-border bg-bg px-3 py-2 text-ink placeholder:text-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-not-allowed ${
+                isTools ? 'text-tools-body' : 'text-[0.9375rem]'
+              }`}
+            />
+          </div>
+        ) : null}
       </div>
 
-      <ul
-        className={`scrollbar-chrome space-y-2 overflow-y-auto ${
-          isTools ? 'min-h-0 flex-1' : 'max-h-[30rem]'
-        }`}
-      >
-        {filteredPairings.map((pairing) => (
-          <li key={pairing.id} className={isTools ? 'pb-2 last:pb-0' : undefined}>
-            <LazyPairCard
-              pairing={pairing}
-              selected={selectedPairing?.id === pairing.id}
-              onSelect={onSelectPairing}
+      <p className="sr-only" aria-live="polite">
+        {filteredPairings.length} pares
+        {listInert ? '. Lista inactiva: ambos roles fijados.' : ''}
+      </p>
+
+      {filteredPairings.length === 0 ? (
+        <div
+          className={`rounded-md border border-dashed border-border bg-bg px-4 py-6 text-center ${emptyClass} text-muted`}
+        >
+          <p>No hay pares que coincidan.</p>
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="mt-2 font-medium text-ink underline-offset-2 hover:underline"
+          >
+            Limpiar filtros
+          </button>
+        </div>
+      ) : (
+        <div className="min-w-0 space-y-3" aria-disabled={listInert || undefined}>
+          {suggested.length > 0 ? (
+            <PairGroup
+              heading="Sugeridos"
+              pairings={suggested}
+              selectedCatalogPairId={selectedCatalogPairId}
+              inert={listInert}
+              onSelect={selectHandler}
+              onPreview={previewHandler}
+              onClearPreview={clearHandler}
               variant={variant}
             />
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function LazyPairCard({
-  pairing,
-  selected,
-  onSelect,
-  variant = 'default',
-}: {
-  pairing: FontPair;
-  selected: boolean;
-  onSelect: (pairing: FontPair) => void;
-  variant?: 'default' | 'tools';
-}) {
-  const cardRef = useRef<HTMLDivElement | null>(null);
-  const [isNearViewport, setIsNearViewport] = useState(false);
-  const fontsRequested = selected || isNearViewport;
-
-  useEffect(() => {
-    if (selected) {
-      loadGoogleFonts([pairing]);
-    }
-  }, [pairing, selected]);
-
-  useEffect(() => {
-    if (fontsRequested || typeof IntersectionObserver === 'undefined') {
-      if (!fontsRequested) {
-        const timer = window.setTimeout(() => {
-          setIsNearViewport(true);
-          loadGoogleFonts([pairing]);
-        }, 0);
-
-        return () => window.clearTimeout(timer);
-      }
-      return;
-    }
-
-    const element = cardRef.current;
-
-    if (!element) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setIsNearViewport(true);
-          loadGoogleFonts([pairing]);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '160px 0px' },
-    );
-
-    observer.observe(element);
-
-    return () => observer.disconnect();
-  }, [fontsRequested, pairing]);
-
-  return (
-    <div ref={cardRef}>
-      <PairCard
-        pairing={pairing}
-        selected={selected}
-        fontsReady={fontsRequested}
-        onSelect={onSelect}
-        variant={variant}
-      />
+          ) : null}
+          <PairGroup
+            heading={suggested.length > 0 ? 'Catálogo' : null}
+            pairings={suggested.length > 0 ? catalog : filteredPairings}
+            selectedCatalogPairId={selectedCatalogPairId}
+            inert={listInert}
+            onSelect={selectHandler}
+            onPreview={previewHandler}
+            onClearPreview={clearHandler}
+            variant={variant}
+          />
+        </div>
+      )}
     </div>
   );
 }

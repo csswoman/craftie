@@ -18,6 +18,7 @@ interface ContrastBadgeProps {
   status: ContrastStatus;
   target: ContrastTarget;
   compact?: boolean;
+  dense?: boolean;
   contextLabel?: string;
 }
 
@@ -27,6 +28,7 @@ export function ContrastBadge({
   status,
   target,
   compact = false,
+  dense = false,
   contextLabel,
 }: ContrastBadgeProps) {
   const levelLabel = level === 'fail' ? '—' : level;
@@ -34,11 +36,15 @@ export function ContrastBadge({
   if (compact) {
     return (
       <span
-        className="inline-flex shrink-0 items-center gap-1 rounded-full bg-black/55 px-2 py-0.5 font-mono text-chrome-caption font-semibold text-white tabular-nums ring-1 ring-white/25"
+        className={`inline-flex shrink-0 items-center rounded-full bg-black/55 font-mono font-semibold text-white tabular-nums ring-1 ring-white/25 ${
+          dense
+            ? 'gap-0.5 px-1 py-0 text-[0.5625rem] leading-[1.1]'
+            : 'gap-1 px-2 py-0.5 text-chrome-caption'
+        }`}
         aria-label={`${contextLabel ? `${contextLabel}; ` : ''}Ratio ${ratio.toFixed(2)}; nivel ${levelLabel}; objetivo ${target}; ${STATUS_LABELS[status]}`}
       >
         {contextLabel ? (
-          <span className="max-w-[4.5rem] truncate text-[0.5625rem] font-semibold normal-case text-white/85">
+          <span className={`truncate font-semibold normal-case text-white/85 ${dense ? 'max-w-[3.5rem] text-[0.5rem]' : 'max-w-[4.5rem] text-[0.5625rem]'}`}>
             {contextLabel}
           </span>
         ) : null}

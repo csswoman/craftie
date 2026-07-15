@@ -11,7 +11,14 @@ interface GenerateButtonProps {
 export function GenerateButton({ onClick, disabled = false, busy = false }: GenerateButtonProps) {
   return (
     <div className="space-y-1.5">
-      <Button type="button" onClick={onClick} disabled={disabled || busy} aria-busy={busy} className="w-full">
+      <Button
+        id="generate-brand-guide"
+        type="button"
+        onClick={onClick}
+        disabled={disabled || busy}
+        aria-busy={busy}
+        className="w-full"
+      >
         {busy ? 'Creando guía…' : 'Crear guía de marca'}
       </Button>
       <p className="text-center text-chrome-caption leading-relaxed text-muted">

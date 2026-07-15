@@ -56,6 +56,7 @@ function rasterizeImage(image: HTMLImageElement): RasterData {
     throw new Error('Unable to create canvas rendering context.');
   }
 
+  context.imageSmoothingEnabled = false;
   context.drawImage(image, 0, 0, dimensions.width, dimensions.height);
   const imageData = context.getImageData(0, 0, dimensions.width, dimensions.height);
 
@@ -89,6 +90,7 @@ export async function extractColorsFromImage(
 export async function extractPaletteColorsFromImage(
   file: File,
   regenerateIndex = 0,
+  mode: 'paint' | 'ui' = 'ui',
 ): Promise<ExtractedColor[]> {
   const sampleSteps = [6, 8, 10, 12, 14];
   const sampleStep = sampleSteps[regenerateIndex % sampleSteps.length]!;
@@ -99,5 +101,6 @@ export async function extractPaletteColorsFromImage(
     sampleStep,
     sampleOffset: regenerateIndex % sampleStep,
     centroidSeed: regenerateIndex * 3,
+    publication: mode === 'paint' ? 'medoid' : 'centroid',
   });
 }

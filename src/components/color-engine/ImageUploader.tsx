@@ -2,6 +2,9 @@
 
 import { useId } from 'react';
 
+import type { ImageExtractionMode } from '@lib/color/imagePalette';
+import type { PaletteType } from '@lib/color/paletteClassification';
+
 import { ImageUploadPreview } from '@/components/color-engine/ImageUploadPreview';
 
 export type ImageUploaderProps = {
@@ -16,6 +19,18 @@ export type ImageUploaderProps = {
   showDropzone?: boolean;
   showChangeImageControl?: boolean;
   previewVariant?: 'default' | 'compact';
+  mode?: ImageExtractionMode;
+  paletteType?: PaletteType | null;
+  paletteTypeOverride?: PaletteType | null;
+  onModeChange?: (mode: ImageExtractionMode) => void;
+  onPaletteTypeChange?: (type: PaletteType | null) => void;
+};
+
+const PALETTE_TYPE_LABELS: Record<PaletteType, string> = {
+  pastel: 'Pastel',
+  vivid: 'Viva',
+  dark: 'Oscura',
+  neutral: 'Neutra',
 };
 
 export function ImageUploader({
@@ -30,6 +45,11 @@ export function ImageUploader({
   showDropzone = true,
   showChangeImageControl = true,
   previewVariant = 'default',
+  mode = 'ui',
+  paletteType = null,
+  paletteTypeOverride = null,
+  onModeChange,
+  onPaletteTypeChange,
 }: ImageUploaderProps) {
   const isEmbedded = variant === 'embedded';
   const inputId = useId();
@@ -71,6 +91,46 @@ export function ImageUploader({
             Sube una imagen local para extraer colores y armar automáticamente una paleta por roles. El archivo no sale de tu navegador.
           </p>
         </div>
+      ) : null}
+
+      {onModeChange ? (
+        <div className="grid grid-cols-2 gap-1 rounded-[var(--chrome-radius-control)] bg-surface-raised p-1" aria-label="Modo de extracción">
+          {(['paint', 'ui'] as const).map((option) => (
+            <button
+              key={option}
+              type="button"
+              aria-pressed={mode === option}
+              disabled={isLoading}
+              onClick={() => onModeChange(option)}
+              className={`min-h-10 rounded-[calc(var(--chrome-radius-control)-2px)] px-2 font-sans text-tools-meta font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:opacity-50 ${
+                mode === option ? 'bg-bg text-ink' : 'text-muted hover:text-ink'
+              }`}
+            >
+              {option === 'paint' ? 'Extraer para pintar' : 'Extraer para UI'}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      {mode === 'ui' && paletteType && onPaletteTypeChange ? (
+        <label className="flex items-center justify-between gap-3 font-sans text-tools-meta text-muted">
+          <span>
+            Tipo <strong className="font-semibold text-ink">{PALETTE_TYPE_LABELS[paletteType]}</strong>
+            {paletteTypeOverride ? ' · manual' : ' · detectado'}
+          </span>
+          <select
+            value={paletteTypeOverride ?? ''}
+            disabled={isLoading}
+            onChange={(event) => onPaletteTypeChange((event.target.value || null) as PaletteType | null)}
+            aria-label="Sobrescribir tipo de paleta"
+            className="min-h-10 rounded-[var(--chrome-radius-control)] border border-border bg-bg px-2 text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+          >
+            <option value="">Automático</option>
+            {Object.entries(PALETTE_TYPE_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
+        </label>
       ) : null}
 
       {hasPreview ? (

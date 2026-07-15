@@ -35,7 +35,7 @@ export function StudioStatusBar({
           : 'bottom-4'
       }`}
     >
-      <div className="panel-float pointer-events-auto flex max-w-full items-center gap-4 rounded-full px-4 py-2.5">
+      <div className="pointer-events-auto flex max-w-full items-center gap-4 rounded-lg border border-border bg-bg/95 px-3 py-2 shadow-sm backdrop-blur-sm">
         <div className="hidden min-w-0 items-center gap-3 sm:flex">
           <TypeChip label="Titular" value={pairing?.heading.family ?? 'Sin asignar'} />
           <span className="text-muted" aria-hidden="true">
