@@ -59,6 +59,27 @@ const EMPTY_LOCKED_BY_THEME: Record<ThemeId, PaletteRoleId[]> = {
   light: [],
   dark: [],
 };
+const DATA_TOKEN_NAMES = [
+  'data-1', 'data-2', 'data-3', 'data-4', 'data-5', 'data-6',
+] as const satisfies readonly SemanticTokenName[];
+
+function applyClearedDataTokens(
+  tokens: SemanticTokens,
+  clearedTokens: SemanticTokenName[],
+): SemanticTokens {
+  if (clearedTokens.length === 0) return tokens;
+
+  const next = { ...tokens };
+  for (const tokenName of DATA_TOKEN_NAMES) {
+    if (!clearedTokens.includes(tokenName)) continue;
+    next[tokenName] = {
+      hex: tokens[tokenName].hex,
+      source: 'derived',
+      gap: 'Esta categoría de datos está vacía. Elige un candidato para asignarla.',
+    };
+  }
+  return next;
+}
 
 export type RolePaletteContextValue = {
   rolePalette: RolePalette | null;
@@ -89,6 +110,7 @@ export type RolePaletteContextValue = {
   setActiveRole: (role: PaletteRoleId | null) => void;
   replaceRole: (role: PaletteRoleId, hex: string) => void;
   replaceSemanticToken: (tokenName: SemanticTokenName, hex: string) => void;
+  clearSemanticToken: (tokenName: SemanticTokenName) => void;
   generateStatusColors: () => void;
   assignSourceToStatus: (role: UiStatusRole, hex: string) => void;
   selectStatusColor: (status: UiStatusColor) => void;
@@ -107,6 +129,7 @@ const RolePaletteContext = createContext<RolePaletteContextValue | null>(null);
 export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   const [extractedColors, setExtractedColors] = useState<ExtractedColor[]>([]);
   const [tokenOverrides, setTokenOverrides] = useState<SemanticTokenOverrides>({});
+  const [clearedSemanticTokens, setClearedSemanticTokens] = useState<SemanticTokenName[]>([]);
   const [roleNames, setRoleNames] = useState<Partial<Record<PaletteRoleId, string>>>({});
   const [activeTheme, setActiveTheme] = useState<ThemeId>('light');
   const [savedVibrancy, setSavedVibrancy] = useState(VIBRANCY_MID);
@@ -131,30 +154,30 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       return null;
     }
 
-    return resolveUiExpressiveGaps(deriveSemanticTokens({
+    return applyClearedDataTokens(resolveUiExpressiveGaps(deriveSemanticTokens({
       extracted: extractedColors,
       overrides: tokenOverrides,
       theme: activeTheme,
       neutralStyle,
       vibrancy: savedVibrancy,
       paletteType,
-    }), extractedColors);
-  }, [activeTheme, extractedColors, neutralStyle, paletteType, savedVibrancy, tokenOverrides]);
+    }), extractedColors), clearedSemanticTokens);
+  }, [activeTheme, clearedSemanticTokens, extractedColors, neutralStyle, paletteType, savedVibrancy, tokenOverrides]);
 
   const previewBaseSemanticTokens = useMemo(() => {
     if (extractedColors.length === 0) {
       return null;
     }
 
-    return resolveUiExpressiveGaps(deriveSemanticTokens({
+    return applyClearedDataTokens(resolveUiExpressiveGaps(deriveSemanticTokens({
       extracted: extractedColors,
       overrides: tokenOverrides,
       theme: activeTheme,
       neutralStyle,
       vibrancy: previewVibrancy,
       paletteType,
-    }), extractedColors);
-  }, [activeTheme, extractedColors, neutralStyle, paletteType, previewVibrancy, tokenOverrides]);
+    }), extractedColors), clearedSemanticTokens);
+  }, [activeTheme, clearedSemanticTokens, extractedColors, neutralStyle, paletteType, previewVibrancy, tokenOverrides]);
 
   const statusColors = useMemo(
     () => statusColorsEnabled && baseSemanticTokens
@@ -212,6 +235,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       if (palette === null) {
         setExtractedColors([]);
         setTokenOverrides({});
+        setClearedSemanticTokens([]);
         setRoleNames({});
         setLockedRolesByTheme(EMPTY_LOCKED_BY_THEME);
         setSavedVibrancy(VIBRANCY_MID);
@@ -232,6 +256,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
         })),
       );
       setTokenOverrides(rolePaletteAsSemanticOverrides(palette));
+      setClearedSemanticTokens([]);
       setSavedVibrancy(VIBRANCY_MID);
       setPreviewVibrancyState(VIBRANCY_MID);
       setIllustrationSeed(DEFAULT_ILLUSTRATION_SEED);
@@ -248,6 +273,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
     setExtractedColors(extracted);
     setPaletteType(nextPaletteType);
     setTokenOverrides({});
+    setClearedSemanticTokens([]);
     setRoleNames({});
     setLockedRolesByTheme(EMPTY_LOCKED_BY_THEME);
     setSavedVibrancy(VIBRANCY_MID);
@@ -292,6 +318,18 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       ...current,
       [tokenName]: normalized,
     }));
+    setClearedSemanticTokens((current) => current.filter((name) => name !== tokenName));
+  }, []);
+
+  const clearSemanticToken = useCallback((tokenName: SemanticTokenName) => {
+    setTokenOverrides((current) => {
+      const next = { ...current };
+      delete next[tokenName];
+      return next;
+    });
+    setClearedSemanticTokens((current) => current.includes(tokenName)
+      ? current
+      : [...current, tokenName]);
   }, []);
 
   const generateStatusColors = useCallback(() => {
@@ -366,6 +404,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
     setPaletteRevision((revision) => revision + 1);
     setExtractedColors([]);
     setTokenOverrides({});
+    setClearedSemanticTokens([]);
     setRoleNames({});
     setLockedRolesByTheme(EMPTY_LOCKED_BY_THEME);
     setActiveTheme('light');
@@ -390,6 +429,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
 
       setExtractedColors(extracted);
       setTokenOverrides({});
+      setClearedSemanticTokens([]);
       setRoleNames(
         Object.fromEntries(
           Object.values(assigned).map((slot) => [slot.role, slot.name]),
@@ -438,6 +478,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       setActiveRole,
       replaceRole,
       replaceSemanticToken,
+      clearSemanticToken,
       generateStatusColors,
       assignSourceToStatus,
       selectStatusColor,
@@ -473,6 +514,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       setNeutralStyle,
       replaceRole,
       replaceSemanticToken,
+      clearSemanticToken,
       generateStatusColors,
       assignSourceToStatus,
       selectStatusColor,

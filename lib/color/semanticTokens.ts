@@ -973,18 +973,22 @@ export function deriveSemanticTokens(input: SemanticTokenDerivationInput): Seman
     const dataGap = token(base.primary.hex, 'derived', {
       gap: 'La imagen no tiene variedad cromática suficiente para esta categoría de datos. Deriva variantes por luminosidad o elige una fuente.',
     });
+    const resolvedDataToken = (name: SemanticTokenName): SemanticToken => {
+      const override = input.overrides?.[name];
+      return override ? token(override, 'override') : dataGap;
+    };
 
     return {
       ...base,
       accent: token(base.surface.hex, 'derived', {
         gap: 'Esta imagen no tiene un color con suficiente carácter para acento.',
       }),
-      'data-1': dataGap,
-      'data-2': dataGap,
-      'data-3': dataGap,
-      'data-4': dataGap,
-      'data-5': dataGap,
-      'data-6': dataGap,
+      'data-1': resolvedDataToken('data-1'),
+      'data-2': resolvedDataToken('data-2'),
+      'data-3': resolvedDataToken('data-3'),
+      'data-4': resolvedDataToken('data-4'),
+      'data-5': resolvedDataToken('data-5'),
+      'data-6': resolvedDataToken('data-6'),
     };
   }
 

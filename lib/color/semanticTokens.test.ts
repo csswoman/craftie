@@ -347,6 +347,16 @@ describe('deriveSemanticTokens', () => {
     }
   });
 
+  it('preserves manual data overrides for neutral input', () => {
+    const tokens = deriveSemanticTokens({
+      extracted: nearMonochromeExtracted(),
+      overrides: { 'data-1': '#5566AA' },
+    });
+
+    expect(tokens['data-1']).toEqual({ hex: '#5566AA', source: 'override' });
+    expect(tokens['data-2'].gap).toBeTruthy();
+  });
+
   it('preserves extracted expressive tokens at every vibrancy setting', () => {
     const pastel = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, vibrancy: 0 });
     const bright = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, vibrancy: 100 });

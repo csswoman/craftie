@@ -22,6 +22,7 @@ export function UiColorPanel({ colors }: { colors: SelectableColor[] }) {
     statusColors,
     paletteRevision,
     replaceSemanticToken,
+    clearSemanticToken,
     generateStatusColors,
     assignSourceToStatus,
     selectStatusColor,
@@ -66,7 +67,12 @@ export function UiColorPanel({ colors }: { colors: SelectableColor[] }) {
         onToggle={toggleToken}
         onSelect={selectForToken}
       />
-      <UiDataSection tokens={resolvedTokens} colors={colors} onReplace={replaceSemanticToken} />
+      <UiDataSection
+        tokens={resolvedTokens}
+        colors={colors}
+        onReplace={replaceSemanticToken}
+        onClear={clearSemanticToken}
+      />
       <UiStatusColorsSection
         colors={colors}
         statusColors={statusColors}
