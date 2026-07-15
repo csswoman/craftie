@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react';
 
-import { buildExpressiveCandidates } from '@lib/color/uiColorCandidates';
 import { normalizeHex } from '@lib/color/normalizeHex';
 import { resolvePaletteDisplayNames } from '@lib/color/paletteDisplay';
 import type { SelectableColor } from '@lib/color/selectableColors';
@@ -59,8 +58,6 @@ export function UiSourceColorsSection({
           const roles = roleIndex.get(hex) ?? [];
           const name = names.get(color.id) ?? color.name;
           const open = openHex === hex;
-          const expressiveDisabled = buildExpressiveCandidates([color])
-            .find((candidate) => candidate.id === `source-${color.id}`)?.verdict.disabled ?? true;
           return (
             <li key={color.id}>
               <div className="flex min-h-11 items-center gap-2 px-2.5 py-2">
@@ -102,12 +99,10 @@ export function UiSourceColorsSection({
                   {action === 'role' ? (
                     <div className="flex flex-wrap gap-1.5" aria-label={`Asignar ${name} a un rol`}>
                       {UI_SYSTEM_ROLES.map((role) => {
-                        const expressive = role.token === 'primary' || role.token === 'secondary' || role.token === 'accent';
                         return (
                           <button
                             key={role.token}
                             type="button"
-                            disabled={expressive && expressiveDisabled}
                             onClick={() => {
                               onAssignRole(role.token, hex);
                               setMessage(`${name} asignado a ${role.label}.`);

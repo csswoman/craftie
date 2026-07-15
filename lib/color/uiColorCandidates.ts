@@ -1,6 +1,6 @@
 import { converter } from 'culori';
 
-import { remainsDistinctWithColorVisionDeficiency, simulateColorVision } from './colorVision';
+import { evaluateColorFitness, fitnessForUse, type ColorFitness, type ColorUse } from './colorFitness';
 import { normalizeHex } from './normalizeHex';
 import type { SelectableColor } from './selectableColors';
 import type { SemanticTokenName, SemanticTokens } from './semanticTokens';
@@ -9,21 +9,22 @@ import { contrastRatio, oklchChannelsToHex } from '../utils/colorMath';
 
 const toOklch = converter('oklch');
 const toOklab = converter('oklab');
-
-export type CandidateVerdictKind = 'serve' | 'weak' | 'collision';
-
+export type CandidateOrigin = 'source' | 'derived' | 'synthetic';
 export type UiColorCandidate = {
   id: string;
   hex: string;
   name: string;
   detail: string;
-  verdict: {
-    kind: CandidateVerdictKind;
-    label: string;
-    metric: string;
-    disabled: boolean;
-  };
+  origin: CandidateOrigin;
+  fitness: ColorFitness;
+  dataSeparation?: { minHue: number | null; minLightness: number | null };
   score: number;
+};
+
+export type CandidateFamily = {
+  id: string;
+  representative: UiColorCandidate;
+  variants: UiColorCandidate[];
 };
 
 type OccupiedSeries = { index: number; hex: string };
@@ -33,52 +34,25 @@ function hueDistance(left: number, right: number): number {
   return Math.min(distance, 360 - distance);
 }
 
-function visionDistance(leftHex: string, rightHex: string, deficiency: 'protanopia' | 'deuteranopia'): number {
-  const left = toOklab(simulateColorVision(leftHex, deficiency));
-  const right = toOklab(simulateColorVision(rightHex, deficiency));
-  if (!left || !right) return 0;
-  return Math.hypot(
-    (left.l ?? 0) - (right.l ?? 0),
-    (left.a ?? 0) - (right.a ?? 0),
-    (left.b ?? 0) - (right.b ?? 0),
-  );
-}
-
-function dataVerdict(hex: string, occupied: OccupiedSeries[], backgroundHex: string) {
-  const channels = toOklch(hex);
-  const contrast = contrastRatio(hex, backgroundHex);
-
-  for (const series of occupied) {
+function dataSeparation(hex: string, occupied: OccupiedSeries[]): UiColorCandidate['dataSeparation'] {
+  const candidate = toOklch(hex);
+  if (!candidate || occupied.length === 0) return { minHue: null, minLightness: null };
+  const separations = occupied.map((series) => {
     const previous = toOklch(series.hex);
-    const deltaL = Math.abs((channels?.l ?? 0) - (previous?.l ?? 0));
-    const deltaHue = typeof channels?.h === 'number' && typeof previous?.h === 'number'
-      ? hueDistance(channels.h, previous.h)
-      : 0;
-    const structuralPass = deltaHue >= 25 || deltaL >= 0.15;
-    const visionPass = remainsDistinctWithColorVisionDeficiency(hex, series.hex);
-
-    if (!structuralPass || !visionPass) {
-      const deuteranopiaCollision = visionDistance(hex, series.hex, 'deuteranopia') < 0.045;
-      const protanopiaCollision = visionDistance(hex, series.hex, 'protanopia') < 0.045;
-      return {
-        kind: 'collision' as const,
-        label: 'Colisiona',
-        metric: deuteranopiaCollision
-          ? `deuteranopía vs serie ${series.index}`
-          : protanopiaCollision
-            ? `protanopía vs serie ${series.index}`
-          : `ΔL ${deltaL.toFixed(2)} vs serie ${series.index}`,
-        disabled: true,
-      };
-    }
-  }
-
-  return contrast >= 3
-    ? { kind: 'serve' as const, label: 'Sirve', metric: `${contrast.toFixed(1)}:1 vs fondo`, disabled: false }
-    : { kind: 'weak' as const, label: `Débil ${contrast.toFixed(1)}:1`, metric: 'por debajo de 3:1', disabled: false };
+    return {
+      hue: typeof candidate.h === 'number' && typeof previous?.h === 'number'
+        ? hueDistance(candidate.h, previous.h)
+        : 0,
+      lightness: Math.abs((candidate.l ?? 0) - (previous?.l ?? 0)),
+    };
+  });
+  return {
+    minHue: Math.min(...separations.map((entry) => entry.hue)),
+    minLightness: Math.min(...separations.map((entry) => entry.lightness)),
+  };
 }
 
-function occupiedSeries(tokens: SemanticTokens, selected: SemanticTokenName): OccupiedSeries[] {
+function occupiedSeries(tokens: SemanticTokens, selected?: SemanticTokenName): OccupiedSeries[] {
   return DATA_TOKEN_NAMES.flatMap((name, index) =>
     name !== selected && !tokens[name].gap ? [{ index: index + 1, hex: tokens[name].hex }] : [],
   );
@@ -94,13 +68,22 @@ export function buildDataCandidates(
   const candidates: UiColorCandidate[] = [];
   const seen = new Set<string>();
 
-  function addCandidate(hex: string, name: string, detail: string, id: string) {
+  function addCandidate(hex: string, name: string, detail: string, id: string, origin: CandidateOrigin) {
     const normalized = normalizeHex(hex);
     if (seen.has(normalized) || occupiedHexes.has(normalized)) return;
     seen.add(normalized);
-    const verdict = dataVerdict(normalized, occupied, tokens.background.hex);
+    const fitness = candidateFitness(normalized, tokens, occupied.map((series) => series.hex));
     const chroma = toOklch(normalized)?.c ?? 0;
-    candidates.push({ id, hex: normalized, name, detail, verdict, score: contrastRatio(normalized, tokens.background.hex) + chroma });
+    candidates.push({
+      id,
+      hex: normalized,
+      name,
+      detail,
+      origin,
+      fitness,
+      dataSeparation: dataSeparation(normalized, occupied),
+      score: contrastRatio(normalized, tokens.background.hex) + chroma,
+    });
   }
 
   for (const color of colors) {
@@ -113,6 +96,7 @@ export function buildDataCandidates(
       color.name || 'Color fuente',
       `fuente · ΔL ${minDeltaL.toFixed(2)} · hue ${Math.round(channels?.h ?? 0)}°`,
       `source-${color.id}`,
+      'source',
     );
     if (!channels || typeof channels.h !== 'number' || (channels.c ?? 0) < 0.03) continue;
     for (const delta of [-0.22, 0.22]) {
@@ -124,6 +108,7 @@ export function buildDataCandidates(
         'Derivado',
         `de ${color.name || 'fuente'} · L ${actualDelta >= 0 ? '+' : ''}${actualDelta.toFixed(2)}`,
         `source-derived-${color.id}-${delta}`,
+        'derived',
       );
     }
   }
@@ -146,14 +131,12 @@ export function buildDataCandidates(
         'Derivado',
         `de ${base.label} · L ${actualDelta >= 0 ? '+' : ''}${actualDelta.toFixed(2)}`,
         `derived-${base.token}-${delta}`,
+        tokens[base.token].source === 'derived' ? 'synthetic' : 'derived',
       );
     }
   }
 
-  return candidates.sort((left, right) => {
-    const rank = { serve: 0, weak: 1, collision: 2 };
-    return rank[left.verdict.kind] - rank[right.verdict.kind] || right.score - left.score;
-  });
+  return candidates.sort((left, right) => Number(right.fitness.asData.ok) - Number(left.fitness.asData.ok) || right.score - left.score);
 }
 
 export function autoFillDataGaps(tokens: SemanticTokens, colors: SelectableColor[]) {
@@ -163,7 +146,7 @@ export function autoFillDataGaps(tokens: SemanticTokens, colors: SelectableColor
   for (const tokenName of DATA_TOKEN_NAMES) {
     if (!working[tokenName].gap) continue;
     const candidate = buildDataCandidates(working, colors, tokenName)
-      .find((entry) => !entry.verdict.disabled);
+      .find((entry) => entry.fitness.asData.ok);
     if (!candidate) continue;
     result.push({ token: tokenName, hex: candidate.hex, candidate });
     working[tokenName] = { hex: candidate.hex, source: 'override' };
@@ -172,26 +155,22 @@ export function autoFillDataGaps(tokens: SemanticTokens, colors: SelectableColor
   return result;
 }
 
-export function buildExpressiveCandidates(colors: SelectableColor[]): UiColorCandidate[] {
+export function buildExpressiveCandidates(colors: SelectableColor[], tokens: SemanticTokens): UiColorCandidate[] {
   const seen = new Set<string>();
   const candidates: UiColorCandidate[] = [];
 
-  function add(hex: string, name: string, detail: string, id: string) {
+  function add(hex: string, name: string, detail: string, id: string, origin: CandidateOrigin) {
     const normalized = normalizeHex(hex);
     if (seen.has(normalized)) return;
     seen.add(normalized);
     const chroma = toOklch(normalized)?.c ?? 0;
-    const verdict = chroma >= 0.055
-      ? { kind: 'serve' as const, label: 'Sirve', metric: `C ${chroma.toFixed(3)}`, disabled: false }
-      : chroma >= 0.03
-        ? { kind: 'weak' as const, label: 'Débil', metric: `C ${chroma.toFixed(3)} < .055`, disabled: false }
-        : { kind: 'collision' as const, label: 'Sin carácter', metric: `C ${chroma.toFixed(3)} < .030`, disabled: true };
-    candidates.push({ id, hex: normalized, name, detail, verdict, score: chroma });
+    const fitness = candidateFitness(normalized, tokens, occupiedSeries(tokens).map((series) => series.hex));
+    candidates.push({ id, hex: normalized, name, detail, origin, fitness, score: chroma });
   }
 
   for (const color of colors) {
     const channels = toOklch(color.hex);
-    add(color.hex, color.name || 'Color fuente', `fuente · C ${(channels?.c ?? 0).toFixed(3)} · hue ${Math.round(channels?.h ?? 0)}°`, `source-${color.id}`);
+    add(color.hex, color.name || 'Color fuente', `fuente · C ${(channels?.c ?? 0).toFixed(3)} · hue ${Math.round(channels?.h ?? 0)}°`, `source-${color.id}`, 'source');
     if (!channels || typeof channels.h !== 'number' || (channels.c ?? 0) < 0.03) continue;
     for (const delta of [-0.22, 0.22]) {
       const lightness = Math.min(0.9, Math.max(0.15, (channels.l ?? 0.5) + delta));
@@ -202,9 +181,100 @@ export function buildExpressiveCandidates(colors: SelectableColor[]): UiColorCan
         'Derivado',
         `de ${color.name || 'fuente'} · L ${actualDelta >= 0 ? '+' : ''}${actualDelta.toFixed(2)}`,
         `derived-${color.id}-${delta}`,
+        'derived',
       );
     }
   }
 
   return candidates.sort((left, right) => right.score - left.score);
+}
+
+export function sortCandidatesForUse(candidates: UiColorCandidate[], use: ColorUse): UiColorCandidate[] {
+  return [...candidates].sort((left, right) => {
+    const leftFitness = fitnessForUse(left.fitness, use);
+    const rightFitness = fitnessForUse(right.fitness, use);
+    return Number(rightFitness.ok) - Number(leftFitness.ok)
+      || (rightFitness.ratio ?? 0) - (leftFitness.ratio ?? 0)
+      || right.score - left.score;
+  });
+}
+
+export function groupCandidatesForUse(candidates: UiColorCandidate[], use: ColorUse): CandidateFamily[] {
+  const originRank: Record<CandidateOrigin, number> = { source: 0, derived: 1, synthetic: 2 };
+  const ordered = sortCandidatesForUse(candidates, use);
+  const families: CandidateFamily[] = [];
+
+  for (const candidate of ordered) {
+    const family = families.find((entry) => perceptuallyNear(entry.representative.hex, candidate.hex));
+    if (family) {
+      family.variants.push(candidate);
+    } else {
+      families.push({ id: candidate.id, representative: candidate, variants: [] });
+    }
+  }
+
+  for (const family of families) {
+    const members = [family.representative, ...family.variants];
+    const bestSource = members
+      .filter((candidate) => candidate.origin === 'source' && fitnessForUse(candidate.fitness, use).ok)
+      .sort((left, right) => compareFitness(left, right, use))[0];
+    if (bestSource && bestSource.id !== family.representative.id) {
+      family.variants = members.filter((candidate) => candidate.id !== bestSource.id);
+      family.representative = bestSource;
+      family.id = bestSource.id;
+    }
+  }
+
+  return families.sort((left, right) =>
+    originRank[left.representative.origin] - originRank[right.representative.origin]
+    || compareFitness(left.representative, right.representative, use),
+  );
+}
+
+function compareFitness(left: UiColorCandidate, right: UiColorCandidate, use: ColorUse): number {
+  const leftFitness = fitnessForUse(left.fitness, use);
+  const rightFitness = fitnessForUse(right.fitness, use);
+  return Number(rightFitness.ok) - Number(leftFitness.ok)
+    || (rightFitness.ratio ?? 0) - (leftFitness.ratio ?? 0)
+    || right.score - left.score;
+}
+
+function perceptuallyNear(leftHex: string, rightHex: string): boolean {
+  const leftLab = toOklab(leftHex);
+  const rightLab = toOklab(rightHex);
+  const labDistance = leftLab && rightLab
+    ? Math.hypot(
+        (leftLab.l ?? 0) - (rightLab.l ?? 0),
+        (leftLab.a ?? 0) - (rightLab.a ?? 0),
+        (leftLab.b ?? 0) - (rightLab.b ?? 0),
+      )
+    : Number.POSITIVE_INFINITY;
+  if (labDistance < 0.08) return true;
+  const left = toOklch(leftHex);
+  const right = toOklch(rightHex);
+  if (!left || !right) return false;
+  return hueDistance(left.h ?? 0, right.h ?? 0) <= 15
+    && Math.abs((left.l ?? 0) - (right.l ?? 0)) < 0.12
+    && Math.abs((left.c ?? 0) - (right.c ?? 0)) < 0.06;
+}
+
+export function deriveFromPrimary(primaryHex: string): string {
+  const primary = toOklch(primaryHex);
+  const lightness = (primary?.l ?? 0.5) >= 0.5
+    ? Math.max(0.12, (primary?.l ?? 0.5) - 0.18)
+    : Math.min(0.9, (primary?.l ?? 0.5) + 0.18);
+  return oklchChannelsToHex(
+    lightness,
+    Math.max(0.055, primary?.c ?? 0.08),
+    ((primary?.h ?? 0) + 34) % 360,
+  );
+}
+
+function candidateFitness(hex: string, tokens: SemanticTokens, occupiedDataHexes: string[]): ColorFitness {
+  return evaluateColorFitness(hex, {
+    backgroundHex: tokens.background.hex,
+    lightOnColorBaseHex: tokens['surface-elevated'].hex,
+    darkTextBaseHex: tokens['on-surface'].hex,
+    occupiedDataHexes,
+  });
 }

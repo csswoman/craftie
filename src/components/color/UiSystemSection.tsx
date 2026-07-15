@@ -6,7 +6,12 @@ import { normalizeHex } from '@lib/color/normalizeHex';
 import type { SelectableColor } from '@lib/color/selectableColors';
 import { getSemanticTokenContrastInfo } from '@lib/color/semanticTokenTargets';
 import type { SemanticTokenName, SemanticTokens } from '@lib/color/semanticTokens';
-import { UI_SYSTEM_ROLES } from '@lib/color/uiColorPanel';
+import {
+  colorUseForSystemToken,
+  systemTokenFitness,
+  UI_SYSTEM_ROLES,
+} from '@lib/color/uiColorPanel';
+import { deriveFromPrimary } from '@lib/color/uiColorCandidates';
 import { EXPRESSIVE_TOKEN_NAMES } from '@lib/color/uiExpressiveGaps';
 
 import { InlineSystemRolePicker } from './InlineSystemRolePicker';
@@ -34,12 +39,35 @@ export function UiSystemSection({
     () => new Set(colors.map((color) => normalizeHex(color.hex))),
     [colors],
   );
+  const unassignedRoles = UI_SYSTEM_ROLES.filter((role) => Boolean(tokens[role.token].gap));
+
+  function jumpToFirstGap() {
+    const first = unassignedRoles[0];
+    if (!first) return;
+    onToggle(first.token);
+    requestAnimationFrame(() => {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      document.getElementById(`ui-role-${first.token}`)?.scrollIntoView({
+        behavior: reduceMotion ? 'auto' : 'smooth',
+        block: 'nearest',
+      });
+    });
+  }
 
   return (
     <section aria-labelledby="ui-system-title">
       <UiColorSectionHeader title="Sistema" />
       <h2 id="ui-system-title" className="sr-only">Sistema de color</h2>
       <UiColorComposition tokens={tokens} loadPercent={loadPercent} />
+      {unassignedRoles.length > 0 ? (
+        <button
+          type="button"
+          onClick={jumpToFirstGap}
+          className="mt-2 min-h-9 w-full rounded-md bg-[#FFF4D6] px-2.5 text-left text-tools-meta font-semibold text-[#6B4700] hover:bg-[#FCE9B6] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 dark:bg-[#4A3A16] dark:text-[#F7D98A]"
+        >
+          <span aria-hidden="true">⚠ </span>{unassignedRoles.length} {unassignedRoles.length === 1 ? 'rol sin asignar' : 'roles sin asignar'} · revisar
+        </button>
+      ) : null}
       <ul className="mt-2 overflow-hidden rounded-lg border border-border bg-bg">
         {UI_SYSTEM_ROLES.map((role, index) => {
           const token = tokens[role.token];
@@ -49,15 +77,30 @@ export function UiSystemSection({
           const isOpen = openToken === role.token;
           const unassigned = EXPRESSIVE_TOKEN_NAMES.includes(role.token as typeof EXPRESSIVE_TOKEN_NAMES[number]) && Boolean(token.gap);
           const fromSource = sourceHexes.has(normalizeHex(token.hex));
+          const fitness = systemTokenFitness(tokens, role.token);
+          const origin = fromSource || token.source === 'extracted'
+            ? 'fuente'
+            : token.source === 'derived'
+              ? 'sintético'
+              : 'derivado';
+          const useLabel = fitness.use === 'fill'
+            ? 'Fill'
+            : fitness.use === 'accent'
+              ? 'Acento'
+              : fitness.use === 'text'
+                ? 'Texto'
+                : 'Superficie';
+          const fitnessRatio = contrast?.ratio ?? fitness.result.ratio;
 
           return (
-            <li key={role.token} className={index > 0 ? 'border-t border-border' : ''}>
+            <li id={`ui-role-${role.token}`} key={role.token} className={index > 0 ? 'border-t border-border' : ''}>
               <button
                 type="button"
                 aria-expanded={isOpen}
                 onClick={() => onToggle(role.token)}
                 className={`flex min-h-12 w-full items-center gap-2 px-2.5 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-primary/25 ${isOpen ? 'bg-surface' : 'hover:bg-surface-raised'}`}
               >
+                {unassigned ? <span className="shrink-0 text-[#8A5A00] dark:text-[#F7D98A]" aria-label="Requiere atención">⚠</span> : null}
                 <span
                   className={`size-[26px] shrink-0 rounded-md ${unassigned ? 'border border-dashed border-muted/60' : 'ring-1 ring-inset ring-ink/10'}`}
                   style={unassigned ? {
@@ -72,12 +115,12 @@ export function UiSystemSection({
                     {unassigned ? 'Sin asignar' : token.hex.toUpperCase()}
                   </span>
                 </span>
-                {!unassigned ? <span className={`rounded-full px-1.5 py-0.5 text-[0.625rem] font-medium ${fromSource ? 'bg-[var(--chrome-green-soft)] text-[var(--chrome-green)]' : 'bg-surface-raised text-muted'}`}>
-                  {fromSource ? 'fuente' : 'derivado'}
+                {!unassigned ? <span className={`hidden rounded-full px-1.5 py-0.5 text-[0.625rem] font-medium sm:inline ${origin === 'fuente' ? 'bg-[var(--chrome-green-soft)] text-[var(--chrome-green)]' : 'bg-surface-raised text-muted'}`}>
+                  {origin}
                 </span> : null}
-                {contrast && !unassigned ? (
-                  <span className={`shrink-0 font-mono text-[0.65625rem] font-semibold tabular-nums ${contrast.status === 'pass' ? 'text-pass' : 'text-fail'}`}>
-                    {contrast.ratio.toFixed(1)}:1 {contrast.status === 'pass' ? '✓' : '⚠'}
+                {!unassigned ? (
+                  <span className={`shrink-0 rounded-md px-1.5 py-1 text-[0.625rem] font-semibold ${fitness.result.ok ? 'bg-[var(--chrome-green-soft)] text-[var(--chrome-green)]' : 'bg-surface-raised text-muted'}`}>
+                    {fitness.result.ok ? '✓' : '✕'} {useLabel}{fitnessRatio === undefined ? '' : ` · ${fitnessRatio.toFixed(1)}:1`}
                   </span>
                 ) : null}
                 <Chevron open={isOpen} />
@@ -86,11 +129,14 @@ export function UiSystemSection({
                 <InlineSystemRolePicker
                   tokenName={role.token}
                   currentHex={token.hex}
+                  tokens={tokens}
                   colors={colors}
                   neutralSteps={neutralSteps}
                   unassigned={unassigned}
                   roleLabel={role.label}
+                  relevantUse={colorUseForSystemToken(role.token)}
                   onSelect={(hex) => onSelect(role.token, hex)}
+                  onDeriveFromPrimary={() => onSelect(role.token, deriveFromPrimary(tokens.primary.hex))}
                   onContinueWithout={() => onToggle(role.token)}
                 />
               ) : null}

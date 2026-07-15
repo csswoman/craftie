@@ -33,6 +33,10 @@ export function UiDataSection({
     [activeGap, colors, tokens],
   );
   const completeCount = DATA_TOKEN_NAMES.length - gaps.length;
+  const hasDataCandidate = candidates.some((candidate) => candidate.fitness.asData.ok);
+  const activeSeriesIndex = activeGap
+    ? DATA_TOKEN_NAMES.indexOf(activeGap as typeof DATA_TOKEN_NAMES[number]) + 1
+    : 0;
 
   function selectGap(tokenName: SemanticTokenName) {
     setSelectedGap(tokenName);
@@ -42,9 +46,17 @@ export function UiDataSection({
 
   function selectCandidate(candidate: UiColorCandidate) {
     if (!activeGap) return;
-    onReplace(activeGap, candidate.hex);
-    setSelectedGap(null);
-    setAutoMessage(null);
+    const assignedGap = activeGap;
+    const currentPosition = gaps.indexOf(assignedGap as typeof DATA_TOKEN_NAMES[number]);
+    const nextGap = [
+      ...gaps.slice(currentPosition + 1),
+      ...gaps.slice(0, currentPosition),
+    ][0] ?? null;
+    onReplace(assignedGap, candidate.hex);
+    setSelectedGap(nextGap);
+    setAutoMessage(nextGap
+      ? `${candidate.name} asignado a la serie ${activeSeriesIndex}. Continúa con la siguiente serie vacía.`
+      : `${candidate.name} asignado a la serie ${activeSeriesIndex}. Serie completa.`);
   }
 
   function fillAutomatically() {
@@ -52,12 +64,9 @@ export function UiDataSection({
     replacements.forEach(({ token, hex }) => onReplace(token, hex));
     setSelectedGap(null);
     setAcceptedIncomplete(false);
-    const weak = replacements.find(({ candidate }) => candidate.verdict.kind === 'weak');
     setAutoMessage(replacements.length === 0
-      ? 'Todos los candidatos disponibles colisionan. Abre un hueco para revisar por qué.'
-      : weak
-        ? `Relleno con la mejor opción disponible: ${weak.candidate.name}, ${weak.candidate.verdict.label.toLocaleLowerCase('es')} (${weak.candidate.verdict.metric}).`
-        : `Se rellenaron ${replacements.length} huecos con candidatos válidos.`);
+      ? 'No hay candidatos aptos como dato. Revisa el eje Datos y elige de forma explícita si quieres forzar uno.'
+      : `Se rellenaron ${replacements.length} huecos con candidatos aptos como dato.`);
   }
 
   function acceptIncomplete() {
@@ -104,8 +113,19 @@ export function UiDataSection({
 
           {activeGap ? (
             <div className="space-y-2">
-              <p className="text-tools-meta font-semibold text-ink">Candidatos para serie {DATA_TOKEN_NAMES.indexOf(activeGap as typeof DATA_TOKEN_NAMES[number]) + 1}</p>
-              <ColorCandidateList candidates={candidates} onSelect={selectCandidate} highlightBest />
+              <h3 className="text-tools-name font-semibold text-ink">Serie {activeSeriesIndex} de {DATA_TOKEN_NAMES.length}</h3>
+              {!hasDataCandidate ? (
+                <p className="text-tools-meta leading-relaxed text-muted">
+                  Ninguno encaja bien como dato. El eje Datos muestra la advertencia; aún puedes elegir uno de forma explícita.
+                </p>
+              ) : null}
+              <ColorCandidateList
+                candidates={candidates}
+                activeUse="data"
+                actionLabel={`Usar en serie ${activeSeriesIndex}`}
+                onSelect={selectCandidate}
+                showData
+              />
             </div>
           ) : null}
 

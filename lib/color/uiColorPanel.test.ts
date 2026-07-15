@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { deriveSemanticTokens } from './semanticTokens';
 import {
   buildTintedNeutralRamp,
+  colorUseForSystemToken,
   deriveMissingDataColors,
   rolesBySourceHex,
 } from './uiColorPanel';
@@ -15,6 +16,15 @@ const colors: SelectableColor[] = [
 ];
 
 describe('UI color panel model', () => {
+  it('maps system roles to the fitness axis that matters for selection', () => {
+    expect(colorUseForSystemToken('primary')).toBe('fill');
+    expect(colorUseForSystemToken('secondary')).toBe('fill');
+    expect(colorUseForSystemToken('accent')).toBe('accent');
+    expect(colorUseForSystemToken('on-background')).toBe('text');
+    expect(colorUseForSystemToken('surface')).toBe('surface');
+    expect(colorUseForSystemToken('border')).toBe('surface');
+  });
+
   it('builds eight tinted neutrals from the source hue', () => {
     const ramp = buildTintedNeutralRamp(colors);
     expect(ramp.steps).toHaveLength(8);

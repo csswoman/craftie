@@ -25,6 +25,15 @@ describe('UI expressive gaps', () => {
     expect(resolveUiExpressiveGaps(raw).accent).toMatchObject({ hex: '#B64020', source: 'override' });
   });
 
+  it('auto-assigns accent by accent or fill fitness instead of text fitness', () => {
+    const source = { hex: '#B8AAA2', prominence: 1 };
+    const raw = deriveSemanticTokens({ extracted: [source], paletteType: 'pastel' });
+    const resolved = resolveUiExpressiveGaps(raw, [source]);
+
+    expect(resolved.accent).toMatchObject({ hex: '#B8AAA2', source: 'extracted' });
+    expect(resolved.accent.gap).toBeUndefined();
+  });
+
   it('turns weak automatic source colors into gaps while allowing explicit choice', () => {
     const weak = deriveSemanticTokens({
       extracted: [{ hex: '#C9A98C', prominence: 1 }],

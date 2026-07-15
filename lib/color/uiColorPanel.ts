@@ -5,6 +5,12 @@ import { normalizeHex } from './normalizeHex';
 import type { SelectableColor } from './selectableColors';
 import type { SemanticTokenName, SemanticTokens } from './semanticTokens';
 import { contrastRatio, oklchChannelsToHex } from '../utils/colorMath';
+import {
+  evaluateColorFitness,
+  fitnessForUse,
+  type ColorUse,
+  type FitnessResult,
+} from './colorFitness';
 
 const toOklch = converter('oklch');
 
@@ -24,6 +30,26 @@ export const UI_SYSTEM_ROLES = [
 }>;
 
 export type UiSystemTokenName = (typeof UI_SYSTEM_ROLES)[number]['token'];
+
+export function colorUseForSystemToken(token: UiSystemTokenName): Exclude<ColorUse, 'data'> {
+  if (token === 'primary' || token === 'secondary') return 'fill';
+  if (token === 'accent') return 'accent';
+  if (token === 'on-background' || token === 'on-surface-muted') return 'text';
+  return 'surface';
+}
+
+export function systemTokenFitness(
+  tokens: SemanticTokens,
+  token: UiSystemTokenName,
+): { use: Exclude<ColorUse, 'data'>; result: FitnessResult } {
+  const use = colorUseForSystemToken(token);
+  const fitness = evaluateColorFitness(tokens[token].hex, {
+    backgroundHex: tokens.background.hex,
+    lightOnColorBaseHex: tokens['surface-elevated'].hex,
+    darkTextBaseHex: tokens['on-surface'].hex,
+  });
+  return { use, result: fitnessForUse(fitness, use) };
+}
 
 export const DATA_TOKEN_NAMES = [
   'data-1', 'data-2', 'data-3', 'data-4', 'data-5', 'data-6',

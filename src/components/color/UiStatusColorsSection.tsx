@@ -1,6 +1,11 @@
 import { normalizeHex } from '@lib/color/normalizeHex';
 import type { SelectableColor } from '@lib/color/selectableColors';
-import { STATUS_COLOR_DEFINITIONS, type UiStatusColorSet } from '@lib/color/uiStatusColors';
+import {
+  buildUiStatusCandidates,
+  STATUS_COLOR_DEFINITIONS,
+  type UiStatusColor,
+  type UiStatusColorSet,
+} from '@lib/color/uiStatusColors';
 
 import { UiColorSectionHeader } from './UiColorSectionHeader';
 import { UiStatusColorCard } from './UiStatusColorCard';
@@ -8,11 +13,15 @@ import { UiStatusColorCard } from './UiStatusColorCard';
 export function UiStatusColorsSection({
   colors,
   statusColors,
+  backgroundHex,
   onGenerate,
+  onSelect,
 }: {
   colors: SelectableColor[];
   statusColors: UiStatusColorSet | null;
+  backgroundHex: string;
   onGenerate: () => void;
+  onSelect: (status: UiStatusColor) => void;
 }) {
   const nameByHex = new Map(colors.map((color) => [normalizeHex(color.hex), color.name]));
 
@@ -40,7 +49,22 @@ export function UiStatusColorsSection({
             const sourceName = status.sourceHex
               ? nameByHex.get(normalizeHex(status.sourceHex))
               : undefined;
-            return <UiStatusColorCard key={role} status={status} sourceName={sourceName} />;
+            const candidates = buildUiStatusCandidates({
+              role,
+              colors: colors.map((color) => ({ hex: color.hex, prominence: color.prominence ?? 1 })),
+              backgroundHex,
+              current: status,
+            });
+            return (
+              <UiStatusColorCard
+                key={role}
+                status={status}
+                sourceName={sourceName}
+                candidates={candidates}
+                nameByHex={nameByHex}
+                onSelect={onSelect}
+              />
+            );
           })}
         </div>
       )}

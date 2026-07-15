@@ -1,11 +1,18 @@
-import type { UiStatusColor } from '@lib/color/uiStatusColors';
+import { normalizeHex } from '@lib/color/normalizeHex';
+import type { UiStatusCandidate, UiStatusColor } from '@lib/color/uiStatusColors';
 
 export function UiStatusColorCard({
   status,
   sourceName,
+  candidates,
+  nameByHex,
+  onSelect,
 }: {
   status: UiStatusColor;
   sourceName?: string;
+  candidates: UiStatusCandidate[];
+  nameByHex: Map<string, string>;
+  onSelect: (status: UiStatusColor) => void;
 }) {
   const anchorPosition = huePosition(status.anchorHue);
   const resultPosition = huePosition(status.resultHue);
@@ -21,9 +28,36 @@ export function UiStatusColorCard({
             {status.hex.toUpperCase()} · hue {Math.round(status.resultHue)}°
           </span>
         </span>
-        <span className={`rounded-full px-1.5 py-0.5 text-[0.625rem] font-medium ${status.origin === 'found' ? 'bg-[var(--chrome-green-soft)] text-[var(--chrome-green)]' : 'bg-surface-raised text-muted'}`}>
-          {status.origin === 'found' ? `encontrado · ${sourceName ?? 'fuente'}` : 'sintético'}
+        <span className={`rounded-full px-1.5 py-0.5 text-[0.625rem] font-medium ${status.origin !== 'synthetic' ? 'bg-[var(--chrome-green-soft)] text-[var(--chrome-green)]' : 'bg-surface-raised text-muted'}`}>
+          {status.origin === 'found'
+            ? `encontrado · ${sourceName ?? 'fuente'}`
+            : status.origin === 'found-adjusted' ? 'encontrado · ajustado' : 'sintético'}
         </span>
+      </div>
+
+      <div className="mt-3">
+        <p className="mb-1.5 text-[0.625rem] font-medium text-muted">Cambiar dentro del rango ±25°</p>
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label={`Candidatos para ${status.role}`}>
+          {candidates.map((candidate) => {
+            const selected = normalizeHex(candidate.hex) === normalizeHex(status.hex)
+              && candidate.origin === status.origin;
+            const candidateName = candidate.sourceHex
+              ? nameByHex.get(normalizeHex(candidate.sourceHex)) ?? candidate.label
+              : candidate.label;
+            return (
+              <button
+                key={candidate.id}
+                type="button"
+                aria-pressed={selected}
+                aria-label={`Usar ${candidateName}, ${candidate.hex}, hue ${Math.round(candidate.resultHue)} grados`}
+                title={`${candidateName} · ${candidate.origin === 'found' ? 'encontrado' : candidate.origin === 'found-adjusted' ? 'encontrado · ajustado' : 'sintético'} · Δhue ${Math.round(candidate.hueDrift)}°`}
+                onClick={() => onSelect(candidate)}
+                className={`size-9 rounded-md ring-offset-2 ring-offset-bg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 motion-reduce:transition-none ${selected ? 'ring-2 ring-ink' : 'ring-1 ring-inset ring-ink/15'}`}
+                style={{ backgroundColor: candidate.hex }}
+              />
+            );
+          })}
+        </div>
       </div>
 
       <div className="mt-3">
@@ -52,7 +86,7 @@ export function UiStatusColorCard({
         style={{ backgroundColor: status.hex, color: status.onHex }}
       >
         <span className="text-[0.6875rem] font-semibold">{demoLabel(status.role)}</span>
-        <span className="text-[0.625rem] opacity-85">{status.contrastOnBackground.toFixed(1)}:1</span>
+        <span className="text-[0.625rem] opacity-85">{status.contrastWithOnColor.toFixed(1)}:1</span>
       </div>
     </article>
   );

@@ -2,10 +2,11 @@
 
 import { useMemo, useState } from 'react';
 
+import type { ColorUse } from '@lib/color/colorFitness';
 import { buildExpressiveCandidates } from '@lib/color/uiColorCandidates';
 import { EXPRESSIVE_TOKEN_NAMES } from '@lib/color/uiExpressiveGaps';
 import type { SelectableColor } from '@lib/color/selectableColors';
-import type { SemanticTokenName } from '@lib/color/semanticTokens';
+import type { SemanticTokenName, SemanticTokens } from '@lib/color/semanticTokens';
 
 import { InlineTokenDerivationEditor } from './InlineTokenDerivationEditor';
 import { ColorCandidateList } from './ColorCandidateList';
@@ -13,25 +14,31 @@ import { ColorCandidateList } from './ColorCandidateList';
 export function InlineSystemRolePicker({
   tokenName,
   currentHex,
+  tokens,
   colors,
   neutralSteps,
   unassigned,
   roleLabel,
+  relevantUse,
   onSelect,
+  onDeriveFromPrimary,
   onContinueWithout,
 }: {
   tokenName: SemanticTokenName;
   currentHex: string;
+  tokens: SemanticTokens;
   colors: SelectableColor[];
   neutralSteps: Array<{ lightness: number; hex: string }>;
   unassigned: boolean;
   roleLabel: string;
+  relevantUse: Exclude<ColorUse, 'data'>;
   onSelect: (hex: string) => void;
+  onDeriveFromPrimary: () => void;
   onContinueWithout: () => void;
 }) {
   const [deriving, setDeriving] = useState(false);
   const [derivationBase, setDerivationBase] = useState(currentHex);
-  const expressiveCandidates = useMemo(() => buildExpressiveCandidates(colors), [colors]);
+  const expressiveCandidates = useMemo(() => buildExpressiveCandidates(colors, tokens), [colors, tokens]);
 
   function startDerivation() {
     setDerivationBase(currentHex);
@@ -43,23 +50,41 @@ export function InlineSystemRolePicker({
   if (expressive) {
     return (
       <div className="space-y-3 bg-surface px-3 pb-3 pt-2">
+        <h3 className="text-tools-name font-semibold text-ink">Elegir {roleLabel}</h3>
         {unassigned ? <p className="text-tools-meta leading-relaxed text-muted">
           Craftie no encontró un candidato fuente con suficiente carácter. Los neutrales no pueden ocupar este rol.
         </p> : null}
-        <ColorCandidateList candidates={expressiveCandidates} onSelect={(candidate) => onSelect(candidate.hex)} />
-        {unassigned ? <button
-          type="button"
-          onClick={onContinueWithout}
-          className="min-h-10 w-full rounded-md border border-border bg-bg px-3 text-tools-meta font-semibold text-ink hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-        >
-          Esta imagen no tiene {roleLabel.toLocaleLowerCase('es')} — continuar sin él
-        </button> : null}
+        {unassigned ? (
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={onContinueWithout}
+              className="min-h-10 rounded-md border border-border bg-bg px-2 text-tools-meta font-semibold text-ink hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+            >
+              Dejar sin asignar
+            </button>
+            <button
+              type="button"
+              onClick={onDeriveFromPrimary}
+              className="min-h-10 rounded-md bg-[var(--chrome-green)] px-2 text-tools-meta font-semibold text-white hover:brightness-95 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+            >
+              Derivar del primario
+            </button>
+          </div>
+        ) : null}
+        <ColorCandidateList
+          candidates={expressiveCandidates}
+          activeUse={relevantUse}
+          actionLabel={`Usar como ${roleLabel.toLocaleLowerCase('es')}`}
+          onSelect={(candidate) => onSelect(candidate.hex)}
+        />
       </div>
     );
   }
 
   return (
     <div className="space-y-3 bg-surface px-3 pb-3 pt-2">
+      <h3 className="text-tools-name font-semibold text-ink">Elegir {roleLabel}</h3>
       <DotGroup
         label="Colores fuente"
         items={colors.map((color) => ({ hex: color.hex, label: color.name || color.hex }))}

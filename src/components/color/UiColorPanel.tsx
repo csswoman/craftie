@@ -20,12 +20,17 @@ export function UiColorPanel({ colors }: { colors: SelectableColor[] }) {
   const {
     semanticTokens,
     statusColors,
+    paletteRevision,
     replaceSemanticToken,
     generateStatusColors,
     assignSourceToStatus,
+    selectStatusColor,
     setActiveRole,
   } = useRolePalette();
-  const [openToken, setOpenToken] = useState<SemanticTokenName | null>(null);
+  const [openRole, setOpenRole] = useState<{ revision: number; token: SemanticTokenName | null }>({
+    revision: paletteRevision,
+    token: null,
+  });
   const ramp = useMemo(() => buildTintedNeutralRamp(colors), [colors]);
   const colorLoad = useMemo(
     () => semanticTokens ? assessUiColorLoad(semanticTokens) : null,
@@ -35,14 +40,19 @@ export function UiColorPanel({ colors }: { colors: SelectableColor[] }) {
   if (!semanticTokens || colors.length === 0 || colorLoad === null) return null;
   const resolvedTokens = semanticTokens;
   const loadPercent = chromaLoadPercent(colorLoad);
+  const openToken = openRole.revision === paletteRevision ? openRole.token : null;
 
   function toggleToken(token: SemanticTokenName) {
-    setOpenToken((current) => current === token ? null : token);
+    setOpenRole((current) => ({
+      revision: paletteRevision,
+      token: current.revision === paletteRevision && current.token === token ? null : token,
+    }));
     setActiveRole(null);
   }
 
   function selectForToken(token: SemanticTokenName, hex: string) {
     replaceSemanticToken(token, hex);
+    setOpenRole({ revision: paletteRevision, token: null });
   }
 
   return (
@@ -57,7 +67,13 @@ export function UiColorPanel({ colors }: { colors: SelectableColor[] }) {
         onSelect={selectForToken}
       />
       <UiDataSection tokens={resolvedTokens} colors={colors} onReplace={replaceSemanticToken} />
-      <UiStatusColorsSection colors={colors} statusColors={statusColors} onGenerate={generateStatusColors} />
+      <UiStatusColorsSection
+        colors={colors}
+        statusColors={statusColors}
+        backgroundHex={resolvedTokens.background.hex}
+        onGenerate={generateStatusColors}
+        onSelect={selectStatusColor}
+      />
       <UiSourceColorsSection
         tokens={resolvedTokens}
         colors={colors}
@@ -83,8 +99,9 @@ export function UiColorPanel({ colors }: { colors: SelectableColor[] }) {
     const candidate = buildDataCandidates(resolvedTokens, colors, gap)
       .find((entry) => entry.hex.toUpperCase() === hex.toUpperCase());
     if (!candidate) return 'Este color ya está usado en la serie.';
-    if (candidate.verdict.disabled) return `No se añadió: ${candidate.verdict.metric}.`;
     replaceSemanticToken(gap, candidate.hex);
-    return `Añadido a ${gap.replace('data-', 'serie ')} · ${candidate.verdict.label}.`;
+    return candidate.fitness.asData.ok
+      ? `Añadido a ${gap.replace('data-', 'serie ')} · ${candidate.fitness.asData.ratio.toFixed(1)}:1.`
+      : `Añadido a ${gap.replace('data-', 'serie ')} de forma explícita · débil como dato (${candidate.fitness.asData.ratio.toFixed(1)}:1).`;
   }
 }
