@@ -82,10 +82,8 @@ function SelectColorsWorkspaceContent() {
     onTypeScaleBaseChange: workspace.setTypeScaleBase,
     onTypeScaleRatioChange: workspace.setTypeScaleRatio,
     customFonts: workspace.customFonts,
-    imageMode: workspace.imageMode,
     imagePaletteType: workspace.imagePaletteType,
     paletteTypeOverride: workspace.paletteTypeOverride,
-    onImageModeChange: workspace.handleImageModeChange,
     onPaletteTypeChange: workspace.handlePaletteTypeChange,
     onApplyCustomFont: workspace.applyCustomFont,
     isGenerating: workspace.isGenerating,
@@ -147,8 +145,6 @@ function SelectColorsWorkspaceContent() {
             onImageFileSelected={workspace.handleImageFileSelected}
             onImageRegenerate={workspace.handleImageRegenerate}
             onOpenInspiration={() => workspace.setInspirationModalOpen(true)}
-            imageMode={workspace.imageMode}
-            onImageModeChange={workspace.handleImageModeChange}
           />
         </div>
 
@@ -180,12 +176,12 @@ function SelectColorsWorkspaceContent() {
             isImageRegenerating={workspace.isImageRegenerating}
             recommendedPairings={workspace.recommendedPairings}
             selectedPairing={workspace.selectedPairing}
+            appliedTypography={workspace.appliedTypography}
             hoveredPairing={workspace.hoveredPairing}
             isTypePreviewing={workspace.isTypePreviewing}
             typeScaleBase={workspace.typeScaleBase}
             typeScaleRatio={workspace.typeScaleRatio}
             onAddColorByHex={workspace.handleAddColorByHex}
-            imageMode={workspace.imageMode}
             paletteCatalog={workspace.paletteCatalog}
           />
         }

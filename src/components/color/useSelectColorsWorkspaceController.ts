@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { GeneratedPalette } from '@lib/color/formulas';
-import { buildImagePalette, type ImageExtractionMode } from '@lib/color/imagePalette';
+import { buildImagePalette } from '@lib/color/imagePalette';
 import type { PaletteType } from '@lib/color/paletteClassification';
 import { validateImageFile } from '@lib/color/imageExtractor';
 import {
@@ -72,7 +72,6 @@ export function useSelectColorsWorkspaceController() {
   const [imageFileName, setImageFileName] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageRegenerateIndex, setImageRegenerateIndex] = useState(0);
-  const [imageMode, setImageMode] = useState<ImageExtractionMode>('ui');
   const [imagePaletteType, setImagePaletteType] = useState<PaletteType | null>(null);
   const [paletteTypeOverride, setPaletteTypeOverride] = useState<PaletteType | null>(null);
   const generatingRef = useRef(false);
@@ -128,7 +127,6 @@ export function useSelectColorsWorkspaceController() {
     file: File,
     regenerateIndex = 0,
     isRegenerate = false,
-    requestedMode: ImageExtractionMode = imageMode,
     requestedPaletteType: PaletteType | null = paletteTypeOverride,
   ) {
     if (isImageBusy) {
@@ -154,9 +152,8 @@ export function useSelectColorsWorkspaceController() {
     }
 
     try {
-      const extracted = await extractPaletteColorsFromImage(file, regenerateIndex, requestedMode);
+      const extracted = await extractPaletteColorsFromImage(file, regenerateIndex);
       const palette = buildImagePalette(extracted, {
-        mode: requestedMode,
         paletteType: requestedPaletteType ?? undefined,
       });
       setImagePaletteType(palette.classification.type);
@@ -183,20 +180,11 @@ export function useSelectColorsWorkspaceController() {
     void processImageFile(imageFile, imageRegenerateIndex + 1, true);
   }
 
-  function handleImageModeChange(mode: ImageExtractionMode) {
-    setImageMode(mode);
-    setPaletteTypeOverride(null);
-
-    if (imageFile !== null) {
-      void processImageFile(imageFile, imageRegenerateIndex + 1, true, mode, null);
-    }
-  }
-
   function handlePaletteTypeChange(type: PaletteType | null) {
     setPaletteTypeOverride(type);
 
-    if (imageFile !== null && imageMode === 'ui') {
-      void processImageFile(imageFile, imageRegenerateIndex + 1, true, 'ui', type);
+    if (imageFile !== null) {
+      void processImageFile(imageFile, imageRegenerateIndex + 1, true, type);
     }
   }
 
@@ -438,13 +426,11 @@ export function useSelectColorsWorkspaceController() {
     catalogSource,
     error,
     imageFileName,
-    imageMode,
     imagePaletteType,
     paletteTypeOverride,
     imagePreviewUrl,
     handleImageFileSelected,
     handleImageRegenerate,
-    handleImageModeChange,
     handlePaletteTypeChange,
     generatedPalette,
     handleAddColorByHex,

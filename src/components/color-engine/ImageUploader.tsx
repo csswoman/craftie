@@ -2,7 +2,6 @@
 
 import { useId } from 'react';
 
-import type { ImageExtractionMode } from '@lib/color/imagePalette';
 import type { PaletteType } from '@lib/color/paletteClassification';
 
 import { ImageUploadPreview } from '@/components/color-engine/ImageUploadPreview';
@@ -19,10 +18,8 @@ export type ImageUploaderProps = {
   showDropzone?: boolean;
   showChangeImageControl?: boolean;
   previewVariant?: 'default' | 'compact';
-  mode?: ImageExtractionMode;
   paletteType?: PaletteType | null;
   paletteTypeOverride?: PaletteType | null;
-  onModeChange?: (mode: ImageExtractionMode) => void;
   onPaletteTypeChange?: (type: PaletteType | null) => void;
 };
 
@@ -45,10 +42,8 @@ export function ImageUploader({
   showDropzone = true,
   showChangeImageControl = true,
   previewVariant = 'default',
-  mode = 'ui',
   paletteType = null,
   paletteTypeOverride = null,
-  onModeChange,
   onPaletteTypeChange,
 }: ImageUploaderProps) {
   const isEmbedded = variant === 'embedded';
@@ -93,26 +88,7 @@ export function ImageUploader({
         </div>
       ) : null}
 
-      {onModeChange ? (
-        <div className="grid grid-cols-2 gap-1 rounded-[var(--chrome-radius-control)] bg-surface-raised p-1" aria-label="Modo de extracción">
-          {(['paint', 'ui'] as const).map((option) => (
-            <button
-              key={option}
-              type="button"
-              aria-pressed={mode === option}
-              disabled={isLoading}
-              onClick={() => onModeChange(option)}
-              className={`min-h-10 rounded-[calc(var(--chrome-radius-control)-2px)] px-2 font-sans text-tools-meta font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:opacity-50 ${
-                mode === option ? 'bg-bg text-ink' : 'text-muted hover:text-ink'
-              }`}
-            >
-              {option === 'paint' ? 'Extraer para pintar' : 'Extraer para UI'}
-            </button>
-          ))}
-        </div>
-      ) : null}
-
-      {mode === 'ui' && paletteType && onPaletteTypeChange ? (
+      {paletteType && onPaletteTypeChange ? (
         <label className="flex items-center justify-between gap-3 font-sans text-tools-meta text-muted">
           <span>
             Tipo <strong className="font-semibold text-ink">{PALETTE_TYPE_LABELS[paletteType]}</strong>

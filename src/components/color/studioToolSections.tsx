@@ -5,14 +5,11 @@ import type { FontPair } from '@lib/typography/pairings';
 import type { AppliedTypography } from '@lib/typography/typeState';
 import type { TypeScaleBase, TypeScaleRatio } from '@lib/typography/typeScale';
 import type { CustomFont } from '@lib/typography/customFonts';
-import type { ImageExtractionMode } from '@lib/color/imagePalette';
 import type { PaletteType } from '@lib/color/paletteClassification';
 
 import { ImageUploader } from '@/components/color-engine/ImageUploader';
 import { GenerateButton } from '@/components/color-engine/GenerateButton';
-import { PaletteAdjustmentsSection } from '@/components/color/PaletteAdjustmentsSection';
 import { SidebarTypographySection } from '@/components/color/SidebarTypographySection';
-import { SourceColorsSection } from '@/components/color/SourceColorsSection';
 import { UiColorPanel } from '@/components/color/UiColorPanel';
 import type { CustomFontSubmitInput } from '@/components/font-pairing/CustomFontEntry';
 import { Button } from '@/components/ui/Button';
@@ -42,12 +39,10 @@ export type StudioToolsInput = {
   typeScaleBase: TypeScaleBase;
   typeScaleRatio: TypeScaleRatio;
   customFonts: CustomFont[];
-  imageMode: ImageExtractionMode;
   imagePaletteType: PaletteType | null;
   paletteTypeOverride: PaletteType | null;
   onImageFileSelected: (file: File) => void;
   onImageRegenerate: () => void;
-  onImageModeChange: (mode: ImageExtractionMode) => void;
   onPaletteTypeChange: (type: PaletteType | null) => void;
   onOpenInspiration: () => void;
   onSelectPairing: (pairing: FontPair) => void;
@@ -81,10 +76,8 @@ export function buildStudioToolSections(
         showHeader={false}
         showDropzone={!input.hasPreview}
         showChangeImageControl={input.hasPreview}
-        mode={input.imageMode}
         paletteType={input.imagePaletteType}
         paletteTypeOverride={input.paletteTypeOverride}
-        onModeChange={input.onImageModeChange}
         onPaletteTypeChange={input.onPaletteTypeChange}
       />
       {!input.isReviewPhase && !input.hasPreview && input.catalogSource === 'none' ? (
@@ -104,9 +97,7 @@ export function buildStudioToolSections(
     { id: 'image', label: 'Imagen', content: imageSection },
     { id: 'source', label: 'Colores', content: (
       <div className="space-y-[var(--chrome-space-4)]">
-        {input.imageMode === 'ui'
-          ? <UiColorPanel colors={input.paletteCatalog} mobile={target === 'mobile'} />
-          : <SourceColorsSection colors={input.paletteCatalog} embedded={target === 'mobile'} />}
+        <UiColorPanel colors={input.paletteCatalog} mobile={target === 'mobile'} />
         {!input.isReviewPhase ? (
           <div
             className={`sticky bottom-0 z-sticky border-t border-border bg-bg pt-[var(--chrome-space-3)] ${
@@ -124,18 +115,6 @@ export function buildStudioToolSections(
         ) : null}
       </div>
     ) },
-    ...(input.imageMode === 'paint'
-      ? [{
-          id: 'adjustments' as const,
-          label: 'Ajustes',
-          content: (
-            <PaletteAdjustmentsSection
-              defaultOpen={target === 'mobile'}
-              embedded={target === 'mobile'}
-            />
-          ),
-        }]
-      : []),
     {
       id: 'typography',
       label: 'Tipografía',

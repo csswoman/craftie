@@ -1,7 +1,6 @@
 'use client';
 
 import { DESIGN_STYLES } from '@lib/styles/presets';
-import type { ImageExtractionMode } from '@lib/color/imagePalette';
 
 import { ImageUploader } from '@/components/color-engine/ImageUploader';
 import { Button } from '@/components/ui/Button';
@@ -14,8 +13,6 @@ export type EmptyWorkspaceCardProps = {
   onImageFileSelected: (file: File) => void;
   onImageRegenerate: () => void;
   onOpenInspiration: () => void;
-  imageMode: ImageExtractionMode;
-  onImageModeChange: (mode: ImageExtractionMode) => void;
 };
 
 const PREVIEW_SWATCHES = DESIGN_STYLES.flatMap((style) => style.thumbnailColors).slice(0, 8);
@@ -28,8 +25,6 @@ export function EmptyWorkspaceCard({
   onImageFileSelected,
   onImageRegenerate,
   onOpenInspiration,
-  imageMode,
-  onImageModeChange,
 }: EmptyWorkspaceCardProps) {
   return (
     <section aria-labelledby="workspace-empty-title" className="w-full max-w-lg">
@@ -78,8 +73,6 @@ export function EmptyWorkspaceCard({
           showHeader={false}
           showDropzone={!hasPreview}
           showChangeImageControl={false}
-          mode={imageMode}
-          onModeChange={onImageModeChange}
         />
       </div>
 

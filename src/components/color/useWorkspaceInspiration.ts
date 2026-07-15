@@ -72,11 +72,7 @@ export function useWorkspaceInspiration({
     setCatalogSource('image');
     setPaletteCatalog(palette.catalog);
     setSelectedStyleId(null);
-    if (palette.mode === 'ui') {
-      assignFromExtracted(palette.extracted, palette.classification.type);
-    } else {
-      clearRolePalette();
-    }
+    assignFromExtracted(palette.extracted, palette.classification.type);
     setGeneratedPalette(null);
     setError(null);
   }
