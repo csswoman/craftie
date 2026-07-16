@@ -233,7 +233,7 @@ function dataLabelsBySourceHex(tokens: SemanticTokens): Map<string, string[]> {
     const entry = tokens[token];
     if (entry.gap || entry.source !== 'extracted') return;
     const hex = normalizeHex(entry.hex);
-    map.set(hex, [...(map.get(hex) ?? []), `Datos ${index + 1}`]);
+    map.set(hex, [...(map.get(hex) ?? []), `Acento ${index + 1}`]);
   });
   return map;
 }

@@ -38,7 +38,7 @@ export function UiCompactStatusSlot({
       <button
         type="button"
         onClick={onOpen}
-        className={`min-h-8 shrink-0 rounded-md px-2 text-tools-meta-scale font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25 ${generated ? 'text-forest opacity-0 hover:bg-line-soft group-hover:opacity-100 group-focus-within:opacity-100' : 'border border-line bg-bg text-forest hover:bg-line-soft'}`}
+        className={`min-h-8 shrink-0 rounded-md px-2 text-tools-meta-scale font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25 ${generated ? 'text-forest opacity-0 hover:bg-line-soft group-hover:opacity-100 group-focus-within:opacity-100' : 'border border-forest/40 bg-bg text-forest hover:bg-forest/10'}`}
       >
         {generated ? 'Editar' : 'Generar'}
       </button>

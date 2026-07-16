@@ -59,15 +59,11 @@ export function DataSeriesList({
         <button
           type="button"
           onClick={() => setShowAll((value) => !value)}
-          className="mt-2 min-h-9 w-full rounded-md px-3 text-tools-meta font-semibold text-muted hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+          className="mt-2 min-h-10 w-full rounded-lg px-3 text-[0.88rem] font-semibold text-muted hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
         >
           {showAll ? 'Ver menos' : `Ver ${representatives.length - DEFAULT_LIMIT} candidatos más`}
         </button>
       ) : null}
-
-      <p className="mt-3 text-[0.7rem] leading-relaxed text-muted">
-        Los puntos = aptitud por eje (Texto · Fill · Acento · Superficie · Datos). Verde lleno = fuerte · ámbar = límite · vacío = falla.
-      </p>
     </>
   );
 }

@@ -73,6 +73,7 @@ export function PaletteCanvas({
   } = useRolePalette();
 
   const [activeView, setActiveView] = useState<CanvasViewId>('colors');
+  const [showAccents, setShowAccents] = useState(false);
   const [activeMode, setActiveMode] = useState<'dashboard' | 'landing' | 'media' | 'analytics'>('dashboard');
   const [selectedColorHex, setSelectedColorHex] = useState<string | null>(null);
   const liveRolePalette = previewRolePalette ?? rolePalette;
@@ -142,10 +143,36 @@ export function PaletteCanvas({
       {hasPalette ? (
         <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-line/60 px-4 py-3 sm:min-h-13 sm:gap-3 sm:px-6 sm:py-1.5">
           <div className="hidden min-w-0 sm:block">
-              <p className="truncate text-chrome-label font-semibold text-ink">Paleta de roles</p>
-              <p className="truncate text-chrome-caption text-muted">Edita colores y revisa el contraste.</p>
+              <p className="truncate text-chrome-label font-semibold text-ink">
+                {activeView === 'colors' && showAccents ? 'Paleta de acentos' : 'Paleta de roles'}
+              </p>
+              <p className="truncate text-chrome-caption text-muted">
+                {activeView === 'colors' && showAccents
+                  ? 'El 1 se usa en UI; 2–6 en gráficos.'
+                  : 'Edita colores y revisa el contraste.'}
+              </p>
           </div>
           {editable ? <PaletteHistoryControls /> : null}
+          <button
+            type="button"
+            aria-pressed={activeView === 'colors' && showAccents}
+            onClick={() => {
+              if (activeView !== 'colors') {
+                setActiveView('colors');
+                setShowAccents(true);
+                return;
+              }
+
+              setShowAccents((visible) => !visible);
+            }}
+            className={`min-h-10 rounded-lg border px-3 text-[0.86rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+              activeView === 'colors' && showAccents
+                ? 'border-[var(--chrome-green)] bg-[var(--chrome-green-soft)] text-[var(--chrome-green)]'
+                : 'border-border bg-bg text-muted hover:bg-surface-raised hover:text-ink'
+            }`}
+          >
+            {activeView === 'colors' && showAccents ? 'Ver roles' : 'Ver acentos'}
+          </button>
           <div className="flex w-full flex-wrap items-center gap-2.5 sm:ml-auto sm:w-auto sm:gap-2.5">
             <CanvasViewSelector
               activeId={activeView}
@@ -197,6 +224,7 @@ export function PaletteCanvas({
               ) : activeView === 'colors' ? (
                 <PaletteView
                   editable={editable}
+                  showAccents={showAccents}
                   onOpenDetails={setSelectedColorHex}
                 />
               ) : activeView === 'style-guide' || activeView === 'type-scale' ? (

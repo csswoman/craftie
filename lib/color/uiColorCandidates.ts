@@ -2,6 +2,7 @@ import { converter } from 'culori';
 
 import { buildDataSeriesProfile, type DataSeriesProfile } from './dataSeriesProfile';
 import { evaluateColorFitness, fitnessForUse, type ColorFitness, type ColorUse } from './colorFitness';
+import { nameForHex } from './naming';
 import { normalizeHex } from './normalizeHex';
 import type { SelectableColor } from './selectableColors';
 import type { SemanticTokenName, SemanticTokens } from './semanticTokens';
@@ -116,7 +117,7 @@ export function buildDataCandidates(
       if (Math.abs(actualDelta) < 0.15) continue;
       addCandidate(
         oklchChannelsToHex(lightness, channels.c ?? 0, channels.h),
-        'Derivado',
+        nameForHex(oklchChannelsToHex(lightness, channels.c ?? 0, channels.h), [{ hex: color.hex }, { hex: oklchChannelsToHex(lightness, channels.c ?? 0, channels.h) }]),
         `de ${color.name || 'fuente'} · L ${actualDelta >= 0 ? '+' : ''}${actualDelta.toFixed(2)}`,
         `source-derived-${color.id}-${delta}`,
         'derived',
@@ -139,7 +140,7 @@ export function buildDataCandidates(
       if (Math.abs(actualDelta) < 0.15) continue;
       addCandidate(
         oklchChannelsToHex(lightness, channels.c ?? 0, channels.h),
-        'Derivado',
+        nameForHex(oklchChannelsToHex(lightness, channels.c ?? 0, channels.h), [{ hex: tokens[base.token].hex }, { hex: oklchChannelsToHex(lightness, channels.c ?? 0, channels.h) }]),
         `de ${base.label} · L ${actualDelta >= 0 ? '+' : ''}${actualDelta.toFixed(2)}`,
         `derived-${base.token}-${delta}`,
         tokens[base.token].source === 'derived' ? 'synthetic' : 'derived',
@@ -205,7 +206,7 @@ export function buildExpressiveCandidates(colors: SelectableColor[], tokens: Sem
       if (Math.abs(actualDelta) < 0.15) continue;
       add(
         oklchChannelsToHex(lightness, channels.c ?? 0, channels.h),
-        'Derivado',
+        nameForHex(oklchChannelsToHex(lightness, channels.c ?? 0, channels.h), [{ hex: color.hex }, { hex: oklchChannelsToHex(lightness, channels.c ?? 0, channels.h) }]),
         `de ${color.name || 'fuente'} · L ${actualDelta >= 0 ? '+' : ''}${actualDelta.toFixed(2)}`,
         `derived-${color.id}-${delta}`,
         'derived',
@@ -285,16 +286,46 @@ function perceptuallyNear(leftHex: string, rightHex: string): boolean {
     && Math.abs((left.c ?? 0) - (right.c ?? 0)) < 0.06;
 }
 
-export function deriveFromPrimary(primaryHex: string): string {
+const DATA_DERIVE_HUE_OFFSETS = [34, 86, 138, 190, 242, 294] as const;
+const DATA_DERIVE_MIN_HUE = 24;
+
+export function deriveFromPrimary(primaryHex: string, occupiedHexes: string[] = []): string {
   const primary = toOklch(primaryHex);
-  const lightness = (primary?.l ?? 0.5) >= 0.5
-    ? Math.max(0.12, (primary?.l ?? 0.5) - 0.18)
-    : Math.min(0.9, (primary?.l ?? 0.5) + 0.18);
-  return oklchChannelsToHex(
-    lightness,
-    Math.max(0.055, primary?.c ?? 0.08),
-    ((primary?.h ?? 0) + 34) % 360,
-  );
+  const baseLightness = primary?.l ?? 0.5;
+  const chroma = Math.max(0.055, primary?.c ?? 0.08);
+  const baseHue = primary?.h ?? 0;
+  const occupied = occupiedHexes.map((hex) => ({
+    hex: normalizeHex(hex),
+    channels: toOklch(hex),
+  }));
+
+  function candidateAt(offset: number, lightnessDelta: number): string {
+    const lightness = baseLightness >= 0.5
+      ? Math.max(0.12, baseLightness - lightnessDelta)
+      : Math.min(0.9, baseLightness + lightnessDelta);
+    return oklchChannelsToHex(lightness, chroma, (baseHue + offset + 360) % 360);
+  }
+
+  function isSeparated(hex: string): boolean {
+    const normalized = normalizeHex(hex);
+    const channels = toOklch(hex);
+    return occupied.every((entry) => {
+      if (entry.hex === normalized) return false;
+      if (typeof channels?.h !== 'number' || typeof entry.channels?.h !== 'number') {
+        return entry.hex !== normalized;
+      }
+      return hueDistance(channels.h, entry.channels.h) >= DATA_DERIVE_MIN_HUE;
+    });
+  }
+
+  for (const lightnessDelta of [0.18, 0.28, 0.12]) {
+    for (const offset of DATA_DERIVE_HUE_OFFSETS) {
+      const candidate = candidateAt(offset, lightnessDelta);
+      if (isSeparated(candidate)) return candidate;
+    }
+  }
+
+  return candidateAt(DATA_DERIVE_HUE_OFFSETS[0], 0.18);
 }
 
 function candidateFitness(hex: string, tokens: SemanticTokens, occupiedDataHexes: string[]): ColorFitness {

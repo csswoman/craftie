@@ -92,9 +92,9 @@
     --color-surface-raised: oklch(0.22 0.012 160);
     --color-ink: oklch(0.93 0.005 160);
     --color-muted: oklch(0.65 0.01 160);
-    --color-forest: #8fc7aa;
-    --color-forest-deep: #a9d8be;
-    --color-forest-darker: #c4e7d2;
+    --color-forest: oklch(0.52 0.11 150);
+    --color-forest-deep: oklch(0.58 0.12 150);
+    --color-forest-darker: oklch(0.46 0.1 150);
     --color-faint: #87968e;
     --color-line: #34473e;
     --color-line-soft: #293a32;
@@ -110,8 +110,8 @@
     --scrollbar-thumb: oklch(0.34 0.01 160);
     --scrollbar-thumb-hover: oklch(0.46 0.012 160);
     --canvas-dot: oklch(0.45 0.01 160 / 0.24);
-    --chrome-green: oklch(0.68 0.11 150);
-    --chrome-green-soft: color-mix(in oklch, var(--chrome-green) 24%, var(--color-surface-raised));
+    --chrome-green: oklch(0.58 0.11 150);
+    --chrome-green-soft: color-mix(in oklch, var(--chrome-green) 22%, var(--color-surface-raised));
     --status-hue-error: oklch(0.62 0.14 25);
     --status-hue-warning: oklch(0.72 0.12 70);
     --status-hue-success: oklch(0.62 0.11 140);

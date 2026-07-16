@@ -45,6 +45,14 @@ describe('UI color candidates', () => {
     expect(candidates.every((candidate) => candidate.dataSeparation !== undefined)).toBe(true);
   });
 
+  it('gives human-readable names to derived data candidates', () => {
+    const candidates = buildDataCandidates(tokensWithGaps(), sourceColors, 'data-2');
+    const derived = candidates.find((candidate) => candidate.origin === 'derived');
+
+    expect(derived).toBeDefined();
+    expect(derived?.name).not.toBe('Derivado');
+  });
+
   it('auto-fill chooses the best enabled candidate in sorted order', () => {
     const tokens = tokensWithGaps();
     const replacements = autoFillDataGaps(tokens, sourceColors);
@@ -92,6 +100,26 @@ describe('UI color candidates', () => {
 
     expect(hueDistance).toBeGreaterThanOrEqual(25);
     expect(Math.abs(primary.l - derived.l)).toBeGreaterThanOrEqual(0.15);
+  });
+
+  it('derives distinct data colors from the same primary when slots are occupied', () => {
+    const primary = '#C85A22';
+    const first = deriveFromPrimary(primary);
+    const second = deriveFromPrimary(primary, [first]);
+    const third = deriveFromPrimary(primary, [first, second]);
+
+    expect(second.toLowerCase()).not.toBe(first.toLowerCase());
+    expect(third.toLowerCase()).not.toBe(first.toLowerCase());
+    expect(third.toLowerCase()).not.toBe(second.toLowerCase());
+
+    const hues = [first, second, third].map((hex) => hexToOklchChannels(hex).h);
+    const hueGap = (left: number, right: number) => {
+      const distance = Math.abs(left - right) % 360;
+      return Math.min(distance, 360 - distance);
+    };
+    expect(hueGap(hues[0]!, hues[1]!)).toBeGreaterThanOrEqual(24);
+    expect(hueGap(hues[0]!, hues[2]!)).toBeGreaterThanOrEqual(24);
+    expect(hueGap(hues[1]!, hues[2]!)).toBeGreaterThanOrEqual(24);
   });
 
   it('deduplicates perceptually close candidates into optional variants', () => {

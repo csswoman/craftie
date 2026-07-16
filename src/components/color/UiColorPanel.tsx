@@ -105,14 +105,15 @@ export function UiColorPanel({
   function assignSourceToData(hex: string): string {
     const gap = (['data-1', 'data-2', 'data-3', 'data-4', 'data-5', 'data-6'] as const)
       .find((name) => Boolean(resolvedTokens[name].gap));
-    if (!gap) return 'La serie ya tiene seis categorías.';
+    if (!gap) return 'La familia ya tiene seis acentos.';
     const candidate = buildDataCandidates(resolvedTokens, colors, gap)
       .find((entry) => entry.hex.toUpperCase() === hex.toUpperCase());
-    if (!candidate) return 'Este color ya está usado en la serie.';
+    if (!candidate) return 'Este color ya está usado en los acentos.';
     replaceSemanticToken(gap, candidate.hex);
+    const label = gap.replace('data-', 'Acento ');
     return candidate.fitness.asData.ok
-      ? `Añadido a ${gap.replace('data-', 'serie ')} · ${candidate.fitness.asData.ratio.toFixed(1)}:1.`
-      : `Añadido a ${gap.replace('data-', 'serie ')} de forma explícita · débil como dato (${candidate.fitness.asData.ratio.toFixed(1)}:1).`;
+      ? `Añadido a ${label} · ${candidate.fitness.asData.ratio.toFixed(1)}:1.`
+      : `Añadido a ${label} de forma explícita · débil como dato (${candidate.fitness.asData.ratio.toFixed(1)}:1).`;
   }
 
   if (focus?.kind === 'roles') {
@@ -170,7 +171,7 @@ export function UiColorPanel({
         <div className="shrink-0">
           <UiFocusedPanelHeader
             title="Colores fuente"
-            subtitle="Elige una fuente y asígnala a un rol, estado o serie de datos"
+            subtitle="Elige una fuente y asígnala a un rol, estado o acento"
             onBack={leaveFocusedView}
           />
         </div>
