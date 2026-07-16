@@ -35,8 +35,18 @@ export function RoleColorEditor({
     return null;
   }
 
-  const { slot, locked, oklch, chromaMax, contrast, updateOklch, handleHexCommit, toggleLock } =
-    editor;
+  const {
+    slot,
+    locked,
+    oklch,
+    chromaMax,
+    contrast,
+    safeColor,
+    updateOklch,
+    handleHexCommit,
+    applySafeColor,
+    toggleLock,
+  } = editor;
   const original = slot.originalHex ? hexToOklchChannels(slot.originalHex) : null;
 
   return (
@@ -109,14 +119,35 @@ export function RoleColorEditor({
 
       {showContrast ? <RoleContrastBadge contrast={contrast} /> : null}
       {showContrast && contrast.status === 'fail' ? (
-        <button
-          type="button"
-          aria-pressed={acceptedFailure}
-          onClick={() => setAcceptedFailure((current) => !current)}
-          className="min-h-10 w-full rounded-md border border-border bg-bg px-3 font-sans text-tools-meta font-semibold text-ink hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-        >
-          {acceptedFailure ? '⚠ Fuera de norma · aceptado' : 'Aceptar este par fuera de norma'}
-        </button>
+        <div className="space-y-2">
+          {safeColor && !locked ? (
+            <button
+              type="button"
+              onClick={applySafeColor}
+              className="flex min-h-10 w-full items-center justify-between gap-3 rounded-md border border-pass/40 bg-pass/10 px-3 font-sans text-tools-meta font-semibold text-ink hover:bg-pass/15 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-pass/25"
+            >
+              <span className="flex items-center gap-2">
+                <span
+                  className="inline-block size-4 shrink-0 rounded-full ring-1 ring-inset ring-ink/10"
+                  style={{ backgroundColor: safeColor.hex }}
+                  aria-hidden="true"
+                />
+                Regenerar opción segura
+              </span>
+              <span className="font-mono tabular-nums text-muted">
+                {safeColor.hex.toUpperCase()} · {safeColor.ratio.toFixed(2)}:1
+              </span>
+            </button>
+          ) : null}
+          <button
+            type="button"
+            aria-pressed={acceptedFailure}
+            onClick={() => setAcceptedFailure((current) => !current)}
+            className="min-h-10 w-full rounded-md border border-border bg-bg px-3 font-sans text-tools-meta font-semibold text-ink hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+          >
+            {acceptedFailure ? '⚠ Fuera de norma · aceptado' : 'Aceptar este par fuera de norma'}
+          </button>
+        </div>
       ) : null}
     </div>
   );

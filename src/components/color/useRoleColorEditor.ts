@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 
 import { getActiveRoleContrastInfo } from '@lib/color/roleInspectorContrast';
+import { getSafeRoleColorNearCurrent } from '@lib/color/safeRoleColor';
 import { normalizeHex } from '@lib/color/normalizeHex';
 import type { PaletteRoleId } from '@lib/color/rolePalette';
 import {
@@ -32,6 +33,13 @@ export function useRoleColorEditor(role: PaletteRoleId) {
   const contrast = useMemo(
     () => (rolePalette ? getActiveRoleContrastInfo(rolePalette, role) : null),
     [rolePalette, role],
+  );
+
+  const safeColor = useMemo(
+    () => (rolePalette && contrast?.status === 'fail'
+      ? getSafeRoleColorNearCurrent(rolePalette, role)
+      : null),
+    [rolePalette, role, contrast?.status],
   );
 
   function updateOklch(patch: Partial<{ l: number; c: number; h: number }>) {
@@ -74,8 +82,14 @@ export function useRoleColorEditor(role: PaletteRoleId) {
     oklch,
     chromaMax,
     contrast,
+    safeColor,
     updateOklch,
     handleHexCommit,
+    applySafeColor: () => {
+      if (safeColor && !locked) {
+        replaceRole(role, safeColor.hex);
+      }
+    },
     revertTo: (hex: string) => replaceRole(role, hex),
     toggleLock: () => toggleLock(role),
   };
