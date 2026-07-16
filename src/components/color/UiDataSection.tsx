@@ -16,6 +16,7 @@ import {
   firstEmptySlot,
   selectDataSeriesSlot,
 } from '@lib/color/dataSeriesState';
+import { pickReadableTextColor } from '@lib/color/readableText';
 import type { SelectableColor } from '@lib/color/selectableColors';
 import type { SemanticTokenName, SemanticTokens } from '@lib/color/semanticTokens';
 import {
@@ -44,7 +45,6 @@ export function UiDataSection({
     const firstEmpty = firstEmptySlot(slots);
     return firstEmpty === -1 ? 0 : firstEmpty;
   });
-  const [autoMessage, setAutoMessage] = useState<string | null>(null);
   const [warningDismissed, setWarningDismissed] = useState(false);
   const seriesState = createDataSeriesState(slots, activeSlot);
   const activeToken = DATA_TOKEN_NAMES[seriesState.activeSlot];
@@ -59,27 +59,18 @@ export function UiDataSection({
 
   function selectSlot(slot: number) {
     setActiveSlot(selectDataSeriesSlot(seriesState, slot).activeSlot);
-    setAutoMessage(null);
   }
 
   function selectCandidate(candidate: UiColorCandidate) {
     const nextState = assignDataSeriesColor(seriesState, candidate.hex);
     onReplace(activeToken, candidate.hex);
     setActiveSlot(nextState.activeSlot);
-    setAutoMessage(nextState.slots.includes(null)
-      ? `${candidate.name} asignado a ${activeAccentLabel}. Continúa con el siguiente acento vacío.`
-      : `${candidate.name} asignado a ${activeAccentLabel}. Familia completa.`);
   }
 
   function clearActiveSlot() {
     const nextState = clearDataSeriesSlot(seriesState, seriesState.activeSlot);
     onClear(activeToken);
     setActiveSlot(nextState.activeSlot);
-    setAutoMessage(`${activeAccentLabel} vaciado.`);
-  }
-
-  function leaveUnassigned() {
-    setAutoMessage(`${activeAccentLabel} queda sin asignar.`);
   }
 
   function deriveActiveFromPrimary() {
@@ -87,7 +78,6 @@ export function UiDataSection({
     const nextState = assignDataSeriesColor(seriesState, hex);
     onReplace(activeToken, hex);
     setActiveSlot(nextState.activeSlot);
-    setAutoMessage(`Se derivó ${activeAccentLabel} del primario.`);
   }
 
   return (
@@ -121,7 +111,10 @@ export function UiDataSection({
                 backgroundColor: 'var(--color-surface-raised)',
               } : { backgroundColor: tokens[name].hex }}
             >
-              <span className={`absolute left-2 top-1.5 rounded-full px-1.5 py-0.5 font-mono text-[0.8rem] font-semibold leading-none ${missing ? 'bg-bg/80 text-muted' : 'bg-black/15 text-white mix-blend-difference'}`}>
+              <span
+                className={`absolute left-2 top-1.5 rounded-full px-1.5 py-0.5 font-mono text-[0.8rem] font-semibold leading-none ${missing ? 'bg-bg/80 text-muted' : ''}`}
+                style={missing ? undefined : { color: pickReadableTextColor(tokens[name].hex) }}
+              >
                 {index + 1}
               </span>
             </button>
@@ -190,12 +183,11 @@ export function UiDataSection({
             targetSeries={activeAccentIndex + 1}
             unassigned={seriesState.slots[seriesState.activeSlot] === null}
             onSelect={selectCandidate}
-            onLeaveUnassigned={leaveUnassigned}
+            onLeaveUnassigned={() => undefined}
             onDerive={deriveActiveFromPrimary}
           />
         </div>
       </div>
-      {autoMessage ? <p role="status" className="mt-3 text-[0.88rem] text-muted">{autoMessage}</p> : null}
     </section>
   );
 }

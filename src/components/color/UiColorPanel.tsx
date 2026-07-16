@@ -11,6 +11,7 @@ import { useRolePalette } from '@/context/RolePaletteContext';
 import { useAutoHideScrollbar } from '@/lib/browser/useAutoHideScrollbar';
 import { useTabListKeyboard } from '@/lib/browser/useTabListKeyboard';
 
+import { CreateBrandGuideFooter } from './CreateBrandGuideFooter';
 import { UiCompactColorPanel } from './UiCompactColorPanel';
 import { UiDataSection } from './UiDataSection';
 import { UiFocusedPanelHeader } from './UiFocusedPanelHeader';
@@ -231,14 +232,25 @@ export function UiColorPanel({
           id="ui-color-panel-data"
           role="tabpanel"
           aria-labelledby="ui-color-tab-data"
-          className="min-h-0 flex-1 overflow-y-auto pt-4"
+          className="flex min-h-0 flex-1 flex-col"
         >
-          <UiDataSection
-            tokens={resolvedTokens}
-            colors={colors}
-            onReplace={replaceSemanticToken}
-            onClear={clearSemanticToken}
-          />
+          <div className="min-h-0 flex-1 overflow-y-auto pt-4">
+            <UiDataSection
+              tokens={resolvedTokens}
+              colors={colors}
+              onReplace={replaceSemanticToken}
+              onClear={clearSemanticToken}
+            />
+          </div>
+          {showCreateGuide ? (
+            <CreateBrandGuideFooter
+              tokens={resolvedTokens}
+              canCreateGuide={canCreateGuide}
+              creatingGuide={creatingGuide}
+              pinned={!mobile}
+              onCreateGuide={onCreateGuide}
+            />
+          ) : null}
         </div>
       )}
     </div>

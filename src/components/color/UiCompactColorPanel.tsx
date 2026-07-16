@@ -11,11 +11,11 @@ import {
 
 import { useAutoHideScrollbar } from '@/lib/browser/useAutoHideScrollbar';
 
+import { CreateBrandGuideFooter } from './CreateBrandGuideFooter';
 import { UiCompactRoleRow } from './UiCompactRoleRow';
 import { UiCompactStatusSlot } from './UiCompactStatusSlot';
 import { UiSourceColorGrid } from './UiSourceColorGrid';
 import {
-  COMPACT_ROLE_COUNT,
   COMPACT_ROLE_GROUPS,
   type CompactRoleGroupId,
 } from './uiColorPanelGroups';
@@ -55,9 +55,6 @@ export function UiCompactColorPanel({
   onCreateGuide: () => void;
 }) {
   const scrollRef = useAutoHideScrollbar<HTMLDivElement>();
-  const readyCount = Object.values(COMPACT_ROLE_GROUPS)
-    .flatMap((group) => group.roles)
-    .filter((role) => !tokens[role.token].gap).length;
 
   const sections = (
     <>
@@ -127,21 +124,13 @@ export function UiCompactColorPanel({
   );
 
   const createGuide = showCreateGuide ? (
-    <section className={fillHeight ? 'shrink-0 border-t border-line-soft bg-bg pt-3' : 'pt-4'}>
-      <button
-        id="generate-brand-guide"
-        type="button"
-        disabled={!canCreateGuide || creatingGuide}
-        aria-busy={creatingGuide}
-        onClick={onCreateGuide}
-        className="min-h-12 w-full rounded-lg bg-forest px-4 text-base font-semibold text-white transition-colors hover:bg-forest-deep active:bg-forest-darker disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/30"
-      >
-        {creatingGuide ? 'Creando guía…' : 'Crear guía de marca'}
-      </button>
-      <p className="mt-2 text-center text-tools-meta-scale text-muted">
-        {readyCount} de {COMPACT_ROLE_COUNT} listos
-      </p>
-    </section>
+    <CreateBrandGuideFooter
+      tokens={tokens}
+      canCreateGuide={canCreateGuide}
+      creatingGuide={creatingGuide}
+      pinned={fillHeight}
+      onCreateGuide={onCreateGuide}
+    />
   ) : null;
 
   if (!fillHeight) {
