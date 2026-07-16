@@ -12,18 +12,35 @@ import { useRolePalette } from '@/context/RolePaletteContext';
 export function InlineTokenDerivationEditor({
   tokenName,
   originalHex,
+  currentHex,
+  candidateHex,
+  applied = false,
   onApply,
+  onDraftChange = () => {},
 }: {
   tokenName: SemanticTokenName;
   originalHex: string;
+  currentHex?: string;
+  candidateHex?: string;
+  applied?: boolean;
   onApply: (hex: string) => void;
+  onDraftChange?: () => void;
 }) {
   const { semanticTokens } = useRolePalette();
   const original = useMemo(() => hexToOklchChannels(originalHex), [originalHex]);
-  const [draftLightness, setDraftLightness] = useState(original.l);
+  const current = useMemo(
+    () => hexToOklchChannels(currentHex ?? originalHex),
+    [currentHex, originalHex],
+  );
+  const draftBase = useMemo(
+    () => hexToOklchChannels(candidateHex ?? currentHex ?? originalHex),
+    [candidateHex, currentHex, originalHex],
+  );
+  const [draftLightness, setDraftLightness] = useState(draftBase.l);
+  const [draftChroma, setDraftChroma] = useState(draftBase.c);
   const draftHex = useMemo(
-    () => oklchChannelsToHex(draftLightness, original.c, original.h),
-    [draftLightness, original],
+    () => oklchChannelsToHex(draftLightness, draftChroma, draftBase.h),
+    [draftBase.h, draftChroma, draftLightness],
   );
   const previewTokens = useMemo(
     () => semanticTokens ? previewSemanticToken(semanticTokens, tokenName, draftHex) : null,
@@ -36,20 +53,37 @@ export function InlineTokenDerivationEditor({
 
   if (!semanticTokens) return null;
   const passes = contrast === null || contrast.status === 'pass';
-  const unchanged = draftHex.toUpperCase() === originalHex.toUpperCase();
+  const unchanged = draftHex.toUpperCase() === (currentHex ?? originalHex).toUpperCase();
+  const atOriginal = (currentHex ?? originalHex).toUpperCase() === originalHex.toUpperCase();
+  const lightnessDelta = draftLightness - original.l;
+  const chromaDelta = draftChroma - original.c;
+
+  function updateLightness(value: number) {
+    onDraftChange();
+    setDraftLightness(value);
+  }
+
+  function updateChroma(value: number) {
+    onDraftChange();
+    setDraftChroma(value);
+  }
+
+  function applyVariant(hex: string) {
+    onApply(hex);
+  }
 
   return (
-    <div className="space-y-3 border-t border-border pt-3">
+    <div className="space-y-3 border-t border-line-soft pt-3">
       <div className="flex items-center gap-2">
         <span
-          className="size-9 shrink-0 rounded-md ring-1 ring-inset ring-ink/10"
+          className="size-9 shrink-0 rounded-full ring-1 ring-inset ring-ink/10"
           style={{ backgroundColor: draftHex }}
           aria-hidden="true"
         />
         <div className="min-w-0 flex-1">
-          <p className="text-tools-meta font-semibold text-ink">Vista previa</p>
+          <p className="text-tools-meta font-semibold text-ink">Ajuste no destructivo</p>
           <p className="truncate font-mono text-tools-meta tabular-nums text-muted">
-            {draftHex.toUpperCase()}
+            {draftHex.toUpperCase()} · original {originalHex.toUpperCase()}
           </p>
         </div>
       </div>
@@ -57,7 +91,9 @@ export function InlineTokenDerivationEditor({
       <label className="block">
         <span className="mb-1 flex items-center justify-between gap-2 text-tools-meta text-muted">
           <span>Luminosidad</span>
-          <span className="font-mono tabular-nums">{draftLightness.toFixed(2)}</span>
+          <span className="font-mono tabular-nums">
+            {draftLightness.toFixed(2)} · Δ{formatDelta(lightnessDelta)}
+          </span>
         </span>
         <input
           type="range"
@@ -65,8 +101,26 @@ export function InlineTokenDerivationEditor({
           max="0.98"
           step="0.01"
           value={draftLightness}
-          onChange={(event) => setDraftLightness(Number(event.target.value))}
-          className="h-11 w-full cursor-pointer appearance-none rounded-full bg-surface-raised accent-primary"
+          onChange={(event) => updateLightness(Number(event.target.value))}
+          className="h-11 w-full cursor-pointer accent-forest"
+        />
+      </label>
+
+      <label className="block">
+        <span className="mb-1 flex items-center justify-between gap-2 text-tools-meta text-muted">
+          <span>Chroma</span>
+          <span className="font-mono tabular-nums">
+            {draftChroma.toFixed(3)} · Δ{formatDelta(chromaDelta, 3)}
+          </span>
+        </span>
+        <input
+          type="range"
+          min="0"
+          max="0.34"
+          step="0.005"
+          value={draftChroma}
+          onChange={(event) => updateChroma(Number(event.target.value))}
+          className="h-11 w-full cursor-pointer accent-forest"
         />
       </label>
 
@@ -85,19 +139,31 @@ export function InlineTokenDerivationEditor({
         </p>
       ) : null}
 
+      {candidateHex ? (
+        <p className="text-tools-meta text-primary" role="status" aria-live="polite">
+          Candidato seleccionado. Aplica la variante para usarlo.
+        </p>
+      ) : null}
+
+      {applied ? (
+        <p className="text-tools-meta text-pass" role="status" aria-live="polite">
+          Variante aplicada.
+        </p>
+      ) : null}
+
       <div className="grid grid-cols-2 gap-2">
         <button
           type="button"
-          disabled={unchanged}
-          onClick={() => setDraftLightness(original.l)}
+          disabled={atOriginal}
+          onClick={() => applyVariant(originalHex)}
           className="min-h-11 rounded-md border border-border bg-bg px-2 text-tools-meta font-semibold text-ink hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
         >
-          Restablecer
+          Revertir al original
         </button>
         <button
           type="button"
           disabled={unchanged}
-          onClick={() => onApply(draftHex)}
+          onClick={() => applyVariant(draftHex)}
           className={`min-h-11 rounded-md px-2 text-tools-meta font-semibold focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
             passes
               ? 'bg-[var(--chrome-green)] text-white hover:brightness-95'
@@ -109,4 +175,8 @@ export function InlineTokenDerivationEditor({
       </div>
     </div>
   );
+}
+
+function formatDelta(value: number, decimals = 2): string {
+  return `${value >= 0 ? '+' : ''}${value.toFixed(decimals)}`;
 }
