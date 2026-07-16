@@ -12,6 +12,7 @@ import {
 import {
   assignRolesFromHexes,
   extractSeedsFromPalette,
+  PALETTE_ROLE_ORDER,
   rolePaletteAsSemanticOverrides,
   renameRoleSlot,
   validateRolePalette,
@@ -25,7 +26,11 @@ import {
 } from '@lib/color/illustrationComposer';
 import type { ExtractedColor } from '@lib/color/imageExtractor';
 import { normalizeHex } from '@lib/color/normalizeHex';
-import { tokenNameForPaletteRole } from '@lib/color/semanticRoleProjection';
+import {
+  paletteRoleForTokenName,
+  projectSemanticTokensToRolePalette,
+  tokenNameForPaletteRole,
+} from '@lib/color/semanticRoleProjection';
 import { getPairedOnTokenForFill } from '@lib/color/semanticTokenTargets';
 import {
   DEFAULT_NEUTRAL_STYLE,
@@ -35,7 +40,10 @@ import {
   type SemanticTokenOverrides,
   type SemanticTokens,
 } from '@lib/color/semanticTokens';
-import { projectSemanticTokensToRolePalette } from '@lib/color/semanticRoleProjection';
+import {
+  counterpartRoleColorForTheme,
+  oppositeTheme,
+} from '@lib/color/themeCounterpartColor';
 import {
   EMPTY_THEMES,
   type ThemeId,
@@ -68,6 +76,10 @@ const EMPTY_LOCKED_BY_THEME: Record<ThemeId, PaletteRoleId[]> = {
   light: [],
   dark: [],
 };
+const EMPTY_OVERRIDES_BY_THEME: Record<ThemeId, SemanticTokenOverrides> = {
+  light: {},
+  dark: {},
+};
 const DATA_TOKEN_NAMES = [
   'data-1', 'data-2', 'data-3', 'data-4', 'data-5', 'data-6',
 ] as const satisfies readonly SemanticTokenName[];
@@ -96,7 +108,7 @@ export type TokenEditPreview =
 
 /** Sub-estado que entra al historial de deshacer/rehacer. */
 type EditablePaletteState = {
-  tokenOverrides: SemanticTokenOverrides;
+  tokenOverridesByTheme: Record<ThemeId, SemanticTokenOverrides>;
   clearedSemanticTokens: SemanticTokenName[];
   roleNames: Partial<Record<PaletteRoleId, string>>;
   lockedRolesByTheme: Record<ThemeId, PaletteRoleId[]>;
@@ -107,7 +119,7 @@ type EditablePaletteState = {
 };
 
 const INITIAL_EDITABLE: EditablePaletteState = {
-  tokenOverrides: {},
+  tokenOverridesByTheme: EMPTY_OVERRIDES_BY_THEME,
   clearedSemanticTokens: [],
   roleNames: {},
   lockedRolesByTheme: EMPTY_LOCKED_BY_THEME,
@@ -182,7 +194,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   const [paletteRevision, setPaletteRevision] = useState(0);
 
   const {
-    tokenOverrides,
+    tokenOverridesByTheme,
     clearedSemanticTokens,
     roleNames,
     lockedRolesByTheme,
@@ -193,6 +205,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   } = editHistory.present;
 
   const lockedRoles = lockedRolesByTheme[activeTheme];
+  const tokenOverrides = tokenOverridesByTheme[activeTheme] ?? {};
 
   const commitEdit = useCallback(
     (updater: (current: EditablePaletteState) => EditablePaletteState) => {
@@ -338,9 +351,19 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
           prominence: 1 - index * 0.05,
         })),
       );
+      const lightOverrides = rolePaletteAsSemanticOverrides(palette);
+      const darkOverrides = Object.fromEntries(
+        PALETTE_ROLE_ORDER.map((role) => [
+          tokenNameForPaletteRole(role),
+          counterpartRoleColorForTheme(palette[role].hex, role, 'dark'),
+        ]),
+      ) as SemanticTokenOverrides;
       setEditHistory((history) => createHistory({
         ...INITIAL_EDITABLE,
-        tokenOverrides: rolePaletteAsSemanticOverrides(palette),
+        tokenOverridesByTheme: {
+          light: lightOverrides,
+          dark: darkOverrides,
+        },
         roleNames: history.present.roleNames,
         lockedRolesByTheme: history.present.lockedRolesByTheme,
       }));
@@ -387,26 +410,61 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   const replaceSemanticToken = useCallback((tokenName: SemanticTokenName, hex: string) => {
     const normalized = normalizeHex(hex);
     const pairedOn = getPairedOnTokenForFill(tokenName);
+    const role = paletteRoleForTokenName(tokenName);
+    const otherTheme = oppositeTheme(activeTheme);
 
-    // Drop stale on-* overrides so deriveSemanticTokens re-pairs text to the new fill.
+    // Persist the chosen hex for the active theme and a same-hue counterpart for the other.
     commitEdit((current) => {
-      const nextOverrides: SemanticTokenOverrides = {
-        ...current.tokenOverrides,
+      const activeOverrides: SemanticTokenOverrides = {
+        ...current.tokenOverridesByTheme[activeTheme],
         [tokenName]: normalized,
       };
 
       if (pairedOn) {
-        delete nextOverrides[pairedOn];
+        delete activeOverrides[pairedOn];
+      }
+
+      let otherOverrides: SemanticTokenOverrides = {
+        ...current.tokenOverridesByTheme[otherTheme],
+      };
+
+      if (role) {
+        const otherBase = deriveSemanticTokens({
+          extracted: extractedColors,
+          overrides: otherOverrides,
+          theme: otherTheme,
+          neutralStyle: current.neutralStyle,
+          vibrancy: current.savedVibrancy,
+          paletteType,
+        });
+        const counterpart = counterpartRoleColorForTheme(normalized, role, otherTheme, {
+          fondoHex: otherBase.background.hex,
+          superficieHex: otherBase.surface.hex,
+          textoHex: otherBase['on-background'].hex,
+        });
+
+        otherOverrides = {
+          ...otherOverrides,
+          [tokenName]: counterpart,
+        };
+
+        if (pairedOn) {
+          delete otherOverrides[pairedOn];
+        }
       }
 
       return {
         ...current,
-        tokenOverrides: nextOverrides,
+        tokenOverridesByTheme: {
+          ...current.tokenOverridesByTheme,
+          [activeTheme]: activeOverrides,
+          [otherTheme]: otherOverrides,
+        },
         clearedSemanticTokens: current.clearedSemanticTokens.filter((name) => name !== tokenName),
       };
     });
     setTokenEditPreviewState(null);
-  }, [commitEdit]);
+  }, [activeTheme, commitEdit, extractedColors, paletteType]);
 
   const replaceRole = useCallback(
     (role: PaletteRoleId, hex: string) => {
@@ -416,12 +474,24 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   );
 
   const clearSemanticToken = useCallback((tokenName: SemanticTokenName) => {
+    const pairedOn = getPairedOnTokenForFill(tokenName);
+
     commitEdit((current) => {
-      const nextOverrides = { ...current.tokenOverrides };
-      delete nextOverrides[tokenName];
+      const nextByTheme = {
+        light: { ...current.tokenOverridesByTheme.light },
+        dark: { ...current.tokenOverridesByTheme.dark },
+      };
+
+      for (const theme of ['light', 'dark'] as const) {
+        delete nextByTheme[theme][tokenName];
+        if (pairedOn) {
+          delete nextByTheme[theme][pairedOn];
+        }
+      }
+
       return {
         ...current,
-        tokenOverrides: nextOverrides,
+        tokenOverridesByTheme: nextByTheme,
         clearedSemanticTokens: current.clearedSemanticTokens.includes(tokenName)
           ? current.clearedSemanticTokens
           : [...current.clearedSemanticTokens, tokenName],

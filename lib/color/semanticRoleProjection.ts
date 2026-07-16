@@ -32,6 +32,14 @@ export function tokenNameForPaletteRole(role: PaletteRoleId): SemanticTokenName 
   return ROLE_TO_TOKEN[role];
 }
 
+export function paletteRoleForTokenName(tokenName: SemanticTokenName): PaletteRoleId | null {
+  const match = (Object.entries(ROLE_TO_TOKEN) as Array<[PaletteRoleId, SemanticTokenName]>).find(
+    ([, name]) => name === tokenName,
+  );
+
+  return match?.[0] ?? null;
+}
+
 export function projectSemanticTokensToRolePalette(
   tokens: SemanticTokens,
   names?: Partial<Record<PaletteRoleId, string>>,
