@@ -22,7 +22,7 @@ export function PaintPaletteCanvas({ colors }: { colors: SelectableColor[] }) {
           Colores para pintar
         </h2>
         <p className="mt-1 max-w-[65ch] text-pretty font-sans text-chrome-label text-muted">
-          Muestras reales de la imagen. No hay roles, ajustes de contraste ni colores derivados.
+          Muestras de tu paleta actual, vistas como pigmento. Sin roles ni corrección de contraste.
         </p>
       </header>
       <div className="mb-5 shrink-0">

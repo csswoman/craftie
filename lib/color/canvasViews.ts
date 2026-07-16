@@ -19,7 +19,7 @@ export type CanvasViewMeta = {
 };
 
 export const CANVAS_VIEWS: readonly CanvasViewMeta[] = [
-  { id: 'paint', group: 'mode', name: 'Pintar', description: 'Solo la paleta cruda' },
+  { id: 'paint', group: 'mode', name: 'Pintar', description: 'Paleta actual como pigmento' },
   { id: 'style-guide', group: 'system', name: 'Guía de estilo', description: 'Vista completa del sistema' },
   { id: 'type-scale', group: 'system', name: 'Escala tipográfica', description: 'Roles y tamaños de fuente' },
   { id: 'colors', group: 'mode', name: 'Colores', description: 'Roles, derivados, sistema completo' },
