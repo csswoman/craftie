@@ -37,7 +37,7 @@ describe('googleFonts', () => {
 
     expect(url).toMatch(/^https:\/\/fonts\.googleapis\.com\/css2\?/);
     expect(url).toContain('display=swap');
-    expect(url).toContain('family=Playfair+Display:wght@600;700');
+    expect(url).toContain('family=Playfair+Display:wght@500;600;700');
     expect(url).toContain('family=Open+Sans:wght@400;500');
   });
 

@@ -139,26 +139,8 @@ export function ExportMenu({ canExport, onExportBrandKit, onExportDesignMd }: Ex
     onExportDesignMd();
   }
 
-  const disabledHintId = `${menuId}-hint`;
-  const exportHint = canExport
-    ? 'Descargar Brand kit (.json) o DESIGN.md'
-    : 'Se habilita al crear la guía de marca';
-
   return (
     <div className="relative z-dropdown flex min-w-0 items-center gap-2">
-      {!canExport ? (
-        <>
-          <span id={disabledHintId} className="sr-only">
-            Se habilita al crear la guía de marca
-          </span>
-          <span
-            aria-hidden="true"
-            className="hidden max-w-[9.5rem] text-right text-chrome-caption leading-snug text-muted sm:block"
-          >
-            Se habilita al crear la guía
-          </span>
-        </>
-      ) : null}
       <button
         ref={triggerRef}
         type="button"
@@ -166,8 +148,7 @@ export function ExportMenu({ canExport, onExportBrandKit, onExportDesignMd }: Ex
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
-        aria-describedby={!canExport ? disabledHintId : undefined}
-        title={exportHint}
+        title="Exportar"
         onClick={() => {
           if (canExport) setOpen((value) => !value);
         }}

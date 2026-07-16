@@ -16,11 +16,11 @@ export function PairingFilterChips({
   onChange,
   isTools = false,
 }: PairingFilterChipsProps) {
-  const chipClass = isTools ? 'text-tools-chip' : 'text-[0.75rem]';
+  const chipClass = isTools ? 'text-tools-chip' : 'text-chrome-caption';
 
   return (
     <div
-      className="flex flex-wrap gap-1.5"
+      className="flex w-max min-w-full flex-nowrap gap-1.5"
       role="group"
       aria-label="Filtrar pares por carácter"
     >
@@ -33,7 +33,7 @@ export function PairingFilterChips({
             type="button"
             onClick={() => onChange(filter.value)}
             aria-pressed={active}
-            className={`rounded-full px-2.5 py-1 ${chipClass} font-medium transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+            className={`min-h-8 shrink-0 rounded-full px-2.5 py-1 ${chipClass} font-medium transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
               active
                 ? 'bg-ink text-bg'
                 : 'bg-surface-raised text-muted hover:bg-border/60 hover:text-ink'

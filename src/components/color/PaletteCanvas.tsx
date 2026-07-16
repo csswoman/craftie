@@ -12,7 +12,6 @@ import type { SelectableColor } from '@lib/color/selectableColors';
 import { ColorDetailsDrawer } from '@/components/color-engine/ColorDetailsDrawer';
 import { useRolePalette } from '@/context/RolePaletteContext';
 import { PaletteView } from './PaletteView';
-import { PaletteThemeToggle } from './PaletteThemeToggle';
 import { PreviewView } from './PreviewView';
 import {
   openRoleColorPopover,
@@ -68,11 +67,9 @@ export function PaletteCanvas({
   const {
     rolePalette,
     previewRolePalette,
-    activeTheme,
     lockedRoles,
     replaceRole,
     setActiveRole,
-    setActiveTheme,
   } = useRolePalette();
 
   const [activeView, setActiveView] = useState<CanvasViewId>('colors');
@@ -139,12 +136,12 @@ export function PaletteCanvas({
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {hasPalette ? (
-        <div className="flex min-h-11 shrink-0 flex-wrap items-center gap-3 border-b border-border px-3 py-1.5 sm:min-h-13 sm:px-6">
-          <div className="min-w-0">
+        <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-line/60 px-4 py-3 sm:min-h-13 sm:gap-3 sm:px-6 sm:py-1.5">
+          <div className="hidden min-w-0 sm:block">
               <p className="truncate text-chrome-label font-semibold text-ink">Paleta de roles</p>
               <p className="truncate text-chrome-caption text-muted">Edita colores y revisa el contraste.</p>
           </div>
-          <div className="ml-auto flex items-center gap-2.5 max-[620px]:ml-0 max-[620px]:w-full max-[620px]:justify-between">
+          <div className="flex w-full flex-wrap items-center gap-2.5 sm:ml-auto sm:w-auto sm:gap-2.5">
             <CanvasViewSelector
               activeId={activeView}
               palette={columns.map((column) => column.hex)}
@@ -156,7 +153,7 @@ export function PaletteCanvas({
             />
             {imagePreviewUrl && onImageFileSelected && onImageRegenerate ? (
               <>
-                <span aria-hidden="true" className="h-[30px] w-px bg-line" />
+                <span aria-hidden="true" className="hidden h-[30px] w-px bg-line sm:block" />
                 <PaletteImageBlock
                   previewUrl={imagePreviewUrl}
                   fileName={imageFileName}
@@ -167,9 +164,6 @@ export function PaletteCanvas({
                 />
               </>
             ) : null}
-          </div>
-          <div className="max-[620px]:ml-auto">
-            <PaletteThemeToggle activeTheme={activeTheme} onChange={setActiveTheme} />
           </div>
         </div>
       ) : null}

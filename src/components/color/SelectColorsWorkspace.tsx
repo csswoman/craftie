@@ -1,7 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
 import { DESIGN_STYLES } from '@lib/styles/presets';
 
 import { InspirationModal } from '@/components/color/InspirationModal';
@@ -9,19 +7,16 @@ import { SelectColorsWorkspaceMain } from '@/components/color/SelectColorsWorksp
 import { EmptyWorkspaceCard } from '@/components/color/EmptyWorkspaceCard';
 import {
   SelectColorsWorkspaceSidebar,
+  ToolsTabToggle,
   useSelectColorsWorkspaceToolSections,
+  useToolsTabState,
 } from '@/components/color/SelectColorsWorkspaceSidebar';
 import { StudioToolsMobileDock } from '@/components/color/StudioToolsMobileDock';
 import { useSelectColorsWorkspaceController } from '@/components/color/useSelectColorsWorkspaceController';
 import { StyleGallery } from '@/components/color-engine/StyleGallery';
 import { StudioCanvas } from '@/components/layout/StudioCanvas';
-import { StudioFlowGuide } from '@/components/layout/StudioFlowGuide';
 import { WorkspaceHeader } from '@/components/layout/WorkspaceHeader';
 import { RolePaletteProvider } from '@/context/RolePaletteContext';
-import {
-  readFlowGuideDismissed,
-  writeFlowGuideDismissed,
-} from '@/lib/browser/flowGuideDismiss';
 
 export function SelectColorsWorkspace() {
   return (
@@ -34,26 +29,7 @@ export function SelectColorsWorkspace() {
 function SelectColorsWorkspaceContent() {
   const workspace = useSelectColorsWorkspaceController();
   const hasInspirationSource = workspace.catalogSource !== 'none';
-  const [flowGuideDismissed, setFlowGuideDismissed] = useState(false);
-
-  useEffect(() => {
-    // The flow hint preference lives in localStorage, so it is only known after mount.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setFlowGuideDismissed(readFlowGuideDismissed());
-  }, []);
-
-  function handleFlowGuideToggle() {
-    setFlowGuideDismissed((current) => {
-      const next = !current;
-      writeFlowGuideDismissed(next);
-      return next;
-    });
-  }
-
-  function handleFlowGuideDismiss() {
-    writeFlowGuideDismissed(true);
-    setFlowGuideDismissed(true);
-  }
+  const { activeTab, setActiveTab } = useToolsTabState();
 
   const toolSectionsInput = {
     catalogSource: workspace.catalogSource,
@@ -81,6 +57,7 @@ function SelectColorsWorkspaceContent() {
     onTogglePinBody: workspace.togglePinBody,
     onTypeScaleBaseChange: workspace.setTypeScaleBase,
     onTypeScaleRatioChange: workspace.setTypeScaleRatio,
+    onHeadingWeightChange: workspace.setHeadingWeight,
     customFonts: workspace.customFonts,
     imagePaletteType: workspace.imagePaletteType,
     paletteTypeOverride: workspace.paletteTypeOverride,
@@ -114,8 +91,6 @@ function SelectColorsWorkspaceContent() {
 
       <WorkspaceHeader
         canExport={workspace.isReviewPhase}
-        flowGuideVisible={hasInspirationSource && !flowGuideDismissed}
-        onFlowGuideToggle={hasInspirationSource ? handleFlowGuideToggle : undefined}
         onExportDesignMd={workspace.handleExportDesignMd}
         onExportBrandKit={workspace.handleExportBrandKit}
       />
@@ -154,21 +129,18 @@ function SelectColorsWorkspaceContent() {
   }
 
   return (
-    <div className="canvas-dots flex h-dvh flex-col overflow-hidden">
+    <div className="canvas-dots flex min-h-dvh flex-col xl:h-dvh xl:min-h-0 xl:overflow-hidden">
       {sharedChrome}
 
-      {!flowGuideDismissed ? (
-        <StudioFlowGuide
-          hasGeneratedPalette={workspace.generatedPalette !== null}
-          hasSelection={workspace.rolePalette !== null}
-          selectionReady={workspace.selectionReady}
-          onStepFocus={workspace.handleFlowStepFocus}
-          onDismiss={handleFlowGuideDismiss}
-        />
-      ) : null}
-
       <StudioCanvas
-        sidebar={<SelectColorsWorkspaceSidebar {...toolSectionsInput} />}
+        sidebar={
+          <SelectColorsWorkspaceSidebar
+            {...toolSectionsInput}
+            activeTab={activeTab}
+            onActiveTabChange={setActiveTab}
+          />
+        }
+        sidebarHeaderExtra={<ToolsTabToggle activeTab={activeTab} onActiveTabChange={setActiveTab} />}
         mobileToolsDock={<StudioToolsMobileDock sections={mobileToolSections} />}
         main={
           <SelectColorsWorkspaceMain

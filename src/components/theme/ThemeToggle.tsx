@@ -1,13 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
-const toggleClassName =
-  'inline-flex size-11 items-center justify-center rounded-lg text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25';
+import { useRolePaletteOptional } from '@/context/RolePaletteContext';
+
+type Mode = 'light' | 'dark';
+
+const MODES: { id: Mode; label: string }[] = [
+  { id: 'light', label: 'Claro' },
+  { id: 'dark', label: 'Oscuro' },
+];
 
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
+  const rolePalette = useRolePaletteOptional();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -16,52 +24,47 @@ export function ThemeToggle() {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    return (
-      <button type="button" className={toggleClassName} aria-label="Cambiar tema" disabled>
-        <MoonIcon />
-      </button>
-    );
+  // Before mount the resolved theme is unknown; render a stable placeholder.
+  const active: Mode = mounted && resolvedTheme === 'dark' ? 'dark' : 'light';
+
+  function handleSelect(mode: Mode) {
+    // The navbar control is the single source of truth: it drives both the
+    // app UI theme (next-themes) and the palette variant being edited.
+    setTheme(mode);
+    rolePalette?.setActiveTheme(mode);
   }
 
-  const isDark = resolvedTheme === 'dark';
-
   return (
-    <button
-      type="button"
-      className={toggleClassName}
-      aria-label={isDark ? 'Activar tema claro' : 'Activar tema oscuro'}
-      onClick={() => setTheme(isDark ? 'light' : 'dark')}
+    <div
+      className="inline-flex shrink-0 gap-0.5 rounded-lg border border-line/60 bg-surface p-1"
+      role="group"
+      aria-label="Tema de la interfaz: claro u oscuro"
     >
-      {isDark ? <SunIcon /> : <MoonIcon />}
-    </button>
-  );
-}
+      {MODES.map((mode) => {
+        const selected = active === mode.id;
 
-function MoonIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 20 20" className="size-4" fill="none">
-      <path
-        d="M15.5 11.5a6.5 6.5 0 01-8.8-8.8 7 7 0 108.8 8.8z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function SunIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 20 20" className="size-4" fill="none">
-      <circle cx="10" cy="10" r="3.25" stroke="currentColor" strokeWidth="1.5" />
-      <path
-        d="M10 2.5v1.75M10 15.75V17.5M4.5 10H2.75M17.25 10H15.5M5.4 5.4l1.24 1.24M13.36 13.36l1.24 1.24M5.4 14.6l1.24-1.24M13.36 6.64l1.24-1.24"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
+        return (
+          <button
+            key={mode.id}
+            type="button"
+            aria-pressed={selected}
+            aria-label={`Tema ${mode.label.toLowerCase()}`}
+            title={`Tema ${mode.label.toLowerCase()}`}
+            disabled={!mounted}
+            onClick={() => handleSelect(mode.id)}
+            className={`grid min-h-11 min-w-11 place-items-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+              selected ? 'bg-surface-raised text-ink shadow-sm' : 'text-muted hover:text-ink'
+            }`}
+          >
+            {mode.id === 'light' ? (
+              <Sun size={16} strokeWidth={1.75} aria-hidden="true" />
+            ) : (
+              <Moon size={16} strokeWidth={1.75} aria-hidden="true" />
+            )}
+            <span className="sr-only">{mode.label}</span>
+          </button>
+        );
+      })}
+    </div>
   );
 }

@@ -333,6 +333,13 @@ export function useSelectColorsWorkspaceController() {
     setTypeUi((current) => ({ ...current, ratio }));
   }
 
+  function handleHeadingWeightChange(weight: number) {
+    setTypeUi((current) => ({
+      ...current,
+      applied: { ...current.applied, headingWeight: weight },
+    }));
+  }
+
   async function handleApplyCustomFont(input: CustomFontSubmitInput) {
     if (input.source === 'google') {
       await loadGoogleFontFamily(input.family);
@@ -480,6 +487,7 @@ export function useSelectColorsWorkspaceController() {
     togglePinBody: handleTogglePinBody,
     setTypeScaleBase: handleTypeScaleBaseChange,
     setTypeScaleRatio: handleTypeScaleRatioChange,
+    setHeadingWeight: handleHeadingWeightChange,
     applyCustomFont: handleApplyCustomFont,
     statusMessage,
   };

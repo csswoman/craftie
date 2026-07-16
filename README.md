@@ -1,196 +1,143 @@
-# 🎨 Palette & Type
+# Craftie
 
-Build accessible color palettes, curated font pairings, and cohesive brand systems.
+Craftie is a web studio for building brand systems from color, inspiration, and typography. The current workflow takes users from an image or curated style to an editable palette, validates it for legibility, and exports a reusable guide.
 
----
+## What it currently does
 
-## Overview
+### Inspiration and color extraction
 
-Palette & Type is a web application designed to help designers, developers, and creators build consistent visual identities.
+- Choose from curated inspiration styles with names, descriptions, seed colors, and moods.
+- Upload a local image to extract dominant colors in the browser.
+- Validate image inputs and show a preview with the file name.
+- Classify extracted palettes as pastel, vivid, dark, or neutral.
+- Regenerate extraction for the same image and manually change the palette type.
+- Add colors manually using HEX values.
 
-The tool combines:
+### Color system
 
-* Color palette generation
-* WCAG accessibility validation
-* Curated typography pairings
-* Design inspiration workflows
-* Brand guide previews
+- Derive a semantic palette from selected colors.
+- Work with system roles such as background, surface, text, primary, accent, and status colors.
+- Generate neutrals, accents, and variants using OKLCH-based formulas.
+- Edit colors, names, and role assignments from the inspector.
+- Adjust hue, lightness, chroma, and vibrancy with non-destructive controls.
+- Keep source colors, semantic tokens, and derived roles separate.
+- Configure light and dark themes with per-role overrides.
+- View the palette through system, paint, typography, and UI composition views.
+- Inspect shades, candidates, data series, and color compositions to understand how the system behaves.
 
-The goal is to provide a structured workflow for creating visually cohesive and accessible brand systems.
+### Accessibility
 
----
-
-## Features
-
-### 🎨 Color Palette Builder
-
-* Curated color selection
-* Smart palette generation
-* Light and dark neutral systems
-* Accent color recommendations
-
-### ♿ Accessibility Testing
-
-* WCAG 2.2 contrast calculations
-* AA and AAA validation
-* Real-world text previews
-* Palette contrast analysis
-
-### 🔤 Typography Pairings
-
-* Curated font combinations
-* Mood-based recommendations
-* Palette-aware suggestions
-* Google Fonts integration
-
-### ✨ Inspiration System
-
-* Design style presets
-* Mood-based workflows
-* Image palette extraction
-* Visual inspiration boards
-
-### 📘 Brand Preview
-
-* Live typography previews
-* Color system visualization
-* Mini brand guide generation
-
----
-
-## Tech Stack
-
-### Frontend
-
-* Next.js
-* TypeScript
-* Tailwind CSS
-
-### Color Engine
-
-* culori
-* OKLCH
-* WCAG 2.2 contrast calculations
+- Calculate relative luminance and contrast ratios.
+- Evaluate semantic color pairs against WCAG 2.2.
+- Show compliance states for normal and large text at AA and AAA levels.
+- Suggest OKLCH lightness adjustments to move a color toward the target contrast level.
+- Show a complementary APCA reading and warn when WCAG and APCA disagree.
+- Preview real text with the palette combinations.
 
 ### Typography
 
-* Google Fonts CSS API
+- Browse a curated catalog of heading and body font pairings.
+- Recommend pairings based on the selected style's mood.
+- Filter pairings by characteristics and inspect their metadata.
+- Preview applied typography on the current palette.
+- Pin the heading or body font independently while previewing other pairings.
+- Adjust the base type scale, scale ratio, and heading weight.
+- Load font families from Google Fonts or upload local fonts for headings or body text.
+- Temporarily retain custom fonts and the selected pairing in the browser.
 
-### Future
+### Guide and export
 
-* Supabase
-* Brand guide exports
-* Project persistence
+- Follow a four-step guided flow: inspiration, role adjustment, generation, and review.
+- Generate a brand guide once the palette is complete and ready for review.
+- Review the palette, contrast, roles, themes, and typography before exporting.
+- Download a `brand-kit.json` containing the palette, roles, typography, metadata, and associated guide.
+- Download a `DESIGN.md` containing YAML tokens, light/dark CSS custom properties, a role reference table, and usage instructions.
+- Use the workspace with resizable panels, responsive views, light/dark mode, and keyboard shortcut help.
 
----
+## Main workflow
 
-## Project Structure
+1. Choose a curated style or upload an image.
+2. Review and adjust source colors and semantic roles.
+3. Customize roles, themes, and vibrancy as needed.
+4. Select a font pairing or apply custom fonts.
+5. Generate the brand guide.
+6. Review contrast and typography, then export `brand-kit.json` or `DESIGN.md`.
+
+## Persistence and current limitations
+
+- The application currently runs in the browser and does not require an account or backend.
+- Project persistence, cross-device synchronization, and Supabase integration are not implemented yet.
+- Images and local fonts are processed locally; this application does not upload them to a server.
+- Interface preferences, such as dismissing the guide and panel layout, are stored in `localStorage`.
+- Custom fonts and the selected font pairing are retained in the browser's session storage.
+
+## Tech stack
+
+- Next.js 16 and React 19
+- TypeScript
+- Tailwind CSS 4
+- `culori` for color conversions and operations, including OKLCH
+- `ntcjs` and original curated data for color names and styles
+- `lucide-react` for icons
+- Vitest for unit tests
+
+## Project structure
 
 ```text
-app/
-
-components/
-  color-engine/
-  font-pairing/
+src/
+  app/                         Next.js entry point, layout, and global styles
+  components/
+    color/                     Workspace, role editor, and color views
+    color-engine/              Palette generation, selection, and extraction
+    font-pairing/              Typography catalog and application
+    layout/                    Shell, navigation, panels, shortcuts, and exports
+    theme/                     Theme provider and toggle
+  context/                     Shared role-palette state
+  lib/browser/                 Browser-dependent adapters
 
 lib/
-  color/
-  typography/
-  styles/
+  a11y/                        Accessibility utilities
+  color/                       Color engine, roles, themes, contrast, and previews
+  export/                      Brand kit, tokens, and DESIGN.md generation
+  studio/                      Studio flow and shortcuts
+  styles/                      Curated inspiration styles
+  typography/                  Pairings, filters, scales, and custom fonts
+  utils/                       Reusable pure utilities
 
-public/
+docs/                          Product documentation and design decisions
+scripts/                       Project validation scripts
 ```
 
----
-
-## Roadmap
-
-### Phase 0
-
-* Project setup
-
-### Phase 1
-
-* Color Engine
-* WCAG Contrast
-* Harmony Detection
-* Smart Color Formulas
-
-### Phase 2
-
-* Select Colors UI
-* Accessibility UI
-
-### Phase 3
-
-* Design Styles
-* Image Palette Extraction
-
-### Phase 4
-
-* Font Pairings
-* Google Fonts Integration
-
-### Phase 5
-
-* Save & Export
-* Supabase Persistence
-
----
-
-## Design Principles
-
-### Accessibility First
-
-Every palette should be evaluated against WCAG standards.
-
-### Color Science
-
-Color operations are based on perceptually uniform color spaces such as OKLCH.
-
-### Separation of Concerns
-
-Business logic remains independent from UI components.
-
-### Small, Testable Modules
-
-Core functionality is implemented as reusable and testable utilities.
-
----
+Business logic lives in `lib/` and remains independent from React. Adapters that require browser APIs live in `src/lib/browser/`.
 
 ## Development
 
-Install dependencies:
+Requirements: Node.js compatible with Next.js 16 and pnpm.
 
 ```bash
 pnpm install
-```
-
-Run development server:
-
-```bash
 pnpm dev
 ```
 
-Run tests:
+Available commands:
 
 ```bash
-pnpm test
+pnpm build                 # Build the application for production
+pnpm start                 # Start the production build
+pnpm lint                  # Run ESLint
+pnpm typecheck             # Check TypeScript types
+pnpm test                  # Run Vitest tests
+pnpm test:watch            # Run Vitest in watch mode
+pnpm check:component-size  # Check the 250-line component limit
+pnpm verify                # Run all checks above
 ```
 
----
+## Project status
 
-## Status
+Craftie is in active development. The color engine, role selection and editing, image extraction, typography, accessibility review, and core exports are implemented. The next pending stage is adding project saving and persistence.
 
-🚧 Active Development
+## Originality and license
 
-The project is currently focused on the Color Engine and Accessibility modules.
+The project's rules, curated styles, recommendations, and original data are maintained independently. Content, tables, datasets, or text protected by third parties must not be copied from products, books, or websites.
 
----
-
-## License
-
-MIT
-
-```
-```
+This project is distributed under the MIT license.

@@ -52,6 +52,7 @@ export type StudioToolsInput = {
   onTogglePinBody: () => void;
   onTypeScaleBaseChange: (base: TypeScaleBase) => void;
   onTypeScaleRatioChange: (ratio: TypeScaleRatio) => void;
+  onHeadingWeightChange: (weight: number) => void;
   onApplyCustomFont: (input: CustomFontSubmitInput) => Promise<void>;
   isGenerating: boolean;
   selectionReady: boolean;
@@ -133,6 +134,7 @@ export function buildStudioToolSections(
           onTogglePinBody={input.onTogglePinBody}
           onBaseChange={input.onTypeScaleBaseChange}
           onRatioChange={input.onTypeScaleRatioChange}
+          onHeadingWeightChange={input.onHeadingWeightChange}
           onApplyCustomFont={input.onApplyCustomFont}
           embedded
         />

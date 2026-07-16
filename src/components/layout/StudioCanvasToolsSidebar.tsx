@@ -11,6 +11,7 @@ import {
 
 type StudioCanvasToolsSidebarProps = {
   sidebar: ReactNode;
+  headerExtra?: ReactNode;
   collapsed: boolean;
   width: number;
   onToggleCollapsed: () => void;
@@ -19,6 +20,7 @@ type StudioCanvasToolsSidebarProps = {
 
 export function StudioCanvasToolsSidebar({
   sidebar,
+  headerExtra,
   collapsed,
   width,
   onToggleCollapsed,
@@ -43,11 +45,8 @@ export function StudioCanvasToolsSidebar({
           style={{ width }}
         >
           <div className="panel-float flex h-full min-h-0 flex-col overflow-hidden">
-            <PanelCollapseBar
-              align="end"
-              title="Craftie"
-              subtitle="Colores y tipografía"
-            >
+            <PanelCollapseBar align="end">
+              {headerExtra}
               <PanelCollapseButton
                 label="Comprimir herramientas"
                 direction="left"

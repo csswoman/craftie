@@ -29,6 +29,7 @@ export type SidebarTypographySectionProps = {
   onTogglePinBody: () => void;
   onBaseChange: (base: TypeScaleBase) => void;
   onRatioChange: (ratio: TypeScaleRatio) => void;
+  onHeadingWeightChange: (weight: number) => void;
   onApplyCustomFont: (input: CustomFontSubmitInput) => Promise<void>;
   embedded?: boolean;
 };
@@ -50,6 +51,7 @@ export function SidebarTypographySection({
   onTogglePinBody,
   onBaseChange,
   onRatioChange,
+  onHeadingWeightChange,
   onApplyCustomFont,
 }: SidebarTypographySectionProps) {
   const listInert = pinHeading && pinBody;
@@ -66,6 +68,7 @@ export function SidebarTypographySection({
         onTogglePinBody={onTogglePinBody}
         onBaseChange={onBaseChange}
         onRatioChange={onRatioChange}
+        onHeadingWeightChange={onHeadingWeightChange}
       />
       <PairingList
         pairings={fontPairings}

@@ -9,23 +9,29 @@ export function PanelCollapseBar({
   alwaysVisible = false,
 }: {
   align: 'start' | 'end';
-  title: string;
+  title?: string;
   subtitle?: string;
   children: ReactNode;
   alwaysVisible?: boolean;
 }) {
   return (
     <div
-      className={`shrink-0 items-center border-b border-line-soft px-4 py-3 ${
+      className={`shrink-0 items-center border-b border-line-soft px-3 py-2.5 ${
         alwaysVisible ? 'flex' : 'hidden xl:flex'
       } ${align === 'end' ? 'justify-end' : 'justify-start'}`}
     >
       <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-        <div className={`min-w-0 ${align === 'end' ? 'text-right' : 'text-left'}`}>
-          <p className="truncate font-display text-[1.375rem] font-medium leading-none text-forest">{title}</p>
-          {subtitle ? <p className="mt-1 truncate text-chrome-caption text-muted">{subtitle}</p> : null}
-        </div>
-        <div className="shrink-0">{children}</div>
+        {title || subtitle ? (
+          <div className={`min-w-0 ${align === 'end' ? 'text-right' : 'text-left'}`}>
+            {title ? (
+              <p className="truncate font-display text-[1rem] font-semibold leading-none text-forest">{title}</p>
+            ) : null}
+            {subtitle ? (
+              <p className={`truncate text-[0.75rem] leading-none text-muted ${title ? 'mt-1' : ''}`}>{subtitle}</p>
+            ) : null}
+          </div>
+        ) : null}
+        <div className="flex min-w-0 flex-1 shrink items-center justify-end gap-2">{children}</div>
       </div>
     </div>
   );

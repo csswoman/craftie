@@ -70,11 +70,12 @@
     --tools-font-headline: 1.25rem;
     --tools-font-body: 1rem;
     /* Five-level scale for the color-system sidebar. */
-    --tools-role-size: 0.95rem;
-    --tools-body-sm-size: 0.82rem;
-    --tools-section-size: 0.72rem;
-    --tools-meta-size: 0.72rem;
-    --tools-micro-size: 0.68rem;
+    --tools-tab-size: 0.9375rem; /* 15px — top tabs and sub-tabs */
+    --tools-role-size: 1rem; /* 16px — role labels */
+    --tools-body-sm-size: 0.875rem; /* 14px */
+    --tools-section-size: 0.9375rem; /* 15px — section titles */
+    --tools-meta-size: 0.8125rem; /* 13px — hex values, meta labels */
+    --tools-micro-size: 0.8125rem; /* 13px — chips, counts */
   }
 }
 
@@ -519,6 +520,11 @@
     animation: preview-sweep 1.4s cubic-bezier(0.3, 0.7, 0.2, 1) both;
   }
 
+  .text-tools-tab {
+    font-size: var(--tools-tab-size);
+    line-height: 1.2;
+  }
+
   .studio-tools-panel .text-tools-role {
     font-size: var(--tools-role-size);
     line-height: 1.15;
@@ -532,9 +538,9 @@
 
   .studio-tools-panel .text-tools-section-label {
     font-size: var(--tools-section-size);
-    line-height: 1;
-    letter-spacing: 0.05em;
-    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    font-weight: 600;
   }
 
   .studio-tools-panel .text-tools-meta-scale {

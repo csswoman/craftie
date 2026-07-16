@@ -238,7 +238,7 @@ function ColorViewTabs({
             aria-selected={selected}
             onClick={() => onChange(view)}
             {...getTabProps(view)}
-            className={`relative min-h-10 px-0 pb-2.5 pt-0.5 text-[0.75rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25 ${selected ? 'text-ink after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:rounded-sm after:bg-forest after:content-[""]' : 'text-muted hover:text-ink'}`}
+            className={`relative min-h-10 px-0 pb-2.5 pt-0.5 text-tools-tab font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25 ${selected ? 'text-ink after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:rounded-sm after:bg-forest after:content-[""]' : 'text-muted hover:text-ink'}`}
           >
             {view === 'system' ? 'Sistema' : 'Datos'}
           </button>

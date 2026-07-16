@@ -2,7 +2,7 @@ import type { FontClassification, FontMeta, FontPair } from './pairings';
 
 const GOOGLE_FONTS_BASE = 'https://fonts.googleapis.com/css2';
 
-const HEADING_WEIGHTS = [600, 700] as const;
+const HEADING_WEIGHTS = [500, 600, 700] as const;
 const BODY_WEIGHTS = [400, 500] as const;
 
 const FALLBACK_FONTS: Record<FontClassification, string> = {

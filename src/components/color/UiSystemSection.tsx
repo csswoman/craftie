@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import { normalizeHex } from '@lib/color/normalizeHex';
 import type { SelectableColor } from '@lib/color/selectableColors';
@@ -82,7 +82,7 @@ export function UiSystemSection({
           key={group.label}
           label={group.label}
           aside={`${group.roles.length} roles`}
-          first={false}
+          collapsible
         >
           <ul aria-label={group.label} className="divide-y divide-border">
               {group.roles.map((role, index) => {
@@ -176,19 +176,38 @@ function PanelSection({
   aside,
   children,
   first = false,
+  collapsible = false,
 }: {
   label: string;
   aside?: string;
   children: ReactNode;
   first?: boolean;
+  collapsible?: boolean;
 }) {
+  const [open, setOpen] = useState(true);
+
   return (
-    <section className={`py-[18px] ${first ? 'pt-1.5' : 'border-t border-border'}`}>
-      <div className="mb-3 flex items-baseline justify-between">
-        <h3 className="text-tools-section-label uppercase text-muted">{label}</h3>
-        {aside ? <span className="text-tools-meta-scale font-semibold text-muted">{aside}</span> : null}
-      </div>
-      {children}
+    <section className={`py-3 ${first ? 'pt-1' : 'border-t border-border'}`}>
+      {collapsible ? (
+        <button
+          type="button"
+          aria-expanded={open}
+          onClick={() => setOpen((value) => !value)}
+          className="mb-2 flex min-h-8 w-full items-center justify-between gap-3 rounded-md text-left focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+        >
+          <span className="flex items-center gap-1.5">
+            <h3 className="text-tools-section-label uppercase text-muted">{label}</h3>
+            <Chevron open={open} />
+          </span>
+          {aside ? <span className="text-tools-meta-scale font-semibold text-muted">{aside}</span> : null}
+        </button>
+      ) : (
+        <div className="mb-2 flex items-baseline justify-between">
+          <h3 className="text-tools-section-label uppercase text-muted">{label}</h3>
+          {aside ? <span className="text-tools-meta-scale font-semibold text-muted">{aside}</span> : null}
+        </div>
+      )}
+      {!collapsible || open ? children : null}
     </section>
   );
 }

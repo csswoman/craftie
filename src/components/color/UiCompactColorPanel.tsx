@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import type { SelectableColor } from '@lib/color/selectableColors';
 import type { SemanticTokens } from '@lib/color/semanticTokens';
 import {
@@ -50,6 +52,7 @@ export function UiCompactColorPanel({
           <PanelSection
             key={groupId}
             title={group.title}
+            collapsible
             trailing={(
               <button
                 type="button"
@@ -75,7 +78,7 @@ export function UiCompactColorPanel({
         );
       })}
 
-      <PanelSection title="Colores de estado" trailing={<span className="text-[0.6875rem] font-semibold text-muted">esencial</span>}>
+      <PanelSection title="Colores de estado" collapsible trailing={<span className="text-[0.6875rem] font-semibold text-muted">esencial</span>}>
         <ul className="space-y-1.5">
           {STATUS_COLOR_DEFINITIONS.map(({ role }) => (
             <UiCompactStatusSlot
@@ -117,18 +120,42 @@ function PanelSection({
   title,
   trailing,
   children,
+  collapsible = false,
 }: {
   title: string;
   trailing: React.ReactNode;
   children: React.ReactNode;
+  collapsible?: boolean;
 }) {
+  const [open, setOpen] = useState(true);
+
   return (
-    <section className="border-b border-line-soft py-3">
-      <div className="mb-1.5 flex min-h-8 items-center justify-between gap-3">
-        <h2 className="font-display text-[0.9375rem] font-semibold text-ink">{title}</h2>
+    <section className="border-b border-line-soft py-2">
+      <div className="mb-1 flex min-h-8 items-center justify-between gap-3">
+        {collapsible ? (
+          <button
+            type="button"
+            aria-expanded={open}
+            onClick={() => setOpen((value) => !value)}
+            className="flex min-w-0 items-center gap-1.5 rounded-md py-1 text-left focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+          >
+            <h2 className="font-display text-[0.9375rem] font-semibold text-ink">{title}</h2>
+            <PanelChevron open={open} />
+          </button>
+        ) : (
+          <h2 className="font-display text-[0.9375rem] font-semibold text-ink">{title}</h2>
+        )}
         {trailing}
       </div>
-      {children}
+      {!collapsible || open ? children : null}
     </section>
+  );
+}
+
+function PanelChevron({ open }: { open: boolean }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 16 16" className={`size-3 shrink-0 text-muted transition-transform duration-200 motion-reduce:transition-none ${open ? 'rotate-180' : ''}`}>
+      <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }
