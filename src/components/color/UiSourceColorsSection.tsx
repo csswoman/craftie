@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 
 import { normalizeHex } from '@lib/color/normalizeHex';
 import { resolvePaletteDisplayNames } from '@lib/color/paletteDisplay';
@@ -10,16 +11,27 @@ import { rolesBySourceHex, UI_SYSTEM_ROLES } from '@lib/color/uiColorPanel';
 import {
   STATUS_COLOR_DEFINITIONS,
   statusAcceptsSource,
+  type UiStatusColorSet,
   type UiStatusRole,
 } from '@lib/color/uiStatusColors';
 
 import { UiColorSectionHeader } from './UiColorSectionHeader';
+import {
+  UiSourceDestinationButton,
+  UiSourceDestinationList,
+} from './UiSourceDestinationList';
+import { UiSourceTypeMenu } from './UiSourceTypeMenu';
 
-type SourceAction = 'role' | 'status' | null;
+type MenuStep = 'type' | 'role' | 'status';
+
+const DATA_TOKENS = [
+  'data-1', 'data-2', 'data-3', 'data-4', 'data-5', 'data-6',
+] as const satisfies readonly SemanticTokenName[];
 
 export function UiSourceColorsSection({
   colors,
   tokens,
+  statusColors = null,
   onAssignRole,
   onAssignData,
   onAssignStatus,
@@ -27,116 +39,162 @@ export function UiSourceColorsSection({
 }: {
   colors: SelectableColor[];
   tokens: SemanticTokens;
+  statusColors?: UiStatusColorSet | null;
   onAssignRole: (token: SemanticTokenName, hex: string) => void;
   onAssignData: (hex: string) => string;
   onAssignStatus: (role: UiStatusRole, hex: string) => void;
   showHeader?: boolean;
 }) {
   const [openHex, setOpenHex] = useState<string | null>(null);
-  const [action, setAction] = useState<SourceAction>(null);
+  const [step, setStep] = useState<MenuStep>('type');
   const [message, setMessage] = useState<string | null>(null);
   const uniqueColors = useMemo(() => uniqueByHex(colors), [colors]);
   const names = useMemo(() => resolvePaletteDisplayNames(uniqueColors), [uniqueColors]);
   const roleIndex = useMemo(() => rolesBySourceHex(tokens), [tokens]);
+  const statusIndex = useMemo(() => statusesBySourceHex(statusColors), [statusColors]);
+  const dataIndex = useMemo(() => dataLabelsBySourceHex(tokens), [tokens]);
 
   function toggleRow(hex: string) {
-    setOpenHex((current) => current === hex ? null : hex);
-    setAction(null);
+    setOpenHex((current) => (current === hex ? null : hex));
+    setStep('type');
     setMessage(null);
   }
 
-  function chooseAction(next: SourceAction) {
-    setAction((current) => current === next ? null : next);
-    setMessage(null);
+  function finishAssign(nextMessage: string) {
+    setMessage(nextMessage);
+    setOpenHex(null);
+    setStep('type');
   }
 
   return (
     <section aria-labelledby="ui-source-title">
       {showHeader ? <UiColorSectionHeader title={`Colores fuente · ${uniqueColors.length}`} /> : null}
       <h2 id="ui-source-title" className="sr-only">Colores fuente</h2>
-      <ul className="mt-2 divide-y divide-border overflow-hidden rounded-lg border border-border bg-bg">
+      {message ? (
+        <p role="status" className="mb-2 text-tools-meta-scale text-muted">{message}</p>
+      ) : null}
+      <ul className="mt-2 space-y-1.5">
         {uniqueColors.map((color) => {
           const hex = normalizeHex(color.hex);
           const roles = roleIndex.get(hex) ?? [];
+          const statuses = statusIndex.get(hex) ?? [];
+          const dataLabels = dataIndex.get(hex) ?? [];
+          const chips = [...roles, ...statuses, ...dataLabels];
           const name = names.get(color.id) ?? color.name;
           const open = openHex === hex;
+          const assignLabel = chips.length === 0 ? 'Asignar' : 'Reasignar';
+
           return (
-            <li key={color.id}>
-              <div className="flex min-h-11 items-center gap-2 px-2.5 py-2">
-                <span className="size-[26px] shrink-0 rounded-md ring-1 ring-inset ring-ink/10" style={{ backgroundColor: hex }} aria-hidden="true" />
+            <li
+              key={color.id}
+              className={`overflow-hidden rounded-lg border transition-colors ${
+                open
+                  ? 'border-forest/35 bg-bg shadow-[var(--shadow-float)]'
+                  : 'border-border bg-bg'
+              }`}
+            >
+              <div className="flex min-h-12 items-center gap-2.5 px-2.5 py-2">
+                <span
+                  className="size-8 shrink-0 rounded-md ring-1 ring-inset ring-ink/10"
+                  style={{ backgroundColor: hex }}
+                  aria-hidden="true"
+                />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[0.78125rem] font-medium text-ink">{name}</span>
-                  <span className="block font-mono text-[0.65625rem] tabular-nums text-muted">{hex.toUpperCase()}</span>
-                </span>
-                {roles.map((role) => (
-                  <span key={role} className="hidden rounded-full bg-[var(--chrome-green-soft)] px-1.5 py-0.5 text-[0.625rem] font-medium text-[var(--chrome-green)] sm:inline">
-                    {role}
+                  <span className="block truncate text-tools-role text-ink">{name}</span>
+                  <span className="block font-mono text-tools-meta-scale tabular-nums text-muted">
+                    {hex.toUpperCase()}
                   </span>
-                ))}
+                </span>
+                {chips.length > 0 ? (
+                  <span className="hidden max-w-[7.5rem] flex-wrap justify-end gap-1 sm:flex">
+                    {chips.slice(0, 2).map((chip) => (
+                      <span
+                        key={chip}
+                        className="rounded-full bg-[var(--chrome-green-soft)] px-1.5 py-0.5 text-tools-micro font-medium text-[var(--chrome-green)]"
+                      >
+                        {chip}
+                      </span>
+                    ))}
+                    {chips.length > 2 ? (
+                      <span className="rounded-full bg-line-soft px-1.5 py-0.5 text-tools-micro font-medium text-muted">
+                        +{chips.length - 2}
+                      </span>
+                    ) : null}
+                  </span>
+                ) : null}
                 <button
                   type="button"
                   aria-expanded={open}
+                  aria-label={`${assignLabel} ${name}`}
                   onClick={() => toggleRow(hex)}
-                  className={`min-h-11 rounded-full px-2 text-[0.625rem] font-medium focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${roles.length === 0 ? 'bg-surface-raised text-muted' : 'border border-border text-ink hover:bg-surface-raised'}`}
+                  className="inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-tools-body-sm font-semibold text-forest transition-colors hover:bg-line-soft focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25"
                 >
-                  {roles.length === 0 ? 'libre' : 'Usar'} {open ? '↑' : '↓'}
+                  {assignLabel}
+                  <ChevronDown
+                    aria-hidden="true"
+                    size={16}
+                    strokeWidth={2.25}
+                    className={`transition-transform ${open ? 'rotate-180' : ''}`}
+                  />
                 </button>
               </div>
 
               {open ? (
-                <div className="space-y-2 bg-surface px-2.5 pb-2.5 pt-2">
-                  <div className="grid grid-cols-3 gap-1.5">
-                    <ActionButton label="Rol" active={action === 'role'} onClick={() => chooseAction('role')} />
-                    <ActionButton
-                      label="Datos"
-                      active={false}
-                      onClick={() => {
-                        setAction(null);
-                        setMessage(onAssignData(hex));
-                      }}
+                <div className="border-t border-line-soft bg-surface px-2.5 py-2.5">
+                  {step === 'type' ? (
+                    <UiSourceTypeMenu
+                      name={name}
+                      onRole={() => setStep('role')}
+                      onStatus={() => setStep('status')}
+                      onData={() => finishAssign(onAssignData(hex))}
                     />
-                    <ActionButton label="Estado" active={action === 'status'} onClick={() => chooseAction('status')} />
-                  </div>
+                  ) : null}
 
-                  {action === 'role' ? (
-                    <div className="flex flex-wrap gap-1.5" aria-label={`Asignar ${name} a un rol`}>
+                  {step === 'role' ? (
+                    <UiSourceDestinationList
+                      label={`Asignar ${name} a un rol`}
+                      onBack={() => setStep('type')}
+                    >
                       {UI_SYSTEM_ROLES.map((role) => {
+                        const current = tokens[role.token];
                         return (
-                          <button
+                          <UiSourceDestinationButton
                             key={role.token}
-                            type="button"
+                            label={role.label}
+                            currentHex={current.gap ? null : current.hex}
                             onClick={() => {
                               onAssignRole(role.token, hex);
-                              setMessage(`${name} asignado a ${role.label}.`);
+                              finishAssign(`${name} asignado a ${role.label}.`);
                             }}
-                            className="min-h-11 rounded-md border border-border bg-bg px-2 text-[0.625rem] font-medium text-ink hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-                          >
-                            {role.label}
-                          </button>
+                          />
                         );
                       })}
-                    </div>
+                    </UiSourceDestinationList>
                   ) : null}
 
-                  {action === 'status' ? (
-                    <div className="grid grid-cols-3 gap-1.5" aria-label={`Usar ${name} como estado`}>
-                      {STATUS_COLOR_DEFINITIONS.map((status) => (
-                        <button
-                          key={status.role}
-                          type="button"
-                          disabled={!statusAcceptsSource(status.role, hex)}
-                          onClick={() => {
-                            onAssignStatus(status.role, hex);
-                            setMessage(`${name} ofrecido como base de ${status.label}.`);
-                          }}
-                          className="min-h-11 rounded-md border border-border bg-bg px-1.5 text-[0.625rem] font-medium text-ink hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-                        >
-                          {status.label}
-                        </button>
-                      ))}
-                    </div>
+                  {step === 'status' ? (
+                    <UiSourceDestinationList
+                      label={`Usar ${name} como estado`}
+                      onBack={() => setStep('type')}
+                    >
+                      {STATUS_COLOR_DEFINITIONS.map((status) => {
+                        const current = statusColors?.[status.role];
+                        const accepted = statusAcceptsSource(status.role, hex);
+                        return (
+                          <UiSourceDestinationButton
+                            key={status.role}
+                            label={status.label}
+                            currentHex={current?.hex ?? null}
+                            disabled={!accepted}
+                            onClick={() => {
+                              onAssignStatus(status.role, hex);
+                              finishAssign(`${name} ofrecido como base de ${status.label}.`);
+                            }}
+                          />
+                        );
+                      })}
+                    </UiSourceDestinationList>
                   ) : null}
-                  {message ? <p role="status" className="text-[0.625rem] leading-relaxed text-muted">{message}</p> : null}
                 </div>
               ) : null}
             </li>
@@ -144,19 +202,6 @@ export function UiSourceColorsSection({
         })}
       </ul>
     </section>
-  );
-}
-
-function ActionButton({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      aria-pressed={active}
-      onClick={onClick}
-      className={`min-h-9 rounded-md border px-2 text-[0.6875rem] font-semibold focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${active ? 'border-[var(--chrome-green)] bg-[var(--chrome-green-soft)] text-[var(--chrome-green)]' : 'border-border bg-bg text-ink hover:bg-surface-raised'}`}
-    >
-      {label}
-    </button>
   );
 }
 
@@ -168,4 +213,27 @@ function uniqueByHex(colors: SelectableColor[]): SelectableColor[] {
     seen.add(hex);
     return true;
   });
+}
+
+function statusesBySourceHex(statusColors: UiStatusColorSet | null | undefined): Map<string, string[]> {
+  const map = new Map<string, string[]>();
+  if (!statusColors) return map;
+  for (const definition of STATUS_COLOR_DEFINITIONS) {
+    const status = statusColors[definition.role];
+    if (!status.sourceHex) continue;
+    const hex = normalizeHex(status.sourceHex);
+    map.set(hex, [...(map.get(hex) ?? []), definition.label]);
+  }
+  return map;
+}
+
+function dataLabelsBySourceHex(tokens: SemanticTokens): Map<string, string[]> {
+  const map = new Map<string, string[]>();
+  DATA_TOKENS.forEach((token, index) => {
+    const entry = tokens[token];
+    if (entry.gap || entry.source !== 'extracted') return;
+    const hex = normalizeHex(entry.hex);
+    map.set(hex, [...(map.get(hex) ?? []), `Datos ${index + 1}`]);
+  });
+  return map;
 }

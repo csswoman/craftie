@@ -52,7 +52,7 @@ export function UiSourceColorGrid({
       <button
         type="button"
         onClick={onOpen}
-        className="mt-3 min-h-9 text-left text-[0.75rem] font-semibold text-forest underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25"
+        className="mt-3 min-h-10 text-left text-tools-body-sm font-semibold text-forest underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25"
       >
         Ver detalle y asignar ›
       </button>

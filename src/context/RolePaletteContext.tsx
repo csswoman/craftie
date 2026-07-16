@@ -41,6 +41,14 @@ import {
   type ThemesConfig,
 } from '@lib/color/themePalette';
 import { VIBRANCY_MID, normalizeVibrancy } from '@lib/color/vibrancy';
+import {
+  canRedo,
+  canUndo,
+  createHistory,
+  pushHistory,
+  redoHistory,
+  undoHistory,
+} from '@lib/utils/historyStack';
 import type { PaletteType } from '@lib/color/paletteClassification';
 import { resolveUiExpressiveGaps } from '@lib/color/uiExpressiveGaps';
 import {
@@ -81,12 +89,40 @@ function applyClearedDataTokens(
   return next;
 }
 
+export type TokenEditPreview =
+  | { kind: 'token'; tokenName: SemanticTokenName; hex: string }
+  | { kind: 'status'; role: UiStatusRole; status: UiStatusColor };
+
+/** Sub-estado que entra al historial de deshacer/rehacer. */
+type EditablePaletteState = {
+  tokenOverrides: SemanticTokenOverrides;
+  clearedSemanticTokens: SemanticTokenName[];
+  roleNames: Partial<Record<PaletteRoleId, string>>;
+  lockedRolesByTheme: Record<ThemeId, PaletteRoleId[]>;
+  savedVibrancy: number;
+  neutralStyle: NeutralStyle;
+  forcedStatusSources: Partial<Record<UiStatusRole, string>>;
+  forcedStatusColors: Partial<Record<UiStatusRole, ForcedStatusColor>>;
+};
+
+const INITIAL_EDITABLE: EditablePaletteState = {
+  tokenOverrides: {},
+  clearedSemanticTokens: [],
+  roleNames: {},
+  lockedRolesByTheme: EMPTY_LOCKED_BY_THEME,
+  savedVibrancy: VIBRANCY_MID,
+  neutralStyle: DEFAULT_NEUTRAL_STYLE,
+  forcedStatusSources: {},
+  forcedStatusColors: {},
+};
+
 export type RolePaletteContextValue = {
   rolePalette: RolePalette | null;
   semanticTokens: SemanticTokens | null;
   previewRolePalette: RolePalette | null;
   previewSemanticTokens: SemanticTokens | null;
   statusColors: UiStatusColorSet | null;
+  tokenEditPreview: TokenEditPreview | null;
   paletteRevision: number;
   seeds: PaletteSeeds | null;
   illustrationSeed: number;
@@ -100,6 +136,10 @@ export type RolePaletteContextValue = {
   lockedRolesByTheme: Record<ThemeId, PaletteRoleId[]>;
   activeRole: PaletteRoleId | null;
   selectionReady: boolean;
+  canUndoEdit: boolean;
+  canRedoEdit: boolean;
+  undoEdit: () => void;
+  redoEdit: () => void;
   setRolePalette: (palette: RolePalette | null) => void;
   assignFromExtracted: (extracted: ExtractedColor[], paletteType?: PaletteType) => void;
   setPreviewVibrancy: (value: number) => void;
@@ -114,6 +154,8 @@ export type RolePaletteContextValue = {
   generateStatusColors: () => void;
   assignSourceToStatus: (role: UiStatusRole, hex: string) => void;
   selectStatusColor: (status: UiStatusColor) => void;
+  setTokenEditPreview: (preview: TokenEditPreview | null) => void;
+  clearTokenEditPreview: () => void;
   renameRole: (role: PaletteRoleId, name: string) => boolean;
   toggleLock: (role: PaletteRoleId) => void;
   clearRolePalette: () => void;
@@ -128,26 +170,50 @@ const RolePaletteContext = createContext<RolePaletteContextValue | null>(null);
 
 export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   const [extractedColors, setExtractedColors] = useState<ExtractedColor[]>([]);
-  const [tokenOverrides, setTokenOverrides] = useState<SemanticTokenOverrides>({});
-  const [clearedSemanticTokens, setClearedSemanticTokens] = useState<SemanticTokenName[]>([]);
-  const [roleNames, setRoleNames] = useState<Partial<Record<PaletteRoleId, string>>>({});
+  const [editHistory, setEditHistory] = useState(() => createHistory(INITIAL_EDITABLE));
   const [activeTheme, setActiveTheme] = useState<ThemeId>('light');
-  const [savedVibrancy, setSavedVibrancy] = useState(VIBRANCY_MID);
   const [previewVibrancy, setPreviewVibrancyState] = useState(VIBRANCY_MID);
   const [illustrationSeed, setIllustrationSeed] = useState(DEFAULT_ILLUSTRATION_SEED);
-  const [neutralStyle, setNeutralStyle] = useState<NeutralStyle>(DEFAULT_NEUTRAL_STYLE);
-  const [lockedRolesByTheme, setLockedRolesByTheme] =
-    useState<Record<ThemeId, PaletteRoleId[]>>(EMPTY_LOCKED_BY_THEME);
   const [activeRole, setActiveRole] = useState<PaletteRoleId | null>(null);
   const [paletteType, setPaletteType] = useState<PaletteType | undefined>(undefined);
   const [statusColorsEnabled, setStatusColorsEnabled] = useState(!STATUS_COLORS_ON_DEMAND);
-  const [forcedStatusSources, setForcedStatusSources] =
-    useState<Partial<Record<UiStatusRole, string>>>({});
-  const [forcedStatusColors, setForcedStatusColors] =
-    useState<Partial<Record<UiStatusRole, ForcedStatusColor>>>({});
+  const [tokenEditPreview, setTokenEditPreviewState] = useState<TokenEditPreview | null>(null);
   const [paletteRevision, setPaletteRevision] = useState(0);
 
+  const {
+    tokenOverrides,
+    clearedSemanticTokens,
+    roleNames,
+    lockedRolesByTheme,
+    savedVibrancy,
+    neutralStyle,
+    forcedStatusSources,
+    forcedStatusColors,
+  } = editHistory.present;
+
   const lockedRoles = lockedRolesByTheme[activeTheme];
+
+  const commitEdit = useCallback(
+    (updater: (current: EditablePaletteState) => EditablePaletteState) => {
+      setEditHistory((history) => pushHistory(history, updater(history.present)));
+    },
+    [],
+  );
+
+  const resetEditable = useCallback((next: Partial<EditablePaletteState> = {}) => {
+    setEditHistory(createHistory({ ...INITIAL_EDITABLE, ...next }));
+  }, []);
+
+  const previewTokenOverrides = useMemo<SemanticTokenOverrides>(() => {
+    if (!tokenEditPreview || tokenEditPreview.kind !== 'token') {
+      return tokenOverrides;
+    }
+
+    return {
+      ...tokenOverrides,
+      [tokenEditPreview.tokenName]: normalizeHex(tokenEditPreview.hex),
+    };
+  }, [tokenEditPreview, tokenOverrides]);
 
   const baseSemanticTokens = useMemo(() => {
     if (extractedColors.length === 0) {
@@ -171,13 +237,13 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
 
     return applyClearedDataTokens(resolveUiExpressiveGaps(deriveSemanticTokens({
       extracted: extractedColors,
-      overrides: tokenOverrides,
+      overrides: previewTokenOverrides,
       theme: activeTheme,
       neutralStyle,
       vibrancy: previewVibrancy,
       paletteType,
     }), extractedColors), clearedSemanticTokens);
-  }, [activeTheme, clearedSemanticTokens, extractedColors, neutralStyle, paletteType, previewVibrancy, tokenOverrides]);
+  }, [activeTheme, clearedSemanticTokens, extractedColors, neutralStyle, paletteType, previewTokenOverrides, previewVibrancy]);
 
   const statusColors = useMemo(
     () => statusColorsEnabled && baseSemanticTokens
@@ -190,15 +256,29 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       : null,
     [baseSemanticTokens, extractedColors, forcedStatusColors, forcedStatusSources, statusColorsEnabled],
   );
+  const previewStatusColors = useMemo(() => {
+    if (!statusColors) {
+      return null;
+    }
+
+    if (!tokenEditPreview || tokenEditPreview.kind !== 'status') {
+      return statusColors;
+    }
+
+    return {
+      ...statusColors,
+      [tokenEditPreview.role]: tokenEditPreview.status,
+    };
+  }, [statusColors, tokenEditPreview]);
   const semanticTokens = useMemo(
     () => baseSemanticTokens ? applyUiStatusColors(baseSemanticTokens, statusColors) : null,
     [baseSemanticTokens, statusColors],
   );
   const previewSemanticTokens = useMemo(
     () => previewBaseSemanticTokens
-      ? applyUiStatusColors(previewBaseSemanticTokens, statusColors)
+      ? applyUiStatusColors(previewBaseSemanticTokens, previewStatusColors)
       : null,
-    [previewBaseSemanticTokens, statusColors],
+    [previewBaseSemanticTokens, previewStatusColors],
   );
 
   const rolePalette = useMemo(
@@ -234,18 +314,12 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       setPaletteRevision((revision) => revision + 1);
       if (palette === null) {
         setExtractedColors([]);
-        setTokenOverrides({});
-        setClearedSemanticTokens([]);
-        setRoleNames({});
-        setLockedRolesByTheme(EMPTY_LOCKED_BY_THEME);
-        setSavedVibrancy(VIBRANCY_MID);
+        resetEditable();
         setPreviewVibrancyState(VIBRANCY_MID);
         setIllustrationSeed(DEFAULT_ILLUSTRATION_SEED);
-        setNeutralStyle(DEFAULT_NEUTRAL_STYLE);
         setPaletteType(undefined);
         setStatusColorsEnabled(!STATUS_COLORS_ON_DEMAND);
-        setForcedStatusSources({});
-        setForcedStatusColors({});
+        setTokenEditPreviewState(null);
         return;
       }
 
@@ -255,44 +329,47 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
           prominence: 1 - index * 0.05,
         })),
       );
-      setTokenOverrides(rolePaletteAsSemanticOverrides(palette));
-      setClearedSemanticTokens([]);
-      setSavedVibrancy(VIBRANCY_MID);
+      setEditHistory((history) => createHistory({
+        ...INITIAL_EDITABLE,
+        tokenOverrides: rolePaletteAsSemanticOverrides(palette),
+        roleNames: history.present.roleNames,
+        lockedRolesByTheme: history.present.lockedRolesByTheme,
+      }));
       setPreviewVibrancyState(VIBRANCY_MID);
       setIllustrationSeed(DEFAULT_ILLUSTRATION_SEED);
-      setNeutralStyle(DEFAULT_NEUTRAL_STYLE);
       setStatusColorsEnabled(!STATUS_COLORS_ON_DEMAND);
-      setForcedStatusSources({});
-      setForcedStatusColors({});
+      setTokenEditPreviewState(null);
     },
-    [],
+    [resetEditable],
   );
 
   const assignFromExtracted = useCallback((extracted: ExtractedColor[], nextPaletteType?: PaletteType) => {
     setPaletteRevision((revision) => revision + 1);
     setExtractedColors(extracted);
     setPaletteType(nextPaletteType);
-    setTokenOverrides({});
-    setClearedSemanticTokens([]);
-    setRoleNames({});
-    setLockedRolesByTheme(EMPTY_LOCKED_BY_THEME);
-    setSavedVibrancy(VIBRANCY_MID);
+    resetEditable();
     setPreviewVibrancyState(VIBRANCY_MID);
     setIllustrationSeed(DEFAULT_ILLUSTRATION_SEED);
-    setNeutralStyle(DEFAULT_NEUTRAL_STYLE);
     setActiveRole(null);
     setStatusColorsEnabled(!STATUS_COLORS_ON_DEMAND);
-    setForcedStatusSources({});
-    setForcedStatusColors({});
-  }, []);
+    setTokenEditPreviewState(null);
+  }, [resetEditable]);
 
   const setPreviewVibrancy = useCallback((value: number) => {
     setPreviewVibrancyState(normalizeVibrancy(value));
   }, []);
 
   const saveVibrancy = useCallback(() => {
-    setSavedVibrancy(previewVibrancy);
-  }, [previewVibrancy]);
+    commitEdit((current) => current.savedVibrancy === previewVibrancy
+      ? current
+      : { ...current, savedVibrancy: previewVibrancy });
+  }, [commitEdit, previewVibrancy]);
+
+  const setNeutralStyle = useCallback((style: NeutralStyle) => {
+    commitEdit((current) => current.neutralStyle === style
+      ? current
+      : { ...current, neutralStyle: style });
+  }, [commitEdit]);
 
   const regenerateIllustrationSeed = useCallback(() => {
     setIllustrationSeed((seed) => nextIllustrationSeed(seed));
@@ -303,59 +380,102 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       const normalized = normalizeHex(hex);
       const tokenName = tokenNameForPaletteRole(role);
 
-      setTokenOverrides((current) => ({
+      commitEdit((current) => ({
         ...current,
-        [tokenName]: normalized,
+        tokenOverrides: { ...current.tokenOverrides, [tokenName]: normalized },
       }));
     },
-    [],
+    [commitEdit],
   );
 
   const replaceSemanticToken = useCallback((tokenName: SemanticTokenName, hex: string) => {
     const normalized = normalizeHex(hex);
 
-    setTokenOverrides((current) => ({
+    commitEdit((current) => ({
       ...current,
-      [tokenName]: normalized,
+      tokenOverrides: { ...current.tokenOverrides, [tokenName]: normalized },
+      clearedSemanticTokens: current.clearedSemanticTokens.filter((name) => name !== tokenName),
     }));
-    setClearedSemanticTokens((current) => current.filter((name) => name !== tokenName));
-  }, []);
+    setTokenEditPreviewState(null);
+  }, [commitEdit]);
 
   const clearSemanticToken = useCallback((tokenName: SemanticTokenName) => {
-    setTokenOverrides((current) => {
-      const next = { ...current };
-      delete next[tokenName];
-      return next;
+    commitEdit((current) => {
+      const nextOverrides = { ...current.tokenOverrides };
+      delete nextOverrides[tokenName];
+      return {
+        ...current,
+        tokenOverrides: nextOverrides,
+        clearedSemanticTokens: current.clearedSemanticTokens.includes(tokenName)
+          ? current.clearedSemanticTokens
+          : [...current.clearedSemanticTokens, tokenName],
+      };
     });
-    setClearedSemanticTokens((current) => current.includes(tokenName)
-      ? current
-      : [...current, tokenName]);
-  }, []);
+  }, [commitEdit]);
 
   const generateStatusColors = useCallback(() => {
     setStatusColorsEnabled(true);
   }, []);
 
   const assignSourceToStatus = useCallback((role: UiStatusRole, hex: string) => {
-    setForcedStatusSources((current) => ({ ...current, [role]: normalizeHex(hex) }));
-    setForcedStatusColors((current) => {
-      const next = { ...current };
-      delete next[role];
-      return next;
+    commitEdit((current) => {
+      const nextForced = { ...current.forcedStatusColors };
+      delete nextForced[role];
+      return {
+        ...current,
+        forcedStatusSources: { ...current.forcedStatusSources, [role]: normalizeHex(hex) },
+        forcedStatusColors: nextForced,
+      };
     });
     setStatusColorsEnabled(true);
-  }, []);
+  }, [commitEdit]);
 
   const selectStatusColor = useCallback((status: UiStatusColor) => {
-    setForcedStatusColors((current) => ({
+    commitEdit((current) => ({
       ...current,
-      [status.role]: {
-        hex: normalizeHex(status.hex),
-        origin: status.origin,
-        ...(status.sourceHex ? { sourceHex: normalizeHex(status.sourceHex) } : {}),
+      forcedStatusColors: {
+        ...current.forcedStatusColors,
+        [status.role]: {
+          hex: normalizeHex(status.hex),
+          origin: status.origin,
+          ...(status.sourceHex ? { sourceHex: normalizeHex(status.sourceHex) } : {}),
+        },
       },
     }));
     setStatusColorsEnabled(true);
+    setTokenEditPreviewState(null);
+  }, [commitEdit]);
+
+  const setTokenEditPreview = useCallback((preview: TokenEditPreview | null) => {
+    setTokenEditPreviewState((current) => {
+      if (current === null && preview === null) {
+        return current;
+      }
+
+      if (
+        current?.kind === 'token'
+        && preview?.kind === 'token'
+        && current.tokenName === preview.tokenName
+        && normalizeHex(current.hex) === normalizeHex(preview.hex)
+      ) {
+        return current;
+      }
+
+      if (
+        current?.kind === 'status'
+        && preview?.kind === 'status'
+        && current.role === preview.role
+        && normalizeHex(current.status.hex) === normalizeHex(preview.status.hex)
+      ) {
+        return current;
+      }
+
+      return preview;
+    });
+  }, []);
+
+  const clearTokenEditPreview = useCallback(() => {
+    setTokenEditPreviewState(null);
   }, []);
 
   const renameRole = useCallback(
@@ -376,47 +496,47 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
         return false;
       }
 
-      setRoleNames((current) => ({ ...current, [role]: trimmed }));
+      commitEdit((current) => ({
+        ...current,
+        roleNames: { ...current.roleNames, [role]: trimmed },
+      }));
 
       return true;
     },
-    [rolePalette],
+    [commitEdit, rolePalette],
   );
 
   const toggleLock = useCallback(
     (role: PaletteRoleId) => {
-      setLockedRolesByTheme((current) => {
-        const themeLocks = current[activeTheme];
+      commitEdit((current) => {
+        const themeLocks = current.lockedRolesByTheme[activeTheme];
         const nextLocks = themeLocks.includes(role)
           ? themeLocks.filter((id) => id !== role)
           : [...themeLocks, role];
 
         return {
           ...current,
-          [activeTheme]: nextLocks,
+          lockedRolesByTheme: {
+            ...current.lockedRolesByTheme,
+            [activeTheme]: nextLocks,
+          },
         };
       });
     },
-    [activeTheme],
+    [activeTheme, commitEdit],
   );
 
   const clearRolePalette = useCallback(() => {
     setPaletteRevision((revision) => revision + 1);
     setExtractedColors([]);
-    setTokenOverrides({});
-    setClearedSemanticTokens([]);
-    setRoleNames({});
-    setLockedRolesByTheme(EMPTY_LOCKED_BY_THEME);
+    resetEditable();
     setActiveTheme('light');
-    setSavedVibrancy(VIBRANCY_MID);
     setPreviewVibrancyState(VIBRANCY_MID);
     setIllustrationSeed(DEFAULT_ILLUSTRATION_SEED);
-    setNeutralStyle(DEFAULT_NEUTRAL_STYLE);
     setActiveRole(null);
     setStatusColorsEnabled(!STATUS_COLORS_ON_DEMAND);
-    setForcedStatusSources({});
-    setForcedStatusColors({});
-  }, []);
+    setTokenEditPreviewState(null);
+  }, [resetEditable]);
 
   const assignFromHexes = useCallback(
     (hexes: string[]) => {
@@ -428,23 +548,37 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       const assigned = assignRolesFromHexes(hexes);
 
       setExtractedColors(extracted);
-      setTokenOverrides({});
-      setClearedSemanticTokens([]);
-      setRoleNames(
-        Object.fromEntries(
+      resetEditable({
+        roleNames: Object.fromEntries(
           Object.values(assigned).map((slot) => [slot.role, slot.name]),
         ) as Partial<Record<PaletteRoleId, string>>,
-      );
-      setSavedVibrancy(VIBRANCY_MID);
+      });
       setPreviewVibrancyState(VIBRANCY_MID);
       setIllustrationSeed(DEFAULT_ILLUSTRATION_SEED);
-      setNeutralStyle(DEFAULT_NEUTRAL_STYLE);
       setStatusColorsEnabled(!STATUS_COLORS_ON_DEMAND);
-      setForcedStatusSources({});
-      setForcedStatusColors({});
+      setTokenEditPreviewState(null);
     },
-    [],
+    [resetEditable],
   );
+
+  const undoEdit = useCallback(() => {
+    if (!canUndo(editHistory)) return;
+    const next = undoHistory(editHistory);
+    setEditHistory(next);
+    setPreviewVibrancyState(next.present.savedVibrancy);
+    setTokenEditPreviewState(null);
+  }, [editHistory]);
+
+  const redoEdit = useCallback(() => {
+    if (!canRedo(editHistory)) return;
+    const next = redoHistory(editHistory);
+    setEditHistory(next);
+    setPreviewVibrancyState(next.present.savedVibrancy);
+    setTokenEditPreviewState(null);
+  }, [editHistory]);
+
+  const canUndoEdit = canUndo(editHistory);
+  const canRedoEdit = canRedo(editHistory);
 
   const selectionReady = useMemo(() => validateRolePalette(rolePalette).ok, [rolePalette]);
 
@@ -455,6 +589,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       previewRolePalette,
       previewSemanticTokens,
       statusColors,
+      tokenEditPreview,
       paletteRevision,
       seeds,
       illustrationSeed,
@@ -468,6 +603,10 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       lockedRolesByTheme,
       activeRole,
       selectionReady,
+      canUndoEdit,
+      canRedoEdit,
+      undoEdit,
+      redoEdit,
       setRolePalette,
       assignFromExtracted,
       setPreviewVibrancy,
@@ -482,6 +621,8 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       generateStatusColors,
       assignSourceToStatus,
       selectStatusColor,
+      setTokenEditPreview,
+      clearTokenEditPreview,
       renameRole,
       toggleLock,
       clearRolePalette,
@@ -493,6 +634,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       previewRolePalette,
       previewSemanticTokens,
       statusColors,
+      tokenEditPreview,
       paletteRevision,
       seeds,
       illustrationSeed,
@@ -506,6 +648,10 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       lockedRolesByTheme,
       activeRole,
       selectionReady,
+      canUndoEdit,
+      canRedoEdit,
+      undoEdit,
+      redoEdit,
       setRolePalette,
       assignFromExtracted,
       setPreviewVibrancy,
@@ -518,6 +664,8 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       generateStatusColors,
       assignSourceToStatus,
       selectStatusColor,
+      setTokenEditPreview,
+      clearTokenEditPreview,
       renameRole,
       toggleLock,
       clearRolePalette,

@@ -111,7 +111,7 @@ function SelectColorsWorkspaceContent() {
       <div className="canvas-dots flex h-dvh flex-col overflow-hidden">
         {sharedChrome}
 
-        <div className="flex min-h-0 flex-1 items-center justify-center p-4 lg:p-6">
+        <div className="flex min-h-0 flex-1 items-center justify-center p-4">
           <EmptyWorkspaceCard
             fileName={workspace.imageFileName}
             hasPreview={workspace.imagePreviewUrl !== null}

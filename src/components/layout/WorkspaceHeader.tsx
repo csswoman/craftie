@@ -24,8 +24,8 @@ export function WorkspaceHeader({
   onExportBrandKit,
 }: WorkspaceHeaderProps) {
   return (
-    <header className="relative z-sticky shrink-0 px-4 pt-4 lg:px-7 lg:pt-7">
-      <div className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-border bg-bg px-4 py-3 lg:px-5">
+    <header className="relative z-sticky shrink-0 px-4 pt-4 xl:px-4 xl:pt-4">
+      <div className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-border bg-bg px-4 py-2.5 xl:px-4">
         <Link
           href="/"
           className="shrink-0 text-ink transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"

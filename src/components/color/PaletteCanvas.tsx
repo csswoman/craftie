@@ -22,6 +22,7 @@ import { EmptyCanvas, PaletteCanvasSkeleton } from './PaletteCanvasEmptyStates';
 import { PaletteCanvasNotices } from './PaletteCanvasNotices';
 import { CanvasSystemView } from './CanvasSystemView';
 import { CanvasViewSelector } from './CanvasViewSelector';
+import { PaletteHistoryControls } from './PaletteHistoryControls';
 import { PaintPaletteCanvas } from './PaintPaletteCanvas';
 import { PaletteImageBlock } from './PaletteImageBlock';
 
@@ -141,6 +142,7 @@ export function PaletteCanvas({
               <p className="truncate text-chrome-label font-semibold text-ink">Paleta de roles</p>
               <p className="truncate text-chrome-caption text-muted">Edita colores y revisa el contraste.</p>
           </div>
+          {editable ? <PaletteHistoryControls /> : null}
           <div className="flex w-full flex-wrap items-center gap-2.5 sm:ml-auto sm:w-auto sm:gap-2.5">
             <CanvasViewSelector
               activeId={activeView}

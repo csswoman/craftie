@@ -8,6 +8,7 @@ import { buildDataCandidates } from '@lib/color/uiColorCandidates';
 import type { UiStatusRole } from '@lib/color/uiStatusColors';
 
 import { useRolePalette } from '@/context/RolePaletteContext';
+import { useAutoHideScrollbar } from '@/lib/browser/useAutoHideScrollbar';
 import { useTabListKeyboard } from '@/lib/browser/useTabListKeyboard';
 
 import { UiCompactColorPanel } from './UiCompactColorPanel';
@@ -16,16 +17,15 @@ import { UiFocusedPanelHeader } from './UiFocusedPanelHeader';
 import { UiFocusedRoleEditor } from './UiFocusedRoleEditor';
 import { UiFocusedStatusEditor } from './UiFocusedStatusEditor';
 import { UiSourceColorsSection } from './UiSourceColorsSection';
+import { UI_COLOR_VIEWS, UiColorViewTabs, type UiColorView } from './UiColorViewTabs';
 import {
   COMPACT_ROLE_GROUPS,
   type CompactRoleGroupId,
 } from './uiColorPanelGroups';
 
-const UI_COLOR_VIEWS = ['system', 'data'] as const;
-type UiColorView = (typeof UI_COLOR_VIEWS)[number];
 type FocusedView =
-  | { kind: 'roles'; group: CompactRoleGroupId; token: SemanticTokenName }
-  | { kind: 'status'; role: UiStatusRole }
+  | { kind: 'roles'; group: CompactRoleGroupId; token: SemanticTokenName | null }
+  | { kind: 'status'; role: UiStatusRole | null }
   | { kind: 'sources' };
 
 export function UiColorPanel({
@@ -53,6 +53,7 @@ export function UiColorPanel({
     assignSourceToStatus,
     selectStatusColor,
     setActiveRole,
+    clearTokenEditPreview,
   } = useRolePalette();
   const [activeView, setActiveView] = useState<UiColorView>('system');
   const [focusedView, setFocusedView] = useState<{ revision: number; view: FocusedView | null }>({
@@ -65,6 +66,7 @@ export function UiColorPanel({
     onActivate: changeView,
   });
   const panelRef = useRef<HTMLDivElement>(null);
+  const sourcesScrollRef = useAutoHideScrollbar<HTMLDivElement>();
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -78,18 +80,26 @@ export function UiColorPanel({
   const focus = focusedView.revision === paletteRevision ? focusedView.view : null;
 
   function changeView(view: UiColorView) {
+    clearTokenEditPreview();
     setActiveView(view);
     setFocusedView({ revision: paletteRevision, view: null });
   }
 
   function openGroup(group: CompactRoleGroupId, token: SemanticTokenName) {
+    clearTokenEditPreview();
     setFocusedView({ revision: paletteRevision, view: { kind: 'roles', group, token } });
     setActiveRole(null);
   }
 
   function openStatus(role: UiStatusRole) {
+    clearTokenEditPreview();
     if (!statusColors) generateStatusColors();
     setFocusedView({ revision: paletteRevision, view: { kind: 'status', role } });
+  }
+
+  function leaveFocusedView() {
+    clearTokenEditPreview();
+    setFocusedView({ revision: paletteRevision, view: null });
   }
 
   function assignSourceToData(hex: string): string {
@@ -112,7 +122,7 @@ export function UiColorPanel({
         <UiFocusedPanelHeader
           title={group.title}
           subtitle={group.subtitle}
-          onBack={() => setFocusedView({ revision: paletteRevision, view: null })}
+          onBack={leaveFocusedView}
         />
         <UiFocusedRoleEditor
           key={`${paletteRevision}-${focus.group}`}
@@ -122,7 +132,7 @@ export function UiColorPanel({
           colors={colors}
           onActivate={(token) => setFocusedView({
             revision: paletteRevision,
-            view: { ...focus, token },
+            view: { kind: 'roles', group: focus.group, token },
           })}
           onSelect={replaceSemanticToken}
         />
@@ -136,7 +146,7 @@ export function UiColorPanel({
         <UiFocusedPanelHeader
           title="Colores de estado"
           subtitle="Ancla el hue, ajusta la textura · piso de chroma garantizado"
-          onBack={() => setFocusedView({ revision: paletteRevision, view: null })}
+          onBack={leaveFocusedView}
         />
         {statusColors ? (
           <UiFocusedStatusEditor
@@ -156,16 +166,22 @@ export function UiColorPanel({
 
   if (focus?.kind === 'sources') {
     return (
-      <div ref={panelRef} className="pb-2">
-        <UiFocusedPanelHeader
-          title="Colores fuente"
-          subtitle="Elige una fuente y asígnala a un rol, estado o serie de datos"
-          onBack={() => setFocusedView({ revision: paletteRevision, view: null })}
-        />
-        <div className="pt-4">
+      <div ref={panelRef} className="flex h-full min-h-0 flex-col pb-2">
+        <div className="shrink-0">
+          <UiFocusedPanelHeader
+            title="Colores fuente"
+            subtitle="Elige una fuente y asígnala a un rol, estado o serie de datos"
+            onBack={leaveFocusedView}
+          />
+        </div>
+        <div
+          ref={sourcesScrollRef}
+          className="scrollbar-chrome min-h-0 flex-1 overflow-x-hidden overflow-y-auto pt-4"
+        >
           <UiSourceColorsSection
             tokens={resolvedTokens}
             colors={colors}
+            statusColors={statusColors}
             showHeader={false}
             onAssignRole={replaceSemanticToken}
             onAssignData={assignSourceToData}
@@ -177,17 +193,24 @@ export function UiColorPanel({
   }
 
   return (
-    <div ref={panelRef} className="pb-2">
+    <div ref={panelRef} className="flex h-full min-h-0 flex-col pb-2">
       {mobile ? (
-        <header className="mb-3 border-b border-line-soft pb-4">
+        <header className="mb-3 shrink-0 border-b border-line-soft pb-4">
           <h1 className="font-display text-[1.375rem] font-medium leading-none text-forest">Craftie</h1>
           <p className="mt-1 text-xs text-muted">Colores y tipografía</p>
         </header>
       ) : null}
-      <ColorViewTabs activeView={activeView} getTabProps={getTabProps} onChange={changeView} />
+      <div className="shrink-0">
+        <UiColorViewTabs activeView={activeView} getTabProps={getTabProps} onChange={changeView} />
+      </div>
 
       {activeView === 'system' ? (
-        <div id="ui-color-panel-system" role="tabpanel" aria-labelledby="ui-color-tab-system">
+        <div
+          id="ui-color-panel-system"
+          role="tabpanel"
+          aria-labelledby="ui-color-tab-system"
+          className="flex min-h-0 flex-1 flex-col"
+        >
           <UiCompactColorPanel
             tokens={resolvedTokens}
             colors={colors}
@@ -195,6 +218,7 @@ export function UiColorPanel({
             showCreateGuide={showCreateGuide}
             canCreateGuide={canCreateGuide}
             creatingGuide={creatingGuide}
+            fillHeight={!mobile}
             onOpenGroup={openGroup}
             onOpenStatus={openStatus}
             onOpenSources={() => setFocusedView({ revision: paletteRevision, view: { kind: 'sources' } })}
@@ -202,7 +226,12 @@ export function UiColorPanel({
           />
         </div>
       ) : (
-        <div id="ui-color-panel-data" role="tabpanel" aria-labelledby="ui-color-tab-data" className="pt-4">
+        <div
+          id="ui-color-panel-data"
+          role="tabpanel"
+          aria-labelledby="ui-color-tab-data"
+          className="min-h-0 flex-1 overflow-y-auto pt-4"
+        >
           <UiDataSection
             tokens={resolvedTokens}
             colors={colors}
@@ -211,39 +240,6 @@ export function UiColorPanel({
           />
         </div>
       )}
-    </div>
-  );
-}
-
-function ColorViewTabs({
-  activeView,
-  getTabProps,
-  onChange,
-}: {
-  activeView: UiColorView;
-  getTabProps: (id: UiColorView) => React.ButtonHTMLAttributes<HTMLButtonElement>;
-  onChange: (view: UiColorView) => void;
-}) {
-  return (
-    <div className="flex items-center gap-5 border-b border-line-soft" role="tablist" aria-label="Vistas de color">
-      {UI_COLOR_VIEWS.map((view) => {
-        const selected = activeView === view;
-        return (
-          <button
-            key={view}
-            type="button"
-            role="tab"
-            id={`ui-color-tab-${view}`}
-            aria-controls={`ui-color-panel-${view}`}
-            aria-selected={selected}
-            onClick={() => onChange(view)}
-            {...getTabProps(view)}
-            className={`relative min-h-10 px-0 pb-2.5 pt-0.5 text-tools-tab font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25 ${selected ? 'text-ink after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:rounded-sm after:bg-forest after:content-[""]' : 'text-muted hover:text-ink'}`}
-          >
-            {view === 'system' ? 'Sistema' : 'Datos'}
-          </button>
-        );
-      })}
     </div>
   );
 }

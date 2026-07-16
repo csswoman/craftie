@@ -70,10 +70,10 @@
     --tools-font-headline: 1.25rem;
     --tools-font-body: 1rem;
     /* Five-level scale for the color-system sidebar. */
-    --tools-tab-size: 0.9375rem; /* 15px — top tabs and sub-tabs */
+    --tools-tab-size: 1rem; /* 16px — top tabs and sub-tabs */
     --tools-role-size: 1rem; /* 16px — role labels */
-    --tools-body-sm-size: 0.875rem; /* 14px */
-    --tools-section-size: 0.9375rem; /* 15px — section titles */
+    --tools-body-sm-size: 0.9375rem; /* 15px */
+    --tools-section-size: 1.0625rem; /* 17px — section titles */
     --tools-meta-size: 0.8125rem; /* 13px — hex values, meta labels */
     --tools-micro-size: 0.8125rem; /* 13px — chips, counts */
   }
@@ -365,6 +365,12 @@
 
   .scrollbar-chrome {
     scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  .scrollbar-chrome[data-scrolling],
+  .scrollbar-chrome:hover,
+  .scrollbar-chrome:focus-within {
     scrollbar-color: var(--scrollbar-thumb) transparent;
   }
 
@@ -381,13 +387,21 @@
   }
 
   .scrollbar-chrome::-webkit-scrollbar-thumb {
-    background-color: var(--scrollbar-thumb);
+    background-color: transparent;
     border: 2px solid transparent;
     border-radius: var(--radius-sm);
     background-clip: padding-box;
   }
 
-  .scrollbar-chrome::-webkit-scrollbar-thumb:hover {
+  .scrollbar-chrome[data-scrolling]::-webkit-scrollbar-thumb,
+  .scrollbar-chrome:hover::-webkit-scrollbar-thumb,
+  .scrollbar-chrome:focus-within::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+  }
+
+  .scrollbar-chrome[data-scrolling]::-webkit-scrollbar-thumb:hover,
+  .scrollbar-chrome:hover::-webkit-scrollbar-thumb:hover,
+  .scrollbar-chrome:focus-within::-webkit-scrollbar-thumb:hover {
     background-color: var(--scrollbar-thumb-hover);
   }
 

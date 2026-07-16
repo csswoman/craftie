@@ -6,11 +6,14 @@ const STORAGE_KEY = 'craftie-studio-panel-layout';
 
 const DEFAULTS = {
   // Keep the editing canvas dominant while leaving enough room for tool labels.
-  sidebarWidth: 320,
+  sidebarWidth: 380,
   rightWidth: 400,
   sidebarCollapsed: false,
   rightCollapsed: true,
 };
+
+/** Fixed tools sidebar width (no resize handle on desktop). */
+export const STUDIO_TOOLS_SIDEBAR_WIDTH = DEFAULTS.sidebarWidth;
 
 export const STUDIO_PANEL_WIDTH_LIMITS = {
   sidebar: { min: 300, max: 480 },

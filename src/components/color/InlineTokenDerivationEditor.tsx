@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { getSemanticTokenContrastInfo } from '@lib/color/semanticTokenTargets';
 import { previewSemanticToken } from '@lib/color/semanticTokenPreview';
@@ -26,12 +26,8 @@ export function InlineTokenDerivationEditor({
   onApply: (hex: string) => void;
   onDraftChange?: () => void;
 }) {
-  const { semanticTokens } = useRolePalette();
+  const { semanticTokens, setTokenEditPreview, clearTokenEditPreview } = useRolePalette();
   const original = useMemo(() => hexToOklchChannels(originalHex), [originalHex]);
-  const current = useMemo(
-    () => hexToOklchChannels(currentHex ?? originalHex),
-    [currentHex, originalHex],
-  );
   const draftBase = useMemo(
     () => hexToOklchChannels(candidateHex ?? currentHex ?? originalHex),
     [candidateHex, currentHex, originalHex],
@@ -43,13 +39,21 @@ export function InlineTokenDerivationEditor({
     [draftBase.h, draftChroma, draftLightness],
   );
   const previewTokens = useMemo(
-    () => semanticTokens ? previewSemanticToken(semanticTokens, tokenName, draftHex) : null,
+    () => (semanticTokens ? previewSemanticToken(semanticTokens, tokenName, draftHex) : null),
     [draftHex, semanticTokens, tokenName],
   );
   const contrast = useMemo(
-    () => previewTokens ? getSemanticTokenContrastInfo(previewTokens, tokenName) : null,
+    () => (previewTokens ? getSemanticTokenContrastInfo(previewTokens, tokenName) : null),
     [previewTokens, tokenName],
   );
+
+  useEffect(() => {
+    setTokenEditPreview({ kind: 'token', tokenName, hex: draftHex });
+  }, [draftHex, setTokenEditPreview, tokenName]);
+
+  useEffect(() => () => {
+    clearTokenEditPreview();
+  }, [clearTokenEditPreview]);
 
   if (!semanticTokens) return null;
   const passes = contrast === null || contrast.status === 'pass';
@@ -68,30 +72,26 @@ export function InlineTokenDerivationEditor({
     setDraftChroma(value);
   }
 
-  function applyVariant(hex: string) {
-    onApply(hex);
-  }
-
   return (
-    <div className="space-y-3 border-t border-line-soft pt-3">
-      <div className="flex items-center gap-2">
+    <div className="space-y-2.5 rounded-lg border border-forest/25 bg-bg p-3">
+      <div className="flex items-center gap-2.5">
         <span
           className="size-9 shrink-0 rounded-full ring-1 ring-inset ring-ink/10"
           style={{ backgroundColor: draftHex }}
           aria-hidden="true"
         />
         <div className="min-w-0 flex-1">
-          <p className="text-tools-meta font-semibold text-ink">Ajuste no destructivo</p>
-          <p className="truncate font-mono text-tools-meta tabular-nums text-muted">
+          <p className="text-tools-body-sm font-semibold text-ink">Ajuste no destructivo</p>
+          <p className="truncate font-mono text-tools-meta-scale tabular-nums text-muted">
             {draftHex.toUpperCase()} · original {originalHex.toUpperCase()}
           </p>
         </div>
       </div>
 
       <label className="block">
-        <span className="mb-1 flex items-center justify-between gap-2 text-tools-meta text-muted">
+        <span className="mb-1 flex items-center justify-between gap-2 text-tools-meta-scale font-medium text-muted">
           <span>Luminosidad</span>
-          <span className="font-mono tabular-nums">
+          <span className="font-mono tabular-nums text-ink">
             {draftLightness.toFixed(2)} · Δ{formatDelta(lightnessDelta)}
           </span>
         </span>
@@ -102,14 +102,14 @@ export function InlineTokenDerivationEditor({
           step="0.01"
           value={draftLightness}
           onChange={(event) => updateLightness(Number(event.target.value))}
-          className="h-11 w-full cursor-pointer accent-forest"
+          className="h-9 w-full cursor-pointer accent-forest"
         />
       </label>
 
       <label className="block">
-        <span className="mb-1 flex items-center justify-between gap-2 text-tools-meta text-muted">
+        <span className="mb-1 flex items-center justify-between gap-2 text-tools-meta-scale font-medium text-muted">
           <span>Chroma</span>
-          <span className="font-mono tabular-nums">
+          <span className="font-mono tabular-nums text-ink">
             {draftChroma.toFixed(3)} · Δ{formatDelta(chromaDelta, 3)}
           </span>
         </span>
@@ -120,51 +120,50 @@ export function InlineTokenDerivationEditor({
           step="0.005"
           value={draftChroma}
           onChange={(event) => updateChroma(Number(event.target.value))}
-          className="h-11 w-full cursor-pointer accent-forest"
+          className="h-9 w-full cursor-pointer accent-forest"
         />
       </label>
 
-      {contrast ? (
-        <div className="flex items-center justify-between gap-2 text-tools-meta">
-          <span className="text-muted">Contraste de la vista previa</span>
-          <span className={`font-mono font-semibold tabular-nums ${passes ? 'text-pass' : 'text-fail'}`}>
-            {contrast.ratio.toFixed(1)}:1 {passes ? '✓' : '⚠'}
-          </span>
-        </div>
-      ) : null}
+      <div className="flex flex-wrap items-center justify-between gap-2 text-tools-meta-scale">
+        {contrast ? (
+          <>
+            <span className="text-muted">Contraste</span>
+            <span className={`font-mono font-semibold tabular-nums ${passes ? 'text-pass' : 'text-fail'}`}>
+              {contrast.ratio.toFixed(1)}:1 {passes ? '✓' : '⚠'}
+            </span>
+          </>
+        ) : null}
+        {candidateHex ? (
+          <p className="w-full text-primary" role="status" aria-live="polite">
+            Preview en la paleta · aplica para guardar
+          </p>
+        ) : null}
+        {applied ? (
+          <p className="w-full text-pass" role="status" aria-live="polite">
+            Variante aplicada.
+          </p>
+        ) : null}
+        {!passes ? (
+          <p className="w-full leading-relaxed text-fail">
+            Esta variante no alcanza AA. No se aplicará sin tu confirmación explícita.
+          </p>
+        ) : null}
+      </div>
 
-      {!passes ? (
-        <p className="text-tools-meta leading-relaxed text-fail">
-          Esta variante no alcanza AA. No se aplicará sin tu confirmación explícita.
-        </p>
-      ) : null}
-
-      {candidateHex ? (
-        <p className="text-tools-meta text-primary" role="status" aria-live="polite">
-          Candidato seleccionado. Aplica la variante para usarlo.
-        </p>
-      ) : null}
-
-      {applied ? (
-        <p className="text-tools-meta text-pass" role="status" aria-live="polite">
-          Variante aplicada.
-        </p>
-      ) : null}
-
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2 pt-0.5">
         <button
           type="button"
           disabled={atOriginal}
-          onClick={() => applyVariant(originalHex)}
-          className="min-h-11 rounded-md border border-border bg-bg px-2 text-tools-meta font-semibold text-ink hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+          onClick={() => onApply(originalHex)}
+          className="min-h-11 rounded-md border border-border bg-bg px-2 text-tools-body-sm font-semibold text-ink hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
         >
           Revertir al original
         </button>
         <button
           type="button"
           disabled={unchanged}
-          onClick={() => applyVariant(draftHex)}
-          className={`min-h-11 rounded-md px-2 text-tools-meta font-semibold focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+          onClick={() => onApply(draftHex)}
+          className={`min-h-11 rounded-md px-2 text-tools-body-sm font-semibold focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
             passes
               ? 'bg-[var(--chrome-green)] text-white hover:brightness-95'
               : 'border border-fail bg-bg text-fail hover:bg-fail/5'

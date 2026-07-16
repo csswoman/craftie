@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
+import { AlertCircle, Droplets, Layers, Palette, type LucideIcon } from 'lucide-react';
 
 import type { SelectableColor } from '@lib/color/selectableColors';
 import type { SemanticTokens } from '@lib/color/semanticTokens';
@@ -7,6 +8,8 @@ import {
   type UiStatusColorSet,
   type UiStatusRole,
 } from '@lib/color/uiStatusColors';
+
+import { useAutoHideScrollbar } from '@/lib/browser/useAutoHideScrollbar';
 
 import { UiCompactRoleRow } from './UiCompactRoleRow';
 import { UiCompactStatusSlot } from './UiCompactStatusSlot';
@@ -17,6 +20,11 @@ import {
   type CompactRoleGroupId,
 } from './uiColorPanelGroups';
 
+const GROUP_ICONS: Record<CompactRoleGroupId, LucideIcon> = {
+  brand: Palette,
+  foundations: Layers,
+};
+
 export function UiCompactColorPanel({
   tokens,
   colors,
@@ -24,6 +32,7 @@ export function UiCompactColorPanel({
   showCreateGuide,
   canCreateGuide,
   creatingGuide,
+  fillHeight = false,
   onOpenGroup,
   onOpenStatus,
   onOpenSources,
@@ -35,29 +44,36 @@ export function UiCompactColorPanel({
   showCreateGuide: boolean;
   canCreateGuide: boolean;
   creatingGuide: boolean;
-  onOpenGroup: (group: CompactRoleGroupId, token: (typeof COMPACT_ROLE_GROUPS)[CompactRoleGroupId]['roles'][number]['token']) => void;
+  /** Desktop tools column: scroll sections, pin create-guide footer. */
+  fillHeight?: boolean;
+  onOpenGroup: (
+    group: CompactRoleGroupId,
+    token: (typeof COMPACT_ROLE_GROUPS)[CompactRoleGroupId]['roles'][number]['token'],
+  ) => void;
   onOpenStatus: (role: UiStatusRole) => void;
   onOpenSources: () => void;
   onCreateGuide: () => void;
 }) {
+  const scrollRef = useAutoHideScrollbar<HTMLDivElement>();
   const readyCount = Object.values(COMPACT_ROLE_GROUPS)
     .flatMap((group) => group.roles)
     .filter((role) => !tokens[role.token].gap).length;
 
-  return (
-    <div>
+  const sections = (
+    <>
       {(['brand', 'foundations'] as const).map((groupId) => {
         const group = COMPACT_ROLE_GROUPS[groupId];
         return (
           <PanelSection
             key={groupId}
             title={group.title}
+            icon={GROUP_ICONS[groupId]}
             collapsible
             trailing={(
               <button
                 type="button"
                 onClick={() => onOpenGroup(groupId, group.roles[0].token)}
-                className="min-h-8 text-xs font-semibold text-forest underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25"
+                className="min-h-9 text-tools-meta-scale font-semibold text-forest underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25"
               >
                 Editar ›
               </button>
@@ -78,7 +94,12 @@ export function UiCompactColorPanel({
         );
       })}
 
-      <PanelSection title="Colores de estado" collapsible trailing={<span className="text-[0.6875rem] font-semibold text-muted">esencial</span>}>
+      <PanelSection
+        title="Colores de estado"
+        icon={AlertCircle}
+        collapsible
+        trailing={<span className="text-tools-meta-scale font-semibold text-muted">esencial</span>}
+      >
         <ul className="space-y-1.5">
           {STATUS_COLOR_DEFINITIONS.map(({ role }) => (
             <UiCompactStatusSlot
@@ -91,59 +112,94 @@ export function UiCompactColorPanel({
         </ul>
       </PanelSection>
 
-      <PanelSection title="Colores fuente" trailing={<span className="text-[0.6875rem] font-semibold text-muted">{colors.length} extraídos</span>}>
+      <PanelSection
+        title="Colores fuente"
+        icon={Droplets}
+        trailing={(
+          <span className="text-tools-meta-scale font-semibold text-muted">
+            {colors.length} extraídos
+          </span>
+        )}
+      >
         <UiSourceColorGrid colors={colors} tokens={tokens} onOpen={onOpenSources} />
       </PanelSection>
+    </>
+  );
 
-      {showCreateGuide ? (
-        <section className="pt-4">
-          <button
-            id="generate-brand-guide"
-            type="button"
-            disabled={!canCreateGuide || creatingGuide}
-            aria-busy={creatingGuide}
-            onClick={onCreateGuide}
-            className="min-h-11 w-full rounded-lg bg-forest px-4 text-sm font-semibold text-white transition-colors hover:bg-forest-deep active:bg-forest-darker disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/30"
-          >
-            {creatingGuide ? 'Creando guía…' : 'Crear guía de marca'}
-          </button>
-          <p className="mt-2 text-center text-[0.71875rem] text-muted">
-            {readyCount} de {COMPACT_ROLE_COUNT} listos
-          </p>
-        </section>
-      ) : null}
+  const createGuide = showCreateGuide ? (
+    <section className={fillHeight ? 'shrink-0 border-t border-line-soft bg-bg pt-3' : 'pt-4'}>
+      <button
+        id="generate-brand-guide"
+        type="button"
+        disabled={!canCreateGuide || creatingGuide}
+        aria-busy={creatingGuide}
+        onClick={onCreateGuide}
+        className="min-h-12 w-full rounded-lg bg-forest px-4 text-base font-semibold text-white transition-colors hover:bg-forest-deep active:bg-forest-darker disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/30"
+      >
+        {creatingGuide ? 'Creando guía…' : 'Crear guía de marca'}
+      </button>
+      <p className="mt-2 text-center text-tools-meta-scale text-muted">
+        {readyCount} de {COMPACT_ROLE_COUNT} listos
+      </p>
+    </section>
+  ) : null;
+
+  if (!fillHeight) {
+    return (
+      <div>
+        {sections}
+        {createGuide}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      <div ref={scrollRef} className="scrollbar-chrome min-h-0 flex-1 overflow-y-auto">
+        {sections}
+      </div>
+      {createGuide}
     </div>
   );
 }
 
 function PanelSection({
   title,
+  icon: Icon,
   trailing,
   children,
   collapsible = false,
 }: {
   title: string;
-  trailing: React.ReactNode;
-  children: React.ReactNode;
+  icon: LucideIcon;
+  trailing: ReactNode;
+  children: ReactNode;
   collapsible?: boolean;
 }) {
   const [open, setOpen] = useState(true);
 
+  const titleRow = (
+    <>
+      <Icon aria-hidden="true" size={18} strokeWidth={2} className="shrink-0 text-forest" />
+      <h2 className="truncate font-display text-tools-section-label font-semibold text-ink">{title}</h2>
+    </>
+  );
+
   return (
-    <section className="border-b border-line-soft py-2">
-      <div className="mb-1 flex min-h-8 items-center justify-between gap-3">
+    <section className="border-b border-line-soft py-2.5">
+      <div className="mb-1.5 flex min-h-9 items-center justify-between gap-3">
         {collapsible ? (
           <button
             type="button"
             aria-expanded={open}
             onClick={() => setOpen((value) => !value)}
-            className="flex min-w-0 items-center gap-1.5 rounded-md py-1 text-left focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+            className="flex min-w-0 items-center gap-2 rounded-md py-1 text-left focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           >
-            <h2 className="font-display text-[0.9375rem] font-semibold text-ink">{title}</h2>
+            {titleRow}
             <PanelChevron open={open} />
           </button>
         ) : (
-          <h2 className="font-display text-[0.9375rem] font-semibold text-ink">{title}</h2>
+          <div className="flex min-w-0 items-center gap-2">{titleRow}</div>
         )}
         {trailing}
       </div>
@@ -154,8 +210,19 @@ function PanelSection({
 
 function PanelChevron({ open }: { open: boolean }) {
   return (
-    <svg aria-hidden="true" viewBox="0 0 16 16" className={`size-3 shrink-0 text-muted transition-transform duration-200 motion-reduce:transition-none ${open ? 'rotate-180' : ''}`}>
-      <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 16 16"
+      className={`size-3 shrink-0 text-muted transition-transform duration-200 motion-reduce:transition-none ${open ? 'rotate-180' : ''}`}
+    >
+      <path
+        d="M4 6l4 4 4-4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }

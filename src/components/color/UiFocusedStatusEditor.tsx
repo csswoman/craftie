@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { normalizeHex } from '@lib/color/normalizeHex';
 import type { SelectableColor } from '@lib/color/selectableColors';
@@ -12,6 +12,8 @@ import {
   type UiStatusRole,
 } from '@lib/color/uiStatusColors';
 
+import { useRolePalette } from '@/context/RolePaletteContext';
+
 import { UiStatusAdjustmentControls } from './UiStatusAdjustmentControls';
 
 const STATUS_LABELS: Record<UiStatusRole, string> = {
@@ -19,6 +21,21 @@ const STATUS_LABELS: Record<UiStatusRole, string> = {
   warning: 'Advertencia',
   danger: 'Peligro',
 };
+
+const ORIGIN_LABELS = {
+  found: {
+    short: 'Imagen',
+    detail: 'Tomado de un color de tu imagen',
+  },
+  'found-adjusted': {
+    short: 'Ajustado',
+    detail: 'Partió de tu imagen y se afinó L o chroma',
+  },
+  synthetic: {
+    short: 'Generado',
+    detail: 'Creado por Craftie para cubrir el hue del estado',
+  },
+} as const;
 
 export function UiFocusedStatusEditor({
   colors,
@@ -30,10 +47,11 @@ export function UiFocusedStatusEditor({
   colors: SelectableColor[];
   statusColors: UiStatusColorSet;
   backgroundHex: string;
-  initialRole: UiStatusRole;
+  initialRole: UiStatusRole | null;
   onSelect: (status: UiStatusColor) => void;
 }) {
-  const [activeRole, setActiveRole] = useState<UiStatusRole>(initialRole);
+  const { setTokenEditPreview, clearTokenEditPreview } = useRolePalette();
+  const [activeRole, setActiveRole] = useState<UiStatusRole | null>(initialRole);
   const [originals] = useState<UiStatusColorSet>(() => statusColors);
   const [candidateDrafts, setCandidateDrafts] = useState<Partial<Record<UiStatusRole, UiStatusColor>>>({});
   const [appliedVariants, setAppliedVariants] = useState<Partial<Record<UiStatusRole, string>>>({});
@@ -42,15 +60,33 @@ export function UiFocusedStatusEditor({
     [colors],
   );
 
+  useEffect(() => {
+    setActiveRole(initialRole);
+  }, [initialRole]);
+
+  useEffect(() => () => {
+    clearTokenEditPreview();
+  }, [clearTokenEditPreview]);
+
+  function collapseAfterCommit(role: UiStatusRole, nextStatus: UiStatusColor) {
+    onSelect(nextStatus);
+    setCandidateDrafts((current) => {
+      const next = { ...current };
+      delete next[role];
+      return next;
+    });
+    setAppliedVariants((current) => ({ ...current, [role]: nextStatus.hex }));
+    clearTokenEditPreview();
+    setActiveRole(null);
+  }
+
   return (
-    <ul className="divide-y divide-line-soft" aria-label="Colores de estado editables">
+    <ul className="space-y-2" aria-label="Colores de estado editables">
       {STATUS_COLOR_DEFINITIONS.map(({ role }) => {
         const status = statusColors[role];
         const candidateDraft = candidateDrafts[role];
         const active = role === activeRole;
-        const origin = status.origin === 'found'
-          ? 'encontrado'
-          : status.origin === 'found-adjusted' ? 'encontrado · ajustado' : 'sintético';
+        const origin = ORIGIN_LABELS[status.origin];
         const candidates = active ? buildUiStatusCandidates({
           role,
           colors: colors.map((color) => ({ hex: color.hex, prominence: color.prominence ?? 1 })),
@@ -59,27 +95,55 @@ export function UiFocusedStatusEditor({
         }) : [];
 
         return (
-          <li key={role}>
+          <li
+            key={role}
+            className={`overflow-hidden rounded-lg border transition-colors ${
+              active
+                ? 'border-forest/35 bg-bg shadow-[var(--shadow-float)]'
+                : 'border-transparent hover:border-line-soft'
+            }`}
+          >
             <button
               type="button"
               aria-expanded={active}
-              onClick={() => setActiveRole(role)}
-              className={`grid min-h-[3.75rem] w-full grid-cols-[34px_minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-forest/25 ${active ? 'bg-line-soft' : 'hover:bg-line-soft/70'}`}
+              onClick={() => {
+                if (active) {
+                  clearTokenEditPreview();
+                  setActiveRole(null);
+                  return;
+                }
+
+                setActiveRole(role);
+              }}
+              className={`grid min-h-12 w-full grid-cols-[34px_minmax(0,1fr)_auto] items-center gap-3 px-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-forest/25 ${
+                active ? 'bg-surface' : 'hover:bg-line-soft/70'
+              }`}
             >
-              <span className="size-[34px] rounded-full ring-1 ring-inset ring-ink/10" style={{ backgroundColor: status.hex }} aria-hidden="true" />
+              <span
+                className="size-[34px] rounded-full ring-1 ring-inset ring-ink/10"
+                style={{ backgroundColor: status.hex }}
+                aria-hidden="true"
+              />
               <span className="min-w-0">
-                <span className="block truncate text-base font-semibold text-ink">{STATUS_LABELS[role]}</span>
-                <span className="block font-mono text-[0.71875rem] tabular-nums text-faint">{status.hex.toUpperCase()}</span>
+                <span className="block truncate text-tools-role text-ink">{STATUS_LABELS[role]}</span>
+                <span className="block font-mono text-tools-meta-scale tabular-nums text-muted">
+                  {status.hex.toUpperCase()}
+                </span>
               </span>
-              <span className="max-w-[7.25rem] rounded-full bg-bg px-2 py-1 text-right text-[0.625rem] font-semibold leading-tight text-muted ring-1 ring-inset ring-line">
-                {origin}
+              <span
+                title={origin.detail}
+                className="shrink-0 rounded-full bg-bg px-2.5 py-1 text-tools-meta-scale font-semibold text-muted ring-1 ring-inset ring-line"
+              >
+                {origin.short}
               </span>
             </button>
 
             {active ? (
-              <div className="space-y-4 px-2 pb-5 pt-3">
+              <div className="space-y-3 border-t border-line-soft px-2.5 pb-3 pt-3">
                 <section aria-label={`Candidatos para ${STATUS_LABELS[role]}`}>
-                  <p className="mb-2 text-[0.71875rem] font-semibold text-muted">Candidatos de tu imagen</p>
+                  <p className="mb-2 text-tools-meta-scale font-semibold text-muted">
+                    Candidatos de tu imagen
+                  </p>
                   <div className="flex flex-wrap gap-2">
                     {candidates.map((candidate) => {
                       const selected = normalizeHex(candidate.hex) === normalizeHex(candidateDraft?.hex ?? status.hex);
@@ -100,8 +164,13 @@ export function UiFocusedStatusEditor({
                               delete next[role];
                               return next;
                             });
+                            setTokenEditPreview({
+                              kind: 'status',
+                              role,
+                              status: candidate,
+                            });
                           }}
-                          className={`size-[30px] rounded-full ring-offset-2 ring-offset-bg transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25 motion-reduce:transition-none ${selected ? 'ring-2 ring-forest' : 'ring-1 ring-inset ring-ink/15'}`}
+                          className={`size-8 rounded-full ring-offset-2 ring-offset-bg transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25 motion-reduce:transition-none ${selected ? 'ring-2 ring-forest' : 'ring-1 ring-inset ring-ink/15'}`}
                           style={{ backgroundColor: candidate.hex }}
                         />
                       );
@@ -118,15 +187,7 @@ export function UiFocusedStatusEditor({
                   candidateSelected={Boolean(candidateDraft)}
                   applied={Boolean(appliedVariants[role])
                     && normalizeHex(appliedVariants[role]!) === normalizeHex(status.hex)}
-                  onApply={(nextStatus) => {
-                    onSelect(nextStatus);
-                    setCandidateDrafts((current) => {
-                      const next = { ...current };
-                      delete next[role];
-                      return next;
-                    });
-                    setAppliedVariants((current) => ({ ...current, [role]: nextStatus.hex }));
-                  }}
+                  onApply={(nextStatus) => collapseAfterCommit(role, nextStatus)}
                   onDraftChange={() => setAppliedVariants((current) => {
                     const next = { ...current };
                     delete next[role];

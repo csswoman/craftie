@@ -7,6 +7,7 @@ import {
   buildStudioToolSections,
   type StudioToolsInput,
 } from '@/components/color/studioToolSections';
+import { useAutoHideScrollbar } from '@/lib/browser/useAutoHideScrollbar';
 import { useTabListKeyboard } from '@/lib/browser/useTabListKeyboard';
 import {
   STUDIO_TOOL_FOCUS_EVENT,
@@ -48,14 +49,14 @@ export function ToolsTabToggle({
   return (
     <ul
       aria-label="Secciones de herramientas"
-      className="flex min-w-0 flex-1 items-center gap-5"
+      className="flex min-w-0 flex-1 items-stretch overflow-hidden rounded-lg border border-line-soft bg-surface"
       role="tablist"
     >
       {TOOLS_TABS.map((tab) => {
         const selected = activeTab === tab.id;
 
         return (
-          <li key={tab.id} className="min-w-0" role="presentation">
+          <li key={tab.id} className="flex min-w-0 flex-1" role="presentation">
             <button
               type="button"
               role="tab"
@@ -64,9 +65,9 @@ export function ToolsTabToggle({
               aria-controls={`tools-panel-${tab.id}`}
               onClick={() => onActiveTabChange(tab.id)}
               {...getTabProps(tab.id)}
-              className={`relative min-h-10 whitespace-nowrap px-0 pb-2.5 pt-0.5 text-tools-tab font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25 ${
+              className={`min-h-10 w-full whitespace-nowrap px-3 text-center text-tools-tab font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-forest/25 ${
                 selected
-                  ? 'text-ink after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:rounded-sm after:bg-forest after:content-[""]'
+                  ? 'bg-bg text-ink shadow-[var(--shadow-float)]'
                   : 'text-muted hover:text-ink'
               }`}
             >
@@ -86,6 +87,7 @@ export function SelectColorsWorkspaceSidebar({
 }: SelectColorsWorkspaceSidebarProps) {
   const sections = buildStudioToolSections(props, 'sidebar');
   const sectionById = Object.fromEntries(sections.map((section) => [section.id, section.content]));
+  const typographyScrollRef = useAutoHideScrollbar<HTMLElement>();
 
   useEffect(() => {
     function handleToolFocus(event: Event) {
@@ -98,9 +100,12 @@ export function SelectColorsWorkspaceSidebar({
 
       onActiveTabChange(sectionId === 'typography' ? 'typography' : 'colors');
       window.requestAnimationFrame(() => {
-        const target = sectionId === 'source'
-          ? document.getElementById('generate-brand-guide')
-          : document.getElementById(`tools-panel-${sectionId === 'typography' ? 'typography' : 'colors'}`);
+        const target =
+          sectionId === 'source'
+            ? document.getElementById('generate-brand-guide')
+            : document.getElementById(
+                `tools-panel-${sectionId === 'typography' ? 'typography' : 'colors'}`,
+              );
         target?.focus();
       });
     }
@@ -120,15 +125,15 @@ export function SelectColorsWorkspaceSidebar({
           tabIndex={activeTab === 'colors' ? 0 : undefined}
           className={
             activeTab === 'colors'
-              ? 'scrollbar-chrome flex min-h-0 flex-1 flex-col gap-[var(--chrome-space-3)] overflow-y-auto'
+              ? 'flex min-h-0 flex-1 flex-col overflow-hidden'
               : 'hidden'
           }
         >
-          <div className="shrink-0">{sectionById.source}</div>
-          <div className="shrink-0">{sectionById.adjustments}</div>
+          <div className="flex min-h-0 flex-1 flex-col">{sectionById.source}</div>
         </section>
 
         <section
+          ref={typographyScrollRef}
           id="tools-panel-typography"
           role="tabpanel"
           aria-labelledby="tools-tab-typography"
