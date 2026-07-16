@@ -65,6 +65,28 @@ describe('rolePaletteContrast', () => {
     expect(primario?.contrastBadges?.length).toBe(1);
     expect(primario?.contrastBadges?.[0]?.label).toBe('Texto legible');
   });
+
+  it('marks role columns when a required contrast pair fails AA', () => {
+    const palette = assignRolesFromExtracted([
+      { hex: '#F5F5F5', prominence: 0.4 },
+      { hex: '#EEEEEE', prominence: 0.3 },
+      { hex: '#E0E0E0', prominence: 0.2 },
+      { hex: '#D8D8D8', prominence: 0.1 },
+    ]);
+
+    // Force a failing texto/fondo pair while keeping a valid structure.
+    palette.texto = { ...palette.texto, hex: '#CFCFCF', source: 'extracted' };
+    palette.fondo = { ...palette.fondo, hex: '#E8E8E8', source: 'extracted' };
+
+    expect(hasRolePaletteContrastFailure(palette)).toBe(true);
+
+    const columns = buildRolePaletteColumnsWithContrast(palette);
+    const texto = columns.find((column) => column.id === 'texto');
+    const fondo = columns.find((column) => column.id === 'fondo');
+
+    expect(texto?.contrastBadges?.some((badge) => badge.status === 'fail')).toBe(true);
+    expect(fondo?.contrastBadges?.some((badge) => badge.status === 'fail')).toBe(true);
+  });
 });
 
 describe('rolePalette completeness', () => {

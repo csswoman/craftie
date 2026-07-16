@@ -92,19 +92,21 @@ export function PaletteColumn({
         />
       ) : null}
 
-      {column.contrastBadges && column.contrastBadges.length > 0 ? (
+      {column.contrastBadges?.some((badge) => badge.status === 'fail') ? (
         <div className="absolute left-2 top-2 z-10 flex max-w-[calc(100%-1rem)] flex-col gap-1">
-          {column.contrastBadges.map((badge) => (
-            <ContrastBadge
-              key={badge.label}
-              ratio={badge.ratio}
-              level={badge.level}
-              status={badge.status}
-              target="AA"
-              compact
-              contextLabel={badge.label}
-            />
-          ))}
+          {column.contrastBadges
+            .filter((badge) => badge.status === 'fail')
+            .map((badge) => (
+              <ContrastBadge
+                key={badge.label}
+                ratio={badge.ratio}
+                level={badge.level}
+                status={badge.status}
+                target="AA"
+                compact
+                contextLabel={badge.label}
+              />
+            ))}
         </div>
       ) : null}
 

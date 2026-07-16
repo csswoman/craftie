@@ -12,6 +12,12 @@ const STATUS_CLASSES: Record<ContrastStatus, string> = {
   fail: 'border-fail/30 bg-fail/10 text-fail',
 };
 
+const COMPACT_STATUS_CLASSES: Record<ContrastStatus, string> = {
+  pass: 'bg-black/55 text-white ring-white/25',
+  warning: 'bg-black/55 text-white ring-amber-200/50',
+  fail: 'bg-fail text-white ring-white/45',
+};
+
 interface ContrastBadgeProps {
   ratio: number;
   level: WCAGLevel;
@@ -36,7 +42,7 @@ export function ContrastBadge({
   if (compact) {
     return (
       <span
-        className={`inline-flex shrink-0 items-center rounded-full bg-black/55 font-mono font-semibold text-white tabular-nums ring-1 ring-white/25 ${
+        className={`inline-flex shrink-0 items-center rounded-full font-mono font-semibold tabular-nums ring-1 ${COMPACT_STATUS_CLASSES[status]} ${
           dense
             ? 'gap-0.5 px-1 py-0 text-[0.5625rem] leading-[1.1]'
             : 'gap-1 px-2 py-0.5 text-chrome-caption'
@@ -44,11 +50,12 @@ export function ContrastBadge({
         aria-label={`${contextLabel ? `${contextLabel}; ` : ''}Ratio ${ratio.toFixed(2)}; nivel ${levelLabel}; objetivo ${target}; ${STATUS_LABELS[status]}`}
       >
         {contextLabel ? (
-          <span className={`truncate font-semibold normal-case text-white/85 ${dense ? 'max-w-[3.5rem] text-[0.5rem]' : 'max-w-[4.5rem] text-[0.5625rem]'}`}>
+          <span className={`truncate font-semibold normal-case opacity-90 ${dense ? 'max-w-[3.5rem] text-[0.5rem]' : 'max-w-[4.5rem] text-[0.5625rem]'}`}>
             {contextLabel}
           </span>
         ) : null}
         <span>{ratio.toFixed(2)}:1</span>
+        {status === 'fail' ? <span className="font-sans font-semibold">No AA</span> : null}
       </span>
     );
   }

@@ -12,7 +12,7 @@ import {
   hasPreviewContrastFailure,
 } from './previewTokens';
 import { deriveReadableRoleVariants } from './readableRoles';
-import type { PaletteRoleId, RolePalette } from './rolePalette';
+import { isPaletteRoleId, type PaletteRoleId, type RolePalette } from './rolePalette';
 
 export type RoleContrastPairId = 'texto/fondo' | 'texto/superficie';
 
@@ -159,18 +159,77 @@ function toChromaticBadge(check: ChromaticReadableTextCheck): RoleContrastBadgeD
   };
 }
 
+function previewPairRole(pairId: string): PaletteRoleId | null {
+  if (pairId.startsWith('button-brand-')) {
+    return 'primario';
+  }
+
+  if (pairId === 'button-neutral-filled') {
+    return 'texto';
+  }
+
+  if (pairId === 'accent-link' || pairId === 'navbar-active') {
+    return 'acento';
+  }
+
+  if (pairId === 'support-banner') {
+    return 'secundario';
+  }
+
+  return null;
+}
+
+function toPreviewFailBadge(pair: {
+  label: string;
+  ratio: number;
+}): RoleContrastBadgeDisplay {
+  return {
+    label: pair.label,
+    ratio: pair.ratio,
+    level: 'fail',
+    status: 'fail',
+  };
+}
+
+function mergeBadges(
+  ...groups: Array<RoleContrastBadgeDisplay[] | undefined>
+): RoleContrastBadgeDisplay[] | undefined {
+  const merged = groups.flatMap((group) => group ?? []);
+  return merged.length > 0 ? merged : undefined;
+}
+
 export function buildRolePaletteColumnsWithContrast(palette: RolePalette): PaletteColumnDisplay[] {
   const columns = buildRolePaletteColumns(palette);
   const neutralChecks = getRolePaletteContrastChecks(palette);
   const chromaticChecks = getChromaticReadableTextChecks(palette);
   const checksByBackground = new Map(neutralChecks.map((check) => [check.backgroundRole, check]));
   const chromaticByRole = new Map(chromaticChecks.map((check) => [check.role, check]));
+  const previewFailBadgesByRole = new Map<PaletteRoleId, RoleContrastBadgeDisplay[]>();
+
+  for (const entry of buildPreviewTokens(palette).contrast) {
+    if (entry.passesAa) {
+      continue;
+    }
+
+    const role = previewPairRole(entry.id);
+    if (!role) {
+      continue;
+    }
+
+    const existing = previewFailBadgesByRole.get(role) ?? [];
+    existing.push(toPreviewFailBadge(entry));
+    previewFailBadgesByRole.set(role, existing);
+  }
 
   return columns.map((column) => {
+    const previewBadges = isPaletteRoleId(column.id)
+      ? previewFailBadgesByRole.get(column.id)
+      : undefined;
+
     if (column.id === 'texto') {
       return {
         ...column,
-        contrastBadges: neutralChecks.map(toNeutralBadge),
+        contrastBadges: mergeBadges(neutralChecks.map(toNeutralBadge), previewBadges),
       };
     }
 
@@ -179,7 +238,7 @@ export function buildRolePaletteColumnsWithContrast(palette: RolePalette): Palet
 
       return {
         ...column,
-        contrastBadges: check ? [toNeutralBadge(check)] : undefined,
+        contrastBadges: mergeBadges(check ? [toNeutralBadge(check)] : undefined, previewBadges),
       };
     }
 
@@ -188,11 +247,11 @@ export function buildRolePaletteColumnsWithContrast(palette: RolePalette): Palet
 
       return {
         ...column,
-        contrastBadges: check ? [toChromaticBadge(check)] : undefined,
+        contrastBadges: mergeBadges(check ? [toChromaticBadge(check)] : undefined, previewBadges),
       };
     }
 
-    return column;
+    return previewBadges ? { ...column, contrastBadges: previewBadges } : column;
   });
 }
 
