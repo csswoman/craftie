@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
 
 import { PanelResizeHandle } from '@/components/layout/PanelResizeHandle';
 import {
@@ -8,6 +8,7 @@ import {
   PanelCollapseButton,
   PanelCollapseRail,
 } from '@/components/layout/StudioPanelChrome';
+import { STUDIO_PANEL_WIDTH_LIMITS } from '@/components/layout/useStudioPanelLayout';
 
 type StudioCanvasToolsSidebarProps = {
   sidebar: ReactNode;
@@ -26,40 +27,67 @@ export function StudioCanvasToolsSidebar({
   onToggleCollapsed,
   onResize,
 }: StudioCanvasToolsSidebarProps) {
+  const panelId = useId();
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const previousCollapsed = useRef(collapsed);
+
+  useEffect(() => {
+    if (previousCollapsed.current === collapsed) {
+      return;
+    }
+
+    previousCollapsed.current = collapsed;
+    toggleRef.current?.focus();
+  }, [collapsed]);
+
   return (
     <>
-      {collapsed ? (
-        <aside aria-label="Herramientas" className="hidden shrink-0 xl:flex">
-          <div className="panel-float flex h-full min-h-0 flex-col overflow-hidden">
+      <aside
+        id={panelId}
+        aria-label="Herramientas"
+        className={
+          collapsed
+            ? 'hidden shrink-0 xl:flex'
+            : 'hidden min-h-0 shrink-0 flex-col xl:flex xl:h-full'
+        }
+        style={collapsed ? undefined : { width }}
+      >
+        <div className="panel-float flex h-full min-h-0 flex-col overflow-hidden">
+          {collapsed ? (
             <PanelCollapseRail
+              ref={toggleRef}
               label="Expandir herramientas"
               direction="right"
+              expanded={false}
               onClick={onToggleCollapsed}
             />
-          </div>
-        </aside>
-      ) : (
-        <aside
-          aria-label="Herramientas"
-          className="hidden min-h-0 shrink-0 flex-col xl:flex xl:h-full"
-          style={{ width }}
-        >
-          <div className="panel-float flex h-full min-h-0 flex-col overflow-hidden">
-            <PanelCollapseBar align="end">
-              {headerExtra}
-              <PanelCollapseButton
-                label="Comprimir herramientas"
-                direction="left"
-                onClick={onToggleCollapsed}
-              />
-            </PanelCollapseBar>
-            <div className="min-h-0 flex-1 overflow-hidden">{sidebar}</div>
-          </div>
-        </aside>
-      )}
+          ) : (
+            <>
+              <PanelCollapseBar align="end">
+                {headerExtra}
+                <PanelCollapseButton
+                  ref={toggleRef}
+                  label="Comprimir herramientas"
+                  direction="left"
+                  expanded
+                  onClick={onToggleCollapsed}
+                />
+              </PanelCollapseBar>
+              <div className="min-h-0 flex-1 overflow-hidden">{sidebar}</div>
+            </>
+          )}
+        </div>
+      </aside>
 
       {!collapsed ? (
-        <PanelResizeHandle onResize={onResize} label="Redimensionar panel de herramientas" />
+        <PanelResizeHandle
+          onResize={onResize}
+          label="Redimensionar panel de herramientas"
+          controlsId={panelId}
+          value={width}
+          min={STUDIO_PANEL_WIDTH_LIMITS.sidebar.min}
+          max={STUDIO_PANEL_WIDTH_LIMITS.sidebar.max}
+        />
       ) : null}
     </>
   );

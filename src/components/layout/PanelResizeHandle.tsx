@@ -7,6 +7,12 @@ export type PanelResizeHandleProps = {
   onResizeEnd?: () => void;
   label?: string;
   keyboardStep?: number;
+  /** Current panel width in px — exposed to assistive tech as aria-valuenow. */
+  value?: number;
+  min?: number;
+  max?: number;
+  /** id of the panel this separator controls. */
+  controlsId?: string;
 };
 
 export function PanelResizeHandle({
@@ -14,6 +20,10 @@ export function PanelResizeHandle({
   onResizeEnd,
   label = 'Redimensionar panel',
   keyboardStep = 16,
+  value,
+  min,
+  max,
+  controlsId,
 }: PanelResizeHandleProps) {
   const draggingRef = useRef(false);
 
@@ -67,15 +77,19 @@ export function PanelResizeHandle({
       role="separator"
       aria-orientation="vertical"
       aria-label={label}
+      aria-controls={controlsId}
+      aria-valuenow={value}
+      aria-valuemin={min}
+      aria-valuemax={max}
       aria-keyshortcuts="ArrowLeft ArrowRight"
       tabIndex={0}
       onPointerDown={handlePointerDown}
       onKeyDown={handleKeyDown}
-      className="group/handle relative hidden w-2 shrink-0 cursor-col-resize xl:block"
+      className="group/handle relative hidden w-4 shrink-0 cursor-col-resize focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 focus-visible:ring-inset xl:block"
     >
       <span
         aria-hidden="true"
-        className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-border transition-colors group-hover/handle:bg-primary/40 group-active/handle:bg-primary/60"
+        className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-border transition-colors group-hover/handle:bg-primary/40 group-active/handle:bg-primary/60 group-focus-visible/handle:bg-primary/60"
       />
     </div>
   );

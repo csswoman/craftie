@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, Ref } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export function PanelCollapseBar({
@@ -41,18 +41,24 @@ export function PanelCollapseButton({
   label,
   direction,
   closeTarget = false,
+  expanded,
   onClick,
+  ref,
 }: {
   label: string;
   direction: 'left' | 'right';
   closeTarget?: boolean;
+  expanded?: boolean;
   onClick: () => void;
+  ref?: Ref<HTMLButtonElement>;
 }) {
   return (
     <button
+      ref={ref}
       type="button"
       data-inspector-close={closeTarget ? '' : undefined}
       aria-label={label}
+      aria-expanded={expanded}
       title={label}
       onClick={onClick}
       className="flex size-11 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
@@ -65,16 +71,22 @@ export function PanelCollapseButton({
 export function PanelCollapseRail({
   label,
   direction,
+  expanded,
   onClick,
+  ref,
 }: {
   label: string;
   direction: 'left' | 'right';
+  expanded?: boolean;
   onClick: () => void;
+  ref?: Ref<HTMLButtonElement>;
 }) {
   return (
     <button
+      ref={ref}
       type="button"
       aria-label={label}
+      aria-expanded={expanded}
       title={label}
       onClick={onClick}
       className="flex h-full min-h-11 w-11 items-center justify-center text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"

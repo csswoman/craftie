@@ -12,10 +12,12 @@ const DEFAULTS = {
   rightCollapsed: true,
 };
 
-const LIMITS = {
+export const STUDIO_PANEL_WIDTH_LIMITS = {
   sidebar: { min: 300, max: 480 },
   right: { min: 320, max: 560 },
 } as const;
+
+const LIMITS = STUDIO_PANEL_WIDTH_LIMITS;
 
 type PanelLayout = {
   sidebarWidth: number;
