@@ -7,6 +7,7 @@ import {
   LockIcon,
   MoveLeftIcon,
   MoveRightIcon,
+  RandomColorIcon,
   ShadesIcon,
 } from './paletteToolbarIcons';
 
@@ -26,6 +27,7 @@ type PaletteColumnToolbarProps = {
   onCopyHex: () => void;
   onToggleShades: () => void;
   onOpenInfo: () => void;
+  onRandomizeColor?: () => void;
 };
 
 const HOVER_VISIBILITY: Record<'column' | 'slot', string> = {
@@ -50,6 +52,7 @@ export function PaletteColumnToolbar({
   onCopyHex,
   onToggleShades,
   onOpenInfo,
+  onRandomizeColor,
 }: PaletteColumnToolbarProps) {
   const slotMode = hoverGroup === 'slot';
   const inlineLayout = layout === 'inline';
@@ -76,6 +79,19 @@ export function PaletteColumnToolbar({
               : 'flex-col gap-2.5'
         }`}
       >
+        {editable && onRandomizeColor ? (
+          <PaletteToolbarIconButton
+            label="Generar color al azar"
+            disabled={locked}
+            lightChrome={lightChrome}
+            compact={inlineLayout}
+            showTooltip={!alwaysVisible}
+            onClick={onRandomizeColor}
+          >
+            <RandomColorIcon />
+          </PaletteToolbarIconButton>
+        ) : null}
+
         <PaletteToolbarIconButton
           label={showShades ? 'Ocultar shades' : 'Ver shades'}
           active={showShades}

@@ -77,3 +77,16 @@ export function LockIcon({ locked }: { locked: boolean }) {
     </IconFrame>
   );
 }
+
+export function RandomColorIcon() {
+  return (
+    <IconFrame>
+      <rect x="3.5" y="3.5" width="13" height="13" rx="2" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="7" cy="7" r="1.15" fill="currentColor" />
+      <circle cx="10" cy="10" r="1.15" fill="currentColor" />
+      <circle cx="13" cy="13" r="1.15" fill="currentColor" />
+      <circle cx="13" cy="7" r="1.15" fill="currentColor" />
+      <circle cx="7" cy="13" r="1.15" fill="currentColor" />
+    </IconFrame>
+  );
+}

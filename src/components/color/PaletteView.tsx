@@ -12,10 +12,9 @@ import { RoleSlotStrip } from './RoleSlotStrip';
 export type PaletteViewProps = {
   editable?: boolean;
   onOpenDetails: (hex: string) => void;
-  onEditRole?: (role: PaletteRoleId, element: HTMLElement) => void;
 };
 
-export function PaletteView({ editable = true, onOpenDetails, onEditRole }: PaletteViewProps) {
+export function PaletteView({ editable = true, onOpenDetails }: PaletteViewProps) {
   const { rolePalette, previewRolePalette, activeRole, lockedRoles, setActiveRole } =
     useRolePalette();
   const liveRolePalette = previewRolePalette ?? rolePalette;
@@ -46,7 +45,6 @@ export function PaletteView({ editable = true, onOpenDetails, onEditRole }: Pale
         editable={editable}
         onSelectRole={handleSelectRole}
         onOpenDetails={onOpenDetails}
-        onEditRole={onEditRole}
       />
     </div>
   );

@@ -1,23 +1,23 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { buildRolePaletteColumnsWithContrast, hasRolePaletteContrastFailure } from '@lib/color/rolePaletteContrast';
+import {
+  buildRolePaletteColumnsWithContrast,
+  getRolePaletteContrastWarnings,
+  hasRolePaletteContrastFailure,
+} from '@lib/color/rolePaletteContrast';
 import { normalizeHex } from '@lib/color/normalizeHex';
-import { isPaletteRoleId, type PaletteRoleId } from '@lib/color/rolePalette';
+import { isPaletteRoleId, PALETTE_ROLE_ORDER, type PaletteRoleId } from '@lib/color/rolePalette';
 import type { FontPair } from '@lib/typography/pairings';
 import type { AppliedTypography } from '@lib/typography/typeState';
 import type { TypeScaleBase, TypeScaleRatio } from '@lib/typography/typeScale';
 import type { CanvasViewId } from '@lib/color/canvasViews';
 import type { SelectableColor } from '@lib/color/selectableColors';
+
 import { ColorDetailsDrawer } from '@/components/color-engine/ColorDetailsDrawer';
 import { useRolePalette } from '@/context/RolePaletteContext';
 import { PaletteView } from './PaletteView';
 import { PreviewView } from './PreviewView';
-import {
-  openRoleColorPopover,
-  RoleColorPopover,
-  type RoleColorPopoverAnchor,
-} from './RoleColorPopover';
 import { EmptyCanvas, PaletteCanvasSkeleton } from './PaletteCanvasEmptyStates';
 import { PaletteCanvasNotices } from './PaletteCanvasNotices';
 import { CanvasSystemView } from './CanvasSystemView';
@@ -70,20 +70,31 @@ export function PaletteCanvas({
     previewRolePalette,
     lockedRoles,
     replaceRole,
-    setActiveRole,
   } = useRolePalette();
 
   const [activeView, setActiveView] = useState<CanvasViewId>('colors');
   const [activeMode, setActiveMode] = useState<'dashboard' | 'landing' | 'media' | 'analytics'>('dashboard');
   const [selectedColorHex, setSelectedColorHex] = useState<string | null>(null);
-  const [colorPopover, setColorPopover] = useState<RoleColorPopoverAnchor | null>(null);
   const liveRolePalette = previewRolePalette ?? rolePalette;
   const columns = useMemo(
     () => (liveRolePalette ? buildRolePaletteColumnsWithContrast(liveRolePalette) : []),
     [liveRolePalette],
   );
+  const paintColors = useMemo<SelectableColor[]>(() => {
+    if (liveRolePalette) {
+      return PALETTE_ROLE_ORDER.map((role) => ({
+        id: `role-${role}`,
+        name: liveRolePalette[role].name,
+        hex: liveRolePalette[role].hex,
+        group: 'bold',
+      }));
+    }
+
+    return paletteCatalog;
+  }, [liveRolePalette, paletteCatalog]);
 
   const contrastFailure = liveRolePalette ? hasRolePaletteContrastFailure(liveRolePalette) : false;
+  const contrastWarnings = liveRolePalette ? getRolePaletteContrastWarnings(liveRolePalette) : [];
   const lockedSet = useMemo(() => new Set(lockedRoles), [lockedRoles]);
   const canReplace = editable && rolePalette !== null;
   const hasPalette = columns.length > 0 && liveRolePalette !== null;
@@ -126,14 +137,6 @@ export function PaletteCanvas({
     return null;
   }
 
-  function handleEditRole(role: PaletteRoleId, element: HTMLElement) {
-    openRoleColorPopover(role, element, setActiveRole, setColorPopover);
-  }
-
-  function handleCloseColorPopover() {
-    setColorPopover(null);
-  }
-
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {hasPalette ? (
@@ -172,7 +175,7 @@ export function PaletteCanvas({
 
       <div className="relative flex min-h-0 flex-1 flex-col">
         {hasPalette ? (
-          <PaletteCanvasNotices contrastFailure={contrastFailure} />
+          <PaletteCanvasNotices contrastFailure={contrastFailure} warnings={contrastWarnings} />
         ) : null}
         {isLoading && !hasPalette ? (
           <PaletteCanvasSkeleton />
@@ -190,12 +193,11 @@ export function PaletteCanvas({
               }`}
             >
               {activeView === 'paint' ? (
-                <PaintPaletteCanvas colors={paletteCatalog} />
+                <PaintPaletteCanvas colors={paintColors} />
               ) : activeView === 'colors' ? (
                 <PaletteView
                   editable={editable}
                   onOpenDetails={setSelectedColorHex}
-                  onEditRole={handleEditRole}
                 />
               ) : activeView === 'style-guide' || activeView === 'type-scale' ? (
                 <CanvasSystemView
@@ -214,7 +216,6 @@ export function PaletteCanvas({
                   isTypePreviewing={isTypePreviewing}
                   typeScaleBase={typeScaleBase}
                   typeScaleRatio={typeScaleRatio}
-                  onEditRole={handleEditRole}
                   activeMode={activeMode}
                   activeFamily={activeView === 'illustration' ? 'illustration' : 'ui'}
                 />
@@ -237,8 +238,6 @@ export function PaletteCanvas({
         onAddColor={!canReplace ? onAddColorByHex : undefined}
         onReplaceColor={canReplace ? handleReplaceFromDrawer : undefined}
       />
-
-      <RoleColorPopover anchor={colorPopover} onClose={handleCloseColorPopover} />
     </div>
   );
 }

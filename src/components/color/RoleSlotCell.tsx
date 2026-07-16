@@ -20,7 +20,7 @@ export type RoleSlotCellProps = {
   isWideLayout: boolean;
   onSelectRole: (role: PaletteRoleId) => void;
   onOpenDetails: (hex: string) => void;
-  onEditRole?: (role: PaletteRoleId, element: HTMLElement) => void;
+  onRandomizeColor: () => void;
   onToggleLock: () => void;
   onCopyHex: () => void;
   onToggleShades: () => void;
@@ -39,7 +39,7 @@ export function RoleSlotCell({
   isWideLayout,
   onSelectRole,
   onOpenDetails,
-  onEditRole,
+  onRandomizeColor,
   onToggleLock,
   onCopyHex,
   onToggleShades,
@@ -50,6 +50,8 @@ export function RoleSlotCell({
   const lightChrome = prefersLightSelectionRing(column.hex);
   const canApplyShade = editable && !locked;
   const mobileExpanded = expanded && !isWideLayout;
+  const failBadges = column.contrastBadges?.filter((badge) => badge.status === 'fail') ?? [];
+  const hasContrastFail = failBadges.length > 0;
   const toolbarProps = {
     hoverGroup: 'slot' as const,
     locked,
@@ -64,6 +66,7 @@ export function RoleSlotCell({
     onCopyHex,
     onToggleShades,
     onOpenInfo: () => onOpenDetails(column.hex),
+    onRandomizeColor,
   };
 
   return (
@@ -75,8 +78,15 @@ export function RoleSlotCell({
               ? 'min-h-24 flex-row items-center justify-start gap-5 px-7 py-6'
               : 'min-h-[5.25rem] flex-row items-center justify-between gap-3 px-4 py-3'
             : 'h-16 px-1 pb-1.5 pt-6'
-        } ${isActive ? 'z-[1] shadow-[inset_0_0_0_2px] shadow-primary' : ''}`}
+        } ${
+          isActive
+            ? 'z-[1] shadow-[inset_0_0_0_2px] shadow-primary'
+            : hasContrastFail
+              ? 'z-[1] shadow-[inset_0_0_0_3px] shadow-fail'
+              : ''
+        } ${hasContrastFail && isActive ? 'ring-2 ring-inset ring-fail' : ''}`}
         style={{ backgroundColor: column.hex, color: textColor }}
+        data-contrast-fail={hasContrastFail ? 'true' : undefined}
       >
         {!showShades && isWideLayout ? (
           <PaletteColumnToolbar {...toolbarProps} />
@@ -100,9 +110,9 @@ export function RoleSlotCell({
           />
         ) : null}
 
-        {!expanded && column.contrastBadges && column.contrastBadges.length > 0 ? (
+        {!expanded && hasContrastFail ? (
           <div className="absolute left-0.5 top-0.5 z-10 flex max-w-[calc(100%-0.75rem)] flex-col gap-1">
-            {column.contrastBadges.map((badge) => (
+            {failBadges.map((badge) => (
               <ContrastBadge
                 key={badge.label}
                 ratio={badge.ratio}
@@ -121,16 +131,10 @@ export function RoleSlotCell({
           <button
             type="button"
             aria-pressed={isActive}
-            aria-label={`${column.roleLabel ?? role}: ${column.name}, ${column.hex}`}
+            aria-label={`${column.roleLabel ?? role}: ${column.name}, ${column.hex}${
+              hasContrastFail ? ', contraste insuficiente AA' : ''
+            }`}
             onClick={() => onSelectRole(role)}
-            onDoubleClick={(event) => {
-              event.preventDefault();
-              if (onEditRole) {
-                onEditRole(role, event.currentTarget);
-                return;
-              }
-              onOpenDetails(column.hex);
-            }}
             className={`min-w-0 cursor-pointer border-0 bg-transparent text-inherit focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
               expanded
                 ? `flex-1 text-left ${mobileExpanded ? 'pr-1' : ''}`
@@ -169,13 +173,13 @@ export function RoleSlotCell({
                     </p>
                   </>
                 )}
-                {column.contrastBadges && column.contrastBadges.length > 0 ? (
+                {hasContrastFail ? (
                   <div
                     className={`flex flex-wrap items-center ${
                       mobileExpanded ? 'mt-1 gap-1' : 'mt-2 gap-1.5'
                     }`}
                   >
-                    {column.contrastBadges.map((badge) => (
+                    {failBadges.map((badge) => (
                       <ContrastBadge
                         key={badge.label}
                         ratio={badge.ratio}
@@ -183,6 +187,7 @@ export function RoleSlotCell({
                         status={badge.status}
                         target="AA"
                         compact
+                        contextLabel={badge.label}
                       />
                     ))}
                   </div>

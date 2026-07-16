@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 
 import type { PaletteColumnDisplay } from '@lib/color/paletteDisplay';
+import { randomRoleColor } from '@lib/color/randomRoleColor';
 import type { PaletteRoleId } from '@lib/color/rolePalette';
 import { isPaletteRoleId } from '@lib/color/rolePalette';
 
@@ -19,7 +20,6 @@ export type RoleSlotStripProps = {
   editable?: boolean;
   onSelectRole: (role: PaletteRoleId) => void;
   onOpenDetails: (hex: string) => void;
-  onEditRole?: (role: PaletteRoleId, element: HTMLElement) => void;
 };
 
 export function RoleSlotStrip({
@@ -30,9 +30,8 @@ export function RoleSlotStrip({
   editable = true,
   onSelectRole,
   onOpenDetails,
-  onEditRole,
 }: RoleSlotStripProps) {
-  const { toggleLock, replaceRole } = useRolePalette();
+  const { toggleLock, replaceRole, rolePalette } = useRolePalette();
   const isWideLayout = useMinWidthQuery(1280);
   const lockedSet = new Set(lockedRoles);
   const expanded = variant === 'expanded';
@@ -91,7 +90,20 @@ export function RoleSlotStrip({
               isWideLayout={isWideLayout}
               onSelectRole={onSelectRole}
               onOpenDetails={onOpenDetails}
-              onEditRole={onEditRole}
+              onRandomizeColor={() => {
+                if (!rolePalette || lockedSet.has(role)) {
+                  return;
+                }
+
+                replaceRole(
+                  role,
+                  randomRoleColor(role, {
+                    fondoHex: rolePalette.fondo.hex,
+                    superficieHex: rolePalette.superficie.hex,
+                    textoHex: rolePalette.texto.hex,
+                  }),
+                );
+              }}
               onToggleLock={() => toggleLock(role)}
               onCopyHex={() => void handleCopyHex(column.hex)}
               onToggleShades={() =>

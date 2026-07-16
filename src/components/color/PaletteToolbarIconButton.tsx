@@ -17,7 +17,7 @@ export function PaletteToolbarIconButton({
   lightChrome: boolean;
   compact?: boolean;
   showTooltip?: boolean;
-  onClick: () => void;
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }) {
   const chromeClasses = lightChrome
     ? {
