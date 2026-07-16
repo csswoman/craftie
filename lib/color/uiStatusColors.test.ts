@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { contrastRatio, hexToOklchChannels } from '../utils/colorMath';
 import {
+  adjustUiStatusColor,
   buildUiStatusColors,
   buildUiStatusCandidates,
   STATUS_CHROMA_FLOORS,
@@ -73,6 +74,21 @@ describe('UI status colors', () => {
     expect(statuses.warning.origin).toBe('synthetic');
     expect(hexToOklchChannels(statuses.warning.hex).c).toBeGreaterThanOrEqual(
       STATUS_CHROMA_FLOORS.warning,
+    );
+  });
+
+  it('routes focused slider adjustments through status floors and foreground contrast', () => {
+    const backgroundHex = '#FAF7F2';
+    const statuses = buildUiStatusColors({ colors: earthPalette, backgroundHex });
+    const adjusted = adjustUiStatusColor(statuses.warning, '#888888', backgroundHex);
+
+    expect(adjusted.origin).toBe('found-adjusted');
+    expect(adjusted.sourceHex).toBe(statuses.warning.sourceHex);
+    expect(hexToOklchChannels(adjusted.hex).c).toBeGreaterThanOrEqual(
+      STATUS_CHROMA_FLOORS.warning,
+    );
+    expect(adjusted.contrastWithOnColor).toBeGreaterThanOrEqual(
+      STATUS_ON_COLOR_MIN_CONTRAST,
     );
   });
 

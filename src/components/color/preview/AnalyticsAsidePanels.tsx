@@ -4,7 +4,8 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { DataLegend, type ChartSeries } from './previewCharts';
-import { ProgressBar, StatDelta } from './previewPrimitives';
+import { RadialMetric } from './previewDataDisplays';
+import { StatDelta, tint } from './previewPrimitives';
 import { displayStyle, headingStyle, labelStyle, titleStyle, type PreviewFonts } from './previewTypography';
 
 const TOP_PAGES = [
@@ -88,20 +89,28 @@ export function AnalyticsAsidePanels({
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
           Top pages
         </PreviewSlotTarget>
-        <div className="mt-4 space-y-3">
-          {TOP_PAGES.map((page) => (
-            <div key={page.label}>
-              <div className="flex items-center justify-between gap-2">
-                <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="truncate" style={titleStyle(fonts)}>
+        <div className="mt-3 space-y-1">
+          {TOP_PAGES.map((page, index) => (
+            <div
+              key={page.label}
+              className="preview-list-in flex items-center gap-3 rounded-lg py-1.5"
+              style={{ animationDelay: `${index * 45}ms` }}
+            >
+              <span
+                className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[0.6875rem] font-bold tabular-nums"
+                style={{ backgroundColor: tint(colors[page.slot], 14), color: colors[page.slot] }}
+              >
+                {index + 1}
+              </span>
+              <div className="min-w-0 flex-1">
+                <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="block truncate" style={titleStyle(fonts)}>
                   {page.label}
                 </PreviewSlotTarget>
-                <span className="shrink-0 tabular-nums opacity-60" style={labelStyle(fonts)}>
-                  {page.share}%
-                </span>
+                <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="block" style={labelStyle(fonts, colors.mutedText)}>
+                  {(page.share * 53).toLocaleString()} visits
+                </PreviewSlotTarget>
               </div>
-              <div className="mt-1.5">
-                <ProgressBar value={page.share} color={colors[page.slot]} slot={page.slot} onEditSlot={onEditSlot} />
-              </div>
+              <RadialMetric value={page.share} color={colors[page.slot]} slot={page.slot} onEditSlot={onEditSlot} />
             </div>
           ))}
         </div>

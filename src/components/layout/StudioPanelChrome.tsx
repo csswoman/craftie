@@ -16,14 +16,14 @@ export function PanelCollapseBar({
 }) {
   return (
     <div
-      className={`shrink-0 items-center border-b border-border/40 px-2.5 py-1.5 ${
+      className={`shrink-0 items-center border-b border-line-soft px-4 py-3 ${
         alwaysVisible ? 'flex' : 'hidden xl:flex'
       } ${align === 'end' ? 'justify-end' : 'justify-start'}`}
     >
       <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
         <div className={`min-w-0 ${align === 'end' ? 'text-right' : 'text-left'}`}>
-          <p className="truncate text-chrome-label font-semibold text-ink">{title}</p>
-          {subtitle ? <p className="truncate text-chrome-caption text-muted">{subtitle}</p> : null}
+          <p className="truncate font-display text-[1.375rem] font-medium leading-none text-forest">{title}</p>
+          {subtitle ? <p className="mt-1 truncate text-chrome-caption text-muted">{subtitle}</p> : null}
         </div>
         <div className="shrink-0">{children}</div>
       </div>

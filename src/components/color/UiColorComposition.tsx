@@ -20,8 +20,8 @@ export function UiColorComposition({
     : verdict.level === 'saturated' ? 'bg-fail' : 'bg-muted';
 
   return (
-    <div className="mt-2 space-y-2.5" aria-label="Composición de carga de color">
-      <div className="flex h-[34px] overflow-hidden rounded-lg ring-1 ring-inset ring-ink/10">
+    <div className="space-y-3" aria-label="Composición de carga de color">
+      <div className="flex h-4 overflow-hidden rounded-md ring-1 ring-inset ring-ink/10">
         {UI_COMPOSITION_SEGMENTS.map((segment) => (
           <span
             key={segment.token}
@@ -38,8 +38,8 @@ export function UiColorComposition({
 
       <div className="flex flex-wrap gap-x-2.5 gap-y-1">
         {UI_COMPOSITION_SEGMENTS.map((segment) => (
-          <span key={segment.token} className="inline-flex items-center gap-1 text-[0.625rem] text-muted">
-            <span className="size-2 rounded-sm ring-1 ring-inset ring-ink/10" style={{ backgroundColor: tokens[segment.token].hex }} aria-hidden="true" />
+          <span key={segment.token} className="inline-flex items-center gap-1.5 text-tools-micro text-muted">
+            <span className="size-2 shrink-0 rounded-full ring-1 ring-inset ring-ink/10" style={{ backgroundColor: tokens[segment.token].hex }} aria-hidden="true" />
             {segment.label} {Math.round(segment.area * 100)}%
           </span>
         ))}
@@ -52,8 +52,8 @@ export function UiColorComposition({
         </div>
         <div className="mt-1.5 flex items-start justify-between gap-3" role="status" aria-live="polite">
           <div>
-            <p className={`text-tools-meta font-semibold ${verdictColor}`}>{verdict.label}</p>
-            <p className="text-[0.65625rem] leading-relaxed text-muted">{verdict.subtitle}</p>
+            <p className={`text-tools-body-sm font-semibold ${verdictColor}`}>{verdict.label}</p>
+            <p className="text-tools-meta-scale leading-snug text-muted">{verdict.subtitle}</p>
           </div>
           <span className={`font-mono text-tools-meta font-semibold tabular-nums ${verdictColor}`}>{loadPercent}%</span>
         </div>

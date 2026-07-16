@@ -1,5 +1,6 @@
 import { converter } from 'culori';
 
+import { buildDataSeriesProfile, type DataSeriesProfile } from './dataSeriesProfile';
 import { evaluateColorFitness, fitnessForUse, type ColorFitness, type ColorUse } from './colorFitness';
 import { normalizeHex } from './normalizeHex';
 import type { SelectableColor } from './selectableColors';
@@ -10,6 +11,7 @@ import { contrastRatio, oklchChannelsToHex } from '../utils/colorMath';
 const toOklch = converter('oklch');
 const toOklab = converter('oklab');
 export type CandidateOrigin = 'source' | 'derived' | 'synthetic';
+export type DataSeparation = { minHue: number | null; minLightness: number | null };
 export type UiColorCandidate = {
   id: string;
   hex: string;
@@ -17,7 +19,8 @@ export type UiColorCandidate = {
   detail: string;
   origin: CandidateOrigin;
   fitness: ColorFitness;
-  dataSeparation?: { minHue: number | null; minLightness: number | null };
+  dataProfile: DataSeriesProfile;
+  dataSeparation: DataSeparation;
   score: number;
 };
 
@@ -34,7 +37,7 @@ function hueDistance(left: number, right: number): number {
   return Math.min(distance, 360 - distance);
 }
 
-function dataSeparation(hex: string, occupied: OccupiedSeries[]): UiColorCandidate['dataSeparation'] {
+function dataSeparation(hex: string, occupied: OccupiedSeries[]): DataSeparation {
   const candidate = toOklch(hex);
   if (!candidate || occupied.length === 0) return { minHue: null, minLightness: null };
   const separations = occupied.map((series) => {
@@ -74,6 +77,8 @@ export function buildDataCandidates(
     seen.add(normalized);
     const fitness = candidateFitness(normalized, tokens, occupied.map((series) => series.hex));
     const chroma = toOklch(normalized)?.c ?? 0;
+    const channels = toOklch(normalized);
+    const separation = dataSeparation(normalized, occupied);
     candidates.push({
       id,
       hex: normalized,
@@ -81,7 +86,13 @@ export function buildDataCandidates(
       detail,
       origin,
       fitness,
-      dataSeparation: dataSeparation(normalized, occupied),
+      dataProfile: buildDataSeriesProfile({
+        fitness,
+        origin,
+        hue: channels?.h ?? 0,
+        separation,
+      }),
+      dataSeparation: separation,
       score: contrastRatio(normalized, tokens.background.hex) + chroma,
     });
   }
@@ -165,7 +176,23 @@ export function buildExpressiveCandidates(colors: SelectableColor[], tokens: Sem
     seen.add(normalized);
     const chroma = toOklch(normalized)?.c ?? 0;
     const fitness = candidateFitness(normalized, tokens, occupiedSeries(tokens).map((series) => series.hex));
-    candidates.push({ id, hex: normalized, name, detail, origin, fitness, score: chroma });
+    const separation = dataSeparation(normalized, occupiedSeries(tokens));
+    candidates.push({
+      id,
+      hex: normalized,
+      name,
+      detail,
+      origin,
+      fitness,
+      dataProfile: buildDataSeriesProfile({
+        fitness,
+        origin,
+        hue: toOklch(normalized)?.h ?? 0,
+        separation,
+      }),
+      dataSeparation: separation,
+      score: chroma,
+    });
   }
 
   for (const color of colors) {

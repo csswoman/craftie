@@ -12,7 +12,6 @@ import {
   type UiLayoutSlot,
 } from '@lib/color/layoutModes';
 import {
-  DEFAULT_PREVIEW_FAMILY_ID,
   getPreviewFamily,
   type PreviewFamilyId,
 } from '@lib/color/previewFamilies';
@@ -34,7 +33,6 @@ import { IllustrationPreview } from '@/components/color/preview/IllustrationPrev
 import { LandingLayoutPreview } from '@/components/color/preview/LandingLayoutPreview';
 import { MediaLayoutPreview } from '@/components/color/preview/MediaLayoutPreview';
 import { PreviewContrastWarnings } from '@/components/color/preview/PreviewChrome';
-import { PreviewNavigator } from '@/components/color/preview/PreviewNavigator';
 import type { PreviewFonts } from '@/components/color/preview/previewTypography';
 import {
   SemanticTokenColorPopover,
@@ -50,6 +48,8 @@ export type PreviewViewProps = {
   typeScaleBase?: TypeScaleBase;
   typeScaleRatio?: TypeScaleRatio;
   onEditRole?: (role: PaletteRoleId, element: HTMLElement) => void;
+  activeMode: UiLayoutModeId;
+  activeFamily: PreviewFamilyId;
 };
 
 export function PreviewView({
@@ -59,6 +59,8 @@ export function PreviewView({
   isTypePreviewing = false,
   typeScaleBase = 16,
   typeScaleRatio = 1.25,
+  activeMode,
+  activeFamily,
   onEditRole,
 }: PreviewViewProps) {
   const {
@@ -70,8 +72,6 @@ export function PreviewView({
     illustrationSeed,
     regenerateIllustrationSeed,
   } = useRolePalette();
-  const [activeFamily, setActiveFamily] = useState<PreviewFamilyId>(DEFAULT_PREVIEW_FAMILY_ID);
-  const [activeMode, setActiveMode] = useState<UiLayoutModeId>('dashboard');
   const [tokenPopover, setTokenPopover] = useState<SemanticTokenPopoverAnchor | null>(null);
 
   const liveRolePalette = previewRolePalette ?? rolePalette;
@@ -158,15 +158,6 @@ export function PreviewView({
       </div>
       <div className={`mx-auto flex w-full ${previewWidthClass} flex-col gap-4 p-5 pb-8 sm:gap-5 sm:p-8`}>
         {tokens.warnings.length > 0 ? <PreviewContrastWarnings warnings={tokens.warnings} /> : null}
-        <PreviewNavigator
-          activeFamily={activeFamily}
-          activeMode={activeMode}
-          onSelectUi={(mode) => {
-            setActiveFamily('ui');
-            setActiveMode(mode);
-          }}
-          onSelectIllustration={() => setActiveFamily('illustration')}
-        />
         {family.id === 'illustration' ? (
           <IllustrationPreview
             tokens={liveSemanticTokens}

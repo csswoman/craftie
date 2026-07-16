@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { TriangleAlert } from 'lucide-react';
 
 import {
   assignDataSeriesColor,
@@ -13,13 +14,13 @@ import {
 import type { SelectableColor } from '@lib/color/selectableColors';
 import type { SemanticTokenName, SemanticTokens } from '@lib/color/semanticTokens';
 import {
-  autoFillDataGaps,
   buildDataCandidates,
+  deriveFromPrimary,
   type UiColorCandidate,
 } from '@lib/color/uiColorCandidates';
 import { DATA_TOKEN_NAMES, sourceHueCause } from '@lib/color/uiColorPanel';
 
-import { ColorCandidateList } from './ColorCandidateList';
+import { DataSeriesList } from './DataSeriesList';
 import { UiColorSectionHeader } from './UiColorSectionHeader';
 
 export function UiDataSection({
@@ -38,7 +39,6 @@ export function UiDataSection({
     const firstEmpty = firstEmptySlot(slots);
     return firstEmpty === -1 ? 0 : firstEmpty;
   });
-  const [acceptedIncomplete, setAcceptedIncomplete] = useState(false);
   const [autoMessage, setAutoMessage] = useState<string | null>(null);
   const seriesState = createDataSeriesState(slots, activeSlot);
   const activeToken = DATA_TOKEN_NAMES[seriesState.activeSlot];
@@ -48,12 +48,10 @@ export function UiDataSection({
     [activeToken, colors, tokens],
   );
   const completeCount = countDataSeriesColors(seriesState.slots);
-  const hasDataCandidate = candidates.some((candidate) => candidate.fitness.asData.ok);
   const activeSeriesIndex = seriesState.activeSlot + 1;
 
   function selectSlot(slot: number) {
     setActiveSlot(selectDataSeriesSlot(seriesState, slot).activeSlot);
-    setAcceptedIncomplete(false);
     setAutoMessage(null);
   }
 
@@ -61,7 +59,6 @@ export function UiDataSection({
     const nextState = assignDataSeriesColor(seriesState, candidate.hex);
     onReplace(activeToken, candidate.hex);
     setActiveSlot(nextState.activeSlot);
-    setAcceptedIncomplete(false);
     setAutoMessage(nextState.slots.includes(null)
       ? `${candidate.name} asignado a la serie ${activeSeriesIndex}. Continúa con la siguiente serie vacía.`
       : `${candidate.name} asignado a la serie ${activeSeriesIndex}. Serie completa.`);
@@ -71,33 +68,33 @@ export function UiDataSection({
     const nextState = clearDataSeriesSlot(seriesState, seriesState.activeSlot);
     onClear(activeToken);
     setActiveSlot(nextState.activeSlot);
-    setAcceptedIncomplete(false);
     setAutoMessage(`Serie ${activeSeriesIndex} vaciada.`);
   }
 
-  function fillAutomatically() {
-    const replacements = autoFillDataGaps(tokens, colors);
-    const nextSlots = [...seriesState.slots];
-    replacements.forEach(({ token, hex }) => onReplace(token, hex));
-    replacements.forEach(({ token, hex }) => {
-      nextSlots[DATA_TOKEN_NAMES.indexOf(token as typeof DATA_TOKEN_NAMES[number])] = hex;
-    });
-    const nextEmpty = firstEmptySlot(nextSlots);
-    setActiveSlot(nextEmpty === -1 ? seriesState.activeSlot : nextEmpty);
-    setAcceptedIncomplete(false);
-    setAutoMessage(replacements.length === 0
-      ? 'No hay candidatos aptos como dato. Revisa el eje Datos y elige de forma explícita si quieres forzar uno.'
-      : `Se rellenaron ${replacements.length} huecos con candidatos aptos como dato.`);
+  function leaveUnassigned() {
+    setAutoMessage(`La serie ${activeSeriesIndex} queda sin asignar.`);
   }
 
-  function acceptIncomplete() {
-    setAcceptedIncomplete(true);
-    setAutoMessage(null);
+  function deriveActiveFromPrimary() {
+    const hex = deriveFromPrimary(tokens.primary.hex);
+    const nextState = assignDataSeriesColor(seriesState, hex);
+    onReplace(activeToken, hex);
+    setActiveSlot(nextState.activeSlot);
+    setAutoMessage(`Se derivó la serie ${activeSeriesIndex} del primario.`);
   }
 
   return (
     <section aria-labelledby="ui-data-title">
-      <UiColorSectionHeader title={`Datos · ${completeCount} de ${DATA_TOKEN_NAMES.length}`} />
+      <UiColorSectionHeader
+        title={(
+          <>
+            Datos · {completeCount} de {DATA_TOKEN_NAMES.length}
+            {gaps.length > 0 ? (
+              <span className="ml-1 text-[#8A5F16] dark:text-[#F2C46D]">· {gaps.length} sin asignar</span>
+            ) : null}
+          </>
+        )}
+      />
       <h2 id="ui-data-title" className="sr-only">Colores de datos</h2>
       <div className="mt-2 flex gap-1.5" aria-label={`${completeCount} de ${DATA_TOKEN_NAMES.length} categorías de datos asignadas`}>
         {DATA_TOKEN_NAMES.map((name, index) => {
@@ -110,9 +107,8 @@ export function UiDataSection({
               aria-pressed={selected}
               aria-label={missing ? `Elegir candidato para serie ${index + 1}` : `Seleccionar serie ${index + 1} para reemplazar ${tokens[name].hex}`}
               onClick={() => selectSlot(index)}
-              className={`relative h-11 min-w-0 flex-1 cursor-pointer rounded-md text-left ring-offset-2 ring-offset-bg focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${missing ? 'border border-dashed border-muted/60' : 'ring-1 ring-inset ring-ink/10'} ${selected ? 'ring-2 ring-[var(--chrome-green)]' : ''}`}
+              className={`relative h-11 min-w-0 flex-1 cursor-pointer rounded-md text-left ring-offset-2 ring-offset-bg focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${missing ? 'border border-dashed border-muted/60 bg-surface-raised [background-image:linear-gradient(135deg,transparent_40%,color-mix(in_oklch,var(--color-muted)_22%,transparent)_40%,color-mix(in_oklch,var(--color-muted)_22%,transparent)_55%,transparent_55%)] [background-size:8px_8px]' : 'ring-1 ring-inset ring-ink/10'} ${selected ? 'ring-2 ring-[var(--chrome-green)]' : ''}`}
               style={missing ? {
-                backgroundImage: 'repeating-linear-gradient(135deg, transparent 0 4px, color-mix(in oklch, var(--color-muted) 22%, transparent) 4px 6px)',
                 backgroundColor: 'var(--color-surface-raised)',
               } : { backgroundColor: tokens[name].hex }}
             >
@@ -126,9 +122,10 @@ export function UiDataSection({
 
       <div className="mt-3 space-y-3">
         {gaps.length > 0 ? (
-          <p className="text-tools-meta leading-relaxed text-ink">
-            <span aria-hidden="true">⚠ </span>{sourceHueCause(colors)}
-          </p>
+          <div role="status" className="flex items-start gap-2.5 rounded-lg border border-[#EAD9B8] bg-[#FBF4E9] px-3 py-2.5 text-[0.82rem] leading-relaxed text-[#654817] dark:border-[#66532D] dark:bg-[#352C1C] dark:text-[#F0D59B]">
+            <TriangleAlert aria-hidden="true" className="mt-px size-[15px] shrink-0 text-[#A97620] dark:text-[#E0A640]" />
+            <span>{sourceHueCause(colors)}</span>
+          </div>
         ) : null}
 
         <div className="space-y-2">
@@ -144,44 +141,16 @@ export function UiDataSection({
               </button>
             ) : null}
           </div>
-          {!hasDataCandidate ? (
-            <p className="text-tools-meta leading-relaxed text-muted">
-              Ninguno encaja bien como dato. El eje Datos muestra la advertencia; aún puedes elegir uno de forma explícita.
-            </p>
-          ) : null}
-          <ColorCandidateList
+          <DataSeriesList
+            key={activeToken}
             candidates={candidates}
-            activeUse="data"
-            actionLabel={`Usar en serie ${activeSeriesIndex}`}
+            targetSeries={activeSeriesIndex}
+            unassigned={seriesState.slots[seriesState.activeSlot] === null}
             onSelect={selectCandidate}
-            showData
+            onLeaveUnassigned={leaveUnassigned}
+            onDerive={deriveActiveFromPrimary}
           />
         </div>
-
-        {gaps.length > 0 ? (
-          <div className="grid gap-2">
-            <button
-              type="button"
-              onClick={fillAutomatically}
-              className="min-h-10 rounded-md bg-[var(--chrome-green)] px-3 text-tools-meta font-semibold text-white hover:brightness-95 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-            >
-              Rellenar {gaps.length} huecos automáticamente
-            </button>
-            <button
-              type="button"
-              onClick={acceptIncomplete}
-              className="min-h-10 rounded-md border border-border bg-bg px-3 text-tools-meta font-semibold text-ink hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-            >
-              Aceptar serie incompleta ({completeCount} categorías)
-            </button>
-          </div>
-        ) : null}
-
-        {acceptedIncomplete ? (
-          <p role="status" className="text-tools-meta font-medium text-[var(--chrome-green)]">
-            Serie incompleta aceptada. Puedes continuar con {completeCount} categorías.
-          </p>
-        ) : null}
       </div>
       {autoMessage ? <p role="status" className="mt-3 text-tools-meta text-muted">{autoMessage}</p> : null}
     </section>

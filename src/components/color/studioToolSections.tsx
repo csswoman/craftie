@@ -8,9 +8,9 @@ import type { CustomFont } from '@lib/typography/customFonts';
 import type { PaletteType } from '@lib/color/paletteClassification';
 
 import { ImageUploader } from '@/components/color-engine/ImageUploader';
-import { GenerateButton } from '@/components/color-engine/GenerateButton';
 import { SidebarTypographySection } from '@/components/color/SidebarTypographySection';
 import { UiColorPanel } from '@/components/color/UiColorPanel';
+import { CuratedSourceActions } from '@/components/color/CuratedSourceActions';
 import type { CustomFontSubmitInput } from '@/components/font-pairing/CustomFontEntry';
 import { Button } from '@/components/ui/Button';
 
@@ -64,22 +64,29 @@ export function buildStudioToolSections(
 ): StudioToolSection[] {
   const imageSection = (
     <>
-      <ImageUploader
-        fileName={input.fileName}
-        hasPreview={input.hasPreview}
-        isLoading={input.isImageBusy}
-        previewUrl={input.imagePreviewUrl}
-        onFileSelected={input.onImageFileSelected}
-        onRegenerate={input.onImageRegenerate}
-        variant="embedded"
-        previewVariant="compact"
-        showHeader={false}
-        showDropzone={!input.hasPreview}
-        showChangeImageControl={input.hasPreview}
-        paletteType={input.imagePaletteType}
-        paletteTypeOverride={input.paletteTypeOverride}
-        onPaletteTypeChange={input.onPaletteTypeChange}
-      />
+      {input.catalogSource === 'curated' && !input.hasPreview ? (
+        <CuratedSourceActions
+          onOpenInspiration={input.onOpenInspiration}
+          onImageFileSelected={input.onImageFileSelected}
+        />
+      ) : (
+        <ImageUploader
+          fileName={input.fileName}
+          hasPreview={input.hasPreview}
+          isLoading={input.isImageBusy}
+          previewUrl={input.imagePreviewUrl}
+          onFileSelected={input.onImageFileSelected}
+          onRegenerate={input.onImageRegenerate}
+          variant="embedded"
+          previewVariant="compact"
+          showHeader={false}
+          showDropzone={!input.hasPreview}
+          showChangeImageControl={input.hasPreview}
+          paletteType={input.imagePaletteType}
+          paletteTypeOverride={input.paletteTypeOverride}
+          onPaletteTypeChange={input.onPaletteTypeChange}
+        />
+      )}
       {!input.isReviewPhase && !input.hasPreview && input.catalogSource === 'none' ? (
         <Button
           type="button"
@@ -96,24 +103,14 @@ export function buildStudioToolSections(
   const sections: StudioToolSection[] = [
     { id: 'image', label: 'Imagen', content: imageSection },
     { id: 'source', label: 'Colores', content: (
-      <div className="space-y-[var(--chrome-space-4)]">
-        <UiColorPanel colors={input.paletteCatalog} mobile={target === 'mobile'} />
-        {!input.isReviewPhase ? (
-          <div
-            className={`sticky bottom-0 z-sticky border-t border-border bg-bg pt-[var(--chrome-space-3)] ${
-              target === 'mobile'
-                ? '-mx-[var(--chrome-space-3)] -mb-[var(--chrome-space-3)] px-[var(--chrome-space-3)] pb-[var(--chrome-space-3)]'
-                : ''
-            }`}
-          >
-            <GenerateButton
-              onClick={input.onGenerate}
-              disabled={!input.selectionReady}
-              busy={input.isGenerating}
-            />
-          </div>
-        ) : null}
-      </div>
+      <UiColorPanel
+        colors={input.paletteCatalog}
+        mobile={target === 'mobile'}
+        showCreateGuide={!input.isReviewPhase}
+        canCreateGuide={input.selectionReady}
+        creatingGuide={input.isGenerating}
+        onCreateGuide={input.onGenerate}
+      />
     ) },
     {
       id: 'typography',

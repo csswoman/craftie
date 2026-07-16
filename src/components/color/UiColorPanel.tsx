@@ -1,30 +1,47 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type { SelectableColor } from '@lib/color/selectableColors';
 import type { SemanticTokenName } from '@lib/color/semanticTokens';
-import { assessUiColorLoad, chromaLoadPercent } from '@lib/color/uiColorComposition';
 import { buildDataCandidates } from '@lib/color/uiColorCandidates';
-import { buildTintedNeutralRamp } from '@lib/color/uiColorPanel';
+import type { UiStatusRole } from '@lib/color/uiStatusColors';
 
 import { useRolePalette } from '@/context/RolePaletteContext';
 import { useTabListKeyboard } from '@/lib/browser/useTabListKeyboard';
 
+import { UiCompactColorPanel } from './UiCompactColorPanel';
 import { UiDataSection } from './UiDataSection';
+import { UiFocusedPanelHeader } from './UiFocusedPanelHeader';
+import { UiFocusedRoleEditor } from './UiFocusedRoleEditor';
+import { UiFocusedStatusEditor } from './UiFocusedStatusEditor';
 import { UiSourceColorsSection } from './UiSourceColorsSection';
-import { UiStatusColorsSection } from './UiStatusColorsSection';
-import { UiSystemSection } from './UiSystemSection';
+import {
+  COMPACT_ROLE_GROUPS,
+  type CompactRoleGroupId,
+} from './uiColorPanelGroups';
 
 const UI_COLOR_VIEWS = ['system', 'data'] as const;
 type UiColorView = (typeof UI_COLOR_VIEWS)[number];
+type FocusedView =
+  | { kind: 'roles'; group: CompactRoleGroupId; token: SemanticTokenName }
+  | { kind: 'status'; role: UiStatusRole }
+  | { kind: 'sources' };
 
 export function UiColorPanel({
   colors,
   mobile = false,
+  showCreateGuide = false,
+  canCreateGuide = false,
+  creatingGuide = false,
+  onCreateGuide = () => undefined,
 }: {
   colors: SelectableColor[];
   mobile?: boolean;
+  showCreateGuide?: boolean;
+  canCreateGuide?: boolean;
+  creatingGuide?: boolean;
+  onCreateGuide?: () => void;
 }) {
   const {
     semanticTokens,
@@ -37,111 +54,43 @@ export function UiColorPanel({
     selectStatusColor,
     setActiveRole,
   } = useRolePalette();
-  const [openRole, setOpenRole] = useState<{ revision: number; token: SemanticTokenName | null }>({
-    revision: paletteRevision,
-    token: null,
-  });
   const [activeView, setActiveView] = useState<UiColorView>('system');
+  const [focusedView, setFocusedView] = useState<{ revision: number; view: FocusedView | null }>({
+    revision: paletteRevision,
+    view: null,
+  });
   const { getTabProps } = useTabListKeyboard({
     items: UI_COLOR_VIEWS,
     activeId: activeView,
-    onActivate: setActiveView,
+    onActivate: changeView,
   });
-  const ramp = useMemo(() => buildTintedNeutralRamp(colors), [colors]);
-  const colorLoad = useMemo(
-    () => semanticTokens ? assessUiColorLoad(semanticTokens) : null,
-    [semanticTokens],
-  );
+  const panelRef = useRef<HTMLDivElement>(null);
 
-  if (!semanticTokens || colors.length === 0 || colorLoad === null) return null;
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      panelRef.current?.scrollIntoView({ block: 'start' });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeView, focusedView.revision, focusedView.view?.kind]);
+
+  if (!semanticTokens || colors.length === 0) return null;
   const resolvedTokens = semanticTokens;
-  const loadPercent = chromaLoadPercent(colorLoad);
-  const openToken = openRole.revision === paletteRevision ? openRole.token : null;
+  const focus = focusedView.revision === paletteRevision ? focusedView.view : null;
 
-  function toggleToken(token: SemanticTokenName) {
-    setOpenRole((current) => ({
-      revision: paletteRevision,
-      token: current.revision === paletteRevision && current.token === token ? null : token,
-    }));
+  function changeView(view: UiColorView) {
+    setActiveView(view);
+    setFocusedView({ revision: paletteRevision, view: null });
+  }
+
+  function openGroup(group: CompactRoleGroupId, token: SemanticTokenName) {
+    setFocusedView({ revision: paletteRevision, view: { kind: 'roles', group, token } });
     setActiveRole(null);
   }
 
-  function selectForToken(token: SemanticTokenName, hex: string) {
-    replaceSemanticToken(token, hex);
-    setOpenRole({ revision: paletteRevision, token: null });
+  function openStatus(role: UiStatusRole) {
+    if (!statusColors) generateStatusColors();
+    setFocusedView({ revision: paletteRevision, view: { kind: 'status', role } });
   }
-
-  return (
-    <div className="space-y-4 pb-2">
-      <div className="grid grid-cols-2 gap-1 rounded-lg bg-surface-raised p-1" role="tablist" aria-label="Vistas de color">
-        {UI_COLOR_VIEWS.map((view) => {
-          const selected = activeView === view;
-          return (
-            <button
-              key={view}
-              type="button"
-              role="tab"
-              id={`ui-color-tab-${view}`}
-              aria-controls={`ui-color-panel-${view}`}
-              aria-selected={selected}
-              onClick={() => setActiveView(view)}
-              {...getTabProps(view)}
-              className={`min-h-11 rounded-md px-3 text-tools-meta font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${selected ? 'bg-bg text-ink ring-1 ring-border' : 'text-muted hover:text-ink'}`}
-            >
-              {view === 'system' ? 'Sistema' : 'Datos'}
-            </button>
-          );
-        })}
-      </div>
-
-      {activeView === 'system' ? (
-        <div
-          id="ui-color-panel-system"
-          role="tabpanel"
-          aria-labelledby="ui-color-tab-system"
-          className="space-y-5"
-        >
-          <UiSystemSection
-            tokens={resolvedTokens}
-            colors={colors}
-            neutralSteps={ramp.steps}
-            openToken={openToken}
-            loadPercent={loadPercent}
-            mobile={mobile}
-            onToggle={toggleToken}
-            onSelect={selectForToken}
-          />
-          <UiStatusColorsSection
-            colors={colors}
-            statusColors={statusColors}
-            backgroundHex={resolvedTokens.background.hex}
-            onGenerate={generateStatusColors}
-            onSelect={selectStatusColor}
-          />
-          <UiSourceColorsSection
-            tokens={resolvedTokens}
-            colors={colors}
-            onAssignRole={replaceSemanticToken}
-            onAssignData={assignSourceToData}
-            onAssignStatus={assignSourceToStatus}
-          />
-        </div>
-      ) : (
-        <div
-          id="ui-color-panel-data"
-          role="tabpanel"
-          aria-labelledby="ui-color-tab-data"
-        >
-          <UiDataSection
-            tokens={resolvedTokens}
-            colors={colors}
-            onReplace={replaceSemanticToken}
-            onClear={clearSemanticToken}
-          />
-        </div>
-      )}
-    </div>
-  );
 
   function assignSourceToData(hex: string): string {
     const gap = (['data-1', 'data-2', 'data-3', 'data-4', 'data-5', 'data-6'] as const)
@@ -155,4 +104,146 @@ export function UiColorPanel({
       ? `Añadido a ${gap.replace('data-', 'serie ')} · ${candidate.fitness.asData.ratio.toFixed(1)}:1.`
       : `Añadido a ${gap.replace('data-', 'serie ')} de forma explícita · débil como dato (${candidate.fitness.asData.ratio.toFixed(1)}:1).`;
   }
+
+  if (focus?.kind === 'roles') {
+    const group = COMPACT_ROLE_GROUPS[focus.group];
+    return (
+      <div ref={panelRef} className="pb-2">
+        <UiFocusedPanelHeader
+          title={group.title}
+          subtitle={group.subtitle}
+          onBack={() => setFocusedView({ revision: paletteRevision, view: null })}
+        />
+        <UiFocusedRoleEditor
+          key={`${paletteRevision}-${focus.group}`}
+          roles={group.roles}
+          activeToken={focus.token}
+          tokens={resolvedTokens}
+          colors={colors}
+          onActivate={(token) => setFocusedView({
+            revision: paletteRevision,
+            view: { ...focus, token },
+          })}
+          onSelect={replaceSemanticToken}
+        />
+      </div>
+    );
+  }
+
+  if (focus?.kind === 'status') {
+    return (
+      <div ref={panelRef} className="pb-2">
+        <UiFocusedPanelHeader
+          title="Colores de estado"
+          subtitle="Ancla el hue, ajusta la textura · piso de chroma garantizado"
+          onBack={() => setFocusedView({ revision: paletteRevision, view: null })}
+        />
+        {statusColors ? (
+          <UiFocusedStatusEditor
+            key={paletteRevision}
+            colors={colors}
+            statusColors={statusColors}
+            backgroundHex={resolvedTokens.background.hex}
+            initialRole={focus.role}
+            onSelect={selectStatusColor}
+          />
+        ) : (
+          <p className="py-6 text-sm text-muted" role="status">Preparando los estados…</p>
+        )}
+      </div>
+    );
+  }
+
+  if (focus?.kind === 'sources') {
+    return (
+      <div ref={panelRef} className="pb-2">
+        <UiFocusedPanelHeader
+          title="Colores fuente"
+          subtitle="Elige una fuente y asígnala a un rol, estado o serie de datos"
+          onBack={() => setFocusedView({ revision: paletteRevision, view: null })}
+        />
+        <div className="pt-4">
+          <UiSourceColorsSection
+            tokens={resolvedTokens}
+            colors={colors}
+            showHeader={false}
+            onAssignRole={replaceSemanticToken}
+            onAssignData={assignSourceToData}
+            onAssignStatus={assignSourceToStatus}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div ref={panelRef} className="pb-2">
+      {mobile ? (
+        <header className="mb-3 border-b border-line-soft pb-4">
+          <h1 className="font-display text-[1.375rem] font-medium leading-none text-forest">Craftie</h1>
+          <p className="mt-1 text-xs text-muted">Colores y tipografía</p>
+        </header>
+      ) : null}
+      <ColorViewTabs activeView={activeView} getTabProps={getTabProps} onChange={changeView} />
+
+      {activeView === 'system' ? (
+        <div id="ui-color-panel-system" role="tabpanel" aria-labelledby="ui-color-tab-system">
+          <UiCompactColorPanel
+            tokens={resolvedTokens}
+            colors={colors}
+            statusColors={statusColors}
+            showCreateGuide={showCreateGuide}
+            canCreateGuide={canCreateGuide}
+            creatingGuide={creatingGuide}
+            onOpenGroup={openGroup}
+            onOpenStatus={openStatus}
+            onOpenSources={() => setFocusedView({ revision: paletteRevision, view: { kind: 'sources' } })}
+            onCreateGuide={onCreateGuide}
+          />
+        </div>
+      ) : (
+        <div id="ui-color-panel-data" role="tabpanel" aria-labelledby="ui-color-tab-data" className="pt-4">
+          <UiDataSection
+            tokens={resolvedTokens}
+            colors={colors}
+            onReplace={replaceSemanticToken}
+            onClear={clearSemanticToken}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ColorViewTabs({
+  activeView,
+  getTabProps,
+  onChange,
+}: {
+  activeView: UiColorView;
+  getTabProps: (id: UiColorView) => React.ButtonHTMLAttributes<HTMLButtonElement>;
+  onChange: (view: UiColorView) => void;
+}) {
+  return (
+    <div className="flex items-center gap-5 border-b border-line-soft" role="tablist" aria-label="Vistas de color">
+      {UI_COLOR_VIEWS.map((view) => {
+        const selected = activeView === view;
+        return (
+          <button
+            key={view}
+            type="button"
+            role="tab"
+            id={`ui-color-tab-${view}`}
+            aria-controls={`ui-color-panel-${view}`}
+            aria-selected={selected}
+            onClick={() => onChange(view)}
+            {...getTabProps(view)}
+            className={`relative min-h-10 px-0 pb-2.5 pt-0.5 text-[0.75rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25 ${selected ? 'text-ink after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:rounded-sm after:bg-forest after:content-[""]' : 'text-muted hover:text-ink'}`}
+          >
+            {view === 'system' ? 'Sistema' : 'Datos'}
+          </button>
+        );
+      })}
+    </div>
+  );
 }

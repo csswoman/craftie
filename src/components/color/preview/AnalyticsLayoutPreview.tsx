@@ -5,6 +5,9 @@ import { useState } from 'react';
 import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
 import { AnalyticsAsidePanels } from './AnalyticsAsidePanels';
+import { AnalyticsDetailPanels } from './AnalyticsDetailPanels';
+import { AnalyticsSourceInsights } from './AnalyticsSourceInsights';
+import { AnalyticsWorkspacePanels } from './AnalyticsWorkspacePanels';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { onVividFill, vividFill } from './previewColor';
 import { DonutChart, Sparkline, type ChartSeries } from './previewCharts';
@@ -132,7 +135,7 @@ export function AnalyticsLayoutPreview({
           <PreviewSlotTarget
             slot="surface"
             onEditSlot={onEditSlot}
-            className="rounded-xl border p-4 lg:p-5"
+            className="flex h-full flex-col rounded-xl border p-4 lg:p-5"
             style={{ backgroundColor: colors.surface, borderColor: colors.border }}
           >
             <div className="flex flex-wrap items-start justify-between gap-4">
@@ -171,10 +174,14 @@ export function AnalyticsLayoutPreview({
                 </ul>
               </div>
             </div>
+            <AnalyticsSourceInsights colors={colors} fonts={fonts} onEditSlot={onEditSlot} />
           </PreviewSlotTarget>
 
           <AnalyticsAsidePanels colors={colors} fonts={fonts} series={series} onEditSlot={onEditSlot} />
         </section>
+
+        <AnalyticsDetailPanels colors={colors} fonts={fonts} onEditSlot={onEditSlot} />
+        <AnalyticsWorkspacePanels colors={colors} fonts={fonts} onEditSlot={onEditSlot} />
       </div>
     </PreviewSlotTarget>
   );

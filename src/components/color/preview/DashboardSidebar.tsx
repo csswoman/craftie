@@ -54,7 +54,7 @@ export function DashboardSidebar({
               key={item.label}
               slot={index === 0 ? 'surfaceElevated' : 'chrome'}
               onEditSlot={onEditSlot}
-              className="flex items-center gap-2.5 rounded-lg px-3 py-2 transition-colors duration-150"
+              className="flex min-w-0 items-center gap-2.5 rounded-lg px-3 py-2 transition-colors duration-150"
               style={{
                 backgroundColor: index === 0 ? colors.surfaceElevated : 'transparent',
                 color: index === 0 ? colors.primaryAction : colors.text,
@@ -62,7 +62,7 @@ export function DashboardSidebar({
               }}
             >
               <PreviewIcon name={item.icon} size={15} />
-              {item.label}
+              <span className="min-w-0 truncate">{item.label}</span>
             </PreviewSlotTarget>
           ))}
         </nav>

@@ -81,7 +81,7 @@ export function StatDelta({
     <PreviewSlotTarget
       slot={slot}
       onEditSlot={onEditSlot}
-      className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[0.6875rem] font-semibold tabular-nums"
+      className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full px-1.5 py-0.5 text-[0.6875rem] font-semibold tabular-nums"
       style={{ backgroundColor: tint(color, 15), color }}
     >
       <PreviewIcon name={direction === 'up' ? 'arrowUp' : 'arrowDown'} size={11} strokeWidth={2.5} />

@@ -1,4 +1,4 @@
-export type CanvasViewGroup = 'mode' | 'system' | 'layout';
+export type CanvasViewGroup = 'mode' | 'system' | 'layout' | 'preview';
 
 export type CanvasViewId =
   | 'paint'
@@ -8,7 +8,8 @@ export type CanvasViewId =
   | 'dashboard'
   | 'landing'
   | 'player'
-  | 'analytics';
+  | 'analytics'
+  | 'illustration';
 
 export type CanvasViewMeta = {
   id: CanvasViewId;
@@ -26,12 +27,14 @@ export const CANVAS_VIEWS: readonly CanvasViewMeta[] = [
   { id: 'landing', group: 'layout', name: 'Landing', description: 'Página de aterrizaje' },
   { id: 'player', group: 'layout', name: 'Reproductor', description: 'Player de música' },
   { id: 'analytics', group: 'layout', name: 'Analytics', description: 'Dashboard dark mode' },
+  { id: 'illustration', group: 'preview', name: 'Ilustración', description: 'Composición generativa con la paleta' },
 ];
 
 export const CANVAS_VIEW_GROUP_LABEL: Record<CanvasViewGroup, string> = {
   mode: 'Modo de extracción',
   system: 'Sistema de diseño',
   layout: 'Maquetas',
+  preview: 'Vistas previas',
 };
 
 export function getCanvasViewMeta(id: CanvasViewId): CanvasViewMeta {

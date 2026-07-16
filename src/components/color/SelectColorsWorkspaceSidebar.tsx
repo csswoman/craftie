@@ -81,7 +81,7 @@ export function SelectColorsWorkspaceSidebar(props: SelectColorsWorkspaceSidebar
                     aria-controls={`tools-panel-${tab.id}`}
                     onClick={() => setActiveTab(tab.id)}
                     {...getTabProps(tab.id)}
-                    className={`flex min-h-11 w-full items-center justify-center rounded-lg px-3 py-2 text-tools-section font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+                    className={`flex min-h-11 w-full items-center justify-center rounded-lg px-3 py-2 text-tools-body-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
                       selected
                         ? 'bg-bg text-ink shadow-sm'
                         : 'text-muted hover:text-ink'
@@ -103,7 +103,7 @@ export function SelectColorsWorkspaceSidebar(props: SelectColorsWorkspaceSidebar
           tabIndex={activeTab === 'colors' ? 0 : undefined}
           className={
             activeTab === 'colors'
-              ? 'scrollbar-chrome flex min-h-0 flex-1 flex-col gap-[var(--chrome-space-4)] overflow-y-auto'
+              ? 'scrollbar-chrome flex min-h-0 flex-1 flex-col gap-[var(--chrome-space-3)] overflow-y-auto'
               : 'hidden'
           }
         >

@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, ChevronDown, ChartNoAxesColumn, LayoutDashboard, Music2, Palette, PanelsTopLeft, Type, BookOpen } from 'lucide-react';
+import { Check, ChevronDown, ChartNoAxesColumn, Image as ImageIcon, LayoutDashboard, Music2, Palette, PanelsTopLeft, Type, BookOpen } from 'lucide-react';
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
 
 import {
@@ -11,7 +11,7 @@ import {
   type CanvasViewId,
 } from '@lib/color/canvasViews';
 
-const GROUPS: CanvasViewGroup[] = ['mode', 'system', 'layout'];
+const GROUPS: CanvasViewGroup[] = ['mode', 'system', 'layout', 'preview'];
 
 export function CanvasViewSelector({ activeId, palette, onSelect }: { activeId: CanvasViewId; palette: string[]; onSelect: (id: CanvasViewId) => void }) {
   const [open, setOpen] = useState(false);
@@ -120,6 +120,7 @@ export function ViewThumbnail({ id, palette }: { id: CanvasViewId; palette: stri
     landing: <PanelsTopLeft className="size-3.5" aria-hidden="true" />,
     player: <Music2 className="size-3.5" aria-hidden="true" />,
     analytics: <ChartNoAxesColumn className="size-3.5" aria-hidden="true" />,
+    illustration: <ImageIcon className="size-3.5" aria-hidden="true" />,
   };
   return <span className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-md border border-border bg-surface text-muted">{icon[id]}</span>;
 }

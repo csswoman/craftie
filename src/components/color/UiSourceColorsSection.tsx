@@ -23,12 +23,14 @@ export function UiSourceColorsSection({
   onAssignRole,
   onAssignData,
   onAssignStatus,
+  showHeader = true,
 }: {
   colors: SelectableColor[];
   tokens: SemanticTokens;
   onAssignRole: (token: SemanticTokenName, hex: string) => void;
   onAssignData: (hex: string) => string;
   onAssignStatus: (role: UiStatusRole, hex: string) => void;
+  showHeader?: boolean;
 }) {
   const [openHex, setOpenHex] = useState<string | null>(null);
   const [action, setAction] = useState<SourceAction>(null);
@@ -50,7 +52,7 @@ export function UiSourceColorsSection({
 
   return (
     <section aria-labelledby="ui-source-title">
-      <UiColorSectionHeader title={`Colores fuente · ${uniqueColors.length}`} />
+      {showHeader ? <UiColorSectionHeader title={`Colores fuente · ${uniqueColors.length}`} /> : null}
       <h2 id="ui-source-title" className="sr-only">Colores fuente</h2>
       <ul className="mt-2 divide-y divide-border overflow-hidden rounded-lg border border-border bg-bg">
         {uniqueColors.map((color) => {

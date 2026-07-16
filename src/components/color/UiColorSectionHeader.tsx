@@ -4,7 +4,7 @@ export function UiColorSectionHeader({
   title,
   trailing,
 }: {
-  title: string;
+  title: ReactNode;
   trailing?: ReactNode;
 }) {
   return (

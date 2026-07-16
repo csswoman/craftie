@@ -220,6 +220,7 @@ export function PaletteCanvas({
                   typeScaleRatio={typeScaleRatio}
                   onEditRole={handleEditRole}
                   activeMode={activeMode}
+                  activeFamily={activeView === 'illustration' ? 'illustration' : 'ui'}
                 />
               )}
             </div>

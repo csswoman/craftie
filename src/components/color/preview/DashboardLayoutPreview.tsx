@@ -52,10 +52,10 @@ export function DashboardLayoutPreview({ colors, fonts = DEFAULT_PREVIEW_FONTS, 
     <PreviewSlotTarget
       slot="appBackground"
       onEditSlot={onEditSlot}
-      className="overflow-hidden rounded-xl border"
+      className="min-w-0 w-full overflow-hidden rounded-xl border"
       style={{ backgroundColor: colors.appBackground, borderColor: colors.border, color: colors.text, ...previewRootTypeStyle() }}
     >
-      <div className="flex min-h-[34rem]">
+      <div className="flex min-h-[34rem] min-w-0">
         <DashboardSidebar
           colors={colors}
           fonts={fonts}
@@ -64,7 +64,7 @@ export function DashboardLayoutPreview({ colors, fonts = DEFAULT_PREVIEW_FONTS, 
           onEditSlot={onEditSlot}
         />
 
-        <main className="min-w-0 flex-1 p-4 sm:p-5 lg:p-6">
+        <main className="min-w-0 flex-1 overflow-hidden p-4 sm:p-5 lg:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0">
               <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={eyebrowStyle(fonts, colors.mutedText)}>
@@ -74,7 +74,7 @@ export function DashboardLayoutPreview({ colors, fonts = DEFAULT_PREVIEW_FONTS, 
                 Revenue operations
               </PreviewSlotTarget>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
               <SegmentedControl
                 options={DASHBOARD_RANGES}
                 value={range}
@@ -97,7 +97,7 @@ export function DashboardLayoutPreview({ colors, fonts = DEFAULT_PREVIEW_FONTS, 
             </div>
           </div>
 
-          <section className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(16rem,0.95fr)]">
+          <section className="mt-4 grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(16rem,0.95fr)]">
             <div className="min-w-0">
               <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 {DASHBOARD_METRICS.map((metric) => (

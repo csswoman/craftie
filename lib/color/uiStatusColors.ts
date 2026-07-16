@@ -143,6 +143,21 @@ function materializeStatusColor(
   };
 }
 
+/** Re-materializes a user adjustment through the existing status constraints. */
+export function adjustUiStatusColor(
+  status: UiStatusColor,
+  hex: string,
+  backgroundHex: string,
+): UiStatusColor {
+  return materializeStatusColor(
+    status.role,
+    hex,
+    backgroundHex,
+    status.sourceHex ? 'found-adjusted' : 'synthetic',
+    status.sourceHex,
+  );
+}
+
 /** Raises chroma without sacrificing the floor to sRGB gamut mapping. */
 function statusHexAtChroma(role: UiStatusRole, baseHex: string, requestedChroma: number): string {
   const definition = STATUS_COLOR_DEFINITIONS.find((entry) => entry.role === role)!;

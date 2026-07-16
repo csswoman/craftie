@@ -45,8 +45,8 @@ export function StudioCanvasToolsSidebar({
           <div className="panel-float flex h-full min-h-0 flex-col overflow-hidden">
             <PanelCollapseBar
               align="end"
-              title="Herramientas"
-              subtitle="Colores y tipografía."
+              title="Craftie"
+              subtitle="Colores y tipografía"
             >
               <PanelCollapseButton
                 label="Comprimir herramientas"

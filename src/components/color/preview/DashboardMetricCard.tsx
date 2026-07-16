@@ -26,11 +26,11 @@ export function DashboardMetricCard({ colors, fonts, metric, onEditSlot }: {
     <PreviewSlotTarget
       slot="surface"
       onEditSlot={onEditSlot}
-      className="rounded-xl border p-3.5 transition-transform duration-200 hover:-translate-y-0.5"
+      className="min-w-0 overflow-hidden rounded-xl border p-3.5 transition-transform duration-200 hover:-translate-y-0.5"
       style={{ backgroundColor: colors.surface, borderColor: colors.border }}
     >
       <div className="flex items-start justify-between gap-2">
-        <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={labelStyle(fonts, colors.mutedText)}>
+        <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="min-w-0 truncate" style={labelStyle(fonts, colors.mutedText)}>
           {metric.label}
         </PreviewSlotTarget>
         <StatDelta value={metric.trend} direction={metric.dir} color={trendColor} slot={metric.trendSlot} onEditSlot={onEditSlot} />
