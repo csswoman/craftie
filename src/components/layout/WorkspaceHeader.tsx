@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { Accessibility, Download, Image, Palette, Type } from 'lucide-react';
 
 import { ExportMenu } from '@/components/layout/ExportMenu';
@@ -6,6 +5,7 @@ import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 export type WorkspaceHeaderProps = {
   canExport: boolean;
+  onCraftieHome: () => void;
   onExportDesignMd: () => void;
   onExportBrandKit: () => void;
 };
@@ -20,20 +20,23 @@ const HELP_ITEMS = [
 
 export function WorkspaceHeader({
   canExport,
+  onCraftieHome,
   onExportDesignMd,
   onExportBrandKit,
 }: WorkspaceHeaderProps) {
   return (
     <header className="relative z-sticky shrink-0 px-4 pt-4 xl:px-4 xl:pt-4">
       <div className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-border bg-bg px-4 py-2.5 xl:px-4">
-        <Link
-          href="/"
+        <button
+          type="button"
+          onClick={onCraftieHome}
+          aria-label="Volver al inicio"
           className="shrink-0 text-ink transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
         >
           <h1 className="font-display text-[var(--chrome-text-display)] font-medium leading-none">
             Craftie
           </h1>
-        </Link>
+        </button>
 
         <div className="flex min-w-0 items-center justify-end gap-2">
           <ThemeToggle />

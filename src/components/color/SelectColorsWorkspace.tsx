@@ -2,6 +2,7 @@
 
 import { DESIGN_STYLES } from '@lib/styles/presets';
 
+import { ConfirmResetWorkspaceDialog } from '@/components/layout/ConfirmResetWorkspaceDialog';
 import { InspirationModal } from '@/components/color/InspirationModal';
 import { SelectColorsWorkspaceMain } from '@/components/color/SelectColorsWorkspaceMain';
 import { EmptyWorkspaceCard } from '@/components/color/EmptyWorkspaceCard';
@@ -91,6 +92,7 @@ function SelectColorsWorkspaceContent() {
 
       <WorkspaceHeader
         canExport={workspace.isReviewPhase}
+        onCraftieHome={workspace.requestCraftieHome}
         onExportDesignMd={workspace.handleExportDesignMd}
         onExportBrandKit={workspace.handleExportBrandKit}
       />
@@ -103,6 +105,12 @@ function SelectColorsWorkspaceContent() {
           {workspace.error}
         </p>
       ) : null}
+
+      <ConfirmResetWorkspaceDialog
+        open={workspace.resetConfirmOpen}
+        onCancel={workspace.cancelResetWorkspace}
+        onConfirm={workspace.confirmResetWorkspace}
+      />
     </>
   );
 

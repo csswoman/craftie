@@ -14,6 +14,7 @@ import type { SelectableColor } from '@lib/color/selectableColors';
 import { DESIGN_STYLES } from '@lib/styles/presets';
 import { FONT_PAIRS, getRecommendedPairings, type FontPair } from '@lib/typography/pairings';
 import type { StudioFlowStepId } from '@lib/studio/studioFlow';
+import { hasWorkspaceProgress } from '@lib/studio/workspaceProgress';
 import {
   appliedToLoadablePair,
   applyPairToTypography,
@@ -67,6 +68,7 @@ export function useSelectColorsWorkspaceController() {
   const [isImageRegenerating, setIsImageRegenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [inspirationModalOpen, setInspirationModalOpen] = useState(false);
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
@@ -261,6 +263,70 @@ export function useSelectColorsWorkspaceController() {
     setGeneratedPalette(null);
     setStatusMessage(null);
   }
+
+  const resetWorkspace = useCallback(() => {
+    if (imagePreviewUrlRef.current !== null) {
+      URL.revokeObjectURL(imagePreviewUrlRef.current);
+      imagePreviewUrlRef.current = null;
+    }
+
+    setImagePreviewUrl(null);
+    setImageFileName(null);
+    setImageFingerprint(null);
+    setImageFile(null);
+    setImageRegenerateIndex(0);
+    setImagePaletteType(null);
+    setPaletteTypeOverride(null);
+    setIsImageExtracting(false);
+    setIsImageRegenerating(false);
+
+    setCatalogSource('none');
+    setSelectedStyleId(null);
+    setPaletteCatalog([]);
+    clearRolePalette();
+    setGeneratedPalette(null);
+
+    setError(null);
+    setStatusMessage(null);
+    setInspirationModalOpen(false);
+    setResetConfirmOpen(false);
+
+    setTypeUi(createInitialTypeUiState());
+  }, [clearRolePalette]);
+
+  const requestCraftieHome = useCallback(() => {
+    const hasProgress = hasWorkspaceProgress({
+      catalogSource,
+      rolePalette,
+      generatedPalette,
+      imageFile,
+      imagePreviewUrl,
+      isImageBusy,
+    });
+
+    if (hasProgress) {
+      setResetConfirmOpen(true);
+      return;
+    }
+
+    resetWorkspace();
+  }, [
+    catalogSource,
+    generatedPalette,
+    imageFile,
+    imagePreviewUrl,
+    isImageBusy,
+    resetWorkspace,
+    rolePalette,
+  ]);
+
+  const cancelResetWorkspace = useCallback(() => {
+    setResetConfirmOpen(false);
+  }, []);
+
+  const confirmResetWorkspace = useCallback(() => {
+    resetWorkspace();
+  }, [resetWorkspace]);
 
   function handleFlowStepFocus(stepId: StudioFlowStepId) {
     if (stepId === 'review') {
@@ -479,6 +545,10 @@ export function useSelectColorsWorkspaceController() {
     isTypePreviewing: typeUi.hovered !== null,
     selectedStyleId,
     selectionReady,
+    resetConfirmOpen,
+    requestCraftieHome,
+    cancelResetWorkspace,
+    confirmResetWorkspace,
     setInspirationModalOpen,
     setSelectedPairing: handleSelectPairing,
     previewPairing: handlePreviewPairing,
