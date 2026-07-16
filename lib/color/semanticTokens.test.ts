@@ -409,4 +409,36 @@ describe('deriveSemanticTokens', () => {
     expect(roundTrip.secondary.hex).toBe(projected.secundario.hex);
     expect(roundTrip.accent.hex).toBe(projected.acento.hex);
   });
+
+  it('re-derives on-secondary when only secondary is overridden', () => {
+    const extracted = [{ hex: '#1C4B8E', prominence: 1 }];
+    const base = deriveSemanticTokens({ extracted, theme: 'light' });
+    const overridden = deriveSemanticTokens({
+      extracted,
+      theme: 'light',
+      overrides: { secondary: '#61C7CD' },
+    });
+
+    expect(overridden.secondary.hex).toBe('#61C7CD');
+    expect(contrastRatio(overridden['on-secondary'].hex, overridden.secondary.hex)).toBeGreaterThanOrEqual(4.5);
+    expect(overridden['on-secondary'].hex).not.toBe(base['on-secondary'].hex);
+  });
+
+  it('keeps a stale on-secondary override until callers delete it', () => {
+    // RolePaletteContext deletes paired on-* overrides when a fill changes.
+    // Without that deletion, applyOverride would keep light text on a light fill.
+    const extracted = [{ hex: '#1C4B8E', prominence: 1 }];
+    const staleOn = deriveSemanticTokens({ extracted, theme: 'light' })['on-secondary'].hex;
+    const tokens = deriveSemanticTokens({
+      extracted,
+      theme: 'light',
+      overrides: {
+        secondary: '#61C7CD',
+        'on-secondary': staleOn,
+      },
+    });
+
+    expect(tokens['on-secondary'].hex).toBe(staleOn);
+    expect(contrastRatio(tokens['on-secondary'].hex, tokens.secondary.hex)).toBeLessThan(4.5);
+  });
 });

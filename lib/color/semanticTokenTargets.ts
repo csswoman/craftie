@@ -92,6 +92,18 @@ const READABLE_PAIRS: Partial<Record<SemanticTokenName, SemanticTokenName>> = {
   ...TONAL_READABLE_PAIRS,
 };
 
+export function getPairedOnTokenForFill(
+  fillToken: SemanticTokenName,
+): SemanticTokenName | null {
+  const paired = READABLE_PAIRS[fillToken];
+
+  if (!paired?.startsWith('on-')) {
+    return null;
+  }
+
+  return paired;
+}
+
 function buildContrastInfo(
   foregroundHex: string,
   backgroundHex: string,

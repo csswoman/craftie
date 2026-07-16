@@ -26,6 +26,7 @@ import {
 import type { ExtractedColor } from '@lib/color/imageExtractor';
 import { normalizeHex } from '@lib/color/normalizeHex';
 import { tokenNameForPaletteRole } from '@lib/color/semanticRoleProjection';
+import { getPairedOnTokenForFill } from '@lib/color/semanticTokenTargets';
 import {
   DEFAULT_NEUTRAL_STYLE,
   deriveSemanticTokens,
@@ -209,10 +210,18 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       return tokenOverrides;
     }
 
-    return {
+    const fillToken = tokenEditPreview.tokenName;
+    const pairedOn = getPairedOnTokenForFill(fillToken);
+    const next: SemanticTokenOverrides = {
       ...tokenOverrides,
-      [tokenEditPreview.tokenName]: normalizeHex(tokenEditPreview.hex),
+      [fillToken]: normalizeHex(tokenEditPreview.hex),
     };
+
+    if (pairedOn) {
+      delete next[pairedOn];
+    }
+
+    return next;
   }, [tokenEditPreview, tokenOverrides]);
 
   const baseSemanticTokens = useMemo(() => {
@@ -375,29 +384,36 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
     setIllustrationSeed((seed) => nextIllustrationSeed(seed));
   }, []);
 
-  const replaceRole = useCallback(
-    (role: PaletteRoleId, hex: string) => {
-      const normalized = normalizeHex(hex);
-      const tokenName = tokenNameForPaletteRole(role);
-
-      commitEdit((current) => ({
-        ...current,
-        tokenOverrides: { ...current.tokenOverrides, [tokenName]: normalized },
-      }));
-    },
-    [commitEdit],
-  );
-
   const replaceSemanticToken = useCallback((tokenName: SemanticTokenName, hex: string) => {
     const normalized = normalizeHex(hex);
+    const pairedOn = getPairedOnTokenForFill(tokenName);
 
-    commitEdit((current) => ({
-      ...current,
-      tokenOverrides: { ...current.tokenOverrides, [tokenName]: normalized },
-      clearedSemanticTokens: current.clearedSemanticTokens.filter((name) => name !== tokenName),
-    }));
+    // Drop stale on-* overrides so deriveSemanticTokens re-pairs text to the new fill.
+    commitEdit((current) => {
+      const nextOverrides: SemanticTokenOverrides = {
+        ...current.tokenOverrides,
+        [tokenName]: normalized,
+      };
+
+      if (pairedOn) {
+        delete nextOverrides[pairedOn];
+      }
+
+      return {
+        ...current,
+        tokenOverrides: nextOverrides,
+        clearedSemanticTokens: current.clearedSemanticTokens.filter((name) => name !== tokenName),
+      };
+    });
     setTokenEditPreviewState(null);
   }, [commitEdit]);
+
+  const replaceRole = useCallback(
+    (role: PaletteRoleId, hex: string) => {
+      replaceSemanticToken(tokenNameForPaletteRole(role), hex);
+    },
+    [replaceSemanticToken],
+  );
 
   const clearSemanticToken = useCallback((tokenName: SemanticTokenName) => {
     commitEdit((current) => {

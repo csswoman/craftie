@@ -3,7 +3,7 @@ import { converter } from 'culori';
 import type { ExtractedColor } from './imageExtractor';
 import { normalizeHex } from './normalizeHex';
 import { classifyPalette, type PaletteType } from './paletteClassification';
-import { deriveForegroundForBackground } from './pairedForeground';
+import { deriveOnTokenHexForFill } from './pairedOnToken';
 import { remainsDistinctWithColorVisionDeficiency } from './colorVision';
 import { brandScore, type FitnessColor } from './roleFitness';
 import {
@@ -841,12 +841,7 @@ function routedExpressiveCandidates(candidates: FitnessColor[]): FitnessColor[] 
 }
 
 function derivedPair(background: SemanticToken): SemanticToken {
-  const foreground = deriveForegroundForBackground(background.hex).hex;
-  const safeForeground = contrastRatio(foreground, background.hex) >= AA_RATIO
-    ? foreground
-    : adjustLightnessForContrast(foreground, background.hex, AA_RATIO);
-
-  return token(safeForeground, 'derived');
+  return token(deriveOnTokenHexForFill(background.hex), 'derived');
 }
 
 function sourceDataSeries(
