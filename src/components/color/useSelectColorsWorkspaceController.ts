@@ -42,6 +42,7 @@ import {
 } from '@/lib/browser/customFonts';
 import type { CustomFontSubmitInput } from '@/components/font-pairing/CustomFontEntry';
 import { extractPaletteColorsFromImage } from '@/lib/browser/imageExtractor';
+import { getImageFingerprint } from '@/lib/browser/imageFingerprint';
 import { readSelectedFontPairId, writeSelectedFontPairId } from '@/lib/browser/selectedFontPair';
 import { requestStudioToolFocus } from '@/lib/browser/studioToolFocus';
 
@@ -70,6 +71,7 @@ export function useSelectColorsWorkspaceController() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [imageFileName, setImageFileName] = useState<string | null>(null);
+  const [imageFingerprint, setImageFingerprint] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageRegenerateIndex, setImageRegenerateIndex] = useState(0);
   const [imagePaletteType, setImagePaletteType] = useState<PaletteType | null>(null);
@@ -121,6 +123,8 @@ export function useSelectColorsWorkspaceController() {
     setImagePreviewUrl(nextPreviewUrl);
     setImageFileName(file.name);
     setImageFile(file);
+    setImageFingerprint(null);
+    void getImageFingerprint(file).then(setImageFingerprint).catch(() => setImageFingerprint(null));
   }
 
   async function processImageFile(
@@ -426,6 +430,7 @@ export function useSelectColorsWorkspaceController() {
     catalogSource,
     error,
     imageFileName,
+    imageFingerprint,
     imagePaletteType,
     paletteTypeOverride,
     imagePreviewUrl,

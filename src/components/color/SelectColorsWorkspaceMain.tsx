@@ -16,6 +16,11 @@ export function SelectColorsWorkspaceMain({
   typeScaleRatio,
   onAddColorByHex,
   paletteCatalog,
+  imagePreviewUrl,
+  imageFileName,
+  imageFingerprint,
+  onImageFileSelected,
+  onImageRegenerate,
 }: {
   isImageExtracting: boolean;
   isImageRegenerating: boolean;
@@ -28,6 +33,11 @@ export function SelectColorsWorkspaceMain({
   typeScaleRatio: TypeScaleRatio;
   onAddColorByHex: (hex: string, customName?: string) => string | null;
   paletteCatalog: SelectableColor[];
+  imagePreviewUrl: string | null;
+  imageFileName: string | null;
+  imageFingerprint: string | null;
+  onImageFileSelected: (file: File) => void;
+  onImageRegenerate: () => void;
 }) {
   return (
     <PaletteCanvas
@@ -43,6 +53,11 @@ export function SelectColorsWorkspaceMain({
       typeScaleRatio={typeScaleRatio}
       paletteCatalog={paletteCatalog}
       onAddColorByHex={onAddColorByHex}
+      imagePreviewUrl={imagePreviewUrl}
+      imageFileName={imageFileName}
+      imageFingerprint={imageFingerprint}
+      onImageFileSelected={onImageFileSelected}
+      onImageRegenerate={onImageRegenerate}
     />
   );
 }

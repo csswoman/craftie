@@ -183,6 +183,11 @@ function SelectColorsWorkspaceContent() {
             typeScaleRatio={workspace.typeScaleRatio}
             onAddColorByHex={workspace.handleAddColorByHex}
             paletteCatalog={workspace.paletteCatalog}
+            imagePreviewUrl={workspace.imagePreviewUrl}
+            imageFileName={workspace.imageFileName}
+            imageFingerprint={workspace.imageFingerprint}
+            onImageFileSelected={workspace.handleImageFileSelected}
+            onImageRegenerate={workspace.handleImageRegenerate}
           />
         }
       />

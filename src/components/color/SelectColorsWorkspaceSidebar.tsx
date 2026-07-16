@@ -107,7 +107,6 @@ export function SelectColorsWorkspaceSidebar(props: SelectColorsWorkspaceSidebar
               : 'hidden'
           }
         >
-          <div className="shrink-0">{sectionById.image}</div>
           <div className="shrink-0">{sectionById.source}</div>
           <div className="shrink-0">{sectionById.adjustments}</div>
         </section>

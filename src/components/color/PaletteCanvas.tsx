@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-
 import { buildRolePaletteColumnsWithContrast, hasRolePaletteContrastFailure } from '@lib/color/rolePaletteContrast';
 import { normalizeHex } from '@lib/color/normalizeHex';
 import { isPaletteRoleId, type PaletteRoleId } from '@lib/color/rolePalette';
@@ -10,10 +9,8 @@ import type { AppliedTypography } from '@lib/typography/typeState';
 import type { TypeScaleBase, TypeScaleRatio } from '@lib/typography/typeScale';
 import type { CanvasViewId } from '@lib/color/canvasViews';
 import type { SelectableColor } from '@lib/color/selectableColors';
-
 import { ColorDetailsDrawer } from '@/components/color-engine/ColorDetailsDrawer';
 import { useRolePalette } from '@/context/RolePaletteContext';
-
 import { PaletteView } from './PaletteView';
 import { PaletteThemeToggle } from './PaletteThemeToggle';
 import { PreviewView } from './PreviewView';
@@ -27,6 +24,7 @@ import { PaletteCanvasNotices } from './PaletteCanvasNotices';
 import { CanvasSystemView } from './CanvasSystemView';
 import { CanvasViewSelector } from './CanvasViewSelector';
 import { PaintPaletteCanvas } from './PaintPaletteCanvas';
+import { PaletteImageBlock } from './PaletteImageBlock';
 
 export type PaletteCanvasProps = {
   isLoading?: boolean;
@@ -41,6 +39,11 @@ export type PaletteCanvasProps = {
   typeScaleBase?: TypeScaleBase;
   typeScaleRatio?: TypeScaleRatio;
   paletteCatalog?: SelectableColor[];
+  imagePreviewUrl?: string | null;
+  imageFileName?: string | null;
+  imageFingerprint?: string | null;
+  onImageFileSelected?: (file: File) => void;
+  onImageRegenerate?: () => void;
 };
 
 export function PaletteCanvas({
@@ -56,6 +59,11 @@ export function PaletteCanvas({
   typeScaleBase = 16,
   typeScaleRatio = 1.25,
   paletteCatalog = [],
+  imagePreviewUrl = null,
+  imageFileName = null,
+  imageFingerprint = null,
+  onImageFileSelected,
+  onImageRegenerate,
 }: PaletteCanvasProps) {
   const {
     rolePalette,
@@ -131,14 +139,12 @@ export function PaletteCanvas({
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {hasPalette ? (
-        <div
-          className="flex min-h-11 shrink-0 items-center justify-between gap-2 border-b border-border px-3 py-1.5 sm:min-h-13 sm:gap-4 sm:px-6"
-        >
-          <div className="flex min-w-0 items-center gap-2 sm:gap-4">
-            <div className="min-w-0">
+        <div className="flex min-h-11 shrink-0 flex-wrap items-center gap-3 border-b border-border px-3 py-1.5 sm:min-h-13 sm:px-6">
+          <div className="min-w-0">
               <p className="truncate text-chrome-label font-semibold text-ink">Paleta de roles</p>
               <p className="truncate text-chrome-caption text-muted">Edita colores y revisa el contraste.</p>
-            </div>
+          </div>
+          <div className="ml-auto flex items-center gap-2.5 max-[620px]:ml-0 max-[620px]:w-full max-[620px]:justify-between">
             <CanvasViewSelector
               activeId={activeView}
               palette={columns.map((column) => column.hex)}
@@ -148,8 +154,23 @@ export function PaletteCanvas({
                 if (view === 'player') setActiveMode('media');
               }}
             />
+            {imagePreviewUrl && onImageFileSelected && onImageRegenerate ? (
+              <>
+                <span aria-hidden="true" className="h-[30px] w-px bg-line" />
+                <PaletteImageBlock
+                  previewUrl={imagePreviewUrl}
+                  fileName={imageFileName}
+                  imageFingerprint={imageFingerprint}
+                  isRegenerating={isUpdating}
+                  onFileSelected={onImageFileSelected}
+                  onRegenerate={onImageRegenerate}
+                />
+              </>
+            ) : null}
           </div>
-          <PaletteThemeToggle activeTheme={activeTheme} onChange={setActiveTheme} />
+          <div className="max-[620px]:ml-auto">
+            <PaletteThemeToggle activeTheme={activeTheme} onChange={setActiveTheme} />
+          </div>
         </div>
       ) : null}
 
