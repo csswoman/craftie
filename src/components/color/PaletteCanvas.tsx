@@ -7,6 +7,7 @@ import {
   hasRolePaletteContrastFailure,
 } from '@lib/color/rolePaletteContrast';
 import { normalizeHex } from '@lib/color/normalizeHex';
+import { accentFamilyPrimaryToken } from '@lib/color/accentFamily';
 import { isPaletteRoleId, PALETTE_ROLE_ORDER, type PaletteRoleId } from '@lib/color/rolePalette';
 import type { FontPair } from '@lib/typography/pairings';
 import type { AppliedTypography } from '@lib/typography/typeState';
@@ -70,12 +71,14 @@ export function PaletteCanvas({
     previewRolePalette,
     lockedRoles,
     replaceRole,
+    replaceSemanticToken,
   } = useRolePalette();
 
   const [activeView, setActiveView] = useState<CanvasViewId>('colors');
   const [showAccents, setShowAccents] = useState(false);
   const [activeMode, setActiveMode] = useState<'dashboard' | 'landing' | 'media' | 'analytics'>('dashboard');
   const [selectedColorHex, setSelectedColorHex] = useState<string | null>(null);
+  const [selectedAccentSlot, setSelectedAccentSlot] = useState<number | null>(null);
   const liveRolePalette = previewRolePalette ?? rolePalette;
   const columns = useMemo(
     () => (liveRolePalette ? buildRolePaletteColumnsWithContrast(liveRolePalette) : []),
@@ -100,6 +103,21 @@ export function PaletteCanvas({
   const canReplace = editable && rolePalette !== null;
   const hasPalette = columns.length > 0 && liveRolePalette !== null;
 
+  function handleOpenRoleDetails(hex: string) {
+    setSelectedAccentSlot(null);
+    setSelectedColorHex(hex);
+  }
+
+  function handleOpenAccentDetails(hex: string, slotIndex: number) {
+    setSelectedAccentSlot(slotIndex);
+    setSelectedColorHex(hex);
+  }
+
+  function handleCloseDetails() {
+    setSelectedColorHex(null);
+    setSelectedAccentSlot(null);
+  }
+
   function handleReplaceFromDrawer(newHex: string): string | null {
     if (!selectedColorHex || !rolePalette) {
       return 'No se puede sustituir este color.';
@@ -114,6 +132,12 @@ export function PaletteCanvas({
     }
 
     if (normalizeHex(selectedColorHex) === normalized) {
+      return null;
+    }
+
+    if (selectedAccentSlot !== null) {
+      replaceSemanticToken(accentFamilyPrimaryToken(selectedAccentSlot), normalized);
+      setSelectedColorHex(normalized);
       return null;
     }
 
@@ -225,7 +249,8 @@ export function PaletteCanvas({
                 <PaletteView
                   editable={editable}
                   showAccents={showAccents}
-                  onOpenDetails={setSelectedColorHex}
+                  onOpenRoleDetails={handleOpenRoleDetails}
+                  onOpenAccentDetails={handleOpenAccentDetails}
                 />
               ) : activeView === 'style-guide' || activeView === 'type-scale' ? (
                 <CanvasSystemView
@@ -262,7 +287,7 @@ export function PaletteCanvas({
       <ColorDetailsDrawer
         colorHex={selectedColorHex}
         open={selectedColorHex !== null}
-        onClose={() => setSelectedColorHex(null)}
+        onClose={handleCloseDetails}
         onAddColor={!canReplace ? onAddColorByHex : undefined}
         onReplaceColor={canReplace ? handleReplaceFromDrawer : undefined}
       />

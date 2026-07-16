@@ -7,7 +7,7 @@ import {
   accentFamilyLabel,
   accentFamilyPrimaryToken,
   accentSlotHex,
-  varyAccentSlotHex,
+  nextAccentSlotHex,
 } from '@lib/color/accentFamily';
 import { nameForHex } from '@lib/color/naming';
 
@@ -18,7 +18,7 @@ import { AccentSlotCell } from './AccentSlotCell';
 
 export type AccentSlotStripProps = {
   editable?: boolean;
-  onOpenDetails: (hex: string) => void;
+  onOpenDetails: (hex: string, slotIndex: number) => void;
 };
 
 export function AccentSlotStrip({ editable = true, onOpenDetails }: AccentSlotStripProps) {
@@ -29,6 +29,7 @@ export function AccentSlotStrip({ editable = true, onOpenDetails }: AccentSlotSt
   } = useRolePalette();
   const isWideLayout = useMinWidthQuery(1280);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [varyCursorBySlot, setVaryCursorBySlot] = useState<Record<number, number>>({});
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
 
   const slots = useMemo(() => {
@@ -91,14 +92,19 @@ export function AccentSlotStrip({ editable = true, onOpenDetails }: AccentSlotSt
             isWideLayout={isWideLayout}
             isActive={activeIndex === slot.index}
             onSelect={() => setActiveIndex(slot.index)}
-            onOpenDetails={onOpenDetails}
+            onOpenDetails={(hex) => onOpenDetails(hex, slot.index)}
             onVary={() => {
-              const nextHex = varyAccentSlotHex(semanticTokens, slot.index, {
+              const cursor = varyCursorBySlot[slot.index] ?? 0;
+              const step = nextAccentSlotHex(semanticTokens, slot.index, cursor, {
                 fondoHex: rolePalette?.fondo.hex,
                 superficieHex: rolePalette?.superficie.hex,
                 textoHex: rolePalette?.texto.hex,
               });
-              replaceSemanticToken(accentFamilyPrimaryToken(slot.index), nextHex);
+              replaceSemanticToken(accentFamilyPrimaryToken(slot.index), step.hex);
+              setVaryCursorBySlot((current) => ({
+                ...current,
+                [slot.index]: step.nextCursor,
+              }));
             }}
             onCopyHex={() => {
               if (slot.hex) void handleCopyHex(slot.hex);

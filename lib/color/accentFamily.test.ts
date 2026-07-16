@@ -9,13 +9,17 @@ import {
   accentFamilySlotTokens,
   accentSlotHex,
   applyAccentSlotToOverrides,
+  buildAccentVaryCandidates,
+  isChromaticAccentCandidate,
   isAccentSlotAssigned,
+  nextAccentSlotHex,
   syncAccentFamilyOverrides,
   varyAccentSlotHex,
 } from './accentFamily';
 import { deriveFromPrimary } from './uiColorCandidates';
 import { deriveSemanticTokens } from './semanticTokens';
 import { normalizeHex } from './normalizeHex';
+import { hexToOklchChannels } from '../utils/colorMath';
 
 function sampleTokens() {
   return deriveSemanticTokens({
@@ -108,5 +112,58 @@ describe('accentFamily', () => {
 
     expect(normalizeHex(slot0)).toMatch(/^#[0-9a-f]{6}$/i);
     expect(occupied).not.toContain(normalizeHex(slot1));
+  });
+
+  it('builds vary candidates from similar colors excluding current and occupied hexes', () => {
+    const base = '#345B46';
+    const candidates = buildAccentVaryCandidates(base, ['#2A4A38']);
+
+    expect(candidates.length).toBeGreaterThan(0);
+    expect(candidates).not.toContain(normalizeHex(base));
+    expect(candidates).not.toContain(normalizeHex('#2A4A38'));
+    expect(candidates.every((hex) => isChromaticAccentCandidate(hex))).toBe(true);
+  });
+
+  it('keeps vary candidates away from near-white and near-black neutrals', () => {
+    const candidates = buildAccentVaryCandidates('#E8D44D', ['#F4A261']);
+
+    expect(candidates.length).toBeGreaterThan(2);
+    for (const hex of candidates) {
+      const { l, c } = hexToOklchChannels(hex);
+      expect(c).toBeGreaterThanOrEqual(0.06);
+      expect(l).toBeGreaterThanOrEqual(0.28);
+      expect(l).toBeLessThanOrEqual(0.78);
+    }
+  });
+
+  it('cycles through multiple similar colors on repeated vary clicks', () => {
+    const tokens = sampleTokens();
+    const base = accentSlotHex(tokens, 1)!;
+    const candidates = buildAccentVaryCandidates(base, accentFamilyOccupiedHexes(tokens, 1));
+    expect(candidates.length).toBeGreaterThan(1);
+
+    const first = nextAccentSlotHex(tokens, 1, 0);
+    const second = nextAccentSlotHex(tokens, 1, first.nextCursor);
+
+    expect(normalizeHex(first.hex)).not.toBe(normalizeHex(base));
+    expect(normalizeHex(second.hex)).not.toBe(normalizeHex(first.hex));
+    expect(isChromaticAccentCandidate(first.hex)).toBe(true);
+    expect(isChromaticAccentCandidate(second.hex)).toBe(true);
+  });
+
+  it('still produces chromatic colors after many vary steps from a vivid base', () => {
+    let tokens = sampleTokens();
+    let cursor = 0;
+
+    for (let step = 0; step < 12; step += 1) {
+      const next = nextAccentSlotHex(tokens, 0, cursor);
+      expect(isChromaticAccentCandidate(next.hex)).toBe(true);
+      tokens = {
+        ...tokens,
+        accent: { ...tokens.accent, hex: next.hex, gap: undefined },
+        'data-1': { ...tokens['data-1'], hex: next.hex, gap: undefined },
+      };
+      cursor = next.nextCursor;
+    }
   });
 });

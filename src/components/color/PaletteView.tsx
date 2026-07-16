@@ -13,13 +13,15 @@ import { RoleSlotStrip } from './RoleSlotStrip';
 export type PaletteViewProps = {
   editable?: boolean;
   showAccents?: boolean;
-  onOpenDetails: (hex: string) => void;
+  onOpenRoleDetails: (hex: string) => void;
+  onOpenAccentDetails: (hex: string, slotIndex: number) => void;
 };
 
 export function PaletteView({
   editable = true,
   showAccents = false,
-  onOpenDetails,
+  onOpenRoleDetails,
+  onOpenAccentDetails,
 }: PaletteViewProps) {
   const { rolePalette, previewRolePalette, activeRole, lockedRoles, setActiveRole } =
     useRolePalette();
@@ -47,7 +49,7 @@ export function PaletteView({
       className="relative flex min-h-0 flex-1 flex-col"
     >
       {showAccents ? (
-        <AccentSlotStrip editable={editable} onOpenDetails={onOpenDetails} />
+        <AccentSlotStrip editable={editable} onOpenDetails={onOpenAccentDetails} />
       ) : (
         <RoleSlotStrip
           columns={columns}
@@ -56,7 +58,7 @@ export function PaletteView({
           variant="expanded"
           editable={editable}
           onSelectRole={handleSelectRole}
-          onOpenDetails={onOpenDetails}
+          onOpenDetails={onOpenRoleDetails}
         />
       )}
     </div>

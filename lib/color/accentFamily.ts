@@ -1,7 +1,13 @@
+import { converter } from 'culori';
+
+import { getSimilarNamedColors } from './colorDetails';
 import { normalizeHex } from './normalizeHex';
 import { randomRoleColor } from './randomRoleColor';
 import type { SemanticTokenName, SemanticTokenOverrides, SemanticTokens } from './semanticTokens';
 import { deriveFromPrimary } from './uiColorCandidates';
+import { oklchChannelsToHex } from '../utils/colorMath';
+
+const toOklch = converter('oklch');
 
 export const ACCENT_FAMILY_SIZE = 6;
 
@@ -127,4 +133,122 @@ export function varyAccentSlotHex(
     tokens.primary.hex,
     accentFamilyOccupiedHexes(tokens, index),
   );
+}
+
+const ACCENT_VARY_SIMILAR_LIMIT = 12;
+const ACCENT_VARY_MIN_CHROMA = 0.06;
+const ACCENT_VARY_MIN_LIGHTNESS = 0.28;
+const ACCENT_VARY_MAX_LIGHTNESS = 0.78;
+const ACCENT_VARY_HUE_OFFSETS = [18, -18, 34, -34, 52, -52, 86, -86, 120, -120] as const;
+
+/** Keeps accent cycling on colorful fills — skips near-white, near-black, and gray. */
+export function isChromaticAccentCandidate(hex: string): boolean {
+  const channels = toOklch(normalizeHex(hex));
+  if (!channels) return false;
+  const lightness = channels.l ?? 0;
+  const chroma = channels.c ?? 0;
+  return chroma >= ACCENT_VARY_MIN_CHROMA
+    && lightness >= ACCENT_VARY_MIN_LIGHTNESS
+    && lightness <= ACCENT_VARY_MAX_LIGHTNESS;
+}
+
+function synthesizeChromaticNeighbors(baseHex: string): string[] {
+  const channels = toOklch(normalizeHex(baseHex));
+  if (!channels || typeof channels.h !== 'number') return [];
+
+  const lightness = Math.min(
+    ACCENT_VARY_MAX_LIGHTNESS,
+    Math.max(ACCENT_VARY_MIN_LIGHTNESS, channels.l ?? 0.55),
+  );
+  const chroma = Math.max(ACCENT_VARY_MIN_CHROMA, channels.c ?? 0.1);
+  const baseHue = channels.h;
+
+  return ACCENT_VARY_HUE_OFFSETS.map((offset) =>
+    normalizeHex(oklchChannelsToHex(lightness, chroma, (baseHue + offset + 360) % 360)),
+  );
+}
+
+/** Chromatic similar + hue neighbors, excluding the current hex and other occupied family slots. */
+export function buildAccentVaryCandidates(
+  baseHex: string,
+  occupiedHexes: string[] = [],
+): string[] {
+  const base = normalizeHex(baseHex);
+  const blocked = new Set(occupiedHexes.map((hex) => normalizeHex(hex)));
+  blocked.add(base);
+
+  const seen = new Set<string>();
+  const candidates: string[] = [];
+
+  function push(hex: string) {
+    const normalized = normalizeHex(hex);
+    if (blocked.has(normalized) || seen.has(normalized)) return;
+    if (!isChromaticAccentCandidate(normalized)) return;
+    seen.add(normalized);
+    candidates.push(normalized);
+  }
+
+  for (const entry of getSimilarNamedColors(base, ACCENT_VARY_SIMILAR_LIMIT)) {
+    push(entry.hex);
+  }
+  for (const hex of synthesizeChromaticNeighbors(base)) {
+    push(hex);
+  }
+
+  return candidates;
+}
+
+export type AccentVaryStep = {
+  hex: string;
+  nextCursor: number;
+};
+
+/** Picks the next similar color in the cycle, or falls back to derive/random when none remain. */
+export function nextAccentVaryHex(
+  currentHex: string,
+  occupiedHexes: string[],
+  cursor: number,
+  fallback: () => string,
+): AccentVaryStep {
+  const seed = normalizeHex(currentHex);
+  let candidates = buildAccentVaryCandidates(seed, occupiedHexes);
+
+  if (candidates.length === 0) {
+    const fallbackHex = normalizeHex(fallback());
+    candidates = buildAccentVaryCandidates(fallbackHex, occupiedHexes);
+    if (candidates.length > 0) {
+      const index = cursor % candidates.length;
+      return { hex: candidates[index]!, nextCursor: cursor + 1 };
+    }
+    return { hex: fallbackHex, nextCursor: 0 };
+  }
+
+  const index = cursor % candidates.length;
+  return { hex: candidates[index]!, nextCursor: cursor + 1 };
+}
+
+/** Cycles similar colors for an accent slot; uses primary when the slot is empty or too neutral. */
+export function nextAccentSlotHex(
+  tokens: SemanticTokens,
+  index: number,
+  cursor: number,
+  context: VaryAccentSlotContext = {},
+  random: () => number = Math.random,
+): AccentVaryStep {
+  assertSlotIndex(index);
+  const occupied = accentFamilyOccupiedHexes(tokens, index);
+  const assigned = accentSlotHex(tokens, index);
+  const primary = normalizeHex(tokens.primary.hex);
+  const current = assigned && isChromaticAccentCandidate(assigned)
+    ? assigned
+    : isChromaticAccentCandidate(primary)
+      ? primary
+      : assigned ?? primary;
+
+  return nextAccentVaryHex(current, occupied, cursor, () => {
+    if (index === 0) {
+      return randomRoleColor('acento', context, random);
+    }
+    return deriveFromPrimary(tokens.primary.hex, occupied);
+  });
 }
