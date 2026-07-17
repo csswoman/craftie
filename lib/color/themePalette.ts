@@ -16,6 +16,17 @@ import {
 
 export type ThemeId = 'light' | 'dark';
 
+/**
+ * Maps a next-themes (or similar) resolved value onto the palette theme id.
+ * Unknown / unresolved values fall back to light so SSR and first paint stay stable.
+ */
+export function resolveActiveThemeFromUi(
+  uiTheme: string | undefined | null,
+  fallback: ThemeId = 'light',
+): ThemeId {
+  return uiTheme === 'light' || uiTheme === 'dark' ? uiTheme : fallback;
+}
+
 export type ThemeOverrides = Partial<Record<PaletteRoleId, string>>;
 
 export type ThemeConfig = {

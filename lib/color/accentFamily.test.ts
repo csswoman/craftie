@@ -10,6 +10,7 @@ import {
   accentSlotHex,
   applyAccentSlotToOverrides,
   buildAccentVaryCandidates,
+  counterpartRoleForAccentFamilySync,
   isChromaticAccentCandidate,
   isAccentSlotAssigned,
   nextAccentSlotHex,
@@ -40,6 +41,15 @@ describe('accentFamily', () => {
     expect(accentFamilySlotTokens(5)).toEqual(['data-6']);
     expect(accentFamilyLabel(0)).toBe('Acento 1');
     expect(accentFamilyLabel(5)).toBe('Acento 6');
+  });
+
+  it('resolves counterpart role for accent-family tokens across themes', () => {
+    expect(counterpartRoleForAccentFamilySync('accent')).toBe('acento');
+    expect(counterpartRoleForAccentFamilySync('data-1')).toBe('acento');
+    expect(counterpartRoleForAccentFamilySync('data-2')).toBe('acento');
+    expect(counterpartRoleForAccentFamilySync('data-6')).toBe('acento');
+    expect(counterpartRoleForAccentFamilySync('primary')).toBe('primario');
+    expect(counterpartRoleForAccentFamilySync('success')).toBeNull();
   });
 
   it('syncs accent and data-1 overrides in both directions', () => {

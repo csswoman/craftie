@@ -7,6 +7,7 @@ import { assignRolesFromHexes, extractSeedsFromPalette } from './rolePalette';
 import {
   deriveDarkBackground,
   deriveTheme,
+  resolveActiveThemeFromUi,
   resolveThemePalette,
   EMPTY_THEMES,
 } from './themePalette';
@@ -64,5 +65,14 @@ describe('themePalette', () => {
 
     expect(oklch?.l ?? 0).toBeCloseTo(0.98, 2);
     expect(oklch?.c ?? 1).toBeLessThan(0.02);
+  });
+
+  it('maps a persisted UI theme to the palette activeTheme on startup', () => {
+    // next-themes can restore "dark" before RolePaletteContext mounts; the
+    // palette variant must follow so layout previews are not stuck on light.
+    expect(resolveActiveThemeFromUi('dark')).toBe('dark');
+    expect(resolveActiveThemeFromUi('light')).toBe('light');
+    expect(resolveActiveThemeFromUi(undefined)).toBe('light');
+    expect(resolveActiveThemeFromUi('system')).toBe('light');
   });
 });

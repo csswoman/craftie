@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
+import { resolveActiveThemeFromUi } from '@lib/color/themePalette';
 import { useRolePaletteOptional } from '@/context/RolePaletteContext';
 
 type Mode = 'light' | 'dark';
@@ -25,7 +26,7 @@ export function ThemeToggle() {
   }, []);
 
   // Before mount the resolved theme is unknown; render a stable placeholder.
-  const active: Mode = mounted && resolvedTheme === 'dark' ? 'dark' : 'light';
+  const active: Mode = mounted ? resolveActiveThemeFromUi(resolvedTheme) : 'light';
 
   function handleSelect(mode: Mode) {
     // The navbar control is the single source of truth: it drives both the

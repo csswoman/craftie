@@ -4,13 +4,16 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from 'react';
+import { useTheme } from 'next-themes';
 
 import {
   accentFamilyCompanionTokens,
+  counterpartRoleForAccentFamilySync,
   syncAccentFamilyOverrides,
 } from '@lib/color/accentFamily';
 import {
@@ -31,7 +34,6 @@ import {
 import type { ExtractedColor } from '@lib/color/imageExtractor';
 import { normalizeHex } from '@lib/color/normalizeHex';
 import {
-  paletteRoleForTokenName,
   projectSemanticTokensToRolePalette,
   tokenNameForPaletteRole,
 } from '@lib/color/semanticRoleProjection';
@@ -50,6 +52,7 @@ import {
 } from '@lib/color/themeCounterpartColor';
 import {
   EMPTY_THEMES,
+  resolveActiveThemeFromUi,
   type ThemeId,
   type ThemesConfig,
 } from '@lib/color/themePalette';
@@ -73,16 +76,6 @@ import {
   type UiStatusColorSet,
   type UiStatusRole,
 } from '@lib/color/uiStatusColors';
-
-function roleForTokenOrAccentCompanion(tokenName: SemanticTokenName): PaletteRoleId | null {
-  const direct = paletteRoleForTokenName(tokenName);
-  if (direct) return direct;
-  for (const companion of accentFamilyCompanionTokens(tokenName)) {
-    const role = paletteRoleForTokenName(companion);
-    if (role) return role;
-  }
-  return null;
-}
 
 function stripPairedOnTokens(
   overrides: SemanticTokenOverrides,
@@ -212,6 +205,7 @@ type RolePaletteProviderProps = {
 const RolePaletteContext = createContext<RolePaletteContextValue | null>(null);
 
 export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
+  const { resolvedTheme } = useTheme();
   const [extractedColors, setExtractedColors] = useState<ExtractedColor[]>([]);
   const [editHistory, setEditHistory] = useState(() => createHistory(INITIAL_EDITABLE));
   const [activeTheme, setActiveTheme] = useState<ThemeId>('light');
@@ -222,6 +216,15 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   const [statusColorsEnabled, setStatusColorsEnabled] = useState(!STATUS_COLORS_ON_DEMAND);
   const [tokenEditPreview, setTokenEditPreviewState] = useState<TokenEditPreview | null>(null);
   const [paletteRevision, setPaletteRevision] = useState(0);
+
+  // Keep palette variant in sync with the persisted UI theme (next-themes).
+  // Without this, a cold start in dark mode leaves layout previews on light.
+  useEffect(() => {
+    if (resolvedTheme !== 'light' && resolvedTheme !== 'dark') {
+      return;
+    }
+    setActiveTheme((current) => (current === resolvedTheme ? current : resolvedTheme));
+  }, [resolvedTheme]);
 
   const {
     tokenOverridesByTheme,
@@ -487,7 +490,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   const replaceSemanticToken = useCallback((tokenName: SemanticTokenName, hex: string) => {
     const normalized = normalizeHex(hex);
     const syncedNames = [tokenName, ...accentFamilyCompanionTokens(tokenName)];
-    const role = roleForTokenOrAccentCompanion(tokenName);
+    const counterpartRole = counterpartRoleForAccentFamilySync(tokenName);
     const otherTheme = oppositeTheme(activeTheme);
 
     // Persist the chosen hex for the active theme and a same-hue counterpart for the other.
@@ -506,7 +509,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
         ...current.tokenOverridesByTheme[otherTheme],
       };
 
-      if (role) {
+      if (counterpartRole) {
         const otherBase = deriveSemanticTokens({
           extracted: extractedColors,
           overrides: otherOverrides,
@@ -515,7 +518,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
           vibrancy: current.savedVibrancy,
           paletteType,
         });
-        const counterpart = counterpartRoleColorForTheme(normalized, role, otherTheme, {
+        const counterpart = counterpartRoleColorForTheme(normalized, counterpartRole, otherTheme, {
           fondoHex: otherBase.background.hex,
           superficieHex: otherBase.surface.hex,
           textoHex: otherBase['on-background'].hex,
@@ -701,13 +704,13 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
     setPaletteRevision((revision) => revision + 1);
     setExtractedColors([]);
     resetEditable();
-    setActiveTheme('light');
+    setActiveTheme(resolveActiveThemeFromUi(resolvedTheme));
     setPreviewVibrancyState(VIBRANCY_MID);
     setIllustrationSeed(DEFAULT_ILLUSTRATION_SEED);
     setActiveRole(null);
     setStatusColorsEnabled(!STATUS_COLORS_ON_DEMAND);
     setTokenEditPreviewState(null);
-  }, [resetEditable]);
+  }, [resetEditable, resolvedTheme]);
 
   const assignFromHexes = useCallback(
     (hexes: string[]) => {

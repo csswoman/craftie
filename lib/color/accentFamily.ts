@@ -3,6 +3,8 @@ import { converter } from 'culori';
 import { getSimilarNamedColors } from './colorDetails';
 import { normalizeHex } from './normalizeHex';
 import { randomRoleColor } from './randomRoleColor';
+import { paletteRoleForTokenName } from './semanticRoleProjection';
+import type { PaletteRoleId } from './roleTypes';
 import type { SemanticTokenName, SemanticTokenOverrides, SemanticTokens } from './semanticTokens';
 import { deriveFromPrimary } from './uiColorCandidates';
 import { oklchChannelsToHex } from '../utils/colorMath';
@@ -49,6 +51,23 @@ export function accentFamilyCompanionTokens(tokenName: SemanticTokenName): Seman
   if (tokenName === 'accent') return ['data-1'];
   if (tokenName === 'data-1') return ['accent'];
   return [];
+}
+
+/** Role anchor for building a same-hue counterpart when syncing accent-family tokens across themes. */
+export function counterpartRoleForAccentFamilySync(
+  tokenName: SemanticTokenName,
+): PaletteRoleId | null {
+  const direct = paletteRoleForTokenName(tokenName);
+  if (direct) return direct;
+
+  for (const companion of accentFamilyCompanionTokens(tokenName)) {
+    const role = paletteRoleForTokenName(companion);
+    if (role) return role;
+  }
+
+  if (tokenName.startsWith('data-')) return 'acento';
+
+  return null;
 }
 
 export function syncAccentFamilyOverrides(
