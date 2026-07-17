@@ -1,7 +1,5 @@
 'use client';
 
-import { DESIGN_STYLES } from '@lib/styles/presets';
-
 import { ImageUploader } from '@/components/color-engine/ImageUploader';
 import { Button } from '@/components/ui/Button';
 
@@ -15,8 +13,6 @@ export type EmptyWorkspaceCardProps = {
   onOpenInspiration: () => void;
 };
 
-const PREVIEW_SWATCHES = DESIGN_STYLES.flatMap((style) => style.thumbnailColors).slice(0, 8);
-
 export function EmptyWorkspaceCard({
   fileName,
   hasPreview,
@@ -28,18 +24,15 @@ export function EmptyWorkspaceCard({
 }: EmptyWorkspaceCardProps) {
   return (
     <section aria-labelledby="workspace-empty-title" className="w-full max-w-lg">
-      <div
-        className="flex h-20 overflow-hidden rounded-lg border border-border"
-        aria-hidden="true"
-      >
-        {PREVIEW_SWATCHES.map((color, index) => (
-          <span
-            key={`${color}-${index}`}
-            className="min-w-0 flex-1"
-            style={{ backgroundColor: color }}
-          />
-        ))}
-      </div>
+      {/* eslint-disable-next-line @next/next/no-img-element -- Static public SVG illustration. */}
+      <img
+        src="/craftie-img.svg"
+        alt=""
+        width={400}
+        height={400}
+        className="mx-auto h-auto w-full max-w-[14rem] select-none sm:max-w-xs"
+        draggable={false}
+      />
 
       <h2
         id="workspace-empty-title"
