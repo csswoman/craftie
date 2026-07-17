@@ -3,23 +3,10 @@
 import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
-import { DataLegend, type ChartSeries } from './previewCharts';
-import { RadialMetric } from './previewDataDisplays';
+import { ANALYTICS_DAY_STATS, ANALYTICS_TOP_ACTIVITIES } from './analyticsPreviewData';
+import type { ChartSeries } from './previewCharts';
 import { StatDelta, tint } from './previewPrimitives';
 import { displayStyle, headingStyle, labelStyle, titleStyle, type PreviewFonts } from './previewTypography';
-
-const TOP_PAGES = [
-  { label: '/pricing', share: 82, slot: 'data1' as const },
-  { label: '/product-tour', share: 61, slot: 'data2' as const },
-  { label: '/docs/getting-started', share: 44, slot: 'data3' as const },
-  { label: '/changelog', share: 27, slot: 'data4' as const },
-] as const;
-
-const SUMMARY_CARDS = [
-  { label: 'Visitors', value: '42.8k', trend: '8.2%', dir: 'up' as const },
-  { label: 'Qualified', value: '11.3k', trend: '4.1%', dir: 'up' as const },
-  { label: 'Intent', value: '7.4%', trend: '0.6%', dir: 'down' as const },
-];
 
 export function AnalyticsAsidePanels({
   colors,
@@ -37,20 +24,25 @@ export function AnalyticsAsidePanels({
       <PreviewSlotTarget
         slot="surfaceElevated"
         onEditSlot={onEditSlot}
-        className="rounded-xl border p-4 lg:p-5 transition-transform duration-200 hover:-translate-y-0.5"
+        className="rounded-[14px] border p-4 lg:p-5 transition-transform duration-200 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
         style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
       >
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
-          Source summary
+          Estado de ánimo
         </PreviewSlotTarget>
-        <div className="mt-4 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-          {SUMMARY_CARDS.map((item) => (
+        <div className="mt-4 grid gap-3 sm:grid-cols-3 @min-[1000px]/analytics:grid-cols-1">
+          {ANALYTICS_DAY_STATS.map((item) => (
             <div key={item.label} className="flex items-center justify-between gap-2">
               <div>
                 <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={labelStyle(fonts, colors.mutedText)}>
                   {item.label}
                 </PreviewSlotTarget>
-                <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1 block tabular-nums" style={displayStyle(fonts)}>
+                <PreviewSlotTarget
+                  slot="text"
+                  onEditSlot={onEditSlot}
+                  className="mt-1 block tabular-nums"
+                  style={displayStyle(fonts)}
+                >
                   {item.value}
                 </PreviewSlotTarget>
               </div>
@@ -69,48 +61,120 @@ export function AnalyticsAsidePanels({
       <PreviewSlotTarget
         slot="surface"
         onEditSlot={onEditSlot}
-        className="rounded-xl border p-4 lg:p-5 transition-transform duration-200 hover:-translate-y-0.5"
+        className="rounded-[14px] border p-4 lg:p-5 transition-transform duration-200 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
         style={{ backgroundColor: colors.surface, borderColor: colors.border }}
       >
-        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
-          Mix breakdown
-        </PreviewSlotTarget>
-        <div className="mt-4">
-          <DataLegend segments={series} onEditSlot={onEditSlot} interactive />
+        <div className="flex items-start justify-between gap-3">
+          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
+            Mix del día
+          </PreviewSlotTarget>
+          <PreviewSlotTarget
+            slot="mutedText"
+            onEditSlot={onEditSlot}
+            className="shrink-0 tabular-nums"
+            style={labelStyle(fonts, colors.mutedText)}
+          >
+            100%
+          </PreviewSlotTarget>
+        </div>
+        <div className="mt-4 flex h-3 overflow-hidden rounded-full" aria-hidden="true">
+          {series.map((item) => (
+            <PreviewSlotTarget
+              key={item.label}
+              slot={item.slot}
+              onEditSlot={onEditSlot}
+              className="h-full first:rounded-l-full last:rounded-r-full"
+              style={{ width: `${item.value}%`, backgroundColor: item.color }}
+            />
+          ))}
+        </div>
+        <div className="mt-4 space-y-3">
+          {series.map((item) => (
+            <div key={item.label} className="preview-list-in">
+              <div className="mb-1.5 flex items-center justify-between gap-3">
+                <span className="flex min-w-0 items-center gap-2">
+                  <PreviewSlotTarget
+                    slot={item.slot}
+                    onEditSlot={onEditSlot}
+                    className="h-2.5 w-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="truncate" style={titleStyle(fonts)}>
+                    {item.label}
+                  </PreviewSlotTarget>
+                </span>
+                <span className="shrink-0 tabular-nums" style={labelStyle(fonts, colors.mutedText)}>
+                  {item.display}
+                </span>
+              </div>
+              <div className="h-1.5 overflow-hidden rounded-full" style={{ backgroundColor: tint(item.color, 14) }}>
+                <PreviewSlotTarget
+                  slot={item.slot}
+                  onEditSlot={onEditSlot}
+                  className="block h-full rounded-full"
+                  style={{ width: `${item.value}%`, backgroundColor: item.color }}
+                />
+              </div>
+            </div>
+          ))}
         </div>
       </PreviewSlotTarget>
 
       <PreviewSlotTarget
         slot="surfaceElevated"
         onEditSlot={onEditSlot}
-        className="rounded-xl border p-4 lg:p-5 transition-transform duration-200 hover:-translate-y-0.5"
+        className="rounded-[14px] border p-4 lg:p-5 transition-transform duration-200 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
         style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
       >
-        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
-          Top pages
-        </PreviewSlotTarget>
-        <div className="mt-3 space-y-1">
-          {TOP_PAGES.map((page, index) => (
+        <div className="flex items-start justify-between gap-3">
+          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
+            Sitios favoritos
+          </PreviewSlotTarget>
+          <PreviewSlotTarget
+            slot="mutedText"
+            onEditSlot={onEditSlot}
+            className="shrink-0"
+            style={labelStyle(fonts, colors.mutedText)}
+          >
+            Top 4
+          </PreviewSlotTarget>
+        </div>
+        <div className="mt-4 space-y-3">
+          {ANALYTICS_TOP_ACTIVITIES.map((place, index) => (
             <div
-              key={page.label}
-              className="preview-list-in flex items-center gap-3 rounded-lg py-1.5"
+              key={place.label}
+              className="preview-list-in"
               style={{ animationDelay: `${index * 45}ms` }}
             >
-              <span
-                className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[0.6875rem] font-bold tabular-nums"
-                style={{ backgroundColor: tint(colors[page.slot], 14), color: colors[page.slot] }}
-              >
-                {index + 1}
-              </span>
-              <div className="min-w-0 flex-1">
-                <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="block truncate" style={titleStyle(fonts)}>
-                  {page.label}
-                </PreviewSlotTarget>
-                <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="block" style={labelStyle(fonts, colors.mutedText)}>
-                  {(page.share * 53).toLocaleString()} visits
-                </PreviewSlotTarget>
+              <div className="mb-1.5 flex items-center gap-2.5">
+                <span
+                  className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[0.6875rem] font-bold tabular-nums"
+                  style={{ backgroundColor: tint(colors[place.slot], 14), color: colors[place.slot] }}
+                >
+                  {index + 1}
+                </span>
+                <div className="min-w-0 flex-1" title={place.label}>
+                  <PreviewSlotTarget
+                    slot="text"
+                    onEditSlot={onEditSlot}
+                    className="block truncate"
+                    style={titleStyle(fonts)}
+                  >
+                    {place.label}
+                  </PreviewSlotTarget>
+                </div>
+                <span className="shrink-0 tabular-nums" style={labelStyle(fonts, colors.mutedText)}>
+                  {place.share}%
+                </span>
               </div>
-              <RadialMetric value={page.share} color={colors[page.slot]} slot={page.slot} onEditSlot={onEditSlot} />
+              <div className="h-1.5 overflow-hidden rounded-full" style={{ backgroundColor: tint(colors[place.slot], 14) }}>
+                <PreviewSlotTarget
+                  slot={place.slot}
+                  onEditSlot={onEditSlot}
+                  className="block h-full rounded-full"
+                  style={{ width: `${place.share}%`, backgroundColor: colors[place.slot] }}
+                />
+              </div>
             </div>
           ))}
         </div>

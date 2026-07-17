@@ -14,9 +14,15 @@ export type ChartSeries = {
   slot: UiLayoutSlot;
 };
 
-function toPoints(values: readonly number[], width: number, height: number, pad: number): [number, number][] {
-  const max = Math.max(...values);
-  const min = Math.min(...values);
+function toPoints(
+  values: readonly number[],
+  width: number,
+  height: number,
+  pad: number,
+  rangeOverride?: { min: number; max: number },
+): [number, number][] {
+  const max = rangeOverride?.max ?? Math.max(...values);
+  const min = rangeOverride?.min ?? Math.min(...values);
   const range = max - min || 1;
 
   return values.map((value, index) => {
@@ -68,11 +74,15 @@ export function AreaChart({
   color,
   surfaceHex,
   height = 132,
+  compareValues,
+  compareColor,
 }: {
   values: number[];
   color: string;
   surfaceHex: string;
   height?: number;
+  compareValues?: number[];
+  compareColor?: string;
 }) {
   const gradientId = useId();
   // Bright fill under the line for pop; the line itself gets a lighter touch so
@@ -80,9 +90,19 @@ export function AreaChart({
   const vivid = vividFill(color, surfaceHex);
   const vividLine = vividFill(color, surfaceHex, 0.25);
   const width = 100;
-  const points = toPoints(values, width, height, 12);
+  const sharedRange = compareValues?.length
+    ? {
+        min: Math.min(...values, ...compareValues),
+        max: Math.max(...values, ...compareValues),
+      }
+    : undefined;
+  const points = toPoints(values, width, height, 12, sharedRange);
   const line = smoothPath(points);
   const area = `${line} L${width},${height} L0,${height} Z`;
+  const compareLine =
+    compareValues && compareValues.length > 1
+      ? smoothPath(toPoints(compareValues, width, height, 12, sharedRange))
+      : null;
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} width="100%" height={height} preserveAspectRatio="none" aria-hidden="true">
@@ -104,6 +124,19 @@ export function AreaChart({
           vectorEffect="non-scaling-stroke"
         />
       ))}
+      {compareLine ? (
+        <path
+          d={compareLine}
+          fill="none"
+          stroke={compareColor ?? tint(color, 40)}
+          strokeWidth={1.75}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray="3 3"
+          vectorEffect="non-scaling-stroke"
+          opacity={0.7}
+        />
+      ) : null}
       <path d={area} fill={`url(#${gradientId})`} />
       <path
         d={line}

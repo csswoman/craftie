@@ -1,46 +1,62 @@
 import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
-import { PreviewIcon, type PreviewIconName } from './previewIcons';
-import { bodyStyle, labelStyle, type PreviewFonts } from './previewTypography';
+import { previewStaggerDelay } from './dashboardPreviewData';
+import { STUDIO_STEPS } from './landingPreviewData';
+import { onVividFill } from './previewColor';
+import { PreviewIcon } from './previewIcons';
+import { bodyStyle, headingStyle, type PreviewFonts } from './previewTypography';
 
-const FEATURES: Array<{ title: string; text: string; icon: PreviewIconName }> = [
-  { title: 'Story', text: 'Clear hero hierarchy for launches and announcements.', icon: 'sparkles' },
-  { title: 'System', text: 'Reusable modules that still adapt to each palette.', icon: 'layers' },
-  { title: 'Trust', text: 'Accessible defaults that keep the interface credible.', icon: 'shield' },
-];
+function stepAccent(colors: ResolvedLayoutColors, slot: string): string {
+  if (slot === 'data1') return colors.data1;
+  if (slot === 'data2') return colors.data2;
+  return colors.data3;
+}
 
-export function LandingFeatureGrid({ colors, fonts, onEditSlot }: {
+export function LandingFeatureGrid({
+  colors,
+  fonts,
+  onEditSlot,
+}: {
   colors: ResolvedLayoutColors;
   fonts: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
   return (
-    <div className="mt-5 grid gap-3 sm:grid-cols-3">
-      {FEATURES.map((item) => (
-        <PreviewSlotTarget
-          key={item.title}
-          slot="surfaceElevated"
-          onEditSlot={onEditSlot}
-          className="rounded-xl border p-4 transition-transform duration-200 hover:-translate-y-0.5"
-          style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
-        >
-          <PreviewSlotTarget
-            slot="primaryAction"
-            onEditSlot={onEditSlot}
-            className="grid h-8 w-8 place-items-center rounded-lg"
-            style={{ backgroundColor: colors.primaryAction, color: colors.primaryActionText }}
+    <ol className="grid gap-6 sm:grid-cols-3 sm:gap-6">
+      {STUDIO_STEPS.map((item, index) => {
+        const accent = stepAccent(colors, item.slot);
+
+        return (
+          <li
+            key={item.title}
+            className="preview-rise flex gap-3 sm:flex-col sm:gap-3"
+            style={{ animationDelay: previewStaggerDelay(index + 2) }}
           >
-            <PreviewIcon name={item.icon} size={15} />
-          </PreviewSlotTarget>
-          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-3" style={labelStyle(fonts)}>
-            {item.title}
-          </PreviewSlotTarget>
-          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-2" style={bodyStyle(fonts, colors.mutedText)}>
-            {item.text}
-          </PreviewSlotTarget>
-        </PreviewSlotTarget>
-      ))}
-    </div>
+            <PreviewSlotTarget
+              slot={item.slot}
+              onEditSlot={onEditSlot}
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] transition-transform duration-200 ease-out hover:rotate-[-3deg] motion-reduce:transition-none motion-reduce:hover:rotate-0"
+              style={{ backgroundColor: accent, color: onVividFill(accent) }}
+            >
+              <PreviewIcon name={item.icon} size={15} />
+            </PreviewSlotTarget>
+            <div className="min-w-0">
+              <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
+                {item.title}
+              </PreviewSlotTarget>
+              <PreviewSlotTarget
+                slot="mutedText"
+                onEditSlot={onEditSlot}
+                className="mt-1.5 max-w-[34ch] text-pretty opacity-80"
+                style={bodyStyle(fonts)}
+              >
+                {item.text}
+              </PreviewSlotTarget>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
   );
 }
