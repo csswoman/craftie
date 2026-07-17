@@ -4,7 +4,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -205,10 +204,18 @@ type RolePaletteProviderProps = {
 const RolePaletteContext = createContext<RolePaletteContextValue | null>(null);
 
 export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
-  const { resolvedTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
+  // Derive from next-themes so cold start (e.g. persisted dark) stays aligned
+  // without syncing via an effect.
+  const activeTheme = resolveActiveThemeFromUi(resolvedTheme);
+  const setActiveTheme = useCallback(
+    (theme: ThemeId) => {
+      setTheme(theme);
+    },
+    [setTheme],
+  );
   const [extractedColors, setExtractedColors] = useState<ExtractedColor[]>([]);
   const [editHistory, setEditHistory] = useState(() => createHistory(INITIAL_EDITABLE));
-  const [activeTheme, setActiveTheme] = useState<ThemeId>('light');
   const [previewVibrancy, setPreviewVibrancyState] = useState(VIBRANCY_MID);
   const [illustrationSeed, setIllustrationSeed] = useState(DEFAULT_ILLUSTRATION_SEED);
   const [activeRole, setActiveRole] = useState<PaletteRoleId | null>(null);
@@ -216,15 +223,6 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   const [statusColorsEnabled, setStatusColorsEnabled] = useState(!STATUS_COLORS_ON_DEMAND);
   const [tokenEditPreview, setTokenEditPreviewState] = useState<TokenEditPreview | null>(null);
   const [paletteRevision, setPaletteRevision] = useState(0);
-
-  // Keep palette variant in sync with the persisted UI theme (next-themes).
-  // Without this, a cold start in dark mode leaves layout previews on light.
-  useEffect(() => {
-    if (resolvedTheme !== 'light' && resolvedTheme !== 'dark') {
-      return;
-    }
-    setActiveTheme((current) => (current === resolvedTheme ? current : resolvedTheme));
-  }, [resolvedTheme]);
 
   const {
     tokenOverridesByTheme,
@@ -704,13 +702,12 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
     setPaletteRevision((revision) => revision + 1);
     setExtractedColors([]);
     resetEditable();
-    setActiveTheme(resolveActiveThemeFromUi(resolvedTheme));
     setPreviewVibrancyState(VIBRANCY_MID);
     setIllustrationSeed(DEFAULT_ILLUSTRATION_SEED);
     setActiveRole(null);
     setStatusColorsEnabled(!STATUS_COLORS_ON_DEMAND);
     setTokenEditPreviewState(null);
-  }, [resetEditable, resolvedTheme]);
+  }, [resetEditable]);
 
   const assignFromHexes = useCallback(
     (hexes: string[]) => {
@@ -838,6 +835,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       saveVibrancy,
       regenerateIllustrationSeed,
       setNeutralStyle,
+      setActiveTheme,
       replaceRole,
       replaceSemanticToken,
       clearSemanticToken,
