@@ -6,7 +6,7 @@ Craftie is a web studio for building brand systems from color, inspiration, and 
 
 ### Inspiration and color extraction
 
-- Choose from curated inspiration styles with names, descriptions, seed colors, and moods.
+- Choose from a set of curated inspiration styles with names, descriptions, seed colors, and moods.
 - Upload a local image to extract dominant colors in the browser.
 - Validate image inputs and show a preview with the file name.
 - Classify extracted palettes as pastel, vivid, dark, or neutral.
@@ -36,7 +36,7 @@ Craftie is a web studio for building brand systems from color, inspiration, and 
 
 ### Typography
 
-- Browse a curated catalog of heading and body font pairings.
+- Browse a curated catalog of around 90 heading and body font pairings.
 - Recommend pairings based on the selected style's mood.
 - Filter pairings by characteristics and inspect their metadata.
 - Preview applied typography on the current palette.
@@ -50,9 +50,13 @@ Craftie is a web studio for building brand systems from color, inspiration, and 
 - Follow a four-step guided flow: inspiration, role adjustment, generation, and review.
 - Generate a brand guide once the palette is complete and ready for review.
 - Review the palette, contrast, roles, themes, and typography before exporting.
-- Download a `brand-kit.json` containing the palette, roles, typography, metadata, and associated guide.
-- Download a `DESIGN.md` containing YAML tokens, light/dark CSS custom properties, a role reference table, and usage instructions.
-- Use the workspace with resizable panels, responsive views, light/dark mode, and keyboard shortcut help.
+- Export in multiple formats:
+  - `tokens.css` with light/dark CSS custom properties.
+  - `tokens.json` as W3C design tokens.
+  - `figma-tokens.json` for Tokens Studio for Figma.
+  - `DESIGN.md` with YAML tokens, CSS custom properties, a role reference table, and usage instructions.
+  - `brand-kit.json` containing the palette, roles, typography, metadata, and associated guide.
+- Use the workspace with resizable panels, responsive views, light/dark mode, undo/redo history, and keyboard shortcut help.
 
 ## Main workflow
 
@@ -61,7 +65,7 @@ Craftie is a web studio for building brand systems from color, inspiration, and 
 3. Customize roles, themes, and vibrancy as needed.
 4. Select a font pairing or apply custom fonts.
 5. Generate the brand guide.
-6. Review contrast and typography, then export `brand-kit.json` or `DESIGN.md`.
+6. Review contrast and typography, then export as CSS, design tokens JSON, Figma tokens, `DESIGN.md`, or `brand-kit.json`.
 
 ## Persistence and current limitations
 
@@ -77,7 +81,8 @@ Craftie is a web studio for building brand systems from color, inspiration, and 
 - TypeScript
 - Tailwind CSS 4
 - `culori` for color conversions and operations, including OKLCH
-- `ntcjs` and original curated data for color names and styles
+- A vendored NTC dataset (`lib/vendor`) plus original curated data for color names and styles
+- `next-themes` for light/dark mode
 - `lucide-react` for icons
 - Vitest for unit tests
 
@@ -87,22 +92,26 @@ Craftie is a web studio for building brand systems from color, inspiration, and 
 src/
   app/                         Next.js entry point, layout, and global styles
   components/
-    color/                     Workspace, role editor, and color views
+    color/                     Workspace, role editor, color views, and previews
     color-engine/              Palette generation, selection, and extraction
     font-pairing/              Typography catalog and application
     layout/                    Shell, navigation, panels, shortcuts, and exports
+    brand-preview/             Brand mockups and previews
+    style-guide/               Style guide view
     theme/                     Theme provider and toggle
+    ui/                        Minimal shared UI primitives
   context/                     Shared role-palette state
   lib/browser/                 Browser-dependent adapters
 
 lib/
   a11y/                        Accessibility utilities
-  color/                       Color engine, roles, themes, contrast, and previews
-  export/                      Brand kit, tokens, and DESIGN.md generation
+  color/                       Color engine, roles, themes, contrast, APCA, and previews
+  export/                      Brand kit, design tokens (CSS/W3C/Figma), and DESIGN.md generation
   studio/                      Studio flow and shortcuts
   styles/                      Curated inspiration styles
   typography/                  Pairings, filters, scales, and custom fonts
   utils/                       Reusable pure utilities
+  vendor/                      Vendored third-party data (NTC color names)
 
 docs/                          Product documentation and design decisions
 scripts/                       Project validation scripts
