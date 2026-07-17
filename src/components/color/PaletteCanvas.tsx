@@ -6,9 +6,7 @@ import {
   getRolePaletteContrastWarnings,
   hasRolePaletteContrastFailure,
 } from '@lib/color/rolePaletteContrast';
-import { normalizeHex } from '@lib/color/normalizeHex';
-import { accentFamilyPrimaryToken } from '@lib/color/accentFamily';
-import { isPaletteRoleId, PALETTE_ROLE_ORDER, type PaletteRoleId } from '@lib/color/rolePalette';
+import { PALETTE_ROLE_ORDER } from '@lib/color/rolePalette';
 import type { FontPair } from '@lib/typography/pairings';
 import type { AppliedTypography } from '@lib/typography/typeState';
 import type { TypeScaleBase, TypeScaleRatio } from '@lib/typography/typeScale';
@@ -21,11 +19,10 @@ import { PaletteView } from './PaletteView';
 import { PreviewView } from './PreviewView';
 import { EmptyCanvas, PaletteCanvasSkeleton } from './PaletteCanvasEmptyStates';
 import { PaletteCanvasNotices } from './PaletteCanvasNotices';
+import { PaletteCanvasToolbar } from './PaletteCanvasToolbar';
 import { CanvasSystemView } from './CanvasSystemView';
-import { CanvasViewSelector } from './CanvasViewSelector';
-import { PaletteHistoryControls } from './PaletteHistoryControls';
 import { PaintPaletteCanvas } from './PaintPaletteCanvas';
-import { PaletteImageBlock } from './PaletteImageBlock';
+import { replacePaletteColorFromDrawer } from './replacePaletteColorFromDrawer';
 
 export type PaletteCanvasProps = {
   isLoading?: boolean;
@@ -119,109 +116,50 @@ export function PaletteCanvas({
   }
 
   function handleReplaceFromDrawer(newHex: string): string | null {
-    if (!selectedColorHex || !rolePalette) {
+    if (!rolePalette) {
       return 'No se puede sustituir este color.';
     }
 
-    let normalized: string;
-
-    try {
-      normalized = normalizeHex(newHex);
-    } catch {
-      return 'Introduce un código HEX válido.';
-    }
-
-    if (normalizeHex(selectedColorHex) === normalized) {
-      return null;
-    }
-
-    if (selectedAccentSlot !== null) {
-      replaceSemanticToken(accentFamilyPrimaryToken(selectedAccentSlot), normalized);
-      setSelectedColorHex(normalized);
-      return null;
-    }
-
-    const role = columns.find((column) => {
-      try {
-        return normalizeHex(column.hex) === normalizeHex(selectedColorHex);
-      } catch {
-        return false;
-      }
-    })?.id;
-
-    if (!role || !isPaletteRoleId(role)) {
-      return 'No se puede sustituir este color.';
-    }
-
-    if (lockedSet.has(role)) {
-      return 'Desbloquea el color para sustituirlo.';
-    }
-
-    replaceRole(role, normalized);
-    setSelectedColorHex(normalized);
-    return null;
+    return replacePaletteColorFromDrawer({
+      newHex,
+      selectedColorHex,
+      selectedAccentSlot,
+      columns,
+      lockedSet,
+      replaceRole,
+      replaceSemanticToken,
+      setSelectedColorHex,
+    });
   }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {hasPalette ? (
-        <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-line/60 px-4 py-3 sm:min-h-13 sm:gap-3 sm:px-6 sm:py-1.5">
-          <div className="hidden min-w-0 sm:block">
-              <p className="truncate text-chrome-label font-semibold text-ink">
-                {activeView === 'colors' && showAccents ? 'Paleta de acentos' : 'Paleta de roles'}
-              </p>
-              <p className="truncate text-chrome-caption text-muted">
-                {activeView === 'colors' && showAccents
-                  ? 'El 1 se usa en UI; 2–6 en gráficos.'
-                  : 'Edita colores y revisa el contraste.'}
-              </p>
-          </div>
-          {editable ? <PaletteHistoryControls /> : null}
-          <button
-            type="button"
-            aria-pressed={activeView === 'colors' && showAccents}
-            onClick={() => {
-              if (activeView !== 'colors') {
-                setActiveView('colors');
-                setShowAccents(true);
-                return;
-              }
-
-              setShowAccents((visible) => !visible);
-            }}
-            className={`min-h-10 rounded-lg border px-3 text-[0.86rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
-              activeView === 'colors' && showAccents
-                ? 'border-[var(--chrome-green)] bg-[var(--chrome-green-soft)] text-[var(--chrome-green)]'
-                : 'border-border bg-bg text-muted hover:bg-surface-raised hover:text-ink'
-            }`}
-          >
-            {activeView === 'colors' && showAccents ? 'Ver roles' : 'Ver acentos'}
-          </button>
-          <div className="flex w-full flex-wrap items-center gap-2.5 sm:ml-auto sm:w-auto sm:gap-2.5">
-            <CanvasViewSelector
-              activeId={activeView}
-              palette={columns.map((column) => column.hex)}
-              onSelect={(view) => {
-                setActiveView(view);
-                if (view === 'dashboard' || view === 'landing' || view === 'analytics') setActiveMode(view);
-                if (view === 'player') setActiveMode('media');
-              }}
-            />
-            {imagePreviewUrl && onImageFileSelected && onImageRegenerate ? (
-              <>
-                <span aria-hidden="true" className="hidden h-[30px] w-px bg-line sm:block" />
-                <PaletteImageBlock
-                  previewUrl={imagePreviewUrl}
-                  fileName={imageFileName}
-                  imageFingerprint={imageFingerprint}
-                  isRegenerating={isUpdating}
-                  onFileSelected={onImageFileSelected}
-                  onRegenerate={onImageRegenerate}
-                />
-              </>
-            ) : null}
-          </div>
-        </div>
+        <PaletteCanvasToolbar
+          activeView={activeView}
+          showAccents={showAccents}
+          editable={editable}
+          palette={columns.map((column) => column.hex)}
+          imagePreviewUrl={imagePreviewUrl}
+          imageFileName={imageFileName}
+          imageFingerprint={imageFingerprint}
+          isUpdating={isUpdating}
+          onToggleAccents={() => {
+            if (activeView !== 'colors') {
+              setActiveView('colors');
+              setShowAccents(true);
+              return;
+            }
+            setShowAccents((visible) => !visible);
+          }}
+          onSelectView={(view) => {
+            setActiveView(view);
+            if (view === 'dashboard' || view === 'landing' || view === 'analytics') setActiveMode(view);
+            if (view === 'player') setActiveMode('media');
+          }}
+          onImageFileSelected={onImageFileSelected}
+          onImageRegenerate={onImageRegenerate}
+        />
       ) : null}
 
       <div className="relative flex min-h-0 flex-1 flex-col">

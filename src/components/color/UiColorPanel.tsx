@@ -14,20 +14,14 @@ import { useTabListKeyboard } from '@/lib/browser/useTabListKeyboard';
 import { CreateBrandGuideFooter } from './CreateBrandGuideFooter';
 import { UiCompactColorPanel } from './UiCompactColorPanel';
 import { UiDataSection } from './UiDataSection';
-import { UiFocusedPanelHeader } from './UiFocusedPanelHeader';
-import { UiFocusedRoleEditor } from './UiFocusedRoleEditor';
-import { UiFocusedStatusEditor } from './UiFocusedStatusEditor';
-import { UiSourceColorsSection } from './UiSourceColorsSection';
+import {
+  UiColorPanelFocused,
+  type FocusedView,
+} from './UiColorPanelFocused';
 import { UI_COLOR_VIEWS, UiColorViewTabs, type UiColorView } from './UiColorViewTabs';
 import {
-  COMPACT_ROLE_GROUPS,
   type CompactRoleGroupId,
 } from './uiColorPanelGroups';
-
-type FocusedView =
-  | { kind: 'roles'; group: CompactRoleGroupId; token: SemanticTokenName | null }
-  | { kind: 'status'; role: UiStatusRole | null }
-  | { kind: 'sources' };
 
 export function UiColorPanel({
   colors,
@@ -117,80 +111,30 @@ export function UiColorPanel({
       : `Añadido a ${label} de forma explícita · débil como dato (${candidate.fitness.asData.ratio.toFixed(1)}:1).`;
   }
 
-  if (focus?.kind === 'roles') {
-    const group = COMPACT_ROLE_GROUPS[focus.group];
+  if (focus) {
     return (
-      <div ref={panelRef} className="pb-2">
-        <UiFocusedPanelHeader
-          title={group.title}
-          subtitle={group.subtitle}
-          onBack={leaveFocusedView}
-        />
-        <UiFocusedRoleEditor
-          key={`${paletteRevision}-${focus.group}`}
-          roles={group.roles}
-          activeToken={focus.token}
-          tokens={resolvedTokens}
-          colors={colors}
-          onActivate={(token) => setFocusedView({
+      <UiColorPanelFocused
+        focus={focus}
+        panelRef={panelRef}
+        sourcesScrollRef={sourcesScrollRef}
+        colors={colors}
+        resolvedTokens={resolvedTokens}
+        statusColors={statusColors}
+        paletteRevision={paletteRevision}
+        onBack={leaveFocusedView}
+        onActivateRole={(token) => {
+          if (focus.kind !== 'roles') return;
+          setFocusedView({
             revision: paletteRevision,
             view: { kind: 'roles', group: focus.group, token },
-          })}
-          onSelect={replaceSemanticToken}
-        />
-      </div>
-    );
-  }
-
-  if (focus?.kind === 'status') {
-    return (
-      <div ref={panelRef} className="pb-2">
-        <UiFocusedPanelHeader
-          title="Colores de estado"
-          subtitle="Ancla el hue, ajusta la textura · piso de chroma garantizado"
-          onBack={leaveFocusedView}
-        />
-        {statusColors ? (
-          <UiFocusedStatusEditor
-            key={paletteRevision}
-            colors={colors}
-            statusColors={statusColors}
-            backgroundHex={resolvedTokens.background.hex}
-            initialRole={focus.role}
-            onSelect={selectStatusColor}
-          />
-        ) : (
-          <p className="py-6 text-sm text-muted" role="status">Preparando los estados…</p>
-        )}
-      </div>
-    );
-  }
-
-  if (focus?.kind === 'sources') {
-    return (
-      <div ref={panelRef} className="flex h-full min-h-0 flex-col pb-2">
-        <div className="shrink-0">
-          <UiFocusedPanelHeader
-            title="Colores fuente"
-            subtitle="Elige una fuente y asígnala a un rol, estado o acento"
-            onBack={leaveFocusedView}
-          />
-        </div>
-        <div
-          ref={sourcesScrollRef}
-          className="scrollbar-chrome min-h-0 flex-1 overflow-x-hidden overflow-y-auto pt-4"
-        >
-          <UiSourceColorsSection
-            tokens={resolvedTokens}
-            colors={colors}
-            statusColors={statusColors}
-            showHeader={false}
-            onAssignRole={replaceSemanticToken}
-            onAssignData={assignSourceToData}
-            onAssignStatus={assignSourceToStatus}
-          />
-        </div>
-      </div>
+          });
+        }}
+        onSelectRole={replaceSemanticToken}
+        onSelectStatus={selectStatusColor}
+        onAssignRole={replaceSemanticToken}
+        onAssignData={assignSourceToData}
+        onAssignStatus={assignSourceToStatus}
+      />
     );
   }
 
