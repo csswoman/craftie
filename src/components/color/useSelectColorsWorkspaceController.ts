@@ -52,8 +52,9 @@ export function useSelectColorsWorkspaceController() {
   const [paletteCatalog, setPaletteCatalog] = useState<SelectableColor[]>([]);
   const {
     rolePalette,
-    seeds,
-    themes,
+    exportRolePalette,
+    exportStatusTokenOverrides,
+    tokenOverridesByTheme,
     selectionReady,
     clearRolePalette,
     replaceRole,
@@ -489,18 +490,27 @@ export function useSelectColorsWorkspaceController() {
     setPaletteCatalog,
   });
 
-  const { handleExportBrandKit, handleExportDesignMd } = useWorkspaceExports({
-    generatedPalette,
-    rolePalette,
-    seeds,
+  const {
+    canExport,
+    exportBlockedReason,
+    handleExportBrandKit,
+    handleExportCss,
+    handleExportDesignMd,
+    handleExportFigmaTokens,
+    handleExportTokensJson,
+  } = useWorkspaceExports({
+    rolePalette: exportRolePalette,
+    tokenOverridesByTheme,
+    exportStatusTokenOverrides,
     selectedPairing,
     setError,
     setStatusMessage,
-    themes,
   });
 
   return {
     catalogSource,
+    canExport,
+    exportBlockedReason,
     error,
     imageFileName,
     imageFingerprint,
@@ -513,7 +523,10 @@ export function useSelectColorsWorkspaceController() {
     generatedPalette,
     handleAddColorByHex,
     handleExportBrandKit,
+    handleExportCss,
     handleExportDesignMd,
+    handleExportFigmaTokens,
+    handleExportTokensJson,
     handleFlowStepFocus,
     handleGenerate,
     handleImageExtractionError,

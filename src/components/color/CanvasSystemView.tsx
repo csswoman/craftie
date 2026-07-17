@@ -25,13 +25,13 @@ type CanvasSystemViewProps = {
 };
 
 const SCALE_ROWS = [
-  { label: 'H1', step: 5, role: 'heading' as const, lineHeight: 0.98, weight: 700 },
-  { label: 'H2', step: 4, role: 'heading' as const, lineHeight: 1.05, weight: 700 },
-  { label: 'H3', step: 3, role: 'heading' as const, lineHeight: 1.12, weight: 650 },
-  { label: 'Sub 1', step: 2, role: 'heading' as const, lineHeight: 1.18, weight: 600 },
-  { label: 'Sub 2', step: 1, role: 'heading' as const, lineHeight: 1.22, weight: 600 },
-  { label: 'Cuerpo', step: 0, role: 'body' as const, lineHeight: 1.5, weight: 400 },
-  { label: 'Pequeño', step: -1, role: 'body' as const, lineHeight: 1.45, weight: 400 },
+  { label: 'Display', token: '--type-display', step: 5, role: 'heading' as const, lineHeight: 0.98 },
+  { label: 'Título 1', token: '--type-h1', step: 4, role: 'heading' as const, lineHeight: 1.05 },
+  { label: 'Título 2', token: '--type-h2', step: 3, role: 'heading' as const, lineHeight: 1.12 },
+  { label: 'Título 3', token: '--type-h3', step: 2, role: 'heading' as const, lineHeight: 1.18 },
+  { label: 'Entradilla', token: '--type-lead', step: 1, role: 'body' as const, lineHeight: 1.4 },
+  { label: 'Cuerpo', token: '--type-body', step: 0, role: 'body' as const, lineHeight: 1.55 },
+  { label: 'Detalle', token: '--type-small', step: -1, role: 'body' as const, lineHeight: 1.45 },
 ] as const;
 
 export function CanvasSystemView({
@@ -80,14 +80,47 @@ export function CanvasSystemView({
   const paletteMutedStyle = { color: rolePalette.texto.hex, opacity: 0.7 };
 
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6" style={{ backgroundColor: rolePalette.fondo.hex }}>
+    <div className="canvas-dots min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
       <div className="mx-auto max-w-4xl space-y-4">
         {view === 'type-scale' ? (
-          <section className="overflow-hidden rounded-xl border" style={paletteSurfaceStyle}>
-            <div className="border-b border-border px-5 py-5 sm:px-8">
-              <p className="text-chrome-caption font-semibold uppercase tracking-[0.06em]" style={paletteMutedStyle}>Escala tipográfica</p>
-              <p className="mt-2 text-chrome-label" style={paletteMutedStyle}>
-                {headingFamily} + {bodyFamily} · base {base}px · ratio {ratio}
+          <section
+            className="overflow-hidden rounded-xl border"
+            style={paletteSurfaceStyle}
+            aria-labelledby="type-scale-title"
+          >
+            <div
+              className="border-b px-5 py-5 sm:px-8 sm:py-7"
+              style={{ backgroundColor: rolePalette.fondo.hex, borderColor: rolePalette.borde.hex }}
+            >
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                <div className="min-w-0">
+                  <h2
+                    id="type-scale-title"
+                    className="text-xl font-semibold sm:text-2xl"
+                    style={{ ...paletteTextStyle, fontFamily: headingFont, fontWeight: headingWeight }}
+                  >
+                    Escala tipográfica
+                  </h2>
+                  <p className="mt-2 max-w-[62ch] text-sm leading-relaxed" style={paletteMutedStyle}>
+                    Jerarquía modular para titulares, lectura continua y detalles de interfaz.
+                  </p>
+                </div>
+                <dl className="flex shrink-0 gap-5 text-sm" style={paletteTextStyle}>
+                  <div>
+                    <dt className="text-[0.6875rem] font-semibold uppercase tracking-[0.06em]" style={paletteMutedStyle}>Base</dt>
+                    <dd className="mt-1 font-mono font-semibold tabular-nums">{base}px</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[0.6875rem] font-semibold uppercase tracking-[0.06em]" style={paletteMutedStyle}>Ratio</dt>
+                    <dd className="mt-1 font-mono font-semibold tabular-nums">{ratio}</dd>
+                  </div>
+                </dl>
+              </div>
+              <p className="mt-5 truncate border-t pt-4 text-xs" style={{ ...paletteMutedStyle, borderColor: rolePalette.borde.hex }}>
+                <span className="font-semibold" style={paletteTextStyle}>{headingFamily}</span>
+                <span aria-hidden="true"> para títulos · </span>
+                <span className="font-semibold" style={paletteTextStyle}>{bodyFamily}</span>
+                <span aria-hidden="true"> para lectura</span>
               </p>
             </div>
             <div className="divide-y" style={{ borderColor: rolePalette.borde.hex }}>
@@ -97,15 +130,23 @@ export function CanvasSystemView({
                 const fontWeight = item.role === 'heading' ? headingWeight : bodyWeight;
 
                 return (
-                  <div key={item.label} className="grid grid-cols-[4.5rem_minmax(0,1fr)_4.5rem] items-baseline gap-3 px-5 py-4 sm:grid-cols-[6rem_minmax(0,1fr)_5rem] sm:px-8">
-                    <span className="text-chrome-caption font-semibold" style={paletteMutedStyle}>{item.label}</span>
+                  <div
+                    key={item.label}
+                    className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4 gap-y-3 px-5 py-5 sm:grid-cols-[7rem_minmax(0,1fr)_5rem] sm:px-8"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold" style={paletteTextStyle}>{item.label}</p>
+                      <p className="mt-1 truncate font-mono text-[0.625rem]" style={paletteMutedStyle}>{item.token}</p>
+                    </div>
                     <span
-                      className="min-w-0 truncate"
+                      className="col-span-2 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap sm:col-span-1"
                       style={{ ...paletteTextStyle, fontFamily, fontSize: `${size}px`, fontWeight, lineHeight: item.lineHeight }}
                     >
-                      {item.role === 'heading' ? 'Diseño claro' : 'Una guía de marca que se lee bien.'}
+                      {item.role === 'heading' ? 'Diseño con intención' : 'Una guía clara se lee sin esfuerzo.'}
                     </span>
-                    <span className="text-right font-mono text-[0.6875rem] tabular-nums" style={paletteMutedStyle}>{size}px</span>
+                    <span className="col-start-2 row-start-1 text-right font-mono text-xs font-semibold tabular-nums sm:col-start-3" style={paletteTextStyle}>
+                      {size}<span className="font-normal" style={paletteMutedStyle}>px</span>
+                    </span>
                   </div>
                 );
               })}

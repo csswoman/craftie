@@ -5,7 +5,11 @@ import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 export type WorkspaceHeaderProps = {
   canExport: boolean;
+  exportBlockedReason?: string | null;
   onCraftieHome: () => void;
+  onExportCss: () => void;
+  onExportTokensJson: () => void;
+  onExportFigmaTokens: () => void;
   onExportDesignMd: () => void;
   onExportBrandKit: () => void;
 };
@@ -15,12 +19,16 @@ const HELP_ITEMS = [
   { icon: Palette, label: 'Colores', description: 'Roles semánticos, temas y ajustes en OKLCH.' },
   { icon: Accessibility, label: 'Accesibilidad', description: 'Contraste WCAG y lectura complementaria APCA.' },
   { icon: Type, label: 'Tipografía', description: 'Parejas curadas, Google Fonts y fuentes locales.' },
-  { icon: Download, label: 'Exportación', description: 'Brand kit JSON y guía de diseño en Markdown.' },
+  { icon: Download, label: 'Exportación', description: 'CSS, design tokens (JSON), Figma, DESIGN.md y brand kit.' },
 ] as const;
 
 export function WorkspaceHeader({
   canExport,
+  exportBlockedReason,
   onCraftieHome,
+  onExportCss,
+  onExportTokensJson,
+  onExportFigmaTokens,
   onExportDesignMd,
   onExportBrandKit,
 }: WorkspaceHeaderProps) {
@@ -78,8 +86,12 @@ export function WorkspaceHeader({
           <div className="hidden h-9 w-px bg-border sm:block" aria-hidden="true" />
           <ExportMenu
             canExport={canExport}
-            onExportBrandKit={onExportBrandKit}
+            exportBlockedReason={exportBlockedReason}
+            onExportCss={onExportCss}
+            onExportTokensJson={onExportTokensJson}
+            onExportFigmaTokens={onExportFigmaTokens}
             onExportDesignMd={onExportDesignMd}
+            onExportBrandKit={onExportBrandKit}
           />
         </div>
       </div>

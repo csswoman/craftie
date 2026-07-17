@@ -91,8 +91,12 @@ function SelectColorsWorkspaceContent() {
       </div>
 
       <WorkspaceHeader
-        canExport={workspace.isReviewPhase}
+        canExport={workspace.canExport}
+        exportBlockedReason={workspace.exportBlockedReason}
         onCraftieHome={workspace.requestCraftieHome}
+        onExportCss={workspace.handleExportCss}
+        onExportTokensJson={workspace.handleExportTokensJson}
+        onExportFigmaTokens={workspace.handleExportFigmaTokens}
         onExportDesignMd={workspace.handleExportDesignMd}
         onExportBrandKit={workspace.handleExportBrandKit}
       />

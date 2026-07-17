@@ -52,6 +52,8 @@ export type PreviewViewProps = {
   activeFamily: PreviewFamilyId;
 };
 
+export const PREVIEW_LAYOUT_WIDTH_CLASS = 'max-w-[1300px]';
+
 export function PreviewView({
   recommendedPairings,
   selectedPairing,
@@ -121,9 +123,7 @@ export function PreviewView({
 
   const previewWidthClass = family.id === 'illustration'
     ? 'max-w-5xl'
-    : activeMode === 'dashboard' || activeMode === 'landing' || activeMode === 'analytics' || activeMode === 'media'
-      ? 'max-w-6xl'
-      : 'max-w-lg';
+    : PREVIEW_LAYOUT_WIDTH_CLASS;
 
   const typeTokenStyle = {
     ['--font-heading' as string]: fonts.headingFamily,

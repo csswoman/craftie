@@ -11,6 +11,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 
+
 import {
   CANVAS_VIEWS,
   CANVAS_VIEW_GROUP_LABEL,
@@ -39,7 +40,6 @@ export function CanvasViewSelector({
     left: number;
     maxHeight: number;
   } | null>(null);
-  const [mounted, setMounted] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Record<CanvasViewId, HTMLButtonElement | null>>(
@@ -47,15 +47,8 @@ export function CanvasViewSelector({
   );
   const active = getCanvasViewMeta(activeId);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   useLayoutEffect(() => {
-    if (!open) {
-      setMenuPosition(null);
-      return;
-    }
+    if (!open) return;
 
     function updatePosition() {
       const trigger = triggerRef.current;
@@ -133,7 +126,7 @@ export function CanvasViewSelector({
   }
 
   const menu =
-    open && menuPosition && mounted
+    open && menuPosition
       ? createPortal(
           <div
             ref={menuRef}
@@ -198,7 +191,7 @@ export function CanvasViewSelector({
       : null;
 
   return (
-    <div className="relative z-dropdown">
+    <div>
       <button
         ref={triggerRef}
         type="button"

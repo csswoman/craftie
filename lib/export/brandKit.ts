@@ -1,8 +1,10 @@
 import type { GeneratedPalette } from '../color/formulas';
 import type { PaletteSeeds, RolePalette } from '../color/rolePalette';
+import type { SemanticTokenOverrides } from '../color/semanticTokens';
 import type { FontPair } from '../typography/pairings';
 import type { ThemesConfig } from '../color/themePalette';
 
+import { buildExportTokenSet } from './exportTokenSet';
 import { generateDesignMd } from './generateDesignMd';
 
 export type BrandKitPayload = {
@@ -23,18 +25,51 @@ export function buildBrandKit(
   rolePalette: RolePalette,
   pairing: FontPair | null,
   kitName = 'Craftie Kit',
-  themeInput?: { seeds: PaletteSeeds; themes: ThemesConfig },
+  themeInput?: {
+    seeds?: PaletteSeeds;
+    themes?: ThemesConfig;
+    tokenOverridesByTheme?: {
+      light: SemanticTokenOverrides;
+      dark: SemanticTokenOverrides;
+    };
+  },
 ): BrandKitPayload {
-  const seeds = themeInput?.seeds ?? {
-    primario: rolePalette.primario.hex,
-    acento: rolePalette.acento.hex,
-    neutralHue: 0,
-  };
+  const exportedAt = new Date().toISOString();
+
+  let designMd: string;
+  if (themeInput?.tokenOverridesByTheme) {
+    designMd = generateDesignMd(
+      buildExportTokenSet({
+        rolePalette,
+        tokenOverridesByTheme: themeInput.tokenOverridesByTheme,
+        pairing,
+        name: kitName,
+        exportedAt,
+      }),
+    );
+  } else if (themeInput?.seeds) {
+    designMd = generateDesignMd({
+      seeds: themeInput.seeds,
+      themes: themeInput.themes,
+      pairing,
+      kitName,
+    });
+  } else {
+    designMd = generateDesignMd(
+      buildExportTokenSet({
+        rolePalette,
+        tokenOverridesByTheme: { light: {}, dark: {} },
+        pairing,
+        name: kitName,
+        exportedAt,
+      }),
+    );
+  }
 
   return {
     version: 1,
     name: kitName,
-    exportedAt: new Date().toISOString(),
+    exportedAt,
     palette,
     rolePalette,
     typography: pairing
@@ -49,12 +84,7 @@ export function buildBrandKit(
           },
         }
       : null,
-    designMd: generateDesignMd({
-      seeds,
-      themes: themeInput?.themes,
-      pairing,
-      kitName,
-    }),
+    designMd,
   };
 }
 

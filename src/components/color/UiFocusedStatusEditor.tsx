@@ -52,6 +52,7 @@ export function UiFocusedStatusEditor({
 }) {
   const { setTokenEditPreview, clearTokenEditPreview } = useRolePalette();
   const [activeRole, setActiveRole] = useState<UiStatusRole | null>(initialRole);
+  const [prevInitialRole, setPrevInitialRole] = useState(initialRole);
   const [originals] = useState<UiStatusColorSet>(() => statusColors);
   const [candidateDrafts, setCandidateDrafts] = useState<Partial<Record<UiStatusRole, UiStatusColor>>>({});
   const [appliedVariants, setAppliedVariants] = useState<Partial<Record<UiStatusRole, string>>>({});
@@ -60,9 +61,10 @@ export function UiFocusedStatusEditor({
     [colors],
   );
 
-  useEffect(() => {
+  if (initialRole !== prevInitialRole) {
+    setPrevInitialRole(initialRole);
     setActiveRole(initialRole);
-  }, [initialRole]);
+  }
 
   useEffect(() => () => {
     clearTokenEditPreview();

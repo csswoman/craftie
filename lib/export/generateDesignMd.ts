@@ -1,16 +1,12 @@
 import type { PaletteSeeds } from '../color/rolePalette';
-import { PALETTE_ROLE_ORDER } from '../color/rolePalette';
 import type { FontPair } from '../typography/pairings';
 import { EMPTY_THEMES, resolveThemePalette, type ThemesConfig } from '../color/themePalette';
+import { tokenNameForPaletteRole } from '../color/semanticRoleProjection';
+import type { SemanticTokenOverrides } from '../color/semanticTokens';
+import { PALETTE_ROLE_ORDER } from '../color/roleTypes';
 
-import {
-  formatRoleLabel,
-  roleTokenName,
-  ROLE_TOKEN_USAGE,
-  themePalettesToCssCustomProperties,
-  themePalettesToTokenRecords,
-  themeTokensToYaml,
-} from './designTokens';
+import { buildExportTokenSet, type ExportTokenSet } from './exportTokenSet';
+import { toCss } from './serializeExportTokens';
 
 export type DesignMdInput = {
   seeds: PaletteSeeds;
@@ -19,46 +15,70 @@ export type DesignMdInput = {
   kitName?: string;
 };
 
-export function generateDesignMd({
-  seeds,
-  themes = EMPTY_THEMES,
-  pairing,
-  kitName = 'Craftie Kit',
-}: DesignMdInput): string {
-  const heading = pairing?.heading.family ?? '—';
-  const body = pairing?.body.family ?? '—';
-  const tokenRecords = themePalettesToTokenRecords(seeds, themes);
-  const cssBlock = themePalettesToCssCustomProperties(seeds, themes);
-  const lightPalette = resolveThemePalette(seeds, 'light', themes, [])!;
-  const darkPalette = resolveThemePalette(seeds, 'dark', themes, [])!;
+function isExportTokenSet(input: ExportTokenSet | DesignMdInput): input is ExportTokenSet {
+  return 'colors' in input && 'meta' in input;
+}
 
-  const yamlColors = themeTokensToYaml(seeds, themes);
+function legacyInputToTokenSet(input: DesignMdInput): ExportTokenSet {
+  const themes = input.themes ?? EMPTY_THEMES;
+  const lightPalette = resolveThemePalette(input.seeds, 'light', themes, [])!;
+  const darkPalette = resolveThemePalette(input.seeds, 'dark', themes, [])!;
+  const dark = Object.fromEntries(
+    PALETTE_ROLE_ORDER.map((role) => [tokenNameForPaletteRole(role), darkPalette[role].hex]),
+  ) as SemanticTokenOverrides;
 
-  const referenceLines = PALETTE_ROLE_ORDER.map((role) => {
-    const lightSlot = lightPalette[role];
-    const darkSlot = darkPalette[role];
+  return buildExportTokenSet({
+    rolePalette: lightPalette,
+    tokenOverridesByTheme: { light: {}, dark },
+    pairing: input.pairing,
+    name: input.kitName ?? 'Craftie Kit',
+  });
+}
 
-    return `| \`${roleTokenName(role)}\` | ${formatRoleLabel(role)} | \`${tokenRecords.light[role]}\` | \`${tokenRecords.dark[role]}\` | ${lightSlot.name} |`;
+export function generateDesignMd(set: ExportTokenSet): string;
+export function generateDesignMd(input: DesignMdInput): string;
+export function generateDesignMd(input: ExportTokenSet | DesignMdInput): string {
+  const set = isExportTokenSet(input) ? input : legacyInputToTokenSet(input);
+  const heading = set.typography?.heading?.family ?? '—';
+  const body = set.typography?.body?.family ?? '—';
+  const cssBlock = toCss(set);
+  const tokens = Object.keys(set.colors).sort();
+
+  const yamlColorLines = tokens.flatMap((token) => {
+    const light = set.colors[token]?.light;
+    return light ? [`    ${token}: "${light}"`] : [];
+  });
+  const yamlDarkLines = tokens.flatMap((token) => {
+    const dark = set.colors[token]?.dark;
+    return dark ? [`    ${token}: "${dark}"`] : [];
+  });
+
+  const referenceLines = tokens.map((token) => {
+    const value = set.colors[token];
+    return `| \`--color-${token}\` | ${token} | \`${value?.light ?? '—'}\` | \`${value?.dark ?? '—'}\` |`;
   });
 
   const usageLines = [
-    ...PALETTE_ROLE_ORDER.map((role) => `- \`${roleTokenName(role)}\` — ${ROLE_TOKEN_USAGE[role]}`),
+    ...tokens.map((token) => `- \`--color-${token}\` — token semántico \`${token}\`.`),
     '- Activa el tema oscuro con `data-theme="dark"` en `<html>` o un contenedor raíz.',
   ];
+  const darkYaml =
+    yamlDarkLines.length > 0 ? `  dark:\n${yamlDarkLines.join('\n')}\n` : '';
 
   return `---
-name: ${kitName}
+name: ${set.name}
 description: Guía de marca generada con Craftie.
 colors:
-${yamlColors}
-typography:
+  light:
+${yamlColorLines.join('\n') || '    {}'}
+${darkYaml}typography:
   display:
     fontFamily: "${heading}"
   body:
     fontFamily: "${body}"
 ---
 
-# Design System: ${kitName}
+# Design System: ${set.name}
 
 ## Tokens de color (CSS)
 
@@ -68,10 +88,10 @@ Pega este bloque para soporte light/dark con custom properties:
 ${cssBlock}
 \`\`\`
 
-## Referencia por rol
+## Referencia
 
-| Token | Rol | Light | Dark | Nombre |
-| --- | --- | --- | --- | --- |
+| Token | Nombre | Light | Dark |
+| --- | --- | --- | --- |
 ${referenceLines.join('\n')}
 
 ## Typography

@@ -4,20 +4,39 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 
 export type ExportMenuProps = {
   canExport: boolean;
-  onExportBrandKit: () => void;
+  exportBlockedReason?: string | null;
+  onExportCss: () => void;
+  onExportTokensJson: () => void;
+  onExportFigmaTokens: () => void;
   onExportDesignMd: () => void;
+  onExportBrandKit: () => void;
 };
 
 const EXPORT_OPTIONS = [
   {
-    id: 'brand-kit',
-    label: 'Brand kit (.json)',
-    description: 'Colores, tipografía y tokens en un JSON listo para usar.',
+    id: 'css',
+    label: 'CSS variables',
+    description: 'Custom properties listos para pegar en tu hoja de estilos.',
+  },
+  {
+    id: 'tokens-json',
+    label: 'Design tokens (JSON)',
+    description: 'Formato W3C / Style Dictionary.',
+  },
+  {
+    id: 'figma',
+    label: 'Figma (Tokens Studio)',
+    description: 'JSON importable con el plugin Tokens Studio.',
   },
   {
     id: 'design-md',
     label: 'DESIGN.md',
     description: 'Guía de diseño en Markdown para documentación.',
+  },
+  {
+    id: 'brand-kit',
+    label: 'Brand kit (.json)',
+    description: 'Paquete todo-en-uno con colores y tipografía.',
   },
 ] as const;
 
@@ -26,7 +45,24 @@ const TRIGGER_BASE =
 const TRIGGER_READY = `${TRIGGER_BASE} bg-primary px-4 py-2 text-chrome-body text-white hover:bg-primary-hover`;
 const TRIGGER_GATED = `${TRIGGER_BASE} border border-border bg-transparent px-3 py-2 text-chrome-label text-muted disabled:cursor-not-allowed`;
 
-export function ExportMenu({ canExport, onExportBrandKit, onExportDesignMd }: ExportMenuProps) {
+const NAV_KEYS = ['ArrowDown', 'ArrowUp', 'Home', 'End'];
+
+function nextMenuIndex(key: string, current: number, length: number): number {
+  if (key === 'Home') return 0;
+  if (key === 'End') return length - 1;
+  if (key === 'ArrowDown') return current < 0 ? 0 : (current + 1) % length;
+  return current < 0 ? length - 1 : (current - 1 + length) % length;
+}
+
+export function ExportMenu({
+  canExport,
+  exportBlockedReason,
+  onExportCss,
+  onExportTokensJson,
+  onExportFigmaTokens,
+  onExportDesignMd,
+  onExportBrandKit,
+}: ExportMenuProps) {
   const [open, setOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState<{ top: string; left: string } | null>(null);
   const menuId = useId();
@@ -35,7 +71,6 @@ export function ExportMenu({ canExport, onExportBrandKit, onExportDesignMd }: Ex
 
   useLayoutEffect(() => {
     if (!open) {
-      // Drop fixed coordinates after the menu closes.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setMenuPosition(null);
       return;
@@ -43,27 +78,16 @@ export function ExportMenu({ canExport, onExportBrandKit, onExportDesignMd }: Ex
 
     function updatePosition() {
       const trigger = triggerRef.current;
-      if (!trigger) {
-        return;
-      }
-
+      if (!trigger) return;
       const rect = trigger.getBoundingClientRect();
       const menuWidth = 320;
-      const left = Math.min(
-        Math.max(16, rect.right - menuWidth),
-        window.innerWidth - menuWidth - 16,
-      );
-
-      setMenuPosition({
-        top: `${rect.bottom + 8}px`,
-        left: `${left}px`,
-      });
+      const left = Math.min(Math.max(16, rect.right - menuWidth), window.innerWidth - menuWidth - 16);
+      setMenuPosition({ top: `${rect.bottom + 8}px`, left: `${left}px` });
     }
 
     updatePosition();
     window.addEventListener('resize', updatePosition);
     window.addEventListener('scroll', updatePosition, true);
-
     return () => {
       window.removeEventListener('resize', updatePosition);
       window.removeEventListener('scroll', updatePosition, true);
@@ -71,15 +95,11 @@ export function ExportMenu({ canExport, onExportBrandKit, onExportDesignMd }: Ex
   }, [open]);
 
   useEffect(() => {
-    if (!open || !menuPosition) {
-      return;
-    }
+    if (!open || !menuPosition) return;
 
     function handlePointerDown(event: MouseEvent) {
       const target = event.target as Node;
-      if (menuRef.current?.contains(target) || triggerRef.current?.contains(target)) {
-        return;
-      }
+      if (menuRef.current?.contains(target) || triggerRef.current?.contains(target)) return;
       setOpen(false);
     }
 
@@ -89,41 +109,19 @@ export function ExportMenu({ canExport, onExportBrandKit, onExportDesignMd }: Ex
         triggerRef.current?.focus();
         return;
       }
-
-      if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp' && event.key !== 'Home' && event.key !== 'End') {
-        return;
-      }
-
+      if (!NAV_KEYS.includes(event.key)) return;
       const items = Array.from(
         menuRef.current?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]') ?? [],
       );
-      if (items.length === 0) {
-        return;
-      }
-
+      if (items.length === 0) return;
       event.preventDefault();
-      const currentIndex = items.findIndex((item) => item === document.activeElement);
-      let nextIndex = currentIndex;
-
-      if (event.key === 'Home') {
-        nextIndex = 0;
-      } else if (event.key === 'End') {
-        nextIndex = items.length - 1;
-      } else if (event.key === 'ArrowDown') {
-        nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % items.length;
-      } else {
-        nextIndex = currentIndex < 0 ? items.length - 1 : (currentIndex - 1 + items.length) % items.length;
-      }
-
-      items[nextIndex]?.focus();
+      const current = items.findIndex((item) => item === document.activeElement);
+      items[nextMenuIndex(event.key, current, items.length)]?.focus();
     }
 
-    const firstItem = menuRef.current?.querySelector<HTMLButtonElement>('[role="menuitem"]');
-    firstItem?.focus();
-
+    menuRef.current?.querySelector<HTMLButtonElement>('[role="menuitem"]')?.focus();
     document.addEventListener('mousedown', handlePointerDown);
     document.addEventListener('keydown', handleKeyDown);
-
     return () => {
       document.removeEventListener('mousedown', handlePointerDown);
       document.removeEventListener('keydown', handleKeyDown);
@@ -132,11 +130,23 @@ export function ExportMenu({ canExport, onExportBrandKit, onExportDesignMd }: Ex
 
   function handleSelect(optionId: (typeof EXPORT_OPTIONS)[number]['id']) {
     setOpen(false);
-    if (optionId === 'brand-kit') {
-      onExportBrandKit();
-      return;
+    switch (optionId) {
+      case 'css':
+        onExportCss();
+        return;
+      case 'tokens-json':
+        onExportTokensJson();
+        return;
+      case 'figma':
+        onExportFigmaTokens();
+        return;
+      case 'design-md':
+        onExportDesignMd();
+        return;
+      case 'brand-kit':
+        onExportBrandKit();
+        return;
     }
-    onExportDesignMd();
   }
 
   return (
@@ -148,7 +158,8 @@ export function ExportMenu({ canExport, onExportBrandKit, onExportDesignMd }: Ex
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
-        title="Exportar"
+        aria-describedby={!canExport && exportBlockedReason ? `${menuId}-blocked` : undefined}
+        title={canExport ? 'Exportar' : (exportBlockedReason ?? 'Exportar')}
         onClick={() => {
           if (canExport) setOpen((value) => !value);
         }}
@@ -158,6 +169,12 @@ export function ExportMenu({ canExport, onExportBrandKit, onExportDesignMd }: Ex
         <span className="hidden sm:inline">Exportar</span>
         {canExport ? <ChevronDownIcon open={open} /> : null}
       </button>
+
+      {!canExport && exportBlockedReason ? (
+        <span id={`${menuId}-blocked`} className="min-w-0 truncate text-chrome-caption text-muted" title={exportBlockedReason}>
+          {exportBlockedReason}
+        </span>
+      ) : null}
 
       {open && menuPosition ? (
         <div

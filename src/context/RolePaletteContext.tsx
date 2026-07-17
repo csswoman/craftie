@@ -156,11 +156,16 @@ const INITIAL_EDITABLE: EditablePaletteState = {
 
 export type RolePaletteContextValue = {
   rolePalette: RolePalette | null;
+  /** Role palette locked to the `light` theme, independent of `activeTheme`, for stable export. */
+  exportRolePalette: RolePalette | null;
+  /** Confirmed status colors projected to semantic token overrides (success/warning/error). */
+  exportStatusTokenOverrides: SemanticTokenOverrides;
   semanticTokens: SemanticTokens | null;
   previewRolePalette: RolePalette | null;
   previewSemanticTokens: SemanticTokens | null;
   statusColors: UiStatusColorSet | null;
   tokenEditPreview: TokenEditPreview | null;
+  tokenOverridesByTheme: Record<ThemeId, SemanticTokenOverrides>;
   paletteRevision: number;
   seeds: PaletteSeeds | null;
   illustrationSeed: number;
@@ -230,7 +235,10 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   } = editHistory.present;
 
   const lockedRoles = lockedRolesByTheme[activeTheme];
-  const tokenOverrides = tokenOverridesByTheme[activeTheme] ?? {};
+  const tokenOverrides = useMemo(
+    () => tokenOverridesByTheme[activeTheme] ?? {},
+    [tokenOverridesByTheme, activeTheme],
+  );
 
   const commitEdit = useCallback(
     (updater: (current: EditablePaletteState) => EditablePaletteState) => {
@@ -339,6 +347,50 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
         : null,
     [previewSemanticTokens, roleNames],
   );
+
+  // Export must serialize the `light` slot regardless of which theme is active in the editor,
+  // so derive a dedicated light-stable role palette instead of reusing `rolePalette`.
+  // Status colors are intentionally excluded: they never affect the 7 core roles.
+  const exportRolePalette = useMemo(() => {
+    if (extractedColors.length === 0) {
+      return null;
+    }
+
+    const lightTokens = applyClearedDataTokens(
+      resolveUiExpressiveGaps(
+        deriveSemanticTokens({
+          extracted: extractedColors,
+          overrides: tokenOverridesByTheme.light ?? {},
+          theme: 'light',
+          neutralStyle,
+          vibrancy: savedVibrancy,
+          paletteType,
+        }),
+        extractedColors,
+      ),
+      clearedSemanticTokens,
+    );
+
+    return projectSemanticTokensToRolePalette(lightTokens, roleNames);
+  }, [
+    clearedSemanticTokens,
+    extractedColors,
+    neutralStyle,
+    paletteType,
+    roleNames,
+    savedVibrancy,
+    tokenOverridesByTheme,
+  ]);
+
+  // Confirmed explicit status colors live in `forcedStatusColors`, outside `tokenOverridesByTheme`,
+  // so project them into semantic token overrides for export (danger maps to the `error` token).
+  const exportStatusTokenOverrides = useMemo<SemanticTokenOverrides>(() => {
+    const overrides: SemanticTokenOverrides = {};
+    if (forcedStatusColors.success) overrides.success = forcedStatusColors.success.hex;
+    if (forcedStatusColors.warning) overrides.warning = forcedStatusColors.warning.hex;
+    if (forcedStatusColors.danger) overrides.error = forcedStatusColors.danger.hex;
+    return overrides;
+  }, [forcedStatusColors]);
 
   const seeds = useMemo<PaletteSeeds | null>(
     () =>
@@ -704,11 +756,14 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   const value = useMemo<RolePaletteContextValue>(
     () => ({
       rolePalette,
+      exportRolePalette,
+      exportStatusTokenOverrides,
       semanticTokens,
       previewRolePalette,
       previewSemanticTokens,
       statusColors,
       tokenEditPreview,
+      tokenOverridesByTheme,
       paletteRevision,
       seeds,
       illustrationSeed,
@@ -749,11 +804,14 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
     }),
     [
       rolePalette,
+      exportRolePalette,
+      exportStatusTokenOverrides,
       semanticTokens,
       previewRolePalette,
       previewSemanticTokens,
       statusColors,
       tokenEditPreview,
+      tokenOverridesByTheme,
       paletteRevision,
       seeds,
       illustrationSeed,

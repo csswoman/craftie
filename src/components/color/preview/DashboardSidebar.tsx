@@ -3,7 +3,7 @@
 import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
-import { DASHBOARD_NAV } from './dashboardPreviewData';
+import { DASHBOARD_NAV, getWeeklyRhythmNote } from './dashboardPreviewData';
 import { PreviewIcon } from './previewIcons';
 import { LiveDot, ProgressBar } from './previewPrimitives';
 import { headingStyle, labelStyle, type PreviewFonts } from './previewTypography';
@@ -23,38 +23,46 @@ export function DashboardSidebar({
   onPrimaryFill,
   onEditSlot,
 }: DashboardSidebarProps) {
+  const weeklyPercent = 92;
+  const weeklyNote = getWeeklyRhythmNote(weeklyPercent);
+
   return (
     <PreviewSlotTarget
       slot="chrome"
       onEditSlot={onEditSlot}
-      className="hidden w-52 shrink-0 border-r p-4 lg:block"
+      className="preview-rise hidden w-56 shrink-0 border-r p-5 @min-[900px]/dashboard:block"
       style={{ backgroundColor: colors.chrome, borderColor: colors.divider }}
     >
-      <div className="flex h-full flex-col">
+      <div className="flex h-full flex-col gap-6">
         <div className="flex items-center gap-3">
           <PreviewSlotTarget
             slot="primaryAction"
             onEditSlot={onEditSlot}
-            className="grid h-9 w-9 place-items-center rounded-xl"
+            className="relative grid h-9 w-9 shrink-0 place-items-center rounded-xl transition-transform duration-200 ease-out hover:rotate-[-2deg] motion-reduce:transition-none motion-reduce:hover:rotate-0"
             style={{ backgroundColor: primaryFill, color: onPrimaryFill }}
           >
-            <PreviewIcon name="zap" size={16} />
+            <span className="text-sm font-black" aria-label="Craftie, perro diseñador">C</span>
+            <PreviewIcon
+              name="sparkles"
+              size={10}
+              className="pointer-events-none absolute -right-0.5 -top-0.5 opacity-85"
+            />
           </PreviewSlotTarget>
           <div className="min-w-0">
             <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="truncate" style={headingStyle(fonts)}>
-              Craftie Ops
+              Craftie Studio
             </PreviewSlotTarget>
-            <LiveDot color={colors.success} slot="success" onEditSlot={onEditSlot} label="All systems live" />
+            <LiveDot color={colors.success} slot="success" onEditSlot={onEditSlot} label="Pincel en movimiento" />
           </div>
         </div>
 
-        <nav className="mt-6 space-y-1" style={labelStyle(fonts)}>
+        <nav className="space-y-0.5" style={labelStyle(fonts)}>
           {DASHBOARD_NAV.map((item, index) => (
             <PreviewSlotTarget
               key={item.label}
               slot={index === 0 ? 'surfaceElevated' : 'chrome'}
               onEditSlot={onEditSlot}
-              className="flex min-w-0 items-center gap-2.5 rounded-lg px-3 py-2 transition-colors duration-150"
+              className="flex min-w-0 items-center gap-2.5 rounded-lg px-3 py-2.5 transition-colors duration-150"
               style={{
                 backgroundColor: index === 0 ? colors.surfaceElevated : 'transparent',
                 color: index === 0 ? colors.primaryAction : colors.text,
@@ -70,17 +78,20 @@ export function DashboardSidebar({
         <PreviewSlotTarget
           slot="surface"
           onEditSlot={onEditSlot}
-          className="mt-auto rounded-xl border p-3"
+          className="mt-auto rounded-xl border p-3.5"
           style={{ backgroundColor: colors.surface, borderColor: colors.border }}
         >
           <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={labelStyle(fonts, colors.mutedText)}>
-            This week
+            Ritmo semanal
           </PreviewSlotTarget>
           <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1" style={headingStyle(fonts)}>
-            92% on track
+            {weeklyPercent}% completado
           </PreviewSlotTarget>
-          <div className="mt-2">
-            <ProgressBar value={92} color={primaryFill} slot="primaryAction" onEditSlot={onEditSlot} />
+          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-1" style={labelStyle(fonts, colors.mutedText)}>
+            {weeklyNote}
+          </PreviewSlotTarget>
+          <div className="mt-2.5">
+            <ProgressBar value={weeklyPercent} color={primaryFill} slot="primaryAction" onEditSlot={onEditSlot} />
           </div>
         </PreviewSlotTarget>
       </div>
