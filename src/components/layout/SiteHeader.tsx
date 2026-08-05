@@ -66,6 +66,9 @@ export function SiteHeader({
                 Colores
               </Link>
             )}
+            <Link href="/docs" className={tabClassName(false)}>
+              Docs
+            </Link>
           </nav>
           <ThemeToggle />
         </div>

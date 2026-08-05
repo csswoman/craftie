@@ -1,4 +1,6 @@
-import { Accessibility, Download, Image, Palette, Type } from 'lucide-react';
+import { Accessibility, BookOpen, Download, Image, Palette, Type } from 'lucide-react';
+
+import Link from 'next/link';
 
 import { ExportMenu } from '@/components/layout/ExportMenu';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
@@ -47,6 +49,13 @@ export function WorkspaceHeader({
         </button>
 
         <div className="flex min-w-0 items-center justify-end gap-2">
+          <Link
+            href="/docs"
+            className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 py-2 text-chrome-label font-semibold text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+          >
+            <BookOpen className="size-4" aria-hidden="true" strokeWidth={1.8} />
+            <span>Docs</span>
+          </Link>
           <ThemeToggle />
           <div className="group relative">
             <button
