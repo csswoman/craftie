@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, BookOpen, Check, Menu } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import { DocsInteractiveDemo } from '@/components/docs/DocsInteractiveDemo';
+import { DocsStudioWalkthrough } from '@/components/docs/DocsStudioWalkthrough';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { docsPath, type DocsPage, DOCS_GROUPS, DOCS_PAGES } from '@/lib/docs/content';
 
@@ -44,7 +45,7 @@ export function DocsShell({ page }: DocsShellProps) {
         <main className="min-w-0 px-4 py-8 sm:px-8 sm:py-12 lg:px-16 lg:py-16">
           <article className="mx-auto max-w-4xl">
             <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-muted">
-              <Link href="/docs" className="hover:text-ink">Docs</Link><span aria-hidden="true">/</span><span>{page.section}</span>
+              <Link href="/docs" className="hover:text-ink">Docs</Link>
             </div>
             <header className="mt-6 max-w-3xl">
               <h1 className="font-display text-4xl font-medium leading-tight tracking-[-0.02em] text-ink sm:text-5xl">{page.title}</h1>
@@ -52,13 +53,22 @@ export function DocsShell({ page }: DocsShellProps) {
               <p className="mt-6 max-w-2xl text-base leading-7 text-ink">{page.lead}</p>
             </header>
 
-            {page.slug === '' || page.kind === 'semantic-roles' ? <div className="mt-10"><DocsInteractiveDemo /></div> : null}
+            {page.kind === 'home' ? <div className="mt-10"><DocsStudioWalkthrough /></div> : null}
+            {page.kind === 'semantic-roles' ? (
+              <div className="mt-10"><DocsInteractiveDemo /></div>
+            ) : null}
 
-            <div className="mt-10 grid gap-4 border-y border-border py-6 md:grid-cols-3">
-              <InfoBlock title="Qué se genera" items={page.generated} icon={<Check className="size-4" aria-hidden="true" />} />
-              <InfoBlock title="Cómo se utiliza" items={page.usage} />
-              <InfoBlock title="Limitaciones" items={page.limitations} muted />
-            </div>
+            {page.kind === 'home' ? (
+              <div className="mt-10 grid gap-4 border-y border-border py-6 md:grid-cols-3">
+                <InfoBlock
+                  title="Qué obtienes"
+                  items={page.generated}
+                  icon={<Check className="size-4" aria-hidden="true" />}
+                />
+                <InfoBlock title="Cómo empezar" items={page.usage} />
+                <InfoBlock title="Limitaciones" items={page.limitations} muted />
+              </div>
+            ) : null}
 
             <div className="mt-10 space-y-10">
               {page.sections.map((section) => <DocsSectionBlock key={section.heading} section={section} />)}
@@ -76,19 +86,33 @@ export function DocsShell({ page }: DocsShellProps) {
 }
 
 function DocsNavigation({ currentSlug }: { currentSlug: string }) {
+  const group = DOCS_GROUPS[0];
+
   return (
-    <nav aria-label="Secciones de documentación" className="space-y-7">
-      {DOCS_GROUPS.map((group) => (
-        <section key={group.title}>
-          <h2 className="mb-2 text-xs font-bold uppercase tracking-[0.08em] text-muted">{group.title}</h2>
+    <nav aria-label="Documentación de Craftie">
+      {group ? (
+        <section>
+          <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.08em] text-muted">{group.title}</h2>
           <ul className="space-y-0.5">
             {group.pages.map((entry) => {
               const active = entry.slug === currentSlug;
-              return <li key={entry.slug}><Link href={docsPath(entry.slug)} aria-current={active ? 'page' : undefined} className={`block rounded-md px-2.5 py-2 text-sm leading-snug transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${active ? 'bg-surface-raised font-bold text-ink' : 'text-muted hover:bg-surface hover:text-ink'}`}>{entry.title}</Link></li>;
+              return (
+                <li key={entry.slug}>
+                  <Link
+                    href={docsPath(entry.slug)}
+                    aria-current={active ? 'page' : undefined}
+                    className={`block rounded-md px-2.5 py-2 text-sm leading-snug transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+                      active ? 'bg-surface-raised font-bold text-ink' : 'text-muted hover:bg-surface hover:text-ink'
+                    }`}
+                  >
+                    {entry.title}
+                  </Link>
+                </li>
+              );
             })}
           </ul>
         </section>
-      ))}
+      ) : null}
     </nav>
   );
 }
