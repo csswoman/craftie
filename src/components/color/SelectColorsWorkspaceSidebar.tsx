@@ -67,7 +67,7 @@ export function ToolsTabToggle({
               {...getTabProps(tab.id)}
               className={`min-h-10 w-full whitespace-nowrap px-3 text-center text-tools-tab font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-forest/25 ${
                 selected
-                  ? 'bg-bg text-ink shadow-[var(--shadow-float)]'
+                  ? 'bg-bg text-ink shadow-(--shadow-float)'
                   : 'text-muted hover:text-ink'
               }`}
             >

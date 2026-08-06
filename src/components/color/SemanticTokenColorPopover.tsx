@@ -87,7 +87,7 @@ export function SemanticTokenColorPopover({
         role="dialog"
         aria-modal="true"
         aria-labelledby="semantic-token-popover-title"
-        className="z-modal fixed max-h-[min(420px,calc(100vh-16px))] w-72 overflow-y-auto rounded-lg border border-border bg-surface p-3 shadow-[var(--shadow-float)]"
+        className="z-modal fixed max-h-[min(420px,calc(100vh-16px))] w-72 overflow-y-auto rounded-lg border border-border bg-surface p-3 shadow-(--shadow-float)"
         style={{ top: position.top, left: position.left }}
         onClick={(event) => event.stopPropagation()}
         onMouseDown={(event) => event.stopPropagation()}

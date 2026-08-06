@@ -64,7 +64,7 @@ export function RoleSlotStrip({
         className={`flex min-h-0 ${
           expanded
             ? `h-full flex-1 flex-col divide-y divide-white/10 ${
-                isWideLayout ? 'min-h-[420px]' : 'min-h-0'
+                isWideLayout ? 'min-h-105' : 'min-h-0'
               }`
             : 'h-16 shrink-0 border-t border-border'
         }`}

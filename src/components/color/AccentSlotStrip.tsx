@@ -77,7 +77,7 @@ export function AccentSlotStrip({ editable = true, onOpenDetails }: AccentSlotSt
 
       <ul
         className={`flex min-h-0 h-full flex-1 flex-col divide-y divide-white/10 ${
-          isWideLayout ? 'min-h-[420px]' : 'min-h-0'
+          isWideLayout ? 'min-h-105' : 'min-h-0'
         }`}
         aria-label="Familia de acentos"
       >
