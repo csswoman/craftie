@@ -6,14 +6,11 @@ import { useTheme } from 'next-themes';
 
 import { resolveActiveThemeFromUi } from '@lib/color/themePalette';
 
-type Mode = 'light' | 'dark';
+type ThemeToggleProps = {
+  variant?: 'icon' | 'menu';
+};
 
-const MODES: { id: Mode; label: string }[] = [
-  { id: 'light', label: 'Claro' },
-  { id: 'dark', label: 'Oscuro' },
-];
-
-export function ThemeToggle() {
+export function ThemeToggle({ variant = 'icon' }: ThemeToggleProps) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -24,44 +21,31 @@ export function ThemeToggle() {
   }, []);
 
   // Before mount the resolved theme is unknown; render a stable placeholder.
-  const active: Mode = mounted ? resolveActiveThemeFromUi(resolvedTheme) : 'light';
+  const activeTheme = mounted ? resolveActiveThemeFromUi(resolvedTheme) : 'light';
+  const nextTheme = activeTheme === 'light' ? 'dark' : 'light';
+  const NextIcon = nextTheme === 'dark' ? Moon : Sun;
+  const nextThemeLabel = nextTheme === 'dark' ? 'oscuro' : 'claro';
 
-  function handleSelect(mode: Mode) {
+  function handleToggle() {
     // next-themes is the source of truth; RolePaletteContext derives activeTheme from it.
-    setTheme(mode);
+    setTheme(nextTheme);
   }
 
   return (
-    <div
-      className="inline-flex shrink-0 gap-0.5 rounded-lg border border-line/60 bg-surface p-1"
-      role="group"
-      aria-label="Tema de la interfaz: claro u oscuro"
+    <button
+      type="button"
+      aria-label={`Cambiar a tema ${nextThemeLabel}`}
+      title={`Cambiar a tema ${nextThemeLabel}`}
+      disabled={!mounted}
+      onClick={handleToggle}
+      className={
+        variant === 'menu'
+          ? 'flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-chrome-body font-semibold text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-default'
+          : 'inline-grid min-h-11 min-w-11 shrink-0 place-items-center rounded-lg text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-default'
+      }
     >
-      {MODES.map((mode) => {
-        const selected = active === mode.id;
-
-        return (
-          <button
-            key={mode.id}
-            type="button"
-            aria-pressed={selected}
-            aria-label={`Tema ${mode.label.toLowerCase()}`}
-            title={`Tema ${mode.label.toLowerCase()}`}
-            disabled={!mounted}
-            onClick={() => handleSelect(mode.id)}
-            className={`grid min-h-11 min-w-11 place-items-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
-              selected ? 'bg-surface-raised text-ink shadow-sm' : 'text-muted hover:text-ink'
-            }`}
-          >
-            {mode.id === 'light' ? (
-              <Sun size={16} strokeWidth={1.75} aria-hidden="true" />
-            ) : (
-              <Moon size={16} strokeWidth={1.75} aria-hidden="true" />
-            )}
-            <span className="sr-only">{mode.label}</span>
-          </button>
-        );
-      })}
-    </div>
+      <NextIcon size={variant === 'menu' ? 18 : 16} strokeWidth={1.75} aria-hidden="true" className={variant === 'menu' ? 'text-muted' : undefined} />
+      {variant === 'menu' ? <span>Cambiar a tema {nextThemeLabel}</span> : null}
+    </button>
   );
 }
