@@ -55,30 +55,74 @@ export const DOCS_GROUPS: DocsGroup[] = [
         '',
         'Sobre Craftie',
         'Qué es Craftie',
-        'Estudio en una pantalla: inspiración → sistema de color y tipografía → export.',
-        'Craftie convierte un estilo curado o una imagen en roles semánticos, comprueba contraste WCAG, propone tipografía y exporta tokens. Todo en `/`: barra lateral de herramientas, canvas central y menú Exportar. No hay wizard multipágina ni cuenta en la nube.',
+        'Crear, probar y documentar identidad visual antes de implementarla en tu producto.',
+        'Los colores y la tipografía pueden funcionar bien por separado y producir resultados distintos cuando se aplican a una interfaz real. Craftie es una herramienta para experimentar con paletas, roles semánticos y fuentes mientras observas el resultado en componentes e interfaces de ejemplo — en un solo estudio en `/`, sin wizard ni cuenta en la nube.',
         [
           'Roles con temas claro/oscuro y estados (Éxito, Advertencia, Peligro).',
-          '6 acentos para gráficos y destacados.',
-          'Maquetas UI, escala tipográfica y modo Pintar.',
-          'CSS, JSON, DESIGN.md y brand kit.',
+          'Contraste WCAG y lectura APCA al editar.',
+          'Parejas tipográficas y maquetas (Dashboard, Landing, Analytics…).',
+          'Export: CSS, tokens JSON, DESIGN.md y brand kit.',
         ],
         [
-          'Abre `/` → elige estilo o imagen.',
-          'Ajusta en panel Colores (Sistema / Acentos).',
-          '«Crear guía de marca» → revisa canvas → Exportar.',
+          'Abre `/` → estilo curado o imagen.',
+          'Asigna roles en panel Colores → «Crear guía de marca».',
+          'Revisa tipografía y maquetas → Exportar.',
         ],
         [
-          'Propone colores; tú confirmas roles y valores.',
-          'Maquetas con contenido de ejemplo.',
+          'Las maquetas usan contenido de ejemplo, no tu app completa.',
+          'Propone valores; tú confirmas la intención de cada rol.',
         ],
         [
           {
+            heading: 'El problema',
+            paragraphs: [
+              'Una paleta no muestra por sí sola cómo se verá un producto. Un color puede parecer correcto en un swatch y fallar en un botón, un texto, una superficie o un estado interactivo. Una pareja tipográfica puede verse bien en un título corto y perder legibilidad en tablas, formularios o párrafos largos.',
+              'Probar todas esas combinaciones en tu app, en Figma o en un design system suele requerir tiempo y trabajo repetitivo.',
+            ],
+          },
+          {
+            heading: 'La propuesta',
+            paragraphs: [
+              'Craftie permite explorar estas decisiones antes de implementarlas. Empieza con un estilo curado, tus propios colores o una paleta extraída de una imagen. Asigna colores a roles semánticos, deriva temas claro y oscuro, comprueba accesibilidad y combina familias tipográficas.',
+              'Los cambios se reflejan en interfaces de ejemplo para evaluar el sistema completo, no solo muestras aisladas.',
+            ],
+          },
+          {
+            heading: 'Qué puedes hacer',
+            bullets: [
+              'Crear una base visual — inspiración, imagen o colores propios.',
+              'Asignar roles semánticos — fondo, texto, superficie, acción principal, borde y estados.',
+              'Trabajar en OKLCH — luminosidad, intensidad y matiz para variantes y escalas.',
+              'Revisar accesibilidad — contraste WCAG; APCA como lectura perceptual complementaria.',
+              'Probar tipografías — parejas titular/cuerpo, Google Fonts o fuentes locales en contenido real.',
+              'Previsualizar interfaces — botones, navegación, paneles y datos en maquetas del canvas.',
+              'Exportar el sistema — CSS, design tokens, JSON para Tokens Studio, DESIGN.md y brand kit.',
+            ],
+          },
+          {
+            heading: 'Flujo recomendado',
+            bullets: [
+              'Elige inspiración o introduce tus colores.',
+              'Asigna los colores principales a roles semánticos.',
+              'Revisa tema claro y oscuro.',
+              'Corrige problemas de contraste.',
+              'Selecciona y ajusta la tipografía.',
+              'Comprueba distintas interfaces y anchos de ventana.',
+              'Exporta o comparte el resultado.',
+            ],
+          },
+          {
+            heading: 'Craftie no reemplaza tu producto',
+            paragraphs: [
+              'Las interfaces del estudio sirven para explorar y detectar problemas rápido. Antes de publicar una identidad visual, pruébala también en tus componentes, contenidos, dispositivos y condiciones reales.',
+            ],
+          },
+          {
             heading: 'Qué no es',
             bullets: [
-              'No es Coolors ni Adobe Color.',
-              'No hay plugin de Figma ni sync remota.',
-              'No guarda el kit completo entre sesiones (solo preferencias parciales).',
+              'No es un clon de Coolors ni Adobe Color.',
+              'No hay plugin de Figma ni sincronización remota automática.',
+              'No persiste el kit completo entre sesiones (solo preferencias parciales en el navegador).',
             ],
           },
         ],
@@ -239,7 +283,7 @@ export const DOCS_GROUPS: DocsGroup[] = [
           {
             heading: 'Canvas',
             paragraphs: [
-              'Toggle «Ver acentos» / «Ver roles» en la toolbar: el 1 se usa en UI; 2–6 en gráficos.',
+              'En la vista Colores del lienzo, el toggle «Ver acentos» / «Ver roles» de la toolbar: el 1 se usa en UI; 2–6 en gráficos. En mobile, cambia de vista del lienzo con la pestaña Vista del menú inferior.',
             ],
           },
         ],
