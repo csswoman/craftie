@@ -14,7 +14,7 @@ import { CuratedSourceActions } from '@/components/color/CuratedSourceActions';
 import type { CustomFontSubmitInput } from '@/components/font-pairing/CustomFontEntry';
 import { Button } from '@/components/ui/Button';
 
-export type StudioToolSectionId = 'image' | 'source' | 'adjustments' | 'typography';
+export type StudioToolSectionId = 'image' | 'source' | 'adjustments' | 'typography' | 'view';
 
 export type StudioToolSection = {
   id: StudioToolSectionId;

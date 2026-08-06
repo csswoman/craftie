@@ -10,6 +10,8 @@ export function StudioToolDockIcon({ id }: { id: StudioToolSectionId }) {
       return <AdjustmentsIcon />;
     case 'typography':
       return <TypographyIcon />;
+    case 'view':
+      return <ViewIcon />;
   }
 }
 
@@ -82,5 +84,29 @@ function TypographyIcon() {
     <span aria-hidden="true" className="text-[0.9375rem] font-semibold leading-none">
       Aa
     </span>
+  );
+}
+
+function ViewIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 16 16" className="size-5">
+      <rect
+        x="2.5"
+        y="3"
+        width="11"
+        height="10"
+        rx="1.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M2.5 7.5h11M8 7.5v5.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }

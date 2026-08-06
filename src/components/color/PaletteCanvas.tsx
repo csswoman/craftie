@@ -10,10 +10,10 @@ import { PALETTE_ROLE_ORDER } from '@lib/color/rolePalette';
 import type { FontPair } from '@lib/typography/pairings';
 import type { AppliedTypography } from '@lib/typography/typeState';
 import type { TypeScaleBase, TypeScaleRatio } from '@lib/typography/typeScale';
-import type { CanvasViewId } from '@lib/color/canvasViews';
 import type { SelectableColor } from '@lib/color/selectableColors';
 
 import { ColorDetailsDrawer } from '@/components/color-engine/ColorDetailsDrawer';
+import { useCanvasView } from '@/context/CanvasViewContext';
 import { useRolePalette } from '@/context/RolePaletteContext';
 import { PaletteView } from './PaletteView';
 import { PreviewView } from './PreviewView';
@@ -70,10 +70,9 @@ export function PaletteCanvas({
     replaceRole,
     replaceSemanticToken,
   } = useRolePalette();
+  const { activeView, activeMode, selectView } = useCanvasView();
 
-  const [activeView, setActiveView] = useState<CanvasViewId>('colors');
   const [showAccents, setShowAccents] = useState(false);
-  const [activeMode, setActiveMode] = useState<'dashboard' | 'landing' | 'media' | 'analytics'>('dashboard');
   const [selectedColorHex, setSelectedColorHex] = useState<string | null>(null);
   const [selectedAccentSlot, setSelectedAccentSlot] = useState<number | null>(null);
   const liveRolePalette = previewRolePalette ?? rolePalette;
@@ -144,19 +143,8 @@ export function PaletteCanvas({
           imageFileName={imageFileName}
           imageFingerprint={imageFingerprint}
           isUpdating={isUpdating}
-          onToggleAccents={() => {
-            if (activeView !== 'colors') {
-              setActiveView('colors');
-              setShowAccents(true);
-              return;
-            }
-            setShowAccents((visible) => !visible);
-          }}
-          onSelectView={(view) => {
-            setActiveView(view);
-            if (view === 'dashboard' || view === 'landing' || view === 'analytics') setActiveMode(view);
-            if (view === 'player') setActiveMode('media');
-          }}
+          onToggleAccents={() => setShowAccents((visible) => !visible)}
+          onSelectView={selectView}
           onImageFileSelected={onImageFileSelected}
           onImageRegenerate={onImageRegenerate}
         />

@@ -34,34 +34,41 @@ export function PaletteCanvasToolbar({
   onImageRegenerate?: () => void;
 }) {
   const accentsActive = activeView === 'colors' && showAccents;
+  const showAccentsToggle = activeView === 'colors';
 
   return (
-    <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-line/60 px-4 py-3 sm:min-h-13 sm:gap-3 sm:px-6 sm:py-1.5">
-      <div className="hidden min-w-0 sm:block">
-        <p className="truncate text-chrome-label font-semibold text-ink">
-          {accentsActive ? 'Paleta de acentos' : 'Paleta de roles'}
-        </p>
-        <p className="truncate text-chrome-caption text-muted">
-          {accentsActive
-            ? 'El 1 se usa en UI; 2–6 en gráficos.'
-            : 'Edita colores y revisa el contraste.'}
-        </p>
-      </div>
+    <div className="flex shrink-0 flex-nowrap items-center gap-1 border-b border-line/60 px-2.5 py-3 sm:gap-3 sm:px-6 sm:py-1.5">
+      {showAccentsToggle ? (
+        <div className="hidden min-w-0 sm:block">
+          <p className="truncate text-chrome-label font-semibold text-ink">
+            {accentsActive ? 'Paleta de acentos' : 'Paleta de roles'}
+          </p>
+          <p className="truncate text-chrome-caption text-muted">
+            {accentsActive
+              ? 'El 1 se usa en UI; 2–6 en gráficos.'
+              : 'Edita colores y revisa el contraste.'}
+          </p>
+        </div>
+      ) : null}
       {editable ? <PaletteHistoryControls /> : null}
-      <button
-        type="button"
-        aria-pressed={accentsActive}
-        onClick={onToggleAccents}
-        className={`min-h-10 rounded-lg border px-3 text-[0.86rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
-          accentsActive
-            ? 'border-[var(--chrome-green)] bg-[var(--chrome-green-soft)] text-[var(--chrome-green)]'
-            : 'border-border bg-bg text-muted hover:bg-surface-raised hover:text-ink'
-        }`}
-      >
-        {accentsActive ? 'Ver roles' : 'Ver acentos'}
-      </button>
-      <div className="flex w-full flex-wrap items-center gap-2.5 sm:ml-auto sm:w-auto sm:gap-2.5">
-        <CanvasViewSelector activeId={activeView} palette={palette} onSelect={onSelectView} />
+      {showAccentsToggle ? (
+        <button
+          type="button"
+          aria-pressed={accentsActive}
+          onClick={onToggleAccents}
+          className={`min-h-10 shrink-0 rounded-lg border px-2.5 text-[0.86rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 sm:px-3 ${
+            accentsActive
+              ? 'border-[var(--chrome-green)] bg-[var(--chrome-green-soft)] text-[var(--chrome-green)]'
+              : 'border-border bg-bg text-muted hover:bg-surface-raised hover:text-ink'
+          }`}
+        >
+          {accentsActive ? 'Ver roles' : 'Ver acentos'}
+        </button>
+      ) : null}
+      <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2.5">
+        <div className="hidden shrink-0 lg:block [&>div]:min-w-0">
+          <CanvasViewSelector activeId={activeView} palette={palette} onSelect={onSelectView} />
+        </div>
         {imagePreviewUrl && onImageFileSelected && onImageRegenerate ? (
           <>
             <span aria-hidden="true" className="hidden h-[30px] w-px bg-line sm:block" />

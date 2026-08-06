@@ -1,9 +1,15 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { PALETTE_ROLE_ORDER } from '@lib/color/rolePalette';
+import type { CanvasViewId } from '@lib/color/canvasViews';
+
+import { CanvasViewPickerList } from '@/components/color/CanvasViewPickerList';
 import { StudioToolDockIcon } from '@/components/color/studioToolDockIcons';
 import type { StudioToolSection, StudioToolSectionId } from '@/components/color/studioToolSections';
+import { useCanvasViewOptional } from '@/context/CanvasViewContext';
+import { useRolePaletteOptional } from '@/context/RolePaletteContext';
 import { useDialogAccessibility } from '@/lib/browser/useDialogAccessibility';
 import {
   STUDIO_TOOL_FOCUS_EVENT,
@@ -15,14 +21,43 @@ export type StudioToolsMobileDockProps = {
 };
 
 export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) {
+  const canvasView = useCanvasViewOptional();
+  const rolePalette = useRolePaletteOptional();
   const [activeSectionId, setActiveSectionId] = useState<StudioToolSectionId | null>(null);
   const sheetRef = useRef<HTMLElement>(null);
-  const activeSection = sections.find((section) => section.id === activeSectionId) ?? null;
+
+  const livePalette = rolePalette?.previewRolePalette ?? rolePalette?.rolePalette;
+  const hasPalette = livePalette !== null && livePalette !== undefined;
+
+  const palettePreview = useMemo(() => {
+    if (!livePalette) return [] as string[];
+    return PALETTE_ROLE_ORDER.map((role) => livePalette[role].hex);
+  }, [livePalette]);
+
+  const dockSections = useMemo(() => {
+    if (!canvasView || !hasPalette) return sections;
+    const viewSection: StudioToolSection = {
+      id: 'view',
+      label: 'Vista',
+      content: null,
+    };
+    return [...sections, viewSection];
+  }, [canvasView, hasPalette, sections]);
+
+  const activeSection = dockSections.find((section) => section.id === activeSectionId) ?? null;
   const sheetOpen = activeSection !== null;
 
   const closeSheet = useCallback(() => {
     setActiveSectionId(null);
   }, []);
+
+  const handleSelectView = useCallback(
+    (view: CanvasViewId) => {
+      canvasView?.selectView(view);
+      setActiveSectionId(null);
+    },
+    [canvasView],
+  );
 
   useDialogAccessibility({
     open: sheetOpen,
@@ -37,7 +72,7 @@ export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) 
       const sectionId = (event as CustomEvent<{ sectionId: StudioToolSectionFocusId }>).detail
         ?.sectionId;
 
-      if (!sectionId || !sections.some((section) => section.id === sectionId)) {
+      if (!sectionId || !dockSections.some((section) => section.id === sectionId)) {
         return;
       }
 
@@ -49,7 +84,7 @@ export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) 
 
     window.addEventListener(STUDIO_TOOL_FOCUS_EVENT, handleToolFocus);
     return () => window.removeEventListener(STUDIO_TOOL_FOCUS_EVENT, handleToolFocus);
-  }, [sections]);
+  }, [dockSections]);
 
   function handleSectionPress(sectionId: StudioToolSectionId) {
     setActiveSectionId((current) => (current === sectionId ? null : sectionId));
@@ -61,13 +96,13 @@ export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) 
         <button
           type="button"
           aria-label="Cerrar herramientas"
-          className="fixed inset-0 z-[25] bg-ink/20 motion-reduce:transition-none xl:hidden"
+          className="fixed inset-0 z-25 bg-ink/20 motion-reduce:transition-none lg:hidden"
           onClick={closeSheet}
         />
       ) : null}
 
       <div
-        className="fixed inset-x-0 bottom-0 z-[26] flex flex-col xl:hidden"
+        className="fixed inset-x-0 bottom-0 z-26 flex flex-col lg:hidden"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
         {sheetOpen && activeSection ? (
@@ -75,12 +110,12 @@ export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) 
             ref={sheetRef}
             role="dialog"
             aria-modal="true"
-            aria-label={activeSection.label}
-            className="flex max-h-[min(58vh,28rem)] min-h-0 flex-col overflow-hidden rounded-t-2xl border border-b-0 border-border bg-bg shadow-[var(--shadow-float)] motion-reduce:transition-none"
+            aria-label={activeSection.id === 'view' ? 'Vistas del lienzo' : activeSection.label}
+            className="flex max-h-[min(58vh,28rem)] min-h-0 flex-col overflow-hidden rounded-t-2xl border border-b-0 border-border bg-bg shadow-(--shadow-float) motion-reduce:transition-none"
           >
             <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border/70 px-4 py-2.5">
               <p className="min-w-0 truncate text-tools-section font-semibold text-ink">
-                {activeSection.label}
+                {activeSection.id === 'view' ? 'Vistas del lienzo' : activeSection.label}
               </p>
               <button
                 type="button"
@@ -92,8 +127,16 @@ export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) 
                 <CloseIcon />
               </button>
             </div>
-            <div className="studio-tools-panel scrollbar-chrome min-h-0 flex-1 overflow-y-auto p-[var(--chrome-space-3)]">
-              {activeSection.content}
+            <div className="studio-tools-panel scrollbar-chrome min-h-0 flex-1 overflow-y-auto p-(--chrome-space-3)">
+              {activeSection.id === 'view' && canvasView ? (
+                <CanvasViewPickerList
+                  activeId={canvasView.activeView}
+                  palette={palettePreview}
+                  onSelect={handleSelectView}
+                />
+              ) : (
+                activeSection.content
+              )}
             </div>
           </section>
         ) : null}
@@ -103,7 +146,7 @@ export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) 
           className="border-t border-border bg-bg/95 backdrop-blur-sm"
         >
           <div className="flex items-stretch gap-1 px-2 py-2">
-            {sections.map((section) => (
+            {dockSections.map((section) => (
               <DockTab
                 key={section.id}
                 sectionId={section.id}
@@ -138,7 +181,7 @@ function DockTab({
       onClick={onPress}
       className={`flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg px-1 py-1.5 transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
         active
-          ? 'bg-[var(--chrome-green-soft)] text-ink'
+          ? 'bg-(--chrome-green-soft) text-ink'
           : 'text-muted hover:bg-surface-raised hover:text-ink'
       }`}
     >

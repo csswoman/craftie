@@ -1,4 +1,4 @@
-export type StudioToolSectionFocusId = 'image' | 'source' | 'adjustments' | 'typography';
+export type StudioToolSectionFocusId = 'image' | 'source' | 'adjustments' | 'typography' | 'view';
 
 export const STUDIO_TOOL_FOCUS_EVENT = 'craftie:focus-studio-tool';
 

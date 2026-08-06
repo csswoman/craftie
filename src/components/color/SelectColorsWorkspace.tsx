@@ -17,12 +17,15 @@ import { useSelectColorsWorkspaceController } from '@/components/color/useSelect
 import { StyleGallery } from '@/components/color-engine/StyleGallery';
 import { StudioCanvas } from '@/components/layout/StudioCanvas';
 import { WorkspaceHeader } from '@/components/layout/WorkspaceHeader';
+import { CanvasViewProvider } from '@/context/CanvasViewContext';
 import { RolePaletteProvider } from '@/context/RolePaletteContext';
 
 export function SelectColorsWorkspace() {
   return (
     <RolePaletteProvider>
-      <SelectColorsWorkspaceContent />
+      <CanvasViewProvider>
+        <SelectColorsWorkspaceContent />
+      </CanvasViewProvider>
     </RolePaletteProvider>
   );
 }
@@ -140,7 +143,7 @@ function SelectColorsWorkspaceContent() {
   }
 
   return (
-    <div className="canvas-dots flex min-h-dvh flex-col xl:h-dvh xl:min-h-0 xl:overflow-hidden">
+    <div className="canvas-dots flex min-h-dvh flex-col lg:h-dvh lg:min-h-0 lg:overflow-hidden">
       {sharedChrome}
 
       <StudioCanvas
