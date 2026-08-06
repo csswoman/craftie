@@ -5,6 +5,7 @@ import {
   oklchChannelsToHex,
 } from '../utils/colorMath';
 import { normalizeHex } from './normalizeHex';
+import type { ThemeId } from './themePalette';
 import type { PaletteRoleId } from './roleTypes';
 
 const AA_RATIO = 4.5;
@@ -13,6 +14,8 @@ export type RandomRoleColorContext = {
   fondoHex?: string;
   superficieHex?: string;
   textoHex?: string;
+  /** Active theme band for sampling. Defaults to light. */
+  theme?: ThemeId;
 };
 
 type RoleRange = {
@@ -22,14 +25,25 @@ type RoleRange = {
   cMax: number;
 };
 
-const ROLE_RANGES: Record<PaletteRoleId, RoleRange> = {
-  fondo: { lMin: 0.92, lMax: 0.98, cMin: 0, cMax: 0.03 },
-  superficie: { lMin: 0.88, lMax: 0.96, cMin: 0, cMax: 0.04 },
-  texto: { lMin: 0.18, lMax: 0.42, cMin: 0, cMax: 0.05 },
-  primario: { lMin: 0.42, lMax: 0.68, cMin: 0.08, cMax: 0.2 },
-  secundario: { lMin: 0.4, lMax: 0.7, cMin: 0.06, cMax: 0.18 },
-  acento: { lMin: 0.45, lMax: 0.72, cMin: 0.1, cMax: 0.22 },
-  borde: { lMin: 0.55, lMax: 0.78, cMin: 0, cMax: 0.04 },
+const ROLE_RANGES: Record<ThemeId, Record<PaletteRoleId, RoleRange>> = {
+  light: {
+    fondo: { lMin: 0.92, lMax: 0.98, cMin: 0, cMax: 0.03 },
+    superficie: { lMin: 0.88, lMax: 0.96, cMin: 0, cMax: 0.04 },
+    texto: { lMin: 0.18, lMax: 0.42, cMin: 0, cMax: 0.05 },
+    primario: { lMin: 0.42, lMax: 0.68, cMin: 0.08, cMax: 0.2 },
+    secundario: { lMin: 0.4, lMax: 0.7, cMin: 0.06, cMax: 0.18 },
+    acento: { lMin: 0.45, lMax: 0.72, cMin: 0.1, cMax: 0.22 },
+    borde: { lMin: 0.55, lMax: 0.78, cMin: 0, cMax: 0.04 },
+  },
+  dark: {
+    fondo: { lMin: 0.12, lMax: 0.2, cMin: 0, cMax: 0.03 },
+    superficie: { lMin: 0.16, lMax: 0.26, cMin: 0, cMax: 0.04 },
+    texto: { lMin: 0.88, lMax: 0.96, cMin: 0, cMax: 0.05 },
+    primario: { lMin: 0.58, lMax: 0.78, cMin: 0.08, cMax: 0.2 },
+    secundario: { lMin: 0.56, lMax: 0.8, cMin: 0.06, cMax: 0.18 },
+    acento: { lMin: 0.58, lMax: 0.82, cMin: 0.1, cMax: 0.22 },
+    borde: { lMin: 0.28, lMax: 0.42, cMin: 0, cMax: 0.04 },
+  },
 };
 
 function lerp(min: number, max: number, t: number): number {
@@ -61,15 +75,17 @@ function ensureBackgroundAa(hex: string, textHex: string): string {
 }
 
 /**
- * Builds a random OKLCH color suited to a palette role. When contrast context is
- * provided, texto / fondo / superficie are nudged to AA with the paired roles.
+ * Builds a random OKLCH color suited to a palette role and theme band.
+ * When contrast context is provided, texto / fondo / superficie are nudged to AA
+ * with the paired roles.
  */
 export function randomRoleColor(
   role: PaletteRoleId,
   context: RandomRoleColorContext = {},
   random: () => number = Math.random,
 ): string {
-  const sample = sampleInRange(ROLE_RANGES[role], random);
+  const theme = context.theme ?? 'light';
+  const sample = sampleInRange(ROLE_RANGES[theme][role], random);
   let hex = normalizeHex(oklchChannelsToHex(sample.l, sample.c, sample.h));
 
   if (role === 'texto') {

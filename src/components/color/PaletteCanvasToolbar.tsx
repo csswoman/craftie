@@ -5,6 +5,7 @@ import type { CanvasViewId } from '@lib/color/canvasViews';
 import { CanvasViewSelector } from './CanvasViewSelector';
 import { PaletteHistoryControls } from './PaletteHistoryControls';
 import { PaletteImageBlock } from './PaletteImageBlock';
+import { PaletteRandomizeButton } from './PaletteRandomizeButton';
 
 export function PaletteCanvasToolbar({
   activeView,
@@ -50,7 +51,12 @@ export function PaletteCanvasToolbar({
           </p>
         </div>
       ) : null}
-      {editable ? <PaletteHistoryControls /> : null}
+      {editable ? (
+        <>
+          <PaletteHistoryControls />
+          <PaletteRandomizeButton />
+        </>
+      ) : null}
       {showAccentsToggle ? (
         <button
           type="button"

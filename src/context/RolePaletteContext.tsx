@@ -135,6 +135,68 @@ type EditablePaletteState = {
   forcedStatusColors: Partial<Record<UiStatusRole, ForcedStatusColor>>;
 };
 
+function applySemanticTokenHex(
+  current: EditablePaletteState,
+  tokenName: SemanticTokenName,
+  hex: string,
+  options: {
+    activeTheme: ThemeId;
+    extractedColors: ExtractedColor[];
+    paletteType: PaletteType | undefined;
+  },
+): EditablePaletteState {
+  const normalized = normalizeHex(hex);
+  const syncedNames = [tokenName, ...accentFamilyCompanionTokens(tokenName)];
+  const counterpartRole = counterpartRoleForAccentFamilySync(tokenName);
+  const otherTheme = oppositeTheme(options.activeTheme);
+
+  const activeOverrides = stripPairedOnTokens(
+    syncAccentFamilyOverrides(
+      current.tokenOverridesByTheme[options.activeTheme],
+      tokenName,
+      normalized,
+    ),
+    syncedNames,
+  );
+
+  let otherOverrides: SemanticTokenOverrides = {
+    ...current.tokenOverridesByTheme[otherTheme],
+  };
+
+  if (counterpartRole) {
+    const otherBase = deriveSemanticTokens({
+      extracted: options.extractedColors,
+      overrides: otherOverrides,
+      theme: otherTheme,
+      neutralStyle: current.neutralStyle,
+      vibrancy: current.savedVibrancy,
+      paletteType: options.paletteType,
+    });
+    const counterpart = counterpartRoleColorForTheme(normalized, counterpartRole, otherTheme, {
+      fondoHex: otherBase.background.hex,
+      superficieHex: otherBase.surface.hex,
+      textoHex: otherBase['on-background'].hex,
+    });
+
+    otherOverrides = stripPairedOnTokens(
+      syncAccentFamilyOverrides(otherOverrides, tokenName, counterpart),
+      syncedNames,
+    );
+  }
+
+  return {
+    ...current,
+    tokenOverridesByTheme: {
+      ...current.tokenOverridesByTheme,
+      [options.activeTheme]: activeOverrides,
+      [otherTheme]: otherOverrides,
+    },
+    clearedSemanticTokens: current.clearedSemanticTokens.filter(
+      (name) => !syncedNames.includes(name),
+    ),
+  };
+}
+
 const INITIAL_EDITABLE: EditablePaletteState = {
   tokenOverridesByTheme: EMPTY_OVERRIDES_BY_THEME,
   clearedSemanticTokens: [],
@@ -184,6 +246,7 @@ export type RolePaletteContextValue = {
   setActiveTheme: (theme: ThemeId) => void;
   setActiveRole: (role: PaletteRoleId | null) => void;
   replaceRole: (role: PaletteRoleId, hex: string) => void;
+  replaceRoles: (hexByRole: Partial<Record<PaletteRoleId, string>>) => void;
   replaceSemanticToken: (tokenName: SemanticTokenName, hex: string) => void;
   clearSemanticToken: (tokenName: SemanticTokenName) => void;
   generateStatusColors: () => void;
@@ -486,67 +549,54 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   }, []);
 
   const replaceSemanticToken = useCallback((tokenName: SemanticTokenName, hex: string) => {
-    const normalized = normalizeHex(hex);
-    const syncedNames = [tokenName, ...accentFamilyCompanionTokens(tokenName)];
-    const counterpartRole = counterpartRoleForAccentFamilySync(tokenName);
-    const otherTheme = oppositeTheme(activeTheme);
-
     // Persist the chosen hex for the active theme and a same-hue counterpart for the other.
     // Accent ↔ data-1 stay in sync as the shared "Acento 1" family slot.
-    commitEdit((current) => {
-      const activeOverrides = stripPairedOnTokens(
-        syncAccentFamilyOverrides(
-          current.tokenOverridesByTheme[activeTheme],
-          tokenName,
-          normalized,
-        ),
-        syncedNames,
-      );
-
-      let otherOverrides: SemanticTokenOverrides = {
-        ...current.tokenOverridesByTheme[otherTheme],
-      };
-
-      if (counterpartRole) {
-        const otherBase = deriveSemanticTokens({
-          extracted: extractedColors,
-          overrides: otherOverrides,
-          theme: otherTheme,
-          neutralStyle: current.neutralStyle,
-          vibrancy: current.savedVibrancy,
-          paletteType,
-        });
-        const counterpart = counterpartRoleColorForTheme(normalized, counterpartRole, otherTheme, {
-          fondoHex: otherBase.background.hex,
-          superficieHex: otherBase.surface.hex,
-          textoHex: otherBase['on-background'].hex,
-        });
-
-        otherOverrides = stripPairedOnTokens(
-          syncAccentFamilyOverrides(otherOverrides, tokenName, counterpart),
-          syncedNames,
-        );
-      }
-
-      return {
-        ...current,
-        tokenOverridesByTheme: {
-          ...current.tokenOverridesByTheme,
-          [activeTheme]: activeOverrides,
-          [otherTheme]: otherOverrides,
-        },
-        clearedSemanticTokens: current.clearedSemanticTokens.filter(
-          (name) => !syncedNames.includes(name),
-        ),
-      };
-    });
+    commitEdit((current) =>
+      applySemanticTokenHex(current, tokenName, hex, {
+        activeTheme,
+        extractedColors,
+        paletteType,
+      }),
+    );
     setTokenEditPreviewState(null);
   }, [activeTheme, commitEdit, extractedColors, paletteType]);
+
   const replaceRole = useCallback(
     (role: PaletteRoleId, hex: string) => {
       replaceSemanticToken(tokenNameForPaletteRole(role), hex);
     },
     [replaceSemanticToken],
+  );
+
+  const replaceRoles = useCallback(
+    (hexByRole: Partial<Record<PaletteRoleId, string>>) => {
+      const entries = PALETTE_ROLE_ORDER.flatMap((role) => {
+        const hex = hexByRole[role];
+        return hex ? ([[role, hex]] as const) : [];
+      });
+      if (entries.length === 0) return;
+
+      // Neutrals last again so opposite-theme counterparts re-nudge AA against
+      // the final fondo / superficie / texto pair on the other theme.
+      const neutralRefresh = (['fondo', 'superficie', 'texto'] as const).flatMap((role) => {
+        const hex = hexByRole[role];
+        return hex ? ([[role, hex]] as const) : [];
+      });
+
+      commitEdit((current) => {
+        let next = current;
+        const applyOpts = { activeTheme, extractedColors, paletteType };
+        for (const [role, hex] of entries) {
+          next = applySemanticTokenHex(next, tokenNameForPaletteRole(role), hex, applyOpts);
+        }
+        for (const [role, hex] of neutralRefresh) {
+          next = applySemanticTokenHex(next, tokenNameForPaletteRole(role), hex, applyOpts);
+        }
+        return next;
+      });
+      setTokenEditPreviewState(null);
+    },
+    [activeTheme, commitEdit, extractedColors, paletteType],
   );
 
   const clearSemanticToken = useCallback((tokenName: SemanticTokenName) => {
@@ -790,6 +840,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       setActiveTheme,
       setActiveRole,
       replaceRole,
+      replaceRoles,
       replaceSemanticToken,
       clearSemanticToken,
       generateStatusColors,
@@ -837,6 +888,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       setNeutralStyle,
       setActiveTheme,
       replaceRole,
+      replaceRoles,
       replaceSemanticToken,
       clearSemanticToken,
       generateStatusColors,

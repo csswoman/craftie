@@ -52,4 +52,23 @@ describe('randomRoleColor', () => {
     const b = randomRoleColor('acento', {}, sequence([0.8, 0.6, 0.9]));
     expect(a).not.toBe(b);
   });
+
+  it('samples dark-band lightness for fondo and texto in dark theme', () => {
+    const fondo = randomRoleColor('fondo', { theme: 'dark' }, sequence([0.5, 0.5, 0.5]));
+    const texto = randomRoleColor('texto', { theme: 'dark' }, sequence([0.5, 0.5, 0.5]));
+
+    expect(hexToOklchChannels(fondo).l).toBeLessThan(0.35);
+    expect(hexToOklchChannels(texto).l).toBeGreaterThan(0.75);
+  });
+
+  it('keeps dark texto AA against dark surfaces when context is provided', () => {
+    const hex = randomRoleColor(
+      'texto',
+      { theme: 'dark', fondoHex: '#14181A', superficieHex: '#1C2226' },
+      sequence([0.1, 0.4, 0.9]),
+    );
+
+    expect(contrastRatio(hex, '#14181A')).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(hex, '#1C2226')).toBeGreaterThanOrEqual(4.5);
+  });
 });

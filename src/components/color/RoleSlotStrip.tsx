@@ -31,7 +31,7 @@ export function RoleSlotStrip({
   onSelectRole,
   onOpenDetails,
 }: RoleSlotStripProps) {
-  const { toggleLock, replaceRole, rolePalette } = useRolePalette();
+  const { toggleLock, replaceRole, rolePalette, activeTheme } = useRolePalette();
   const isWideLayout = useMinWidthQuery(1024);
   const lockedSet = new Set(lockedRoles);
   const expanded = variant === 'expanded';
@@ -98,6 +98,7 @@ export function RoleSlotStrip({
                 replaceRole(
                   role,
                   randomRoleColor(role, {
+                    theme: activeTheme,
                     fondoHex: rolePalette.fondo.hex,
                     superficieHex: rolePalette.superficie.hex,
                     textoHex: rolePalette.texto.hex,
