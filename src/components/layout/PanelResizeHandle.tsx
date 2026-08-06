@@ -85,7 +85,7 @@ export function PanelResizeHandle({
       tabIndex={0}
       onPointerDown={handlePointerDown}
       onKeyDown={handleKeyDown}
-      className="group/handle relative hidden w-4 shrink-0 cursor-col-resize focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 focus-visible:ring-inset xl:block"
+      className="group/handle relative hidden w-4 shrink-0 cursor-col-resize focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 focus-visible:ring-inset lg:block"
     >
       <span
         aria-hidden="true"

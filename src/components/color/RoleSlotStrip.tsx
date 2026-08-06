@@ -32,7 +32,7 @@ export function RoleSlotStrip({
   onOpenDetails,
 }: RoleSlotStripProps) {
   const { toggleLock, replaceRole, rolePalette } = useRolePalette();
-  const isWideLayout = useMinWidthQuery(1280);
+  const isWideLayout = useMinWidthQuery(1024);
   const lockedSet = new Set(lockedRoles);
   const expanded = variant === 'expanded';
   const [shadesOpenRole, setShadesOpenRole] = useState<PaletteRoleId | null>(null);

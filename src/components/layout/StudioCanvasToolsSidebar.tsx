@@ -41,8 +41,8 @@ export function StudioCanvasToolsSidebar({
       aria-label="Herramientas"
       className={
         collapsed
-          ? 'hidden shrink-0 xl:flex'
-          : 'hidden min-h-0 shrink-0 flex-col xl:flex xl:h-full'
+          ? 'hidden shrink-0 lg:flex'
+          : 'hidden min-h-0 shrink-0 flex-col lg:flex lg:h-full'
       }
       style={collapsed ? undefined : ({ width: STUDIO_TOOLS_SIDEBAR_WIDTH } satisfies CSSProperties)}
     >

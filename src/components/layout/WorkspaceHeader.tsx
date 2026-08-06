@@ -37,7 +37,7 @@ export function WorkspaceHeader({
   onExportBrandKit,
 }: WorkspaceHeaderProps) {
   return (
-    <header className="relative z-sticky shrink-0 px-4 pt-4 xl:px-4 xl:pt-4">
+    <header className="relative z-sticky shrink-0 px-2 pt-2 xl:px-4 xl:pt-4">
       <div className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-border bg-bg px-4 py-2.5 xl:px-4">
         <button
           type="button"
@@ -45,7 +45,7 @@ export function WorkspaceHeader({
           aria-label="Volver al inicio"
           className="shrink-0 text-ink transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
         >
-          <h1 className="font-display text-[var(--chrome-text-display)] font-medium leading-none">
+          <h1 className="font-display text-(--chrome-text-display) font-medium leading-none">
             Craftie
           </h1>
         </button>
@@ -181,7 +181,7 @@ function WorkspaceMobileMenu() {
             onClick={() => setOpen(false)}
             className="flex min-h-12 items-center gap-3 rounded-lg px-3 text-chrome-body font-semibold text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           >
-            <BookOpen className="size-[18px] text-muted" aria-hidden="true" strokeWidth={1.8} />
+            <BookOpen className="size-4.5 text-muted" aria-hidden="true" strokeWidth={1.8} />
             Documentación
           </Link>
           <ThemeToggle variant="menu" />
@@ -194,7 +194,7 @@ function WorkspaceMobileMenu() {
               className="flex min-h-12 w-full items-center justify-between rounded-lg px-3 text-left text-chrome-body font-semibold text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
             >
               <span className="flex items-center gap-3">
-                <HintIcon className="size-[18px]" />
+                <HintIcon className="size-4.5" />
                 Guía rápida
               </span>
               <span className="text-muted" aria-hidden="true">{showHelp ? '−' : '+'}</span>

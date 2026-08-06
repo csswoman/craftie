@@ -31,7 +31,7 @@ export function StudioStatusBar({
     <div
       className={`pointer-events-none fixed inset-x-0 z-sticky flex justify-center px-4 ${
         mobileDockOffset
-          ? 'bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] xl:bottom-4'
+          ? 'bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] lg:bottom-4'
           : 'bottom-4'
       }`}
     >

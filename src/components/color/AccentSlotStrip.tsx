@@ -27,7 +27,7 @@ export function AccentSlotStrip({ editable = true, onOpenDetails }: AccentSlotSt
     rolePalette,
     replaceSemanticToken,
   } = useRolePalette();
-  const isWideLayout = useMinWidthQuery(1280);
+  const isWideLayout = useMinWidthQuery(1024);
   const [activeIndex, setActiveIndex] = useState(0);
   const [varyCursorBySlot, setVaryCursorBySlot] = useState<Record<number, number>>({});
   const [copyMessage, setCopyMessage] = useState<string | null>(null);

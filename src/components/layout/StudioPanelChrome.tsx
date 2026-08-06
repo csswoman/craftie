@@ -17,7 +17,7 @@ export function PanelCollapseBar({
   return (
     <div
       className={`shrink-0 items-center border-b border-border bg-surface px-3 py-2 ${
-        alwaysVisible ? 'flex' : 'hidden xl:flex'
+        alwaysVisible ? 'flex' : 'hidden lg:flex'
       } ${align === 'end' ? 'justify-end' : 'justify-start'}`}
     >
       <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
