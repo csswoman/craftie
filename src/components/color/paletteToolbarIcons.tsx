@@ -90,3 +90,13 @@ export function RandomColorIcon() {
     </IconFrame>
   );
 }
+
+export function MoreActionsIcon() {
+  return (
+    <IconFrame>
+      <circle cx="5" cy="10" r="1.25" fill="currentColor" />
+      <circle cx="10" cy="10" r="1.25" fill="currentColor" />
+      <circle cx="15" cy="10" r="1.25" fill="currentColor" />
+    </IconFrame>
+  );
+}

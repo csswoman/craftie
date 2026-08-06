@@ -8,6 +8,8 @@ import { ContrastBadge } from '@/components/color-engine/ContrastBadge';
 
 import { PaletteColumnToolbar } from './PaletteColumnToolbar';
 import { PaletteShadesOverlay } from './PaletteShadesOverlay';
+import { PaletteSlotOverflowMenu } from './PaletteSlotOverflowMenu';
+import { buildRoleSlotOverflowItems } from './roleSlotOverflowItems';
 
 export type RoleSlotCellProps = {
   column: PaletteColumnDisplay;
@@ -52,6 +54,7 @@ export function RoleSlotCell({
   const mobileExpanded = expanded && !isWideLayout;
   const failBadges = column.contrastBadges?.filter((badge) => badge.status === 'fail') ?? [];
   const hasContrastFail = failBadges.length > 0;
+  const roleLabel = column.roleLabel ?? role;
   const toolbarProps = {
     hoverGroup: 'slot' as const,
     locked,
@@ -68,6 +71,17 @@ export function RoleSlotCell({
     onOpenInfo: () => onOpenDetails(column.hex),
     onRandomizeColor,
   };
+
+  const overflowItems = buildRoleSlotOverflowItems({
+    editable,
+    locked,
+    showShades,
+    onRandomizeColor,
+    onToggleShades,
+    onCopyHex,
+    onOpenInfo: () => onOpenDetails(column.hex),
+    onToggleLock,
+  });
 
   return (
     <li className="relative flex min-h-0 min-w-0 flex-1">
@@ -88,9 +102,7 @@ export function RoleSlotCell({
         style={{ backgroundColor: column.hex, color: textColor }}
         data-contrast-fail={hasContrastFail ? 'true' : undefined}
       >
-        {!showShades && isWideLayout ? (
-          <PaletteColumnToolbar {...toolbarProps} />
-        ) : null}
+        {!showShades && isWideLayout ? <PaletteColumnToolbar {...toolbarProps} /> : null}
 
         {showShades ? (
           <PaletteShadesOverlay
@@ -104,7 +116,11 @@ export function RoleSlotCell({
         {locked ? (
           <span
             className={`absolute z-10 size-2 rounded-full bg-white/80 ${
-              expanded ? 'right-4 top-4' : 'right-1 top-1 size-1.5'
+              mobileExpanded
+                ? 'right-14 top-3.5'
+                : expanded
+                  ? 'right-4 top-4'
+                  : 'right-1 top-1 size-1.5'
             }`}
             aria-label="Bloqueado"
           />
@@ -131,10 +147,21 @@ export function RoleSlotCell({
           <button
             type="button"
             aria-pressed={isActive}
-            aria-label={`${column.roleLabel ?? role}: ${column.name}, ${column.hex}${
-              hasContrastFail ? ', contraste insuficiente AA' : ''
-            }`}
-            onClick={() => onSelectRole(role)}
+            aria-label={
+              mobileExpanded
+                ? `${roleLabel}: ${column.name}, ${column.hex}. Tocar para copiar HEX${
+                    hasContrastFail ? '. Contraste insuficiente AA' : ''
+                  }`
+                : `${roleLabel}: ${column.name}, ${column.hex}${
+                    hasContrastFail ? ', contraste insuficiente AA' : ''
+                  }`
+            }
+            onClick={() => {
+              onSelectRole(role);
+              if (mobileExpanded) {
+                onCopyHex();
+              }
+            }}
             className={`min-w-0 cursor-pointer border-0 bg-transparent text-inherit focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
               expanded
                 ? `flex-1 text-left ${mobileExpanded ? 'pr-1' : ''}`
@@ -150,7 +177,7 @@ export function RoleSlotCell({
                   : 'px-0.5 text-chrome-caption'
               }`}
             >
-              {column.roleLabel ?? role}
+              {roleLabel}
             </span>
             {expanded ? (
               <>
@@ -198,10 +225,10 @@ export function RoleSlotCell({
         ) : null}
 
         {!showShades && mobileExpanded ? (
-          <PaletteColumnToolbar
-            {...toolbarProps}
-            layout="inline"
-            alwaysVisible
+          <PaletteSlotOverflowMenu
+            label={`Más acciones de ${roleLabel}`}
+            lightChrome={lightChrome}
+            items={overflowItems}
           />
         ) : null}
       </div>

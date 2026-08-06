@@ -2,6 +2,7 @@
 
 import { pickReadableTextColor, prefersLightSelectionRing } from '@lib/color/readableText';
 
+import { PaletteSlotOverflowMenu } from './PaletteSlotOverflowMenu';
 import { PaletteToolbarIconButton } from './PaletteToolbarIconButton';
 import { CopyIcon, InfoIcon, RandomColorIcon } from './paletteToolbarIcons';
 
@@ -38,19 +39,13 @@ export function AccentSlotCell({
   const lightChrome = assigned ? prefersLightSelectionRing(hex) : true;
   const mobileExpanded = expanded && !isWideLayout;
 
-  const toolbar = (
-    <div
-      className={`pointer-events-none absolute z-10 flex inset-x-0 top-4 justify-center opacity-0 transition-opacity group-hover/accent:opacity-100 group-focus-within/accent:opacity-100 ${
-        mobileExpanded ? 'static opacity-100' : ''
-      }`}
-    >
-      <div className={`pointer-events-auto flex items-center gap-1.5 ${mobileExpanded ? 'flex-row flex-wrap justify-end' : ''}`}>
+  const desktopToolbar = (
+    <div className="pointer-events-none absolute z-10 flex inset-x-0 top-4 justify-center opacity-0 transition-opacity group-hover/accent:opacity-100 group-focus-within/accent:opacity-100">
+      <div className="pointer-events-auto flex items-center gap-1.5">
         {editable ? (
           <PaletteToolbarIconButton
             label={`Variar ${label}`}
             lightChrome={lightChrome}
-            compact={mobileExpanded}
-            showTooltip={!mobileExpanded}
             onClick={onVary}
           >
             <RandomColorIcon />
@@ -61,8 +56,6 @@ export function AccentSlotCell({
             <PaletteToolbarIconButton
               label="Copiar HEX"
               lightChrome={lightChrome}
-              compact={mobileExpanded}
-              showTooltip={!mobileExpanded}
               onClick={onCopyHex}
             >
               <CopyIcon />
@@ -70,8 +63,6 @@ export function AccentSlotCell({
             <PaletteToolbarIconButton
               label="Ver info del color"
               lightChrome={lightChrome}
-              compact={mobileExpanded}
-              showTooltip={!mobileExpanded}
               onClick={() => onOpenDetails(hex)}
             >
               <InfoIcon />
@@ -81,6 +72,22 @@ export function AccentSlotCell({
       </div>
     </div>
   );
+
+  const overflowItems = [
+    ...(editable
+      ? [{ id: 'vary', label: `Variar ${label}`, onSelect: onVary }]
+      : []),
+    ...(assigned
+      ? [
+          { id: 'copy', label: 'Copiar HEX', onSelect: onCopyHex },
+          {
+            id: 'info',
+            label: 'Info del color',
+            onSelect: () => onOpenDetails(hex),
+          },
+        ]
+      : []),
+  ];
 
   return (
     <li className="relative flex min-h-0 min-w-0 flex-1">
@@ -98,13 +105,24 @@ export function AccentSlotCell({
         }`}
         style={{ backgroundColor: fill, color: textColor }}
       >
-        {!mobileExpanded ? toolbar : null}
+        {!mobileExpanded ? desktopToolbar : null}
 
         <button
           type="button"
           aria-pressed={isActive}
-          aria-label={assigned ? `${label}: ${name}, ${hex}` : `${label}: sin asignar`}
-          onClick={onSelect}
+          aria-label={
+            assigned
+              ? mobileExpanded
+                ? `${label}: ${name}, ${hex}. Tocar para copiar HEX`
+                : `${label}: ${name}, ${hex}`
+              : `${label}: sin asignar`
+          }
+          onClick={() => {
+            onSelect();
+            if (mobileExpanded && assigned) {
+              onCopyHex();
+            }
+          }}
           className={`min-w-0 cursor-pointer border-0 bg-transparent text-inherit focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
             expanded
               ? `flex-1 text-left ${mobileExpanded ? 'pr-1' : ''}`
@@ -149,7 +167,13 @@ export function AccentSlotCell({
           ) : null}
         </button>
 
-        {mobileExpanded ? toolbar : null}
+        {mobileExpanded && overflowItems.length > 0 ? (
+          <PaletteSlotOverflowMenu
+            label={`Más acciones de ${label}`}
+            lightChrome={lightChrome}
+            items={overflowItems}
+          />
+        ) : null}
       </div>
     </li>
   );
