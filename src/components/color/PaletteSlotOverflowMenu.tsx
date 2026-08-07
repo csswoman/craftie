@@ -1,6 +1,9 @@
 'use client';
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+
+import { computeAnchoredMenuPosition } from '@/lib/browser/computeAnchoredMenuPosition';
 
 import { MoreActionsIcon } from './paletteToolbarIcons';
 
@@ -10,6 +13,10 @@ export type PaletteSlotOverflowItem = {
   disabled?: boolean;
   onSelect: () => void;
 };
+
+const MENU_MIN_WIDTH = 176;
+const MENU_ITEM_HEIGHT = 44;
+const MENU_VERTICAL_PADDING = 8;
 
 export function PaletteSlotOverflowMenu({
   label,
@@ -21,17 +28,50 @@ export function PaletteSlotOverflowMenu({
   items: PaletteSlotOverflowItem[];
 }) {
   const [open, setOpen] = useState(false);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
   const menuId = useId();
-  const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (!open) {
+      // Clear stale coordinates when the menu closes.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setMenuPosition(null);
+      return;
+    }
+
+    function updatePosition() {
+      const trigger = triggerRef.current;
+      if (!trigger) return;
+
+      const measured = menuRef.current?.getBoundingClientRect();
+      const height =
+        measured?.height || items.length * MENU_ITEM_HEIGHT + MENU_VERTICAL_PADDING;
+      const width = Math.max(measured?.width ?? 0, MENU_MIN_WIDTH);
+
+      setMenuPosition(
+        computeAnchoredMenuPosition(trigger.getBoundingClientRect(), { width, height }),
+      );
+    }
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [open, items.length]);
 
   useEffect(() => {
     if (!open) return;
 
     function handlePointerDown(event: MouseEvent) {
       const target = event.target as Node;
-      if (rootRef.current?.contains(target)) return;
+      if (menuRef.current?.contains(target) || triggerRef.current?.contains(target)) {
+        return;
+      }
       setOpen(false);
     }
 
@@ -49,7 +89,7 @@ export function PaletteSlotOverflowMenu({
       document.removeEventListener('mousedown', handlePointerDown);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [open]);
+  }, [open, menuPosition]);
 
   const chromeClasses = lightChrome
     ? {
@@ -61,8 +101,40 @@ export function PaletteSlotOverflowMenu({
         focus: 'focus-visible:ring-black/30',
       };
 
+  const menu =
+    open && menuPosition
+      ? createPortal(
+          <div
+            ref={menuRef}
+            id={menuId}
+            role="menu"
+            aria-label={label}
+            className="fixed z-dropdown min-w-44 overflow-hidden rounded-lg border border-border bg-bg py-1 text-ink shadow-lg"
+            style={{ top: menuPosition.top, left: menuPosition.left }}
+          >
+            {items.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                role="menuitem"
+                disabled={item.disabled}
+                onClick={() => {
+                  if (item.disabled) return;
+                  setOpen(false);
+                  item.onSelect();
+                }}
+                className="flex min-h-11 w-full items-center px-3 text-left text-chrome-body font-medium text-ink transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:bg-surface-raised"
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>,
+          document.body,
+        )
+      : null;
+
   return (
-    <div ref={rootRef} className="relative z-20 shrink-0">
+    <div className="relative z-20 shrink-0">
       <button
         ref={triggerRef}
         type="button"
@@ -78,33 +150,7 @@ export function PaletteSlotOverflowMenu({
       >
         <MoreActionsIcon />
       </button>
-
-      {open ? (
-        <div
-          ref={menuRef}
-          id={menuId}
-          role="menu"
-          aria-label={label}
-          className="absolute right-0 top-[calc(100%+4px)] z-30 min-w-44 overflow-hidden rounded-lg border border-border bg-bg py-1 text-ink shadow-lg"
-        >
-          {items.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              role="menuitem"
-              disabled={item.disabled}
-              onClick={() => {
-                if (item.disabled) return;
-                setOpen(false);
-                item.onSelect();
-              }}
-              className="flex min-h-11 w-full items-center px-3 text-left text-chrome-body font-medium text-ink transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:bg-surface-raised"
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      ) : null}
+      {menu}
     </div>
   );
 }
