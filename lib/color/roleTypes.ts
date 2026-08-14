@@ -2,6 +2,7 @@ export type PaletteRoleId =
   | 'fondo'
   | 'superficie'
   | 'texto'
+  | 'texto-secundario'
   | 'primario'
   | 'secundario'
   | 'acento'
@@ -16,6 +17,8 @@ export type RoleSlot = {
   source: ColorSource;
   originalHex?: string;
   gap?: string;
+  /** Why: whether this hex meets AA 4.5:1 as text on surface (expressive roles). */
+  textSafe?: boolean;
 };
 
 export type RolePalette = Record<PaletteRoleId, RoleSlot>;
@@ -24,6 +27,7 @@ export const PALETTE_ROLE_ORDER: PaletteRoleId[] = [
   'fondo',
   'superficie',
   'texto',
+  'texto-secundario',
   'primario',
   'secundario',
   'acento',
@@ -34,6 +38,7 @@ export const ROLE_LABELS: Record<PaletteRoleId, string> = {
   fondo: 'Fondo',
   superficie: 'Superficie',
   texto: 'Texto',
+  'texto-secundario': 'Texto secundario',
   primario: 'Primario',
   secundario: 'Secundario',
   acento: 'Acento',
@@ -46,6 +51,7 @@ export const DERIVED_ROLES: PaletteRoleId[] = [
   'fondo',
   'superficie',
   'texto',
+  'texto-secundario',
   'secundario',
   'borde',
 ];

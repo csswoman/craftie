@@ -15,6 +15,7 @@ function rolePalette(): RolePalette {
     fondo: slot('fondo', '#FFFFFF'),
     superficie: slot('superficie', '#F7F7F7'),
     texto: slot('texto', '#111111'),
+    'texto-secundario': slot('texto-secundario', '#666666'),
     primario: slot('primario', '#3366FF'),
     secundario: slot('secundario', '#88AAFF'),
     acento: slot('acento', '#FFAA00'),

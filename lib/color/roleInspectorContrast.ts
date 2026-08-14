@@ -47,6 +47,12 @@ export function getActiveRoleContrastInfo(
   switch (role) {
     case 'texto':
       return buildContrastInfo(palette.texto.hex, palette.fondo.hex, 'Texto sobre fondo');
+    case 'texto-secundario':
+      return buildContrastInfo(
+        palette['texto-secundario'].hex,
+        palette.superficie.hex,
+        'Texto secundario sobre superficie',
+      );
     case 'fondo':
       return buildContrastInfo(palette.texto.hex, palette.fondo.hex, 'Texto sobre fondo');
     case 'superficie':

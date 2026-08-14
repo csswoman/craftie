@@ -22,6 +22,7 @@ import {
   deriveNeutralRoles,
   deriveSecondary,
 } from '../utils/deriveRoles';
+import { deriveMutedTextHex } from './mutedText';
 
 export function isPaletteRoleId(id: string): id is PaletteRoleId {
   return (PALETTE_ROLE_ORDER as string[]).includes(id);
@@ -146,6 +147,8 @@ function deriveSlotHex(
       return neutrals.superficie;
     case 'texto':
       return neutrals.texto;
+    case 'texto-secundario':
+      return deriveMutedTextHex(palette.texto.hex, palette.superficie.hex, 3);
     case 'borde':
       return neutrals.borde;
     case 'primario':

@@ -17,6 +17,7 @@ function palette(partial: Partial<Record<keyof RolePalette, string>>): RolePalet
     fondo: '#FFFFFF',
     superficie: '#F5F5F5',
     texto: '#111111',
+    'texto-secundario': '#666666',
     primario: '#3366FF',
     secundario: '#88AAFF',
     acento: '#FFAA00',

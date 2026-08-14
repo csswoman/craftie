@@ -4,6 +4,7 @@ import {
   deriveSecondary,
 } from '../utils/deriveRoles';
 import { adjustLightnessForContrast } from '../utils/colorMath';
+import { deriveMutedTextHex } from './mutedText';
 import {
   fitsBorderOn,
   fitsSurfaceOn,
@@ -26,6 +27,7 @@ export type PaletteNeutralSeed = {
 };
 
 const TEXT_AA_RATIO = 4.5;
+const MUTED_TEXT_RATIO = 3;
 
 type RoleResolution = { hex: string; source: ColorSource };
 
@@ -133,6 +135,15 @@ export function recomputeDerivedRoles(
     superficie.hex,
     neutrals.texto,
   );
+  const textoSecundario = locked.has('texto-secundario')
+    ? {
+        hex: palette['texto-secundario'].hex,
+        source: palette['texto-secundario'].source,
+      }
+    : {
+        hex: deriveMutedTextHex(texto.hex, superficie.hex, MUTED_TEXT_RATIO),
+        source: 'derived' as const,
+      };
   const borde = resolveBorde(palette, locked.has('borde'), superficie.hex, neutrals.borde);
 
   const keepSecundario =
@@ -148,6 +159,7 @@ export function recomputeDerivedRoles(
       ? { hex: palette.secundario.hex, source: palette.secundario.source }
       : { hex: deriveSecondary(palette.primario.hex), source: 'derived' },
     texto,
+    'texto-secundario': textoSecundario,
     superficie,
     borde,
   };

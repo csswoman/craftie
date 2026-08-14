@@ -32,6 +32,7 @@ describe('randomUnlockedRolePalette', () => {
       'fondo',
       'superficie',
       'texto',
+      'texto-secundario',
       'primario',
       'secundario',
       'acento',

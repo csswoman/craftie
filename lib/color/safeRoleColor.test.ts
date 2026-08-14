@@ -13,6 +13,7 @@ function buildPalette(overrides: Partial<Record<PaletteRoleId, string>>): RolePa
     fondo: '#FBFAF8',
     superficie: '#F9EFF2',
     texto: '#1A1A1A',
+    'texto-secundario': '#666666',
     primario: '#2563EB',
     secundario: '#1C4B8E',
     acento: '#7C3AED',

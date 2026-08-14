@@ -2,6 +2,7 @@ import { converter } from 'culori';
 
 import type { ExtractedColor } from './imageExtractor';
 import { normalizeHex } from './normalizeHex';
+import { deriveMutedTextHex } from './mutedText';
 import { classifyPalette, type PaletteType } from './paletteClassification';
 import { deriveOnTokenHexForFill } from './pairedOnToken';
 import { remainsDistinctWithColorVisionDeficiency } from './colorVision';
@@ -41,6 +42,7 @@ export type SemanticTokenName =
   | 'surface-inverse'
   | 'surface-inverse-elevated'
   | 'on-background'
+  | 'on-background-muted'
   | 'on-surface'
   | 'on-surface-muted'
   | 'on-background-inverse'
@@ -470,6 +472,17 @@ function mutedOnSurface(surfaceHex: string, onSurfaceHex: string): SemanticToken
   return token(best, 'derived');
 }
 
+/**
+ * Why: secondary labels need a quieter text token (~3:1 AA large:
+ * typically ≥18px or ≥14px bold) — not full AA body text.
+ */
+function deriveOnBackgroundMuted(
+  onBackgroundHex: string,
+  surfaceHex: string,
+): SemanticToken {
+  return token(deriveMutedTextHex(onBackgroundHex, surfaceHex, 3), 'derived');
+}
+
 function colorsAreDistinguishable(leftHex: string, rightHex: string): boolean {
   const left = toOklch(leftHex);
   const right = toOklch(rightHex);
@@ -765,6 +778,11 @@ function deriveBaseSemanticTokens(input: SemanticTokenDerivationInput): Semantic
     separatedSurfaceHex === surface.hex
       ? surface
       : token(separatedSurfaceHex, surface.source === 'override' ? 'override' : 'derived');
+  const onBackgroundMuted = applyOverride(
+    'on-background-muted',
+    deriveOnBackgroundMuted(onBackground.hex, separatedSurface.hex),
+    overrides,
+  );
   const separatedOnSurfaceMuted =
     onSurfaceMuted.source === 'override' ||
     contrastRatio(onSurfaceMuted.hex, separatedSurface.hex) >= AA_RATIO
@@ -868,6 +886,7 @@ function deriveBaseSemanticTokens(input: SemanticTokenDerivationInput): Semantic
     'surface-inverse': surfaceInverse,
     'surface-inverse-elevated': surfaceInverseElevated,
     'on-background': onBackground,
+    'on-background-muted': onBackgroundMuted,
     'on-surface': onSurface,
     'on-surface-muted': separatedOnSurfaceMuted,
     'on-background-inverse': onBackgroundInverse,

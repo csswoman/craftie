@@ -73,6 +73,7 @@ export const ROLE_TOKEN_USAGE: Record<PaletteRoleId, string> = {
   fondo: 'Fondo principal de la aplicación.',
   superficie: 'Tarjetas, paneles y capas elevadas.',
   texto: 'Texto principal sobre fondo y superficie.',
+  'texto-secundario': 'Etiquetas secundarias y texto grande de menor énfasis.',
   primario: 'Acciones principales y énfasis de marca.',
   secundario: 'Badges, secciones de apoyo y acentos secundarios de marca.',
   acento: 'Destacados, enlaces y llamadas de atención.',
