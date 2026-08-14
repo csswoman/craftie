@@ -3,7 +3,7 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { STUDIO_TRAIL } from './landingPreviewData';
 import { onVividFill } from './previewColor';
-import { labelStyle, type PreviewFonts } from './previewTypography';
+import { captionStyle, type PreviewFonts } from './previewTypography';
 
 type LandingHeroPaletteProps = {
   colors: ResolvedLayoutColors;
@@ -22,7 +22,7 @@ const PLACEMENT = [
 export function LandingHeroPalette({ colors, fonts, onEditSlot }: LandingHeroPaletteProps) {
   return (
     <div
-      className="grid h-full min-h-[13.5rem] grid-cols-3 grid-rows-3 gap-2 sm:min-h-[15rem] sm:gap-2.5"
+      className="grid h-full min-h-[13rem] grid-cols-3 grid-rows-3 gap-2 @min-[720px]/landing:min-h-[16rem] @min-[720px]/landing:gap-2"
       aria-label="Paleta del estudio"
     >
       {STUDIO_TRAIL.map((item, index) => {
@@ -42,7 +42,7 @@ export function LandingHeroPalette({ colors, fonts, onEditSlot }: LandingHeroPal
               style={{ backgroundColor: 'color-mix(in srgb, currentColor 10%, transparent)' }}
               aria-hidden="true"
             />
-            <span className="relative truncate" style={{ ...labelStyle(fonts), fontWeight: 600 }}>
+            <span className="relative truncate" style={captionStyle(fonts)}>
               {item.label}
             </span>
           </PreviewSlotTarget>

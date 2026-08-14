@@ -10,9 +10,8 @@ import {
   ANALYTICS_WEEK_ENERGY_PREV,
 } from './analyticsPreviewData';
 import { AreaChart } from './previewCharts';
-import { SegmentMeter } from './previewDataDisplays';
-import { tint } from './previewPrimitives';
-import { bodyStyle, headingStyle, labelStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import { ProgressBar, tint } from './previewPrimitives';
+import { bodyStyle, captionStyle, headingStyle, titleStyle, type PreviewFonts } from './previewTypography';
 
 type DetailPanelProps = {
   colors: ResolvedLayoutColors;
@@ -24,11 +23,11 @@ export function AnalyticsDetailPanels({ colors, fonts, onEditSlot }: DetailPanel
   const peakDay = ANALYTICS_ENERGY_BY_DAY.reduce((best, day) => (day.value > best.value ? day : best));
 
   return (
-    <div className="mt-4 grid gap-4">
+    <div className="mt-6 grid gap-6">
       <PreviewSlotTarget
         slot="surfaceElevated"
         onEditSlot={onEditSlot}
-        className="preview-rise rounded-[14px] border p-4 lg:p-5 transition-transform duration-200 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+        className="preview-rise rounded-xl border p-5 @min-[800px]/analytics:p-6"
         style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
       >
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -39,13 +38,13 @@ export function AnalyticsDetailPanels({ colors, fonts, onEditSlot }: DetailPanel
             <PreviewSlotTarget
               slot="mutedText"
               onEditSlot={onEditSlot}
-              className="mt-1 max-w-[44ch] text-pretty"
+              className="mt-2 max-w-[44ch] text-pretty"
               style={bodyStyle(fonts, colors.mutedText)}
             >
               Cuánta cola movió Craftie de lunes a domingo.
             </PreviewSlotTarget>
           </div>
-          <div className="flex items-center gap-3" style={labelStyle(fonts, colors.mutedText)}>
+          <div className="flex items-center gap-3" style={captionStyle(fonts, colors.mutedText)}>
             <span className="inline-flex items-center gap-1.5">
               <PreviewSlotTarget
                 slot="data1"
@@ -66,7 +65,7 @@ export function AnalyticsDetailPanels({ colors, fonts, onEditSlot }: DetailPanel
           </div>
         </div>
 
-        <div className="mt-4 grid gap-4 @min-[900px]/analytics:grid-cols-[minmax(0,1.35fr)_minmax(13rem,0.85fr)]">
+        <div className="mt-4 grid gap-4 @min-[720px]/analytics:grid-cols-[minmax(0,1.35fr)_minmax(13rem,0.85fr)]">
           <div className="min-w-0">
             <PreviewSlotTarget slot="data1" onEditSlot={onEditSlot} className="block">
               <AreaChart
@@ -78,7 +77,7 @@ export function AnalyticsDetailPanels({ colors, fonts, onEditSlot }: DetailPanel
                 height={128}
               />
             </PreviewSlotTarget>
-            <div className="mt-2 grid grid-cols-7 gap-1 text-center" style={labelStyle(fonts, colors.mutedText)}>
+            <div className="mt-2 grid grid-cols-7 gap-1 text-center" style={captionStyle(fonts, colors.mutedText)}>
               {ANALYTICS_ENERGY_BY_DAY.map((day) => (
                 <div key={day.day} className="min-w-0">
                   <span
@@ -96,19 +95,15 @@ export function AnalyticsDetailPanels({ colors, fonts, onEditSlot }: DetailPanel
             </div>
           </div>
 
-          <div className="min-w-0 space-y-2.5">
+          <div className="min-w-0 space-y-4">
             {ANALYTICS_ENERGY_INSIGHTS.map((insight) => (
-              <div
-                key={insight.label}
-                className="rounded-[10px] px-3 py-2.5"
-                style={{ backgroundColor: tint(colors.mutedText, 8) }}
-              >
+              <div key={insight.label}>
                 <div className="flex items-baseline justify-between gap-2">
                   <PreviewSlotTarget
                     slot="mutedText"
                     onEditSlot={onEditSlot}
                     className="block"
-                    style={labelStyle(fonts, colors.mutedText)}
+                    style={captionStyle(fonts, colors.mutedText)}
                   >
                     {insight.label}
                   </PreviewSlotTarget>
@@ -116,7 +111,7 @@ export function AnalyticsDetailPanels({ colors, fonts, onEditSlot }: DetailPanel
                     slot={insight.slot}
                     onEditSlot={onEditSlot}
                     className="tabular-nums"
-                    style={{ ...titleStyle(fonts), color: colors[insight.slot], fontWeight: 700 }}
+                    style={{ ...titleStyle(fonts), color: colors[insight.slot] }}
                   >
                     {insight.value}
                   </PreviewSlotTarget>
@@ -124,30 +119,27 @@ export function AnalyticsDetailPanels({ colors, fonts, onEditSlot }: DetailPanel
                 <PreviewSlotTarget
                   slot="mutedText"
                   onEditSlot={onEditSlot}
-                  className="mt-0.5 block"
-                  style={labelStyle(fonts, colors.mutedText)}
+                  className="mt-1 block"
+                  style={captionStyle(fonts, colors.mutedText)}
                 >
                   {insight.detail}
                 </PreviewSlotTarget>
               </div>
             ))}
 
-            <div
-              className="rounded-[10px] border px-3 py-2.5"
-              style={{ borderColor: colors.border, backgroundColor: tint(colors.mutedText, 6) }}
-            >
+            <div className="border-t pt-4" style={{ borderColor: colors.divider }}>
               <PreviewSlotTarget
                 slot="mutedText"
                 onEditSlot={onEditSlot}
                 className="block"
-                style={labelStyle(fonts, colors.mutedText)}
+                style={captionStyle(fonts, colors.mutedText)}
               >
                 Nota del día
               </PreviewSlotTarget>
               <PreviewSlotTarget
                 slot="text"
                 onEditSlot={onEditSlot}
-                className="mt-1 block text-pretty"
+                className="mt-2 block text-pretty"
                 style={bodyStyle(fonts)}
               >
                 {peakDay.day} lideró la cola: más movimiento que el resto de la semana.
@@ -157,20 +149,20 @@ export function AnalyticsDetailPanels({ colors, fonts, onEditSlot }: DetailPanel
         </div>
       </PreviewSlotTarget>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-6 @min-[720px]/analytics:grid-cols-2">
         <AnalyticsChatPanel colors={colors} fonts={fonts} onEditSlot={onEditSlot} />
 
         <PreviewSlotTarget
           slot="surface"
           onEditSlot={onEditSlot}
-          className="rounded-[14px] border p-4 lg:p-5 transition-transform duration-200 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+          className="rounded-xl border p-5 @min-[800px]/analytics:p-6"
           style={{ backgroundColor: colors.surface, borderColor: colors.border }}
         >
           <div className="flex items-center justify-between gap-3">
             <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
               Metas de Craftie
             </PreviewSlotTarget>
-            <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={labelStyle(fonts, colors.mutedText)}>
+            <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={captionStyle(fonts, colors.mutedText)}>
               Este mes
             </PreviewSlotTarget>
           </div>
@@ -186,16 +178,16 @@ export function AnalyticsDetailPanels({ colors, fonts, onEditSlot }: DetailPanel
                       slot="mutedText"
                       onEditSlot={onEditSlot}
                       className="block"
-                      style={labelStyle(fonts, colors.mutedText)}
+                      style={captionStyle(fonts, colors.mutedText)}
                     >
                       {goal.total}
                     </PreviewSlotTarget>
                   </div>
-                  <span className="shrink-0 font-semibold tabular-nums" style={titleStyle(fonts)}>
+                  <span className="shrink-0 tabular-nums" style={titleStyle(fonts)}>
                     {goal.value}%
                   </span>
                 </div>
-                <SegmentMeter value={goal.value} color={colors[goal.slot]} slot={goal.slot} onEditSlot={onEditSlot} />
+                <ProgressBar value={goal.value} color={colors[goal.slot]} slot={goal.slot} onEditSlot={onEditSlot} />
               </div>
             ))}
           </div>

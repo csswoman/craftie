@@ -109,7 +109,9 @@ export function PreviewView({
     ? family.modes.find((entry) => entry.id === activeMode) ?? family.modes[0]!
     : getPreviewFamily('ui').modes[0]!;
   const colors = resolveLayoutColors(mode, liveSemanticTokens);
-  const slotToToken = new Map<UiLayoutSlot, SemanticTokenName>(layoutModeTokenEntries(mode));
+  const slotToToken = new Map<UiLayoutSlot, SemanticTokenName>(
+    layoutModeTokenEntries(mode, liveSemanticTokens),
+  );
 
   function handleEditSlot(slot: UiLayoutSlot, element: HTMLElement) {
     const tokenName = slotToToken.get(slot);

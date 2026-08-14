@@ -3,7 +3,7 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { Sparkline } from './previewCharts';
 import { StatDelta } from './previewPrimitives';
-import { displayStyle, labelStyle, type PreviewFonts } from './previewTypography';
+import { captionStyle, displayStyle, titleStyle, type PreviewFonts } from './previewTypography';
 
 export type DashboardMetric = {
   label: string;
@@ -34,16 +34,16 @@ export function DashboardMetricCard({
       slot="surface"
       onEditSlot={onEditSlot}
       className={`min-w-0 overflow-hidden rounded-xl border transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgb(0_0_0/0.06)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:shadow-none ${
-        featured ? 'p-4 @min-[640px]/dashboard:p-3.5' : 'p-3'
+        featured ? 'p-5' : 'p-4'
       }`}
       style={{ backgroundColor: colors.surface, borderColor: colors.border }}
     >
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex items-start justify-between gap-3">
         <PreviewSlotTarget
           slot="mutedText"
           onEditSlot={onEditSlot}
           className="min-w-0 text-pretty"
-          style={labelStyle(fonts, colors.mutedText)}
+          style={captionStyle(fonts, colors.mutedText)}
         >
           {metric.label}
         </PreviewSlotTarget>
@@ -52,12 +52,12 @@ export function DashboardMetricCard({
       <PreviewSlotTarget
         slot="text"
         onEditSlot={onEditSlot}
-        className={`mt-2 tabular-nums ${featured ? 'text-[1.75rem] leading-none' : ''}`}
-        style={displayStyle(fonts)}
+        className="mt-3 tabular-nums"
+        style={featured ? displayStyle(fonts) : { ...titleStyle(fonts), fontSize: 'var(--size-h3)' }}
       >
         {metric.value}
       </PreviewSlotTarget>
-      <div className={featured ? 'mt-3' : 'mt-2'}>
+      <div className={featured ? 'mt-4' : 'mt-3'}>
         <Sparkline values={metric.spark} color={trendColor} surfaceHex={colors.surface} height={featured ? 32 : 22} />
       </div>
     </PreviewSlotTarget>

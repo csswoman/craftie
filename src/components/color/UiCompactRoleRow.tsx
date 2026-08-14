@@ -2,6 +2,8 @@ import { normalizeHex } from '@lib/color/normalizeHex';
 import type { SelectableColor } from '@lib/color/selectableColors';
 import type { SemanticToken } from '@lib/color/semanticTokens';
 
+import { UiCompactSwatch } from './UiCompactSwatch';
+
 export function UiCompactRoleRow({
   label,
   token,
@@ -24,15 +26,19 @@ export function UiCompactRoleRow({
         type="button"
         onClick={onOpen}
         aria-label={`${unassigned ? 'Asignar' : 'Editar'} ${label}`}
-        className="group flex min-h-11 w-full items-center gap-2.5 rounded-md px-1.5 text-left transition-colors duration-200 hover:bg-line-soft focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25 dark:hover:bg-line-soft"
+        className="group flex min-h-11 w-full items-center gap-3 rounded-md px-1.5 text-left transition-colors duration-200 hover:bg-line-soft focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25 dark:hover:bg-line-soft"
       >
-        <span
-          className={`size-[22px] shrink-0 rounded-full ${unassigned ? 'border border-dashed border-attention' : 'ring-1 ring-inset ring-ink/10'}`}
-          style={unassigned ? {
-            background: 'repeating-linear-gradient(45deg,#fff,#fff 4px,#fbf1e4 4px,#fbf1e4 8px)',
-          } : { backgroundColor: token.hex }}
-          aria-hidden="true"
-        />
+        {unassigned ? (
+          <span
+            className="size-8 shrink-0 rounded-full border border-dashed border-attention"
+            style={{
+              background: 'repeating-linear-gradient(45deg,#fff,#fff 4px,#fbf1e4 4px,#fbf1e4 8px)',
+            }}
+            aria-hidden="true"
+          />
+        ) : (
+          <UiCompactSwatch hex={token.hex} />
+        )}
         <span className={`truncate text-tools-role font-semibold ${unassigned ? 'text-attention' : 'text-ink'}`}>
           {label}
         </span>
@@ -44,7 +50,7 @@ export function UiCompactRoleRow({
         {unassigned ? (
           <span className="mr-1 size-1.5 shrink-0 rounded-full bg-attention" aria-label="Sin asignar" />
         ) : (
-          <span className="w-[5.25rem] shrink-0 text-right font-mono text-tools-meta-scale tabular-nums text-muted">
+          <span className="w-[5.25rem] shrink-0 text-right font-mono text-tools-meta-scale font-medium tabular-nums text-ink/80">
             {token.hex.toUpperCase()}
           </span>
         )}

@@ -4,7 +4,9 @@ import {
   DASHBOARD_METRICS,
   DASHBOARD_NAV,
   PALETTE_REVIEW_ROLES,
+  STUDIO_SUBTITLE,
   buildDashboardActivity,
+  dashboardRangeLabel,
   getPaletteReviewStatus,
   getPaletteProgressNote,
   getStudioGreeting,
@@ -33,14 +35,24 @@ describe('Craftie dashboard content', () => {
   });
 
   it('greets the studio with time-aware copy', () => {
-    expect(getStudioGreeting(9)).toBe('Buenos días, diseñadora');
-    expect(getStudioGreeting(15)).toBe('Buenas tardes, diseñadora');
-    expect(getStudioGreeting(21)).toBe('Buenas noches, diseñadora');
+    expect(getStudioGreeting(9)).toBe('Buenos días');
+    expect(getStudioGreeting(15)).toBe('Buenas tardes');
+    expect(getStudioGreeting(21)).toBe('Buenas noches');
   });
 
   it('offers encouraging studio notes at milestone thresholds', () => {
-    expect(getWeeklyRhythmNote(92)).toBe('Casi en el lienzo.');
-    expect(getPaletteProgressNote(68)).toBe('Naming y color ya conversan.');
+    expect(getWeeklyRhythmNote(92)).toBe('Queda una entrega.');
+    expect(getPaletteProgressNote(68)).toBe('Color y nombres listos.');
+  });
+
+  it('spells out the selected range in prose', () => {
+    expect(dashboardRangeLabel('7d')).toBe('7 días');
+    expect(dashboardRangeLabel('30d')).toBe('30 días');
+    expect(dashboardRangeLabel('90d')).toBe('90 días');
+  });
+
+  it('points the studio at a concrete next review', () => {
+    expect(STUDIO_SUBTITLE).toContain('contraste');
   });
 
   it('reviews the palette by named roles, one per data color', () => {

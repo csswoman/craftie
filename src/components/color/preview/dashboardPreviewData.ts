@@ -19,26 +19,32 @@ export const DASHBOARD_METRICS = [
 ] as const;
 
 export function getStudioGreeting(hour: number): string {
-  if (hour < 6) return 'Buenas noches, diseñadora';
-  if (hour < 12) return 'Buenos días, diseñadora';
-  if (hour < 19) return 'Buenas tardes, diseñadora';
-  return 'Buenas noches, diseñadora';
+  if (hour < 6) return 'Buenas noches';
+  if (hour < 12) return 'Buenos días';
+  if (hour < 19) return 'Buenas tardes';
+  return 'Buenas noches';
 }
 
-export const STUDIO_GREETING_FALLBACK = 'Buenas tardes, diseñadora';
+export const STUDIO_GREETING_FALLBACK = 'Buenas tardes';
 
-export const STUDIO_SUBTITLE = 'Hay color por secar en el estudio.';
+export const STUDIO_SUBTITLE = 'Atelier Pigmento espera revisión de contraste.';
+
+export function dashboardRangeLabel(range: DashboardRange): string {
+  if (range === '7d') return '7 días';
+  if (range === '30d') return '30 días';
+  return '90 días';
+}
 
 export function getWeeklyRhythmNote(percent: number): string {
-  if (percent >= 90) return 'Casi en el lienzo.';
-  if (percent >= 70) return 'El estudio va con buen ritmo.';
-  return 'Sigue mezclando.';
+  if (percent >= 90) return 'Queda una entrega.';
+  if (percent >= 70) return 'La semana va al día.';
+  return 'Hay entregas por cerrar.';
 }
 
 export function getPaletteProgressNote(percent: number): string {
-  if (percent >= 80) return 'Lista para exportar pronto.';
-  if (percent >= 50) return 'Naming y color ya conversan.';
-  return 'Aún en boceto.';
+  if (percent >= 80) return 'Lista para exportar.';
+  if (percent >= 50) return 'Color y nombres listos.';
+  return 'Todavía en boceto.';
 }
 
 export function previewStaggerDelay(index: number, stepMs = 55): string {
@@ -64,8 +70,8 @@ export function buildDashboardActivity(colors: {
   data3: string;
 }) {
   return [
-    { label: 'Paleta Bosque aprobada', detail: 'Marca Lupo · hace 2 min', initials: 'LB', color: colors.data1, slot: 'data1' as const },
+    { label: 'Bosque, paleta aprobada', detail: 'Lupo · hace 2 min', initials: 'LB', color: colors.data1, slot: 'data1' as const },
     { label: 'Guía de marca exportada', detail: 'Estudio Nube · hace 18 min', initials: 'EN', color: colors.data2, slot: 'data2' as const },
-    { label: 'Contraste ajustado a AAA', detail: 'Atelier Pigmento · hace 1 h', initials: 'AP', color: colors.data3, slot: 'data3' as const },
+    { label: 'Contraste subido a AAA', detail: 'Atelier Pigmento · hace 1 h', initials: 'AP', color: colors.data3, slot: 'data3' as const },
   ] as const;
 }

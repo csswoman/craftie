@@ -4,9 +4,9 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { PLANS } from './landingPreviewData';
-import { onVividFill, vividFill } from './previewColor';
+import { vividFill } from './previewColor';
 import { Tag } from './previewPrimitives';
-import { bodyStyle, displayStyle, labelStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import { bodyStyle, captionStyle, headingStyle, type PreviewFonts } from './previewTypography';
 
 type LandingPricingPlansProps = {
   colors: ResolvedLayoutColors;
@@ -16,30 +16,37 @@ type LandingPricingPlansProps = {
 
 export function LandingPricingPlans({ colors, fonts, onEditSlot }: LandingPricingPlansProps) {
   return (
-    <div className="grid gap-3 sm:grid-cols-3">
+    <div className="grid gap-4 @min-[720px]/landing:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)_minmax(0,1fr)] @min-[720px]/landing:items-stretch">
       {PLANS.map((plan) => {
         const featured = 'featured' in plan && plan.featured;
         const swatch = plan.slot === 'primaryAction' ? colors.primaryAction : colors[plan.slot];
         const fill = featured ? vividFill(swatch, colors.surface) : swatch;
-        const onFill = onVividFill(fill);
+        const onFill = featured ? colors.primaryActionText : colors.text;
 
         return (
           <PreviewSlotTarget
             key={plan.name}
             slot={featured ? 'primaryAction' : plan.slot}
             onEditSlot={onEditSlot}
-            className="flex min-h-[7.5rem] flex-col rounded-[14px] border p-4 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgb(0_0_0/0.06)] active:translate-y-0 active:shadow-none motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:shadow-none"
+            className={`flex flex-col rounded-[14px] border transition-transform duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${
+              featured ? 'p-6' : 'p-4'
+            }`}
             style={
               featured
                 ? { backgroundColor: fill, borderColor: 'transparent', color: onFill }
                 : { backgroundColor: colors.surfaceElevated, borderColor: colors.border, color: colors.text }
             }
           >
+            {featured ? null : (
+              <span className="mb-4 h-1 w-8 rounded-full" style={{ backgroundColor: swatch }} />
+            )}
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span style={labelStyle(fonts)}>{plan.name}</span>
+              <span style={featured ? captionStyle(fonts, onFill) : captionStyle(fonts, colors.mutedText)}>
+                {plan.name}
+              </span>
               {featured ? (
                 <Tag
-                  label="El de Craftie"
+                  label="El del estudio"
                   color={onFill}
                   surfaceHex={fill}
                   slot="primaryActionText"
@@ -47,13 +54,11 @@ export function LandingPricingPlans({ colors, fonts, onEditSlot }: LandingPricin
                 />
               ) : null}
             </div>
-            <div className="mt-3 tabular-nums" style={displayStyle(fonts)}>
+            <div className="mt-4 flex items-baseline gap-1 tabular-nums" style={headingStyle(fonts)}>
               {plan.price}
-              <span className="opacity-70" style={titleStyle(fonts)}>
-                /mo
-              </span>
+              <span style={captionStyle(fonts, featured ? onFill : colors.mutedText)}>/mes</span>
             </div>
-            <p className="mt-2 leading-snug opacity-85" style={bodyStyle(fonts)}>
+            <p className="mt-3 text-pretty" style={bodyStyle(fonts, featured ? onFill : colors.mutedText)}>
               {plan.tagline}
             </p>
           </PreviewSlotTarget>

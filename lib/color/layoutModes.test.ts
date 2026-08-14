@@ -56,6 +56,25 @@ describe('layoutModes', () => {
     expect(entries.get('appBackground')).toBe('background');
   });
 
+  it('rewires dashboard actions to a fill-ready primary step when the source is a pastel', () => {
+    const dashboard = LAYOUT_MODES.find((mode) => mode.id === 'dashboard')!;
+    const tokens = deriveSemanticTokens({
+      extracted: [
+        { hex: '#1A1214', prominence: 1 },
+        { hex: '#E8B4B8', prominence: 0.8 },
+        { hex: '#C47A80', prominence: 0.5 },
+      ],
+      theme: 'dark',
+      overrides: { primary: '#E8B4B8' },
+    });
+    const entries = new Map(layoutModeTokenEntries(dashboard, tokens));
+    const colors = resolveLayoutColors(dashboard, tokens);
+
+    expect(['primary-500', 'primary-600']).toContain(entries.get('primaryAction'));
+    expect(entries.get('primaryActionText')).toBe(`on-${entries.get('primaryAction')}`);
+    expect(colors.primaryAction).not.toBe(tokens.primary.hex);
+  });
+
   it('maps the media player to the active theme instead of inverse surfaces', () => {
     const media = LAYOUT_MODES.find((mode) => mode.id === 'media')!;
     const source = [{ hex: '#3366CC', prominence: 1 }];

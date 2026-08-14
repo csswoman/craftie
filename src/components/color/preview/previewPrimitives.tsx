@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 
 import type { UiLayoutSlot } from '@lib/color/layoutModes';
 import { deriveForegroundForBackground } from '@lib/color/pairedForeground';
-import { adjustLightnessForContrast, contrastRatio, mix } from '@lib/utils/colorMath';
+import { adjustLightnessForContrast, contrastRatio, mix, readableOn } from '@lib/utils/colorMath';
 
 import { PreviewIcon, type PreviewIconName } from './previewIcons';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
@@ -95,7 +95,8 @@ export function LiveDot({
   slot,
   onEditSlot,
   label,
-}: SlotColorProps & { label?: string }) {
+  surfaceHex,
+}: SlotColorProps & { label?: string; surfaceHex?: string }) {
   const dot = (
     <PreviewSlotTarget
       slot={slot}
@@ -110,7 +111,10 @@ export function LiveDot({
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5 text-[0.6875rem] font-medium" style={{ color }}>
+    <span
+      className="inline-flex items-center gap-1.5 text-[0.6875rem] font-medium"
+      style={{ color: surfaceHex ? readableOn(color, surfaceHex) : color }}
+    >
       {dot}
       {label}
     </span>
@@ -143,8 +147,8 @@ export function SegmentedControl({
     <PreviewSlotTarget
       slot={trackSlot}
       onEditSlot={onEditSlot}
-      className="inline-flex items-center gap-0.5 rounded-full p-0.5"
-      style={{ backgroundColor: tint(trackColor, 60) }}
+      className="inline-flex items-center gap-1 rounded-full p-1"
+      style={{ backgroundColor: trackColor }}
     >
       {options.map((option) => {
         const active = option === value;
@@ -157,10 +161,11 @@ export function SegmentedControl({
               event.stopPropagation();
               onChange(option);
             }}
-            className="rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold transition-colors duration-200 ease-out"
+            className="rounded-full px-3 py-1.5 text-[0.6875rem] transition-colors duration-200 ease-out"
             style={{
               backgroundColor: active ? activeColor : 'transparent',
               color: active ? activeText : mutedText,
+              fontWeight: active ? 500 : 400,
             }}
           >
             {option}

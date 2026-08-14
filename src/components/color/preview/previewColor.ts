@@ -1,5 +1,5 @@
 import { deriveForegroundForBackground } from '@lib/color/pairedForeground';
-import { adjustLightnessForContrast, contrastRatio } from '@lib/utils/colorMath';
+import { adjustLightnessForContrast, contrastRatio, readableOn } from '@lib/utils/colorMath';
 
 /** Compatibility helper: UI fills now publish the source token unchanged. */
 export function vividFill(hex: string, surfaceHex: string, amount = 0.35): string {
@@ -15,4 +15,12 @@ export function onVividFill(fillHex: string): string {
   return contrastRatio(foreground, fillHex) >= 4.5
     ? foreground
     : adjustLightnessForContrast(foreground, fillHex, 4.5);
+}
+
+/**
+ * Expressive tokens (primary, accent, success) are fills.
+ * When they must appear as type on a surface, keep the hue and move lightness to AA.
+ */
+export function readableInk(hex: string, surfaceHex: string, targetRatio = 4.5): string {
+  return readableOn(hex, surfaceHex, targetRatio);
 }

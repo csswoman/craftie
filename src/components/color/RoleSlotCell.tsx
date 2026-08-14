@@ -52,8 +52,11 @@ export function RoleSlotCell({
   const lightChrome = prefersLightSelectionRing(column.hex);
   const canApplyShade = editable && !locked;
   const mobileExpanded = expanded && !isWideLayout;
-  const failBadges = column.contrastBadges?.filter((badge) => badge.status === 'fail') ?? [];
-  const hasContrastFail = failBadges.length > 0;
+  const contrastBadges = column.contrastBadges ?? [];
+  const hasContrastFail = contrastBadges.some((badge) => badge.status === 'fail');
+  const contrastSummary = contrastBadges.length
+    ? ` ${contrastBadges.map((badge) => `${badge.label}: ${badge.ratio.toFixed(2)} a 1, WCAG ${badge.level}`).join('; ')}`
+    : '';
   const roleLabel = column.roleLabel ?? role;
   const toolbarProps = {
     hoverGroup: 'slot' as const,
@@ -71,7 +74,6 @@ export function RoleSlotCell({
     onOpenInfo: () => onOpenDetails(column.hex),
     onRandomizeColor,
   };
-
   const overflowItems = buildRoleSlotOverflowItems({
     editable,
     locked,
@@ -82,7 +84,6 @@ export function RoleSlotCell({
     onOpenInfo: () => onOpenDetails(column.hex),
     onToggleLock,
   });
-
   return (
     <li className="relative flex min-h-0 min-w-0 flex-1">
       <div
@@ -126,9 +127,15 @@ export function RoleSlotCell({
           />
         ) : null}
 
-        {!expanded && hasContrastFail ? (
-          <div className="absolute left-0.5 top-0.5 z-10 flex max-w-[calc(100%-0.75rem)] flex-col gap-1">
-            {failBadges.map((badge) => (
+        {!expanded && contrastBadges.length > 0 ? (
+          <div
+            className={`absolute left-0.5 top-0.5 z-10 max-w-[calc(100%-0.75rem)] flex-col gap-1 ${
+              isWideLayout
+                ? 'hidden group-hover/slot:flex group-focus-within/slot:flex'
+                : 'flex'
+            }`}
+          >
+            {contrastBadges.map((badge) => (
               <ContrastBadge
                 key={badge.label}
                 ratio={badge.ratio}
@@ -150,10 +157,10 @@ export function RoleSlotCell({
             aria-label={
               mobileExpanded
                 ? `${roleLabel}: ${column.name}, ${column.hex}. Tocar para copiar HEX${
-                    hasContrastFail ? '. Contraste insuficiente AA' : ''
-                  }`
-                : `${roleLabel}: ${column.name}, ${column.hex}${
-                    hasContrastFail ? ', contraste insuficiente AA' : ''
+                  contrastSummary ? `. ${contrastSummary}` : ''
+                }`
+              : `${roleLabel}: ${column.name}, ${column.hex}${
+                    contrastSummary ? `. ${contrastSummary}` : ''
                   }`
             }
             onClick={() => {
@@ -200,13 +207,17 @@ export function RoleSlotCell({
                     </p>
                   </>
                 )}
-                {hasContrastFail ? (
+                {contrastBadges.length > 0 ? (
                   <div
-                    className={`flex flex-wrap items-center ${
+                    className={`${
+                      isWideLayout
+                        ? 'hidden group-hover/slot:flex group-focus-within/slot:flex'
+                        : 'flex'
+                    } flex-wrap items-center ${
                       mobileExpanded ? 'mt-1 gap-1' : 'mt-2 gap-1.5'
                     }`}
                   >
-                    {failBadges.map((badge) => (
+                    {contrastBadges.map((badge) => (
                       <ContrastBadge
                         key={badge.label}
                         ratio={badge.ratio}

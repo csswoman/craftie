@@ -85,6 +85,7 @@ export function MediaLayoutPreview({
               slot="success"
               onEditSlot={onEditSlot}
               label={playing ? 'Pincel en movimiento' : 'Pausa en el estudio'}
+              surfaceHex={colors.appBackground}
             />
           </header>
 

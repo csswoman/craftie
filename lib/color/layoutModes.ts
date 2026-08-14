@@ -1,3 +1,4 @@
+import { pickActionFillTokens } from './actionFill';
 import type { SemanticTokenName, SemanticTokens } from './semanticTokens';
 
 export type UiLayoutModeId = 'dashboard' | 'landing' | 'media' | 'analytics';
@@ -118,11 +119,24 @@ export function getUiLayoutMode(id: UiLayoutModeId): UiLayoutModeDefinition {
 
 export function layoutModeTokenEntries(
   mode: UiLayoutModeDefinition,
+  tokens?: SemanticTokens,
 ): Array<[UiLayoutSlot, SemanticTokenName]> {
-  return [
+  const entries: Array<[UiLayoutSlot, SemanticTokenName]> = [
     ...(Object.entries(mode.commonSlots) as Array<[UiCommonLayoutSlot, SemanticTokenName]>),
     ...(Object.entries(mode.modeSlots ?? {}) as Array<[UiModeLayoutSlot, SemanticTokenName]>),
   ];
+
+  if (!tokens || mode.commonSlots.primaryAction !== 'primary') {
+    return entries;
+  }
+
+  const action = pickActionFillTokens(tokens);
+
+  return entries.map(([slot, tokenName]) => {
+    if (slot === 'primaryAction') return [slot, action.fill];
+    if (slot === 'primaryActionText') return [slot, action.on];
+    return [slot, tokenName];
+  });
 }
 
 export function resolveLayoutColors(
@@ -130,7 +144,7 @@ export function resolveLayoutColors(
   tokens: SemanticTokens,
 ): ResolvedLayoutColors {
   return Object.fromEntries(
-    layoutModeTokenEntries(mode).map(([slot, tokenName]) => [slot, tokens[tokenName].hex]),
+    layoutModeTokenEntries(mode, tokens).map(([slot, tokenName]) => [slot, tokens[tokenName].hex]),
   ) as ResolvedLayoutColors;
 }
 

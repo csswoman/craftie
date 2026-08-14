@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   CRAFTIE_QUOTE,
   HERO_COPY,
+  LANDING_GUTTER_CLASS,
   LANDING_NAV,
   PLANS,
   STUDIO_STEPS,
@@ -13,6 +14,7 @@ import { LANDING_CONTAINER_CLASS } from './LandingLayoutPreview';
 describe('Craftie landing content', () => {
   it('uses its own preview width as the responsive breakpoint context', () => {
     expect(LANDING_CONTAINER_CLASS).toContain('@container/landing');
+    expect(LANDING_GUTTER_CLASS).toContain('@min-[720px]/landing');
   });
 
   it('brands the preview as Craftie the dog designer studio', () => {

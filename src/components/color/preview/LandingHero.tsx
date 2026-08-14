@@ -5,9 +5,9 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 import { LandingHeroPalette } from './LandingHeroPalette';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { previewStaggerDelay } from './dashboardPreviewData';
-import { HERO_COPY } from './landingPreviewData';
-import { onVividFill, vividFill } from './previewColor';
-import { bodyStyle, heroStyle, labelStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import { HERO_COPY, LANDING_GUTTER_CLASS } from './landingPreviewData';
+import { vividFill } from './previewColor';
+import { bodyStyle, captionStyle, heroStyle, labelStyle, type PreviewFonts } from './previewTypography';
 
 type LandingHeroProps = {
   colors: ResolvedLayoutColors;
@@ -17,40 +17,37 @@ type LandingHeroProps = {
 
 export function LandingHero({ colors, fonts, onEditSlot }: LandingHeroProps) {
   const primaryFill = vividFill(colors.primaryAction, colors.surface);
-  const onPrimary = onVividFill(primaryFill);
+  const onPrimary = colors.primaryActionText;
   const onHero = colors.onHero ?? colors.primaryActionText;
 
   return (
     <PreviewSlotTarget
       slot="heroSurface"
       onEditSlot={onEditSlot}
-      className="preview-rise px-4 py-8 sm:px-5 sm:py-10 lg:px-6 lg:py-11"
+      className={`preview-rise py-12 ${LANDING_GUTTER_CLASS} @min-[720px]/landing:py-16`}
       style={{
         backgroundColor: colors.heroSurface ?? colors.primaryAction,
         color: onHero,
-        animationDelay: previewStaggerDelay(0),
+        animationDelay: previewStaggerDelay(1),
       }}
     >
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(14rem,0.85fr)] lg:items-center lg:gap-8">
+      <div className="grid gap-8 @min-[720px]/landing:grid-cols-[minmax(0,1.2fr)_minmax(12rem,0.8fr)] @min-[720px]/landing:items-start @min-[720px]/landing:gap-10">
         <div className="min-w-0">
-          <PreviewSlotTarget
-            slot="onHero"
-            onEditSlot={onEditSlot}
-            className="text-pretty opacity-90"
-            style={labelStyle(fonts)}
-          >
+          <PreviewSlotTarget slot="onHero" onEditSlot={onEditSlot} style={captionStyle(fonts)}>
             {HERO_COPY.kicker}
           </PreviewSlotTarget>
-
-          <PreviewSlotTarget slot="onHero" onEditSlot={onEditSlot} className="mt-2" style={heroStyle(fonts)}>
-            Craftie
-          </PreviewSlotTarget>
+          <PreviewSlotTarget
+            slot="secondaryAction"
+            onEditSlot={onEditSlot}
+            className="mt-2 h-0.5 w-8 rounded-full"
+            style={{ backgroundColor: colors.secondaryAction }}
+          />
 
           <PreviewSlotTarget
             slot="onHero"
             onEditSlot={onEditSlot}
-            className="mt-3 max-w-[34ch] text-pretty"
-            style={{ ...titleStyle(fonts), fontSize: '1.125rem', lineHeight: 1.35 }}
+            className="mt-3 max-w-[16ch]"
+            style={heroStyle(fonts)}
           >
             {HERO_COPY.headline}
           </PreviewSlotTarget>
@@ -58,13 +55,13 @@ export function LandingHero({ colors, fonts, onEditSlot }: LandingHeroProps) {
           <PreviewSlotTarget
             slot="onHero"
             onEditSlot={onEditSlot}
-            className="mt-3 max-w-[48ch] text-pretty opacity-85"
+            className="mt-4 max-w-[46ch] text-pretty"
             style={bodyStyle(fonts)}
           >
             {HERO_COPY.body}
           </PreviewSlotTarget>
 
-          <div className="mt-6 flex flex-wrap items-center gap-3">
+          <div className="mt-8 flex flex-wrap items-center gap-3">
             <PreviewSlotTarget
               slot="primaryAction"
               onEditSlot={onEditSlot}
@@ -74,13 +71,14 @@ export function LandingHero({ colors, fonts, onEditSlot }: LandingHeroProps) {
               {HERO_COPY.primaryCta}
             </PreviewSlotTarget>
             <PreviewSlotTarget
-              slot="secondaryAction"
+              slot="onHero"
               onEditSlot={onEditSlot}
-              className="inline-flex min-h-11 items-center rounded-[10px] border bg-transparent px-4 transition-colors duration-150 hover:bg-[color-mix(in_srgb,currentColor_14%,transparent)]"
+              className="inline-flex min-h-11 items-center rounded-[10px] border bg-transparent px-4 transition-colors duration-150 hover:bg-[color-mix(in_srgb,currentColor_12%,transparent)]"
               style={{
                 ...labelStyle(fonts),
+                fontWeight: 500,
                 borderColor: onHero,
-                color: colors.secondaryActionText ?? onHero,
+                color: onHero,
               }}
             >
               {HERO_COPY.secondaryCta}
