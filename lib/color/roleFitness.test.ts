@@ -6,6 +6,7 @@ import {
   borderRoleFitness,
   brandScore,
   chromaticRoleFitness,
+  isTextSafe,
   pickBestChromaticRole,
 } from './roleFitness';
 
@@ -135,5 +136,17 @@ describe('roleFitness', () => {
     const picked = pickBestChromaticRole(pool, new Set(), [], 'primario');
 
     expect(picked?.hex).toBe('#F6D27C');
+  });
+});
+
+describe('isTextSafe', () => {
+  it('returns true when contrast against surface is at least AA 4.5:1', () => {
+    // Near-black on near-white — well above 4.5:1
+    expect(isTextSafe('#111111', '#F5F5F5')).toBe(true);
+  });
+
+  it('returns false when contrast against surface is below AA 4.5:1', () => {
+    // Mid gray on light gray — typically fails normal-text AA
+    expect(isTextSafe('#A0A0A0', '#F0F0F0')).toBe(false);
   });
 });

@@ -27,6 +27,15 @@ const SURFACE_CONTRAST_MAX = 1.4;
 const SURFACE_CONTRAST_IDEAL = 1.12;
 const SURFACE_CHROMA_MAX = 0.06;
 const TEXT_AA_RATIO = 4.5;
+
+/**
+ * Why: callers need to know if an expressive color can be used as normal text
+ * on a surface (WCAG AA 4.5:1), without changing which color was selected.
+ */
+export function isTextSafe(candidateHex: string, surfaceHex: string): boolean {
+  return contrastRatio(candidateHex, surfaceHex) >= TEXT_AA_RATIO;
+}
+
 const BRAND_LIGHTNESS_IDEAL = 0.56;
 const BRAND_LIGHTNESS_SPREAD = 0.38;
 const BRAND_CHROMA_CAP = 0.16;
