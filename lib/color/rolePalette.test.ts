@@ -17,6 +17,7 @@ import {
 import { normalizeHex } from './normalizeHex';
 import { contrastRatio, relativeLuminance } from '../utils/colorMath';
 import { hasAdequateSurfaceFillSeparation } from '../utils/surfaceFillSeparation';
+import { isTextSafe } from './roleFitness';
 
 const toOklch = converter('oklch');
 
@@ -130,6 +131,15 @@ describe('rolePalette', () => {
 
     expect(updated.primario.hex).toBe('#FF5500');
     expect(updated.primario.source).toBe('extracted');
+  });
+
+  it('refreshes primario textSafe when its hex is replaced', () => {
+    const palette = assignRolesFromHexes(['#F7F7F5', '#3366CC', '#E8D44D', '#2C3E50']);
+    const updated = replaceRoleHex(palette, 'primario', '#FFFFFF');
+
+    expect(updated.primario.textSafe).toBe(
+      isTextSafe(updated.primario.hex, updated.superficie.hex),
+    );
   });
 
   it('toggles a color off by reverting its role to derived', () => {

@@ -91,12 +91,14 @@ export function buildBasePalette(
     slots.primario,
     sources?.primario ?? 'derived',
     paletteInput,
+    slots.fondo,
   );
   palette.acento = createRoleSlot(
     'acento',
     slots.acento,
     sources?.acento ?? 'derived',
     paletteInput,
+    slots.fondo,
   );
 
   for (const role of DERIVED_ROLES) {
@@ -104,7 +106,13 @@ export function buildBasePalette(
       continue;
     }
 
-    palette[role] = createRoleSlot(role, slots.fondo, 'derived', paletteInput);
+    palette[role] = createRoleSlot(
+      role,
+      slots.fondo,
+      'derived',
+      paletteInput,
+      slots.fondo,
+    );
   }
 
   return palette;

@@ -20,6 +20,7 @@ import {
   applyUniqueRoleNames,
   buildPaletteInput,
   createRoleSlot,
+  withExpressiveTextSafety,
 } from './rolePaletteSlots';
 
 export type PaletteNeutralSeed = {
@@ -187,7 +188,17 @@ export function recomputeDerivedRoles(
 
     const resolution = resolutions[role];
     const source: ColorSource = locked.has(role) ? palette[role].source : resolution.source;
-    next[role] = createRoleSlot(role, resolution.hex, source, paletteInput);
+    next[role] = createRoleSlot(
+      role,
+      resolution.hex,
+      source,
+      paletteInput,
+      superficie.hex,
+    );
+  }
+
+  for (const role of ['primario', 'secundario', 'acento'] as const) {
+    next[role] = withExpressiveTextSafety(next[role], superficie.hex);
   }
 
   return applyUniqueRoleNames(next);

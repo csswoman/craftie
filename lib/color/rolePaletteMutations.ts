@@ -9,6 +9,7 @@ import { recomputeDerivedRoles } from './rolePaletteDerived';
 import {
   applyUniqueRoleNames,
   createRoleSlot,
+  withExpressiveTextSafety,
 } from './rolePaletteSlots';
 import {
   PALETTE_ROLE_ORDER,
@@ -46,7 +47,7 @@ export function replaceRoleHex(
   const next = { ...palette };
   const slot = palette[role];
 
-  next[role] = {
+  next[role] = withExpressiveTextSafety({
     ...slot,
     hex: normalized,
     source: 'extracted',
@@ -54,7 +55,7 @@ export function replaceRoleHex(
       slot.name && slot.name !== ROLE_LABELS[role] && !slot.name.match(/ \d+$/)
         ? slot.name
         : nameForHex(normalized, paletteInput, { style: 'creative' }),
-  };
+  }, palette.superficie.hex);
 
   const updated = applyUniqueRoleNames(next);
 
@@ -168,7 +169,7 @@ function setDerivedRoleSlot(palette: RolePalette, role: PaletteRoleId): RolePale
 
   return applyUniqueRoleNames({
     ...palette,
-    [role]: createRoleSlot(role, hex, 'derived', paletteInput),
+    [role]: createRoleSlot(role, hex, 'derived', paletteInput, palette.superficie.hex),
   });
 }
 

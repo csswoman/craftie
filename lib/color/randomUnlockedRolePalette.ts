@@ -1,4 +1,5 @@
 import { randomRoleColor } from './randomRoleColor';
+import { deriveMutedTextHex } from './mutedText';
 import type { ThemeId } from './themePalette';
 import { PALETTE_ROLE_ORDER, type PaletteRoleId, type RolePalette } from './roleTypes';
 
@@ -40,6 +41,14 @@ export function randomUnlockedRolePalette(
 
   if (!locked.has('texto')) {
     nextHex.texto = randomRoleColor('texto', context(), random);
+  }
+
+  if (!locked.has('texto-secundario')) {
+    nextHex['texto-secundario'] = deriveMutedTextHex(
+      nextHex.texto,
+      nextHex.superficie,
+      3,
+    );
   }
 
   const updates: Partial<Record<PaletteRoleId, string>> = {};
