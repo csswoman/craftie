@@ -11,6 +11,9 @@ import {
   collectMoods,
   DESIGN_STYLES,
   filterStylesByMood,
+  formatInspirationCountLabel,
+  formatInspirationFilterLabel,
+  INSPIRATION_FILTER_TAGS,
   type DesignStyle,
 } from './presets';
 
@@ -35,8 +38,22 @@ const sampleStyles: DesignStyle[] = [
 
 describe('presets', () => {
   it('exports curated styles for onboarding', () => {
-    expect(DESIGN_STYLES.length).toBeGreaterThanOrEqual(4);
+    expect(DESIGN_STYLES).toHaveLength(20);
     expect(DESIGN_STYLES.every((style) => style.seeds.length >= 2)).toBe(true);
+    expect(DESIGN_STYLES.every((style) => style.mood.length >= 1 && style.mood.length <= 2)).toBe(
+      true,
+    );
+  });
+
+  it('tags every style with at least one inspiration filter chip', () => {
+    const filterSet = new Set<string>(INSPIRATION_FILTER_TAGS);
+
+    for (const style of DESIGN_STYLES) {
+      expect(
+        style.mood.some((tag) => filterSet.has(tag)),
+        style.id,
+      ).toBe(true);
+    }
   });
 
   it('maps every curated style to a valid selection', () => {
@@ -66,5 +83,15 @@ describe('presets', () => {
     expect(filterStylesByMood(sampleStyles, 'editorial')).toHaveLength(1);
     expect(filterStylesByMood(sampleStyles, 'editorial')[0]?.id).toBe('calm-ledger');
     expect(filterStylesByMood(sampleStyles, null)).toEqual(sampleStyles);
+  });
+
+  it('formats inspiration filter labels and count copy', () => {
+    expect(formatInspirationFilterLabel('cálido')).toBe('Cálido');
+    expect(formatInspirationCountLabel(20, 20)).toBe(
+      '20 estilos disponibles · toca cualquiera para cargar',
+    );
+    expect(formatInspirationCountLabel(4, 20)).toBe(
+      '4 de 20 estilos · toca cualquiera para cargar',
+    );
   });
 });

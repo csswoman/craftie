@@ -3,8 +3,10 @@
 import { useMemo, useState } from 'react';
 
 import {
-  collectMoods,
   filterStylesByMood,
+  formatInspirationCountLabel,
+  formatInspirationFilterLabel,
+  INSPIRATION_FILTER_TAGS,
   type DesignStyle,
 } from '@lib/styles/presets';
 
@@ -18,9 +20,6 @@ export type StyleGalleryProps = {
   showHeader?: boolean;
 };
 
-/** Only show mood filters when the list is large enough to need them. */
-const MOOD_FILTER_MIN_STYLES = 8;
-
 export function StyleGallery({
   styles,
   selectedStyleId = null,
@@ -30,20 +29,24 @@ export function StyleGallery({
 }: StyleGalleryProps) {
   const isEmbedded = variant === 'embedded';
   const [activeMood, setActiveMood] = useState<string | null>(null);
-  const moods = useMemo(() => collectMoods(styles), [styles]);
-  const showMoodFilters = styles.length >= MOOD_FILTER_MIN_STYLES && moods.length > 0;
   const visibleStyles = useMemo(
-    () => (showMoodFilters ? filterStylesByMood(styles, activeMood) : styles),
-    [styles, activeMood, showMoodFilters],
+    () => filterStylesByMood(styles, activeMood),
+    [styles, activeMood],
   );
+  const showFilters = styles.length > 0;
+  const countLabel = formatInspirationCountLabel(visibleStyles.length, styles.length);
 
   return (
     <section
       aria-label="Estilos de diseño"
-      className={isEmbedded ? 'space-y-3' : 'rounded-lg border border-border bg-bg p-5'}
+      className={
+        isEmbedded
+          ? 'flex min-h-0 flex-1 flex-col gap-3'
+          : 'flex flex-col gap-3 rounded-lg border border-border bg-bg p-5'
+      }
     >
       {showHeader ? (
-        <div>
+        <div className="shrink-0">
           <h2 className={`font-semibold text-ink ${isEmbedded ? 'text-[0.9375rem]' : 'text-base'}`}>
             Elegir inspiración
           </h2>
@@ -55,48 +58,41 @@ export function StyleGallery({
       ) : null}
 
       {styles.length === 0 ? (
-        <p
-          className={`rounded-md border border-dashed border-border bg-surface px-4 py-8 text-center text-[0.9375rem] text-muted ${
-            showHeader ? 'mt-4' : ''
-          }`}
-        >
+        <p className="rounded-md border border-dashed border-border bg-surface px-4 py-8 text-center text-[0.9375rem] text-muted">
           Aún no hay estilos de diseño disponibles.
         </p>
       ) : (
         <>
-          {showMoodFilters ? (
+          {showFilters ? (
             <div
-              className={`flex flex-wrap gap-1.5 ${showHeader ? 'mt-4' : ''}`}
+              className="relative z-10 flex shrink-0 flex-wrap gap-2 bg-surface pb-0.5"
               role="group"
-              aria-label="Filtrar por estado de ánimo"
+              aria-label="Filtrar por vibe"
             >
               <MoodChip
-                label="Todos"
+                label="Todas"
                 active={activeMood === null}
                 onClick={() => setActiveMood(null)}
               />
-              {moods.map((mood) => (
+              {INSPIRATION_FILTER_TAGS.map((tag) => (
                 <MoodChip
-                  key={mood}
-                  label={mood}
-                  active={activeMood === mood}
-                  onClick={() => setActiveMood(mood)}
+                  key={tag}
+                  label={formatInspirationFilterLabel(tag)}
+                  active={activeMood === tag}
+                  onClick={() => setActiveMood(tag)}
                 />
               ))}
             </div>
           ) : null}
 
           {visibleStyles.length === 0 ? (
-            <p className="mt-4 text-[0.9375rem] text-muted">
+            <p className="flex-1 py-8 text-center text-[0.9375rem] text-muted">
               Ningún estilo coincide con este filtro.
             </p>
           ) : (
             <ul
-              className={`${showMoodFilters || showHeader ? 'mt-4' : ''} grid gap-3 ${
-                isEmbedded
-                  ? 'grid-cols-1'
-                  : 'grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4'
-              }`}
+              key={activeMood ?? 'all'}
+              className="grid min-h-0 flex-1 animate-[inspiration-grid-in_220ms_cubic-bezier(0.16,1,0.3,1)] grid-cols-2 content-start gap-2.5 overflow-y-auto overscroll-contain sm:gap-3 motion-reduce:animate-none"
             >
               {visibleStyles.map((style) => (
                 <li key={style.id}>
@@ -109,6 +105,13 @@ export function StyleGallery({
               ))}
             </ul>
           )}
+
+          <p
+            className="shrink-0 border-t border-border/40 pt-3 text-center text-[0.75rem] leading-snug text-muted"
+            aria-live="polite"
+          >
+            {countLabel}
+          </p>
         </>
       )}
     </section>
@@ -129,10 +132,10 @@ function MoodChip({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`rounded-md px-2.5 py-1.5 text-[0.8125rem] font-medium transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+      className={`min-h-9 shrink-0 rounded-full px-3.5 py-1.5 text-[0.8125rem] font-medium transition-[color,background-color,border-color,transform,box-shadow] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 active:scale-[0.97] motion-reduce:transition-colors motion-reduce:active:scale-100 ${
         active
-          ? 'bg-surface-raised text-ink'
-          : 'text-muted hover:bg-surface-raised/70 hover:text-ink'
+          ? 'bg-ink text-bg shadow-[0_1px_0_rgb(0_0_0_/0.06)]'
+          : 'border border-border/60 bg-surface-raised text-muted hover:border-border hover:bg-border/40 hover:text-ink'
       }`}
     >
       {label}

@@ -187,9 +187,9 @@ export const DOCS_GROUPS: DocsGroup[] = [
         [],
         [
           {
-            heading: 'Estilos curados (5)',
+            heading: 'Estilos curados (20)',
             bullets: [
-              'Bosque sereno · Editorial claro · Calor suave · Brisa costera · Nota floral.',
+              'Veinte estilos curados (Bosque sereno, Neón noche, Concreto…) con filtros por vibe.',
               'Cada uno trae 3 colores semilla y etiquetas de mood para tipografía.',
             ],
           },
