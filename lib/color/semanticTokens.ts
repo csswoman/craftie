@@ -2,6 +2,7 @@ import { converter } from 'culori';
 
 import type { ExtractedColor } from './imageExtractor';
 import { normalizeHex } from './normalizeHex';
+import { deriveMutedTextHex } from './mutedText';
 import { classifyPalette, type PaletteType } from './paletteClassification';
 import { deriveOnTokenHexForFill } from './pairedOnToken';
 import { remainsDistinctWithColorVisionDeficiency } from './colorVision';
@@ -41,6 +42,7 @@ export type SemanticTokenName =
   | 'surface-inverse'
   | 'surface-inverse-elevated'
   | 'on-background'
+  | 'on-background-muted'
   | 'on-surface'
   | 'on-surface-muted'
   | 'on-background-inverse'
@@ -96,6 +98,7 @@ export type SemanticTokenDerivationInput = {
 const toOklch = converter('oklch');
 
 const AA_RATIO = 4.5;
+export const MIN_BG_SURFACE_LIGHTNESS_DELTA = 0.035;
 const EXPRESSIVE_CHROMA_MIN = 0.055;
 const ACHROMATIC_CHROMA_MAX = 0.01;
 type NeutralRamp = {
@@ -254,6 +257,46 @@ function token(
   details?: Pick<SemanticToken, 'originalHex' | 'gap'>,
 ): SemanticToken {
   return { hex: normalizeHex(hex), source, ...details };
+}
+
+/**
+ * Why: tinted neutral ramps can collapse background and surface into one
+ * visual plane; keep a minimum OKLCH lightness gap so layers read as distinct,
+ * without changing hue/chroma or invading the border band.
+ */
+export function ensureSurfaceLightnessSeparation(
+  backgroundHex: string,
+  surfaceHex: string,
+  borderHex: string,
+  theme: 'light' | 'dark',
+): string {
+  const bg = toOklch(backgroundHex);
+  const surface = toOklch(surfaceHex);
+  const border = toOklch(borderHex);
+  if (!bg || !surface || !border) return surfaceHex;
+
+  const bgL = bg.l ?? 0;
+  let surfaceL = surface.l ?? 0;
+  const borderL = border.l ?? 0;
+  const chroma = surface.c ?? 0;
+  const hue = surface.h ?? bg.h ?? 0;
+  const low = Math.min(bgL, borderL);
+  const high = Math.max(bgL, borderL);
+
+  if (Math.abs(bgL - surfaceL) >= MIN_BG_SURFACE_LIGHTNESS_DELTA) {
+    const clampedSurfaceL = Math.min(high, Math.max(low, surfaceL));
+    return clampedSurfaceL === surfaceL
+      ? surfaceHex
+      : oklchChannelsToHex(clampedSurfaceL, chroma, hue);
+  }
+
+  const desired =
+    theme === 'light'
+      ? bgL - MIN_BG_SURFACE_LIGHTNESS_DELTA
+      : bgL + MIN_BG_SURFACE_LIGHTNESS_DELTA;
+  surfaceL = Math.min(high, Math.max(low, desired));
+
+  return oklchChannelsToHex(surfaceL, chroma, hue);
 }
 
 function expressiveTokenWithVibrancy(
@@ -427,6 +470,17 @@ function mutedOnSurface(surfaceHex: string, onSurfaceHex: string): SemanticToken
   }
 
   return token(best, 'derived');
+}
+
+/**
+ * Why: secondary labels need a quieter text token (~3:1 AA large:
+ * typically ≥18px or ≥14px bold) — not full AA body text.
+ */
+function deriveOnBackgroundMuted(
+  onBackgroundHex: string,
+  surfaceHex: string,
+): SemanticToken {
+  return token(deriveMutedTextHex(onBackgroundHex, surfaceHex, 3), 'derived');
 }
 
 function colorsAreDistinguishable(leftHex: string, rightHex: string): boolean {
@@ -714,13 +768,41 @@ function deriveBaseSemanticTokens(input: SemanticTokenDerivationInput): Semantic
     token(neutralHex(ramp.divider[0], ramp.divider[1], hue), 'derived'),
     overrides,
   );
+  const separatedSurfaceHex = ensureSurfaceLightnessSeparation(
+    background.hex,
+    surface.hex,
+    border.hex,
+    theme,
+  );
+  const separatedSurface =
+    separatedSurfaceHex === surface.hex
+      ? surface
+      : token(separatedSurfaceHex, surface.source === 'override' ? 'override' : 'derived');
+  const onBackgroundMuted = applyOverride(
+    'on-background-muted',
+    deriveOnBackgroundMuted(onBackground.hex, separatedSurface.hex),
+    overrides,
+  );
+  const separatedOnSurfaceMuted =
+    onSurfaceMuted.source === 'override' ||
+    contrastRatio(onSurfaceMuted.hex, separatedSurface.hex) >= AA_RATIO
+      ? onSurfaceMuted
+      : token(
+          adjustLightnessForContrast(
+            onSurfaceMuted.hex,
+            separatedSurface.hex,
+            AA_RATIO,
+          ),
+          'corrected',
+          { originalHex: onSurfaceMuted.hex },
+        );
 
   const pool = expressiveCandidates(candidates);
   const used = new Set<string>();
   const primary = expressiveTokenWithVibrancy(
     applyOverride(
       'primary',
-      pickExpressive(pool, used, surface.hex, synthesizeExpressive(hue, 0, theme)),
+      pickExpressive(pool, used, separatedSurface.hex, synthesizeExpressive(hue, 0, theme)),
       overrides,
     ),
     vibrancy,
@@ -728,7 +810,7 @@ function deriveBaseSemanticTokens(input: SemanticTokenDerivationInput): Semantic
   const secondary = expressiveTokenWithVibrancy(
     applyOverride(
       'secondary',
-      pickExpressive(pool, used, surface.hex, synthesizeExpressive(hue, offsets.secondary, theme), 24),
+      pickExpressive(pool, used, separatedSurface.hex, synthesizeExpressive(hue, offsets.secondary, theme), 24),
       overrides,
     ),
     vibrancy,
@@ -736,24 +818,24 @@ function deriveBaseSemanticTokens(input: SemanticTokenDerivationInput): Semantic
   const accent = expressiveTokenWithVibrancy(
     applyOverride(
       'accent',
-      pickExpressive(pool, used, surface.hex, synthesizeExpressive(hue, offsets.accent, theme), 36),
+      pickExpressive(pool, used, separatedSurface.hex, synthesizeExpressive(hue, offsets.accent, theme), 36),
       overrides,
     ),
     vibrancy,
   );
   const success = applyOverride(
     'success',
-    pickState(pool, STANDARD_STATE_HUES.success, hue, surface.hex, theme),
+    pickState(pool, STANDARD_STATE_HUES.success, hue, separatedSurface.hex, theme),
     overrides,
   );
   const warning = applyOverride(
     'warning',
-    pickState(pool, STANDARD_STATE_HUES.warning, hue, surface.hex, theme),
+    pickState(pool, STANDARD_STATE_HUES.warning, hue, separatedSurface.hex, theme),
     overrides,
   );
   const error = applyOverride(
     'error',
-    pickState(pool, STANDARD_STATE_HUES.error, hue, surface.hex, theme),
+    pickState(pool, STANDARD_STATE_HUES.error, hue, separatedSurface.hex, theme),
     overrides,
   );
   const seriesIdentities = buildDataSeriesIdentities(
@@ -787,7 +869,7 @@ function deriveBaseSemanticTokens(input: SemanticTokenDerivationInput): Semantic
     token(readableOn(theme === 'dark' ? background.hex : surfaceElevated.hex, heroSurface.hex), 'derived'),
     overrides,
   );
-  const dataSeries = materializeSeries(seriesIdentities, surface.hex, theme, vibrancy);
+  const dataSeries = materializeSeries(seriesIdentities, separatedSurface.hex, theme, vibrancy);
   const dataToken = (index: number, fallback: SemanticToken): SemanticToken =>
     dataSeries[index] ?? dataSeries[dataSeries.length - 1] ?? fallback;
   const tonalTokens = Object.fromEntries([
@@ -798,14 +880,15 @@ function deriveBaseSemanticTokens(input: SemanticTokenDerivationInput): Semantic
 
   return {
     background,
-    surface,
+    surface: separatedSurface,
     'surface-elevated': surfaceElevated,
     'background-inverse': backgroundInverse,
     'surface-inverse': surfaceInverse,
     'surface-inverse-elevated': surfaceInverseElevated,
     'on-background': onBackground,
+    'on-background-muted': onBackgroundMuted,
     'on-surface': onSurface,
-    'on-surface-muted': onSurfaceMuted,
+    'on-surface-muted': separatedOnSurfaceMuted,
     'on-background-inverse': onBackgroundInverse,
     'on-surface-inverse': onSurfaceInverse,
     border,

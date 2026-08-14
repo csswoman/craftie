@@ -32,6 +32,7 @@ describe('randomUnlockedRolePalette', () => {
       'fondo',
       'superficie',
       'texto',
+      'texto-secundario',
       'primario',
       'secundario',
       'acento',
@@ -68,6 +69,22 @@ describe('randomUnlockedRolePalette', () => {
 
     expect(contrastRatio(texto, fondo)).toBeGreaterThanOrEqual(4.5);
     expect(contrastRatio(texto, superficie)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('regenerates texto-secundario near 3:1 after superficie changes', () => {
+    const updates = randomUnlockedRolePalette(
+      palette,
+      ['fondo', 'texto', 'primario', 'secundario', 'acento', 'borde'],
+      sequence([0.1, 0.7, 0.9]),
+    );
+    const superficie = updates.superficie ?? palette.superficie.hex;
+    const muted = updates['texto-secundario'] ?? palette['texto-secundario'].hex;
+    const ratio = contrastRatio(muted, superficie);
+
+    expect(superficie).not.toBe(palette.superficie.hex);
+    expect(muted).not.toBe(palette['texto-secundario'].hex);
+    expect(ratio).toBeGreaterThanOrEqual(2.8);
+    expect(ratio).toBeLessThanOrEqual(3.4);
   });
 
   it('reports whether any role can be randomized', () => {

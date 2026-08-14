@@ -36,6 +36,7 @@ export const SEMANTIC_TOKEN_LABELS: Record<SemanticTokenName, string> = {
   'surface-inverse': 'Surface inverse',
   'surface-inverse-elevated': 'Surface inverse elevated',
   'on-background': 'On background',
+  'on-background-muted': 'On background muted',
   'on-surface': 'On surface',
   'on-surface-muted': 'On surface muted',
   'on-background-inverse': 'On background inverse',
@@ -74,6 +75,7 @@ const TONAL_READABLE_PAIRS = Object.fromEntries(
 const READABLE_PAIRS: Partial<Record<SemanticTokenName, SemanticTokenName>> = {
   background: 'on-background',
   surface: 'on-surface',
+  'on-background-muted': 'surface',
   'on-surface-muted': 'surface',
   'background-inverse': 'on-background-inverse',
   'surface-inverse': 'on-surface-inverse',

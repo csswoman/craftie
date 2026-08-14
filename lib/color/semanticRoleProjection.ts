@@ -1,5 +1,6 @@
 import { namePalette } from './naming';
 import { normalizeHex } from './normalizeHex';
+import { isTextSafe } from './roleFitness';
 import {
   PALETTE_ROLE_ORDER,
   ROLE_LABELS,
@@ -18,11 +19,14 @@ const ROLE_TO_TOKEN: Record<PaletteRoleId, SemanticTokenName> = {
   fondo: 'background',
   superficie: 'surface',
   texto: 'on-background',
+  'texto-secundario': 'on-background-muted',
   primario: 'primary',
   secundario: 'secondary',
   acento: 'accent',
   borde: 'border',
 };
+
+const EXPRESSIVE_ROLES = new Set<PaletteRoleId>(['primario', 'secundario', 'acento']);
 
 function projectSource(source: SemanticTokenSource): ColorSource {
   return source === 'override' ? 'extracted' : source;
@@ -60,6 +64,9 @@ export function projectSemanticTokensToRolePalette(
       source: projectSource(semantic.source),
       ...(semantic.originalHex ? { originalHex: semantic.originalHex } : {}),
       ...(semantic.gap ? { gap: semantic.gap } : {}),
+      ...(EXPRESSIVE_ROLES.has(role)
+        ? { textSafe: isTextSafe(normalized, tokens.surface.hex) }
+        : {}),
     };
 
     palette[role] = slot;

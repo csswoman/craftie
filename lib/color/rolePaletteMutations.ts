@@ -9,6 +9,7 @@ import { recomputeDerivedRoles } from './rolePaletteDerived';
 import {
   applyUniqueRoleNames,
   createRoleSlot,
+  withExpressiveTextSafety,
 } from './rolePaletteSlots';
 import {
   PALETTE_ROLE_ORDER,
@@ -22,9 +23,45 @@ import {
   deriveNeutralRoles,
   deriveSecondary,
 } from '../utils/deriveRoles';
+import { deriveMutedTextHex } from './mutedText';
 
 export function isPaletteRoleId(id: string): id is PaletteRoleId {
   return (PALETTE_ROLE_ORDER as string[]).includes(id);
+}
+
+function refreshTextDependencies(
+  palette: RolePalette,
+  changedRole: PaletteRoleId,
+  lockedRoles: PaletteRoleId[] = [],
+): RolePalette {
+  if (changedRole !== 'texto' && changedRole !== 'superficie') {
+    return palette;
+  }
+
+  const next = { ...palette };
+  const locked = new Set(lockedRoles);
+
+  if (!locked.has('texto-secundario')) {
+    const mutedHex = deriveMutedTextHex(next.texto.hex, next.superficie.hex, 3);
+    const paletteInput = PALETTE_ROLE_ORDER.map((role) => ({
+      hex: role === 'texto-secundario' ? mutedHex : next[role].hex,
+    }));
+    next['texto-secundario'] = createRoleSlot(
+      'texto-secundario',
+      mutedHex,
+      'derived',
+      paletteInput,
+      next.superficie.hex,
+    );
+  }
+
+  if (changedRole === 'superficie') {
+    for (const role of ['primario', 'secundario', 'acento'] as const) {
+      next[role] = withExpressiveTextSafety(next[role], next.superficie.hex);
+    }
+  }
+
+  return next;
 }
 
 export function replaceRoleHex(
@@ -45,7 +82,7 @@ export function replaceRoleHex(
   const next = { ...palette };
   const slot = palette[role];
 
-  next[role] = {
+  next[role] = withExpressiveTextSafety({
     ...slot,
     hex: normalized,
     source: 'extracted',
@@ -53,9 +90,11 @@ export function replaceRoleHex(
       slot.name && slot.name !== ROLE_LABELS[role] && !slot.name.match(/ \d+$/)
         ? slot.name
         : nameForHex(normalized, paletteInput, { style: 'creative' }),
-  };
+  }, palette.superficie.hex);
 
-  const updated = applyUniqueRoleNames(next);
+  const updated = applyUniqueRoleNames(
+    refreshTextDependencies(next, role, options?.lockedRoles),
+  );
 
   if (role === 'fondo' || role === 'primario') {
     const neutralHue =
@@ -146,6 +185,8 @@ function deriveSlotHex(
       return neutrals.superficie;
     case 'texto':
       return neutrals.texto;
+    case 'texto-secundario':
+      return deriveMutedTextHex(palette.texto.hex, palette.superficie.hex, 3);
     case 'borde':
       return neutrals.borde;
     case 'primario':
@@ -163,10 +204,12 @@ function setDerivedRoleSlot(palette: RolePalette, role: PaletteRoleId): RolePale
     hex: entry === role ? hex : palette[entry].hex,
   }));
 
-  return applyUniqueRoleNames({
+  const updated = {
     ...palette,
-    [role]: createRoleSlot(role, hex, 'derived', paletteInput),
-  });
+    [role]: createRoleSlot(role, hex, 'derived', paletteInput, palette.superficie.hex),
+  };
+
+  return applyUniqueRoleNames(refreshTextDependencies(updated, role));
 }
 
 export function toggleColorInRolePalette(

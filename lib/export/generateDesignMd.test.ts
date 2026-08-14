@@ -31,6 +31,7 @@ describe('designTokens', () => {
       fondo: '#F7F7F5',
       superficie: '#EFEFE8',
       texto: '#2C3E50',
+      'texto-secundario': '#6B7280',
       primario: '#9ADBD6',
       secundario: '#E8D44D',
       acento: '#F4A261',
@@ -43,6 +44,7 @@ describe('designTokens', () => {
   --color-fondo: #F7F7F5;
   --color-superficie: #EFEFE8;
   --color-texto: #2C3E50;
+  --color-texto-secundario: #6B7280;
   --color-primario: #9ADBD6;
   --color-secundario: #E8D44D;
   --color-acento: #F4A261;

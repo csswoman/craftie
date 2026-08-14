@@ -1,5 +1,6 @@
 import { nameForHex, namePalette } from './naming';
 import { normalizeHex } from './normalizeHex';
+import { isTextSafe } from './roleFitness';
 import {
   PALETTE_ROLE_ORDER,
   ROLE_LABELS,
@@ -8,6 +9,17 @@ import {
   type RolePalette,
   type RoleSlot,
 } from './roleTypes';
+
+const EXPRESSIVE_ROLES = new Set<PaletteRoleId>(['primario', 'secundario', 'acento']);
+
+export function withExpressiveTextSafety(
+  slot: RoleSlot,
+  surfaceHex?: string,
+): RoleSlot {
+  return EXPRESSIVE_ROLES.has(slot.role) && surfaceHex
+    ? { ...slot, textSafe: isTextSafe(slot.hex, surfaceHex) }
+    : slot;
+}
 
 export function buildPaletteInput(
   slots: Partial<Record<PaletteRoleId, string>>,
@@ -22,15 +34,16 @@ export function createRoleSlot(
   hex: string,
   source: ColorSource,
   paletteInput: { hex: string }[],
+  surfaceHex?: string,
 ): RoleSlot {
   const normalized = normalizeHex(hex);
 
-  return {
+  return withExpressiveTextSafety({
     role,
     hex: normalized,
     name: nameForHex(normalized, paletteInput, { style: 'creative' }),
     source,
-  };
+  }, surfaceHex);
 }
 
 export function applyUniqueRoleNames(palette: RolePalette): RolePalette {

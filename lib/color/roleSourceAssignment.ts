@@ -24,6 +24,7 @@ import {
   contrastRatio,
   oklchChannelsToHex,
 } from '../utils/colorMath';
+import { deriveMutedTextHex } from './mutedText';
 import {
   deriveFondo,
   deriveNeutralRoles,
@@ -349,9 +350,22 @@ export function assignSourceRoles(
   }
 
   const texto = assignTexto(candidates, used, fondo.hex, superficie.hex);
+  const textoSecundario: RoleAssignment = {
+    hex: deriveMutedTextHex(texto.hex, superficie.hex, 3),
+    source: 'derived',
+  };
 
   return {
-    roles: { fondo, superficie, texto, primario, secundario, acento, borde },
+    roles: {
+      fondo,
+      superficie,
+      texto,
+      'texto-secundario': textoSecundario,
+      primario,
+      secundario,
+      acento,
+      borde,
+    },
     neutralHue: fondoNeutralHue,
   };
 }

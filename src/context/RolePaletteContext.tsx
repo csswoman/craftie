@@ -75,6 +75,11 @@ import {
   type UiStatusColorSet,
   type UiStatusRole,
 } from '@lib/color/uiStatusColors';
+import {
+  getColorForUsage,
+  type UsageColor,
+  type UsageIntent,
+} from '@lib/color/usageColor';
 
 function stripPairedOnTokens(
   overrides: SemanticTokenOverrides,
@@ -88,6 +93,7 @@ function stripPairedOnTokens(
   return next;
 }
 export type { ThemeId, ThemesConfig };
+export type { UsageColor, UsageIntent };
 
 const EMPTY_LOCKED_BY_THEME: Record<ThemeId, PaletteRoleId[]> = {
   light: [],
@@ -210,6 +216,7 @@ const INITIAL_EDITABLE: EditablePaletteState = {
 
 export type RolePaletteContextValue = {
   rolePalette: RolePalette | null;
+  getColorForUsage: (intent: UsageIntent) => UsageColor | null;
   /** Role palette locked to the `light` theme, independent of `activeTheme`, for stable export. */
   exportRolePalette: RolePalette | null;
   /** Confirmed status colors projected to semantic token overrides (success/warning/error). */
@@ -403,6 +410,13 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   const rolePalette = useMemo(
     () => (semanticTokens ? projectSemanticTokensToRolePalette(semanticTokens, roleNames) : null),
     [roleNames, semanticTokens],
+  );
+  const getColorForUsageBound = useCallback(
+    (intent: UsageIntent) => {
+      if (!rolePalette || !semanticTokens) return null;
+      return getColorForUsage(rolePalette, semanticTokens, intent);
+    },
+    [rolePalette, semanticTokens],
   );
   const previewRolePalette = useMemo(
     () =>
@@ -806,6 +820,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   const value = useMemo<RolePaletteContextValue>(
     () => ({
       rolePalette,
+      getColorForUsage: getColorForUsageBound,
       exportRolePalette,
       exportStatusTokenOverrides,
       semanticTokens,
@@ -855,6 +870,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
     }),
     [
       rolePalette,
+      getColorForUsageBound,
       exportRolePalette,
       exportStatusTokenOverrides,
       semanticTokens,

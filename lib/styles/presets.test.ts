@@ -40,6 +40,8 @@ describe('presets', () => {
   it('exports curated styles for onboarding', () => {
     expect(DESIGN_STYLES).toHaveLength(20);
     expect(DESIGN_STYLES.every((style) => style.seeds.length >= 2)).toBe(true);
+    expect(DESIGN_STYLES.every((style) => style.seeds.length === 5)).toBe(true);
+    expect(DESIGN_STYLES.every((style) => style.thumbnailColors.length === 5)).toBe(true);
     expect(DESIGN_STYLES.every((style) => style.mood.length >= 1 && style.mood.length <= 2)).toBe(
       true,
     );

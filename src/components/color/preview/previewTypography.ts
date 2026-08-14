@@ -77,6 +77,17 @@ export function labelStyle(_fonts?: PreviewFonts, color?: string): TypeRoleStyle
   };
 }
 
+/** Small metadata at body weight — keeps labels from competing with headings. */
+export function captionStyle(_fonts?: PreviewFonts, color?: string): TypeRoleStyle {
+  return {
+    fontFamily: FONT_BODY,
+    fontWeight: WEIGHT_BODY,
+    lineHeight: 1.45,
+    fontSize: 'var(--size-small)',
+    ...(color ? { color } : null),
+  };
+}
+
 export function eyebrowStyle(_fonts?: PreviewFonts, color?: string): TypeRoleStyle {
   return {
     fontFamily: FONT_BODY,

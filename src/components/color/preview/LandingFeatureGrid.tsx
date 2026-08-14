@@ -1,13 +1,11 @@
-import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
+import type { ResolvedLayoutColors, UiLayoutSlot } from '@lib/color/layoutModes';
 
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { previewStaggerDelay } from './dashboardPreviewData';
 import { STUDIO_STEPS } from './landingPreviewData';
-import { onVividFill } from './previewColor';
-import { PreviewIcon } from './previewIcons';
-import { bodyStyle, headingStyle, type PreviewFonts } from './previewTypography';
+import { bodyStyle, headingStyle, titleStyle, type PreviewFonts } from './previewTypography';
 
-function stepAccent(colors: ResolvedLayoutColors, slot: string): string {
+function stepAccent(colors: ResolvedLayoutColors, slot: UiLayoutSlot): string {
   if (slot === 'data1') return colors.data1;
   if (slot === 'data2') return colors.data2;
   return colors.data3;
@@ -23,33 +21,33 @@ export function LandingFeatureGrid({
   onEditSlot?: PreviewSlotEditHandler;
 }) {
   return (
-    <ol className="grid gap-6 sm:grid-cols-3 sm:gap-6">
+    <ol className="flex flex-col gap-8 @min-[720px]/landing:flex-row @min-[720px]/landing:gap-8">
       {STUDIO_STEPS.map((item, index) => {
         const accent = stepAccent(colors, item.slot);
 
         return (
           <li
             key={item.title}
-            className="preview-rise flex gap-3 sm:flex-col sm:gap-3"
-            style={{ animationDelay: previewStaggerDelay(index + 2) }}
+            className="preview-rise flex min-w-0 gap-4 @min-[720px]/landing:flex-1"
+            style={{ animationDelay: previewStaggerDelay(index + 3) }}
           >
             <PreviewSlotTarget
               slot={item.slot}
               onEditSlot={onEditSlot}
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] transition-transform duration-200 ease-out hover:rotate-[-3deg] motion-reduce:transition-none motion-reduce:hover:rotate-0"
-              style={{ backgroundColor: accent, color: onVividFill(accent) }}
+              className="tabular-nums"
+              style={{ ...headingStyle(fonts), color: accent }}
             >
-              <PreviewIcon name={item.icon} size={15} />
+              {index + 1}
             </PreviewSlotTarget>
-            <div className="min-w-0">
-              <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
+            <div className="flex min-w-0 flex-col gap-2">
+              <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={titleStyle(fonts)}>
                 {item.title}
               </PreviewSlotTarget>
               <PreviewSlotTarget
                 slot="mutedText"
                 onEditSlot={onEditSlot}
-                className="mt-1.5 max-w-[34ch] text-pretty opacity-80"
-                style={bodyStyle(fonts)}
+                className="max-w-[34ch] text-pretty"
+                style={bodyStyle(fonts, colors.mutedText)}
               >
                 {item.text}
               </PreviewSlotTarget>

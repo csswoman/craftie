@@ -5,7 +5,7 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { CRAFTIE_QUOTE } from './landingPreviewData';
 import { Avatar, Tag } from './previewPrimitives';
-import { bodyStyle, labelStyle, type PreviewFonts } from './previewTypography';
+import { bodyStyle, captionStyle, titleStyle, type PreviewFonts } from './previewTypography';
 
 type LandingTestimonialCardProps = {
   colors: ResolvedLayoutColors;
@@ -15,16 +15,11 @@ type LandingTestimonialCardProps = {
 
 export function LandingTestimonialCard({ colors, fonts, onEditSlot }: LandingTestimonialCardProps) {
   return (
-    <PreviewSlotTarget
-      slot="surfaceElevated"
-      onEditSlot={onEditSlot}
-      className="rounded-[14px] border p-5"
-      style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
-    >
+    <blockquote className="preview-rise mt-12 max-w-[48ch]">
       <Tag
         label={CRAFTIE_QUOTE.badge}
         color={colors.success}
-        surfaceHex={colors.surfaceElevated}
+        surfaceHex={colors.appBackground}
         slot="success"
         onEditSlot={onEditSlot}
       />
@@ -32,13 +27,13 @@ export function LandingTestimonialCard({ colors, fonts, onEditSlot }: LandingTes
       <PreviewSlotTarget
         slot="text"
         onEditSlot={onEditSlot}
-        className="mt-4 max-w-[40ch] text-pretty"
-        style={{ ...bodyStyle(fonts), fontSize: '1.05em', lineHeight: 1.5 }}
+        className="mt-4 text-pretty"
+        style={{ ...bodyStyle(fonts), fontSize: '1.0625em', lineHeight: 1.55 }}
       >
         &ldquo;{CRAFTIE_QUOTE.text}&rdquo;
       </PreviewSlotTarget>
 
-      <div className="mt-5 flex items-center gap-3 border-t pt-4" style={{ borderColor: colors.border }}>
+      <footer className="mt-5 flex items-center gap-3">
         <Avatar
           initials={CRAFTIE_QUOTE.initials}
           color={colors.primaryAction}
@@ -47,19 +42,19 @@ export function LandingTestimonialCard({ colors, fonts, onEditSlot }: LandingTes
           size={36}
         />
         <div className="min-w-0">
-          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={labelStyle(fonts)}>
+          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={titleStyle(fonts)}>
             {CRAFTIE_QUOTE.author}
           </PreviewSlotTarget>
           <PreviewSlotTarget
             slot="mutedText"
             onEditSlot={onEditSlot}
             className="truncate"
-            style={labelStyle(fonts, colors.mutedText)}
+            style={captionStyle(fonts, colors.mutedText)}
           >
             {CRAFTIE_QUOTE.role}
           </PreviewSlotTarget>
         </div>
-      </div>
-    </PreviewSlotTarget>
+      </footer>
+    </blockquote>
   );
 }

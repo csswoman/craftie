@@ -1,4 +1,8 @@
+import { ChevronRight } from 'lucide-react';
+
 import type { UiStatusColor, UiStatusRole } from '@lib/color/uiStatusColors';
+
+import { UiCompactSwatch } from './UiCompactSwatch';
 
 const STATUS_LABELS: Record<UiStatusRole, string> = {
   success: 'Éxito',
@@ -18,30 +22,28 @@ export function UiCompactStatusSlot({
   const generated = status !== null;
 
   return (
-    <li className={`group flex min-h-12 items-center gap-2.5 rounded-lg border px-2.5 ${generated ? 'border-line' : 'border-dashed border-line'}`}>
-      <span
-        className="size-[22px] shrink-0 rounded-full ring-1 ring-inset ring-ink/10"
-        style={generated ? { backgroundColor: status.hex } : {
-          backgroundColor: 'var(--color-surface)',
-          backgroundImage: 'repeating-linear-gradient(45deg,transparent,transparent 4px,var(--color-line) 4px,var(--color-line) 6px)',
-        }}
-        aria-hidden="true"
-      />
+    <li className={`group flex min-h-12 items-center gap-3 rounded-lg border px-2.5 ${generated ? 'border-line' : 'border-dashed border-line bg-surface'}`}>
+      <UiCompactSwatch hex={status?.hex} pending={!generated} />
       <span className="min-w-0 flex-1">
         <span className="block truncate text-tools-body-sm font-semibold text-ink">
           {STATUS_LABELS[role]}
         </span>
-        <span className={`block text-tools-meta-scale ${generated ? 'font-mono tabular-nums text-muted' : 'text-muted'}`}>
-          {generated ? status.hex.toUpperCase() : 'Sin generar'}
-        </span>
+        {generated && status ? (
+          <span className="block font-mono text-tools-meta-scale font-medium tabular-nums text-ink/80">
+            {status.hex.toUpperCase()}
+          </span>
+        ) : null}
       </span>
-      <button
-        type="button"
-        onClick={onOpen}
-        className={`min-h-8 shrink-0 rounded-md px-2 text-tools-meta-scale font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25 ${generated ? 'text-forest opacity-0 hover:bg-line-soft group-hover:opacity-100 group-focus-within:opacity-100' : 'border border-forest/40 bg-bg text-forest hover:bg-forest/10'}`}
-      >
-        {generated ? 'Editar' : 'Generar'}
-      </button>
+      {generated ? (
+        <button
+          type="button"
+          onClick={onOpen}
+          className="inline-flex min-h-8 shrink-0 items-center gap-0.5 rounded-md px-2 text-tools-meta-scale font-semibold text-muted opacity-0 transition-all duration-200 hover:bg-line-soft hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25 group-hover:opacity-100 group-focus-within:opacity-100"
+        >
+          Editar
+          <ChevronRight size={14} strokeWidth={2.25} aria-hidden="true" />
+        </button>
+      ) : null}
     </li>
   );
 }

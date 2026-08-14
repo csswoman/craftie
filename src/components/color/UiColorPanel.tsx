@@ -86,9 +86,12 @@ export function UiColorPanel({
     setActiveRole(null);
   }
 
+  function generateStatus() {
+    generateStatusColors();
+  }
+
   function openStatus(role: UiStatusRole) {
     clearTokenEditPreview();
-    if (!statusColors) generateStatusColors();
     setFocusedView({ revision: paletteRevision, view: { kind: 'status', role } });
   }
 
@@ -166,6 +169,7 @@ export function UiColorPanel({
             creatingGuide={creatingGuide}
             fillHeight={!mobile}
             onOpenGroup={openGroup}
+            onGenerateStatus={generateStatus}
             onOpenStatus={openStatus}
             onOpenSources={() => setFocusedView({ revision: paletteRevision, view: { kind: 'sources' } })}
             onCreateGuide={onCreateGuide}

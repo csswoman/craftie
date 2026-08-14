@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { remainsDistinctWithColorVisionDeficiency } from './colorVision';
+import { normalizeHex } from './normalizeHex';
 import type { SelectableColor } from './selectableColors';
 import { deriveSemanticTokens } from './semanticTokens';
 import {
@@ -7,6 +9,7 @@ import {
   buildDataCandidates,
   buildExpressiveCandidates,
   deriveFromPrimary,
+  fillRemainingAccentGaps,
   groupCandidatesForUse,
   sortCandidatesForUse,
 } from './uiColorCandidates';
@@ -135,5 +138,108 @@ describe('UI color candidates', () => {
     expect(families.length).toBeLessThan(candidates.length);
     expect(families.some((family) => family.variants.length >= 2)).toBe(true);
     expect(families[0]?.representative.origin).toBe('source');
+  });
+});
+
+describe('fillRemainingAccentGaps', () => {
+  function cyanClusterTokens() {
+    const tokens = deriveSemanticTokens({
+      extracted: [
+        { hex: '#0E7490', prominence: 0.6 },
+        { hex: '#0369A1', prominence: 0.4 },
+      ],
+      paletteType: 'vivid',
+    });
+    return {
+      ...tokens,
+      primary: { hex: '#0E7490', source: 'extracted' as const },
+      'data-1': { hex: '#0E7490', source: 'extracted' as const },
+      'data-2': { hex: '#0369A1', source: 'extracted' as const },
+      'data-3': { hex: '#0284C7', source: 'derived' as const },
+      'data-4': { hex: '#0284C7', source: 'derived' as const },
+      'data-5': { hex: '#0284C7', source: 'derived' as const, gap: 'pending' },
+      'data-6': { hex: '#0284C7', source: 'derived' as const, gap: 'pending' },
+    };
+  }
+
+  const cyanSources: SelectableColor[] = [
+    { id: 'cyan', name: 'Cyan', hex: '#0E7490', group: 'bold' },
+    { id: 'blue', name: 'Blue', hex: '#0369A1', group: 'bold' },
+    { id: 'sky', name: 'Sky', hex: '#0284C7', group: 'bold' },
+  ];
+
+  it('fills remaining gaps with colors that stay CVD-distinct from occupied accents', () => {
+    const tokens = cyanClusterTokens();
+    const filled = fillRemainingAccentGaps(tokens, cyanSources);
+    expect(filled.length).toBeGreaterThan(0);
+
+    const occupied = ['data-1', 'data-2', 'data-3', 'data-4']
+      .map((name) => normalizeHex(tokens[name as 'data-1'].hex));
+
+    for (const entry of filled) {
+      expect(entry.token === 'data-5' || entry.token === 'data-6').toBe(true);
+      for (const hex of occupied) {
+        expect(remainsDistinctWithColorVisionDeficiency(entry.hex, hex)).toBe(true);
+      }
+    }
+
+    if (filled.length === 2) {
+      expect(remainsDistinctWithColorVisionDeficiency(filled[0]!.hex, filled[1]!.hex)).toBe(true);
+    }
+  });
+
+  it('does not overwrite already-assigned data tokens', () => {
+    const tokens = cyanClusterTokens();
+    const before = {
+      d1: tokens['data-1'].hex,
+      d2: tokens['data-2'].hex,
+      d3: tokens['data-3'].hex,
+      d4: tokens['data-4'].hex,
+    };
+    fillRemainingAccentGaps(tokens, cyanSources);
+    expect(tokens['data-1'].hex).toBe(before.d1);
+    expect(tokens['data-2'].hex).toBe(before.d2);
+    expect(tokens['data-3'].hex).toBe(before.d3);
+    expect(tokens['data-4'].hex).toBe(before.d4);
+    expect(tokens['data-5'].gap).toBeTruthy();
+    expect(tokens['data-6'].gap).toBeTruthy();
+  });
+
+  it('returns only the slots that found a safe candidate (partial fill)', () => {
+    const base = tokensWithGaps();
+    const tokens = {
+      ...base,
+      primary: { ...base.primary, gap: 'pending' as const },
+      secondary: { ...base.secondary, gap: 'pending' as const },
+      accent: { ...base.accent, gap: 'pending' as const },
+      'data-1': { hex: '#111111', source: 'override' as const },
+      'data-2': { hex: '#111111', source: 'derived' as const, gap: 'pending' },
+      'data-3': { hex: '#111111', source: 'derived' as const, gap: 'pending' },
+      'data-4': { hex: '#111111', source: 'derived' as const, gap: 'pending' },
+      'data-5': { hex: '#111111', source: 'derived' as const, gap: 'pending' },
+      'data-6': { hex: '#111111', source: 'derived' as const, gap: 'pending' },
+    };
+    const filled = fillRemainingAccentGaps(tokens, [
+      { id: 'soft-gray', name: 'Soft gray', hex: '#B8B8B8', group: 'light-neutral' },
+    ]);
+    expect(filled.every((entry) => entry.token.startsWith('data-'))).toBe(true);
+    expect(filled.length).toBeLessThanOrEqual(5);
+  });
+
+  it('returns an empty array when no candidate is fit for data', () => {
+    const base = tokensWithGaps();
+    const tokens = {
+      ...base,
+      primary: { ...base.primary, gap: 'pending' as const },
+      secondary: { ...base.secondary, gap: 'pending' as const },
+      accent: { ...base.accent, gap: 'pending' as const },
+      'data-1': { hex: '#111111', source: 'override' as const },
+      'data-2': { hex: '#111111', source: 'derived' as const, gap: 'pending' },
+      'data-3': { hex: '#111111', source: 'derived' as const, gap: 'pending' },
+    };
+    const filled = fillRemainingAccentGaps(tokens, [
+      { id: 'soft-gray', name: 'Soft gray', hex: '#B8B8B8', group: 'light-neutral' },
+    ]);
+    expect(filled).toEqual([]);
   });
 });

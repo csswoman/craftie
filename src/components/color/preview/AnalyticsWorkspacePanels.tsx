@@ -9,7 +9,7 @@ import { ANALYTICS_NOTIFICATIONS, ANALYTICS_SETTINGS } from './analyticsPreviewD
 import { onVividFill } from './previewColor';
 import { PreviewIcon } from './previewIcons';
 import { tint } from './previewPrimitives';
-import { headingStyle, labelStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import { captionStyle, headingStyle, titleStyle, type PreviewFonts } from './previewTypography';
 
 export function AnalyticsWorkspacePanels({
   colors,
@@ -25,25 +25,29 @@ export function AnalyticsWorkspacePanels({
     hungry: true,
     nap: false,
   });
+  const accent = colors.accent;
+  const onAccent = onVividFill(accent);
 
   return (
-    <div className="mt-4 grid gap-4 lg:grid-cols-2">
+    <div className="mt-6 grid gap-6 @min-[720px]/analytics:grid-cols-2">
       <PreviewSlotTarget
         slot="surfaceElevated"
         onEditSlot={onEditSlot}
-        className="rounded-[14px] border p-4 lg:p-5 transition-transform duration-200 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+        className="rounded-xl border p-5 @min-[800px]/analytics:p-6"
         style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
       >
         <div className="flex items-center justify-between gap-3">
           <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
             Avisos del estudio
           </PreviewSlotTarget>
-          <span
+          <PreviewSlotTarget
+            slot="accent"
+            onEditSlot={onEditSlot}
             className="rounded-full px-2 py-0.5"
-            style={{ ...labelStyle(fonts), backgroundColor: tint(colors.data4, 14), color: colors.data4 }}
+            style={{ ...captionStyle(fonts), backgroundColor: tint(accent, 14), color: accent }}
           >
             3 nuevos
-          </span>
+          </PreviewSlotTarget>
         </div>
         <div className="mt-4 space-y-1">
           {ANALYTICS_NOTIFICATIONS.map((item, index) => (
@@ -71,12 +75,18 @@ export function AnalyticsWorkspacePanels({
                   slot="mutedText"
                   onEditSlot={onEditSlot}
                   className="block"
-                  style={labelStyle(fonts, colors.mutedText)}
+                  style={captionStyle(fonts, colors.mutedText)}
                 >
                   {item.detail}
                 </PreviewSlotTarget>
               </div>
-              <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: colors.data4 }} aria-hidden="true" />
+              <PreviewSlotTarget
+                slot="accent"
+                onEditSlot={onEditSlot}
+                className="h-2 w-2 shrink-0 rounded-full"
+                style={{ backgroundColor: accent }}
+                aria-hidden="true"
+              />
             </div>
           ))}
         </div>
@@ -85,7 +95,7 @@ export function AnalyticsWorkspacePanels({
       <PreviewSlotTarget
         slot="surface"
         onEditSlot={onEditSlot}
-        className="rounded-[14px] border p-4 lg:p-5 transition-transform duration-200 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+        className="rounded-xl border p-5 @min-[800px]/analytics:p-6"
         style={{ backgroundColor: colors.surface, borderColor: colors.border }}
       >
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
@@ -98,7 +108,7 @@ export function AnalyticsWorkspacePanels({
               <div key={item.id} className="flex items-center gap-3">
                 <span
                   className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px]"
-                  style={{ backgroundColor: tint(colors.data2, 11), color: colors.data2 }}
+                  style={{ backgroundColor: tint(colors.mutedText, 10), color: colors.mutedText }}
                 >
                   <PreviewIcon name={item.icon} size={15} />
                 </span>
@@ -110,7 +120,7 @@ export function AnalyticsWorkspacePanels({
                     slot="mutedText"
                     onEditSlot={onEditSlot}
                     className="block truncate"
-                    style={labelStyle(fonts, colors.mutedText)}
+                    style={captionStyle(fonts, colors.mutedText)}
                   >
                     {item.detail}
                   </PreviewSlotTarget>
@@ -126,14 +136,14 @@ export function AnalyticsWorkspacePanels({
                   }}
                   className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors duration-200 ease-out focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none"
                   style={{
-                    backgroundColor: active ? colors.data4 : tint(colors.mutedText, 24),
-                    outlineColor: colors.primaryAction,
+                    backgroundColor: active ? accent : tint(colors.mutedText, 24),
+                    outlineColor: accent,
                   }}
                 >
                   <span
                     className="pointer-events-none block h-5 w-5 rounded-full shadow-[0_1px_3px_rgb(0_0_0/0.18)] transition-transform duration-200 ease-out motion-reduce:transition-none"
                     style={{
-                      backgroundColor: active ? onVividFill(colors.data4) : colors.surfaceElevated,
+                      backgroundColor: active ? onAccent : colors.surfaceElevated,
                       transform: active ? 'translateX(1.25rem)' : 'translateX(0)',
                     }}
                   />

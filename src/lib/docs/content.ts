@@ -216,7 +216,7 @@ export const DOCS_GROUPS: DocsGroup[] = [
         'Sobre Craftie',
         'Panel Colores: Sistema',
         'Marca, fundaciones, estados y colores fuente.',
-        'La pestaña Sistema del panel Colores es el centro de edición semántica. «Editar ›» abre vistas enfocadas con candidatos de imagen, derivación L/C y contraste en vivo.',
+        'La pestaña Sistema del panel Colores es el centro de edición semántica. «Editar» abre vistas enfocadas con candidatos de imagen, derivación L/C y contraste en vivo.',
         [],
         [],
         [],
@@ -224,7 +224,7 @@ export const DOCS_GROUPS: DocsGroup[] = [
           {
             heading: 'Color de marca',
             bullets: [
-              'Primario, Secundario, Acento — 3 roles con «Editar ›».',
+              'Primario, Secundario, Acento — 3 roles con «Editar».',
             ],
           },
           {
@@ -237,8 +237,8 @@ export const DOCS_GROUPS: DocsGroup[] = [
             heading: 'Colores de estado',
             bullets: [
               'Éxito, Advertencia, Peligro (no solo rojo/verde decorativo).',
+              '«Generar» rellena los tres estados en el panel. «Editar» abre el ajuste fino.',
               'Origen visible: Imagen, Ajustado o Generado.',
-              'Ajuste fino con controles L/C en la vista enfocada.',
             ],
           },
           {

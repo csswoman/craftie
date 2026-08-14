@@ -23,6 +23,7 @@ const TARGET_LIGHTNESS: Record<ThemeId, Record<PaletteRoleId, number>> = {
     fondo: 0.98,
     superficie: 0.96,
     texto: 0.25,
+    'texto-secundario': 0.45,
     primario: 0.52,
     secundario: 0.55,
     acento: 0.58,
@@ -32,6 +33,7 @@ const TARGET_LIGHTNESS: Record<ThemeId, Record<PaletteRoleId, number>> = {
     fondo: 0.15,
     superficie: 0.19,
     texto: 0.92,
+    'texto-secundario': 0.72,
     primario: 0.68,
     secundario: 0.7,
     acento: 0.72,
@@ -39,7 +41,13 @@ const TARGET_LIGHTNESS: Record<ThemeId, Record<PaletteRoleId, number>> = {
   },
 };
 
-const NEUTRAL_ROLES = new Set<PaletteRoleId>(['fondo', 'superficie', 'texto', 'borde']);
+const NEUTRAL_ROLES = new Set<PaletteRoleId>([
+  'fondo',
+  'superficie',
+  'texto',
+  'texto-secundario',
+  'borde',
+]);
 
 export function oppositeTheme(theme: ThemeId): ThemeId {
   return theme === 'light' ? 'dark' : 'light';

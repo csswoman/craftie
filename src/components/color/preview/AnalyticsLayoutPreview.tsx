@@ -6,7 +6,9 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
 import { AnalyticsAsidePanels } from './AnalyticsAsidePanels';
 import { AnalyticsDetailPanels } from './AnalyticsDetailPanels';
+import { AnalyticsMetricCard } from './AnalyticsMetricCard';
 import { AnalyticsSourceInsights } from './AnalyticsSourceInsights';
+import { AnalyticsTreatPanel } from './AnalyticsTreatPanel';
 import { AnalyticsWorkspacePanels } from './AnalyticsWorkspacePanels';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import {
@@ -16,12 +18,12 @@ import {
   getAnalyticsGreeting,
 } from './analyticsPreviewData';
 import { previewStaggerDelay } from './dashboardPreviewData';
-import { onVividFill, vividFill } from './previewColor';
-import { DonutChart, Sparkline, type ChartSeries } from './previewCharts';
+import { DonutChart, type ChartSeries } from './previewCharts';
 import { PreviewIcon } from './previewIcons';
-import { StatDelta, tint } from './previewPrimitives';
+import { tint } from './previewPrimitives';
 import {
   bodyStyle,
+  captionStyle,
   DEFAULT_PREVIEW_FONTS,
   displayStyle,
   headingStyle,
@@ -41,6 +43,7 @@ export const ANALYTICS_VISUAL_SLOTS = [
   'divider',
   'primaryAction',
   'primaryActionText',
+  'accent',
   'success',
   'error',
   'data1',
@@ -63,8 +66,8 @@ export function AnalyticsLayoutPreview({
   onEditSlot?: PreviewSlotEditHandler;
 }) {
   const [hovered, setHovered] = useState<string | null>(null);
-  const filterFill = vividFill(colors.primaryAction, colors.surface);
   const greeting = getAnalyticsGreeting(new Date().getHours());
+  const [featuredKpi, ...secondaryKpis] = ANALYTICS_KPIS;
   const series: ChartSeries[] = ANALYTICS_ACTIVITY_MIX.map((item) => ({
     label: item.label,
     value: item.value,
@@ -85,96 +88,73 @@ export function AnalyticsLayoutPreview({
         ...previewRootTypeStyle(),
       }}
     >
-      <div className="min-h-[32rem] p-4 sm:p-5 lg:p-6">
+      <header
+        className="preview-rise flex flex-wrap items-start justify-between gap-x-6 gap-y-4 border-b px-6 py-5 @min-[900px]/analytics:px-8"
+        style={{
+          backgroundColor: colors.chrome,
+          borderColor: colors.divider,
+          animationDelay: previewStaggerDelay(0),
+        }}
+      >
+        <div className="min-w-0 max-w-[42ch]">
+          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={{ ...displayStyle(fonts), textWrap: 'balance' }}>
+            {greeting}
+          </PreviewSlotTarget>
+          <PreviewSlotTarget
+            slot="mutedText"
+            onEditSlot={onEditSlot}
+            className="mt-3 text-pretty"
+            style={bodyStyle(fonts, colors.mutedText)}
+          >
+            Metas de perro artista: croquetas, carrera, pelota y charlar contigo.
+          </PreviewSlotTarget>
+        </div>
         <PreviewSlotTarget
-          slot="chrome"
+          slot="border"
           onEditSlot={onEditSlot}
-          className="preview-rise mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[14px] border px-4 py-3"
+          className="inline-flex min-h-11 items-center gap-2 rounded-[10px] border px-4"
           style={{
-            backgroundColor: colors.chrome,
+            ...labelStyle(fonts),
+            fontWeight: 500,
+            backgroundColor: 'transparent',
             borderColor: colors.border,
-            animationDelay: previewStaggerDelay(0),
+            color: colors.text,
           }}
         >
-          <div className="min-w-0">
-            <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={labelStyle(fonts, colors.mutedText)}>
-              Diario de Craftie
-            </PreviewSlotTarget>
-            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-0.5" style={headingStyle(fonts)}>
-              {greeting}
-            </PreviewSlotTarget>
-            <PreviewSlotTarget
-              slot="mutedText"
-              onEditSlot={onEditSlot}
-              className="mt-1 max-w-[42ch] text-pretty"
-              style={bodyStyle(fonts, colors.mutedText)}
-            >
-              Metas de perro artista: croquetas, carrera, pelota y charlar contigo.
-            </PreviewSlotTarget>
-          </div>
-          <PreviewSlotTarget
-            slot="primaryAction"
-            onEditSlot={onEditSlot}
-            className="inline-flex items-center gap-1.5 rounded-[10px] px-3 py-2 transition-transform duration-200 ease-out hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-            style={{
-              ...labelStyle(fonts),
-              backgroundColor: filterFill,
-              color: onVividFill(filterFill),
-              outlineColor: colors.primaryAction,
-            }}
-          >
-            <PreviewIcon name="filter" size={13} />
-            Filtrar día
-          </PreviewSlotTarget>
+          <PreviewIcon name="filter" size={13} />
+          Filtrar día
         </PreviewSlotTarget>
+      </header>
 
-        <section className="mb-4 grid gap-3 sm:grid-cols-2 @min-[900px]/analytics:grid-cols-4">
-          {ANALYTICS_KPIS.map((kpi, index) => {
-            const kpiColor = colors[kpi.slot];
-            const trendColor = kpi.dir === 'up' ? colors.success : colors.error;
-            const trendSlot = kpi.dir === 'up' ? ('success' as const) : ('error' as const);
-
-            return (
-              <PreviewSlotTarget
-                key={kpi.label}
-                slot="surface"
-                onEditSlot={onEditSlot}
-                className="preview-rise rounded-[14px] border p-3.5 transition-transform duration-200 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-                style={{
-                  backgroundColor: colors.surface,
-                  borderColor: colors.border,
-                  animationDelay: previewStaggerDelay(index + 1),
-                }}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={labelStyle(fonts, colors.mutedText)}>
-                    {kpi.label}
-                  </PreviewSlotTarget>
-                  <StatDelta value={kpi.trend} direction={kpi.dir} color={trendColor} slot={trendSlot} onEditSlot={onEditSlot} />
-                </div>
-                <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-2 tabular-nums" style={displayStyle(fonts)}>
-                  {kpi.value}
-                </PreviewSlotTarget>
-                <div className="mt-2.5">
-                  <Sparkline values={[...kpi.spark]} color={kpiColor} surfaceHex={colors.surface} height={26} />
-                </div>
-              </PreviewSlotTarget>
-            );
-          })}
+      <div className="min-h-[32rem] p-6 @min-[900px]/analytics:px-8 @min-[900px]/analytics:py-7">
+        <section className="@container/analyticsmain">
+          <div className="grid grid-cols-2 gap-3 @min-[400px]/analyticsmain:grid-cols-4 @min-[400px]/analyticsmain:gap-4">
+            <div
+              className="preview-rise col-span-2 @min-[400px]/analyticsmain:col-span-1"
+              style={{ animationDelay: previewStaggerDelay(1) }}
+            >
+              <AnalyticsMetricCard colors={colors} fonts={fonts} kpi={featuredKpi} featured onEditSlot={onEditSlot} />
+            </div>
+            {secondaryKpis.map((kpi, index) => (
+              <div key={kpi.label} className="preview-rise" style={{ animationDelay: previewStaggerDelay(index + 2) }}>
+                <AnalyticsMetricCard colors={colors} fonts={fonts} kpi={kpi} onEditSlot={onEditSlot} />
+              </div>
+            ))}
+          </div>
         </section>
 
-        <section className="grid gap-4 @min-[1000px]/analytics:grid-cols-[minmax(0,1.4fr)_minmax(17.5rem,0.95fr)]">
+        <section className="mt-6 grid min-w-0 gap-6 @min-[800px]/analytics:grid-cols-[minmax(0,1.4fr)_minmax(16rem,0.9fr)]">
           <PreviewSlotTarget
             slot="surface"
             onEditSlot={onEditSlot}
-            className="preview-rise flex h-full flex-col rounded-[14px] border p-4 lg:p-5"
+            className="preview-rise flex h-full min-w-0 flex-col rounded-xl border p-5 @min-[800px]/analytics:p-6"
             style={{
               backgroundColor: colors.surface,
               borderColor: colors.border,
               animationDelay: previewStaggerDelay(5),
             }}
           >
-            <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex flex-wrap items-start justify-between gap-6">
               <div className="min-w-0">
                 <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
                   Cómo pasó el día
@@ -182,7 +162,7 @@ export function AnalyticsLayoutPreview({
                 <PreviewSlotTarget
                   slot="mutedText"
                   onEditSlot={onEditSlot}
-                  className="mt-1 max-w-[40ch] text-pretty"
+                  className="mt-2 max-w-[40ch] text-pretty"
                   style={bodyStyle(fonts, colors.mutedText)}
                 >
                   Pasa el cursor por un segmento para ver dónde puso la energía Craftie.
@@ -196,13 +176,13 @@ export function AnalyticsLayoutPreview({
                   surfaceHex={colors.surface}
                   size={132}
                 />
-                <ul className="space-y-1.5" style={labelStyle(fonts)}>
+                <ul className="space-y-2" style={captionStyle(fonts)}>
                   {series.map((item) => (
                     <li
                       key={item.label}
                       onMouseEnter={() => setHovered(item.label)}
                       onMouseLeave={() => setHovered(null)}
-                      className="flex items-center gap-2 rounded-md px-1.5 py-0.5 transition-[background-color,opacity] duration-150"
+                      className="flex items-center gap-2 rounded-md px-1.5 py-0.5"
                       style={{
                         backgroundColor: hovered === item.label ? tint(item.color, 14) : 'transparent',
                         opacity: hovered && hovered !== item.label ? 0.45 : 1,
@@ -227,9 +207,13 @@ export function AnalyticsLayoutPreview({
           </PreviewSlotTarget>
 
           <div className="preview-rise min-w-0" style={{ animationDelay: previewStaggerDelay(6) }}>
-            <AnalyticsAsidePanels colors={colors} fonts={fonts} series={series} onEditSlot={onEditSlot} />
+            <AnalyticsAsidePanels colors={colors} fonts={fonts} onEditSlot={onEditSlot} />
           </div>
         </section>
+
+        <div className="mt-6">
+          <AnalyticsTreatPanel colors={colors} fonts={fonts} onEditSlot={onEditSlot} />
+        </div>
 
         <AnalyticsDetailPanels colors={colors} fonts={fonts} onEditSlot={onEditSlot} />
         <AnalyticsWorkspacePanels colors={colors} fonts={fonts} onEditSlot={onEditSlot} />

@@ -6,10 +6,9 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { ANALYTICS_CHAT } from './analyticsPreviewData';
-import { onVividFill, vividFill } from './previewColor';
+import { onVividFill } from './previewColor';
 import { PreviewIcon } from './previewIcons';
-import { tint } from './previewPrimitives';
-import { headingStyle, labelStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import { captionStyle, headingStyle, labelStyle, titleStyle, type PreviewFonts } from './previewTypography';
 
 export function AnalyticsChatPanel({
   colors,
@@ -22,23 +21,25 @@ export function AnalyticsChatPanel({
 }) {
   const [draft, setDraft] = useState('');
   const [sentMessage, setSentMessage] = useState<string | null>(null);
-  const outgoingFill = vividFill(colors.data4, colors.surface);
-  const craftieFill = colors.primaryAction;
+  /** Analytics chrome is neutral; accent (data-1) is the one expressive identity color. */
+  const craftieFill = colors.accent;
   const onCraftie = onVividFill(craftieFill);
+  const outgoingFill = colors.text;
+  const onOutgoing = colors.surface;
 
   return (
     <PreviewSlotTarget
       slot="surface"
       onEditSlot={onEditSlot}
-      className="rounded-[14px] border p-4 lg:p-5"
+      className="rounded-xl border p-5 @min-[800px]/analytics:p-6"
       style={{ backgroundColor: colors.surface, borderColor: colors.border }}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <PreviewSlotTarget
-            slot="primaryAction"
+            slot="accent"
             onEditSlot={onEditSlot}
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full font-black"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full font-medium"
             style={{ backgroundColor: craftieFill, color: onCraftie }}
           >
             {ANALYTICS_CHAT.initials}
@@ -47,7 +48,7 @@ export function AnalyticsChatPanel({
             <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="block" style={headingStyle(fonts)}>
               {ANALYTICS_CHAT.name}
             </PreviewSlotTarget>
-            <span className="flex items-center gap-1.5" style={labelStyle(fonts, colors.mutedText)}>
+            <span className="flex items-center gap-1.5" style={captionStyle(fonts, colors.mutedText)}>
               <PreviewSlotTarget
                 slot="success"
                 onEditSlot={onEditSlot}
@@ -58,7 +59,7 @@ export function AnalyticsChatPanel({
             </span>
           </div>
         </div>
-        <span style={labelStyle(fonts, colors.mutedText)} aria-hidden="true">
+        <span style={captionStyle(fonts, colors.mutedText)} aria-hidden="true">
           •••
         </span>
       </div>
@@ -82,11 +83,19 @@ export function AnalyticsChatPanel({
               colors={colors}
               fonts={fonts}
               fill={outgoingFill}
+              ink={onOutgoing}
             />
           ),
         )}
         {sentMessage ? (
-          <MessageBubble text={sentMessage} time="Ahora" colors={colors} fonts={fonts} fill={outgoingFill} />
+          <MessageBubble
+            text={sentMessage}
+            time="Ahora"
+            colors={colors}
+            fonts={fonts}
+            fill={outgoingFill}
+            ink={onOutgoing}
+          />
         ) : null}
       </div>
 
@@ -121,7 +130,7 @@ export function AnalyticsChatPanel({
           type="submit"
           onClick={(event) => event.stopPropagation()}
           className="grid h-9 w-9 shrink-0 place-items-center rounded-full transition-transform duration-150 ease-out hover:-translate-y-0.5 active:scale-90 focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-          style={{ backgroundColor: craftieFill, color: onCraftie, outlineColor: colors.primaryAction }}
+          style={{ backgroundColor: craftieFill, color: onCraftie, outlineColor: craftieFill }}
           aria-label="Enviar mensaje a Craftie"
         >
           <PreviewIcon name="arrowRight" size={14} />
@@ -138,6 +147,7 @@ function MessageBubble({
   colors,
   fonts,
   fill,
+  ink,
 }: {
   text: string;
   time: string;
@@ -145,15 +155,20 @@ function MessageBubble({
   colors: ResolvedLayoutColors;
   fonts: PreviewFonts;
   fill?: string;
+  ink?: string;
 }) {
-  const backgroundColor = incoming ? tint(colors.data2, 12) : (fill ?? colors.data4);
-  const color = incoming ? colors.text : onVividFill(backgroundColor);
+  const backgroundColor = incoming ? colors.surfaceElevated : (fill ?? colors.text);
+  const color = incoming ? colors.text : (ink ?? colors.surface);
 
   return (
     <div className={`preview-list-in flex ${incoming ? 'justify-start' : 'justify-end'}`}>
       <div
-        className={`max-w-[82%] px-3 py-2 ${incoming ? 'rounded-r-xl rounded-bl-xl' : 'rounded-l-xl rounded-br-xl'}`}
-        style={{ backgroundColor, color }}
+        className={`max-w-[82%] border px-3 py-2 ${incoming ? 'rounded-r-xl rounded-bl-xl' : 'rounded-l-xl rounded-br-xl'}`}
+        style={{
+          backgroundColor,
+          color,
+          borderColor: incoming ? colors.border : 'transparent',
+        }}
       >
         <p style={titleStyle(fonts)}>{text}</p>
         <p className="mt-1 text-right opacity-70" style={labelStyle(fonts)}>

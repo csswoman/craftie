@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { AlertCircle, Droplets, Layers, Palette, type LucideIcon } from 'lucide-react';
+import { AlertCircle, ChevronRight, Droplets, Layers, Palette, Sparkles, type LucideIcon } from 'lucide-react';
 
 import type { SelectableColor } from '@lib/color/selectableColors';
 import type { SemanticTokens } from '@lib/color/semanticTokens';
@@ -34,6 +34,7 @@ export function UiCompactColorPanel({
   creatingGuide,
   fillHeight = false,
   onOpenGroup,
+  onGenerateStatus,
   onOpenStatus,
   onOpenSources,
   onCreateGuide,
@@ -50,6 +51,7 @@ export function UiCompactColorPanel({
     group: CompactRoleGroupId,
     token: (typeof COMPACT_ROLE_GROUPS)[CompactRoleGroupId]['roles'][number]['token'],
   ) => void;
+  onGenerateStatus: () => void;
   onOpenStatus: (role: UiStatusRole) => void;
   onOpenSources: () => void;
   onCreateGuide: () => void;
@@ -67,13 +69,7 @@ export function UiCompactColorPanel({
             icon={GROUP_ICONS[groupId]}
             collapsible
             trailing={(
-              <button
-                type="button"
-                onClick={() => onOpenGroup(groupId, group.roles[0].token)}
-                className="min-h-9 text-tools-meta-scale font-semibold text-forest underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25"
-              >
-                Editar ›
-              </button>
+              <EditAction onClick={() => onOpenGroup(groupId, group.roles[0].token)} />
             )}
           >
             <ul aria-label={group.title}>
@@ -93,8 +89,10 @@ export function UiCompactColorPanel({
 
       <PanelSection
         title="Colores de estado"
+        kicker="Semántico"
         icon={AlertCircle}
         collapsible
+        breakBefore
         trailing={<span className="text-tools-meta-scale font-semibold text-muted">esencial</span>}
       >
         <ul className="space-y-1.5">
@@ -107,6 +105,16 @@ export function UiCompactColorPanel({
             />
           ))}
         </ul>
+        {!statusColors ? (
+          <button
+            type="button"
+            onClick={onGenerateStatus}
+            className="mt-2 inline-flex min-h-9 w-full items-center justify-center gap-1.5 rounded-md border border-line bg-bg px-3 text-tools-meta-scale font-semibold text-ink transition-colors hover:bg-line-soft focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25"
+          >
+            <Sparkles size={14} strokeWidth={1.75} aria-hidden="true" />
+            Generar colores de estado
+          </button>
+        ) : null}
       </PanelSection>
 
       <PanelSection
@@ -154,28 +162,35 @@ export function UiCompactColorPanel({
 
 function PanelSection({
   title,
+  kicker,
   icon: Icon,
   trailing,
   children,
   collapsible = false,
+  breakBefore = false,
 }: {
   title: string;
+  kicker?: string;
   icon: LucideIcon;
   trailing: ReactNode;
   children: ReactNode;
   collapsible?: boolean;
+  breakBefore?: boolean;
 }) {
   const [open, setOpen] = useState(true);
 
   const titleRow = (
     <>
-      <Icon aria-hidden="true" size={18} strokeWidth={2} className="shrink-0 text-forest" />
+      <Icon aria-hidden="true" size={18} strokeWidth={2} className="shrink-0 text-muted" />
       <h2 className="truncate font-display text-tools-section-label font-semibold text-ink">{title}</h2>
     </>
   );
 
   return (
-    <section className="border-b border-line-soft py-2.5">
+    <section className={`border-b border-line-soft py-2.5 ${breakBefore ? '-mt-px border-t-2 border-line pt-3.5' : ''}`}>
+      {kicker ? (
+        <p className="mb-1 text-tools-meta-scale font-medium text-muted">{kicker}</p>
+      ) : null}
       <div className="mb-1.5 flex min-h-9 items-center justify-between gap-3">
         {collapsible ? (
           <button
@@ -194,6 +209,19 @@ function PanelSection({
       </div>
       {!collapsible || open ? children : null}
     </section>
+  );
+}
+
+function EditAction({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group inline-flex min-h-9 items-center gap-0.5 text-tools-meta-scale font-semibold text-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25"
+    >
+      Editar
+      <ChevronRight size={14} strokeWidth={2.25} aria-hidden="true" className="transition-transform duration-200 ease-out group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" />
+    </button>
   );
 }
 
