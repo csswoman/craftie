@@ -142,6 +142,34 @@ describe('rolePalette', () => {
     );
   });
 
+  it('refreshes muted text and expressive textSafe when superficie is replaced', () => {
+    const palette = assignRolesFromHexes(['#F7F7F5', '#3366CC', '#E8D44D', '#2C3E50']);
+    const updated = replaceRoleHex(palette, 'superficie', '#B0B0B0');
+    const mutedRatio = contrastRatio(
+      updated['texto-secundario'].hex,
+      updated.superficie.hex,
+    );
+
+    expect(mutedRatio).toBeGreaterThanOrEqual(2.8);
+    expect(mutedRatio).toBeLessThanOrEqual(3.4);
+    for (const role of ['primario', 'secundario', 'acento'] as const) {
+      expect(updated[role].textSafe).toBe(
+        isTextSafe(updated[role].hex, updated.superficie.hex),
+      );
+    }
+  });
+
+  it('preserves locked muted text when superficie is replaced', () => {
+    const palette = assignRolesFromHexes(['#F7F7F5', '#3366CC', '#E8D44D', '#2C3E50']);
+    const mutedHex = palette['texto-secundario'].hex;
+
+    const updated = replaceRoleHex(palette, 'superficie', '#202020', {
+      lockedRoles: ['texto-secundario'],
+    });
+
+    expect(updated['texto-secundario'].hex).toBe(mutedHex);
+  });
+
   it('toggles a color off by reverting its role to derived', () => {
     const palette = assignRolesFromExtracted([
       { hex: '#F7F7F5', prominence: 0.4 },

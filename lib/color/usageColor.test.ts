@@ -31,6 +31,16 @@ describe('getColorForUsage', () => {
     expect(getColorForUsage(palette, tokens, 'action').fill.role).toBe('primario');
   });
 
+  it('uses the action fill as text when the expressive color is text safe', () => {
+    const { palette, tokens } = createPalette('#1B365D');
+    expect(palette.primario.textSafe).toBe(true);
+
+    const result = getColorForUsage(palette, tokens, 'action');
+
+    expect(result.textSafe).toBe(true);
+    expect(result.text).toBe(result.fill);
+  });
+
   it('uses texto for active-state instead of an expressive text color', () => {
     const { palette, tokens } = createPalette();
     const result = getColorForUsage(palette, tokens, 'active-state');
