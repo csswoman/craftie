@@ -1,7 +1,7 @@
 'use client';
 
 import { useId, useMemo, useState } from 'react';
-import { Info, TriangleAlert, X } from 'lucide-react';
+import { Info, Sparkles, TriangleAlert, X } from 'lucide-react';
 
 import {
   accentFamilyHelpText,
@@ -21,6 +21,7 @@ import type { SelectableColor } from '@lib/color/selectableColors';
 import type { SemanticTokenName, SemanticTokens } from '@lib/color/semanticTokens';
 import {
   buildDataCandidates,
+  fillRemainingAccentGaps,
   type UiColorCandidate,
 } from '@lib/color/uiColorCandidates';
 import { DATA_TOKEN_NAMES, sourceHueCause } from '@lib/color/uiColorPanel';
@@ -80,6 +81,22 @@ export function UiDataSection({
     setActiveSlot(nextState.activeSlot);
   }
 
+  function fillRemainingGaps() {
+    const filled = fillRemainingAccentGaps(tokens, colors);
+    if (filled.length === 0) return;
+
+    const nextSlots = [...seriesState.slots];
+    for (const entry of filled) {
+      const index = DATA_TOKEN_NAMES.indexOf(entry.token as (typeof DATA_TOKEN_NAMES)[number]);
+      if (index === -1) continue;
+      onReplace(entry.token, entry.hex);
+      nextSlots[index] = entry.hex;
+    }
+
+    const nextEmpty = firstEmptySlot(nextSlots);
+    if (nextEmpty !== -1) setActiveSlot(nextEmpty);
+  }
+
   return (
     <section aria-labelledby="ui-accents-title">
       <UiColorSectionHeader
@@ -123,6 +140,19 @@ export function UiDataSection({
       </div>
 
       <div className="mt-3 space-y-3">
+        {gaps.length > 0 ? (
+          <button
+            type="button"
+            onClick={fillRemainingGaps}
+            className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-bg px-3 text-[0.88rem] font-semibold text-ink hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+          >
+            <Sparkles aria-hidden="true" className="size-3.5" strokeWidth={1.75} />
+            {gaps.length === 1
+              ? 'Generar el 1 restante'
+              : `Generar los ${gaps.length} restantes`}
+          </button>
+        ) : null}
+
         {gaps.length > 0 && !warningDismissed ? (
           <div role="status" className="rounded-xl border border-[#EAD9B8] bg-[#FBF4E9] px-3.5 py-3 text-[0.95rem] leading-relaxed text-[#654817] dark:border-[#66532D] dark:bg-[#352C1C] dark:text-[#F0D59B]">
             <div className="flex items-start justify-between gap-3">
