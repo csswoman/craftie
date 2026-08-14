@@ -9,35 +9,36 @@ import { resolveActiveFontPair } from '@lib/typography/activePairing';
 import { buildFontFamilyStack } from '@lib/typography/googleFonts';
 import type { FontPair } from '@lib/typography/pairings';
 import type { AppliedTypography } from '@lib/typography/typeState';
-import { typeScaleSize, type TypeScaleBase, type TypeScaleRatio } from '@lib/typography/typeScale';
+import { type TypeScaleBase, type TypeScaleRatio } from '@lib/typography/typeScale';
+import type { SizeOverrides } from '@/components/font-pairing/FineTuneSizes';
+import type { TypographySpacing } from '@/components/font-pairing/SpacingControls';
 import { familyStackFromApplied } from '@lib/typography/typeState';
 
 import { useRolePalette } from '@/context/RolePaletteContext';
 import { loadGoogleFonts } from '@/lib/browser/googleFonts';
+import { TypeScalePreview } from '@/components/color/TypeScalePreview';
 
 type CanvasSystemViewProps = {
   view: Extract<CanvasViewId, 'style-guide' | 'type-scale'>;
   base: TypeScaleBase;
   ratio: TypeScaleRatio;
+  overrides: SizeOverrides;
+  spacing: TypographySpacing;
+  largerSteps: number;
+  smallerSteps: number;
   selectedPairing: FontPair | null;
   appliedTypography?: AppliedTypography;
   recommendedPairings: FontPair[];
 };
 
-const SCALE_ROWS = [
-  { label: 'Display', token: '--type-display', step: 5, role: 'heading' as const, lineHeight: 0.98 },
-  { label: 'Título 1', token: '--type-h1', step: 4, role: 'heading' as const, lineHeight: 1.05 },
-  { label: 'Título 2', token: '--type-h2', step: 3, role: 'heading' as const, lineHeight: 1.12 },
-  { label: 'Título 3', token: '--type-h3', step: 2, role: 'heading' as const, lineHeight: 1.18 },
-  { label: 'Entradilla', token: '--type-lead', step: 1, role: 'body' as const, lineHeight: 1.4 },
-  { label: 'Cuerpo', token: '--type-body', step: 0, role: 'body' as const, lineHeight: 1.55 },
-  { label: 'Detalle', token: '--type-small', step: -1, role: 'body' as const, lineHeight: 1.45 },
-] as const;
-
 export function CanvasSystemView({
   view,
   base,
   ratio,
+  overrides,
+  spacing,
+  largerSteps,
+  smallerSteps,
   selectedPairing,
   appliedTypography,
   recommendedPairings,
@@ -83,75 +84,13 @@ export function CanvasSystemView({
     <div className="canvas-dots min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
       <div className="mx-auto max-w-4xl space-y-4">
         {view === 'type-scale' ? (
-          <section
-            className="overflow-hidden rounded-xl border"
-            style={paletteSurfaceStyle}
-            aria-labelledby="type-scale-title"
-          >
-            <div
-              className="border-b px-5 py-5 sm:px-8 sm:py-7"
-              style={{ backgroundColor: rolePalette.fondo.hex, borderColor: rolePalette.borde.hex }}
-            >
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-                <div className="min-w-0">
-                  <h2
-                    id="type-scale-title"
-                    className="text-xl font-semibold sm:text-2xl"
-                    style={{ ...paletteTextStyle, fontFamily: headingFont, fontWeight: headingWeight }}
-                  >
-                    Escala tipográfica
-                  </h2>
-                  <p className="mt-2 max-w-[62ch] text-sm leading-relaxed" style={paletteMutedStyle}>
-                    Jerarquía modular para titulares, lectura continua y detalles de interfaz.
-                  </p>
-                </div>
-                <dl className="flex shrink-0 gap-5 text-sm" style={paletteTextStyle}>
-                  <div>
-                    <dt className="text-[0.6875rem] font-semibold uppercase tracking-[0.06em]" style={paletteMutedStyle}>Base</dt>
-                    <dd className="mt-1 font-mono font-semibold tabular-nums">{base}px</dd>
-                  </div>
-                  <div>
-                    <dt className="text-[0.6875rem] font-semibold uppercase tracking-[0.06em]" style={paletteMutedStyle}>Ratio</dt>
-                    <dd className="mt-1 font-mono font-semibold tabular-nums">{ratio}</dd>
-                  </div>
-                </dl>
-              </div>
-              <p className="mt-5 truncate border-t pt-4 text-xs" style={{ ...paletteMutedStyle, borderColor: rolePalette.borde.hex }}>
-                <span className="font-semibold" style={paletteTextStyle}>{headingFamily}</span>
-                <span aria-hidden="true"> para títulos · </span>
-                <span className="font-semibold" style={paletteTextStyle}>{bodyFamily}</span>
-                <span aria-hidden="true"> para lectura</span>
-              </p>
-            </div>
-            <div className="divide-y" style={{ borderColor: rolePalette.borde.hex }}>
-              {SCALE_ROWS.map((item) => {
-                const size = typeScaleSize(base, ratio, item.step);
-                const fontFamily = item.role === 'heading' ? headingFont : bodyFont;
-                const fontWeight = item.role === 'heading' ? headingWeight : bodyWeight;
-
-                return (
-                  <div
-                    key={item.label}
-                    className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4 gap-y-3 px-5 py-5 sm:grid-cols-[7rem_minmax(0,1fr)_5rem] sm:px-8"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-xs font-semibold" style={paletteTextStyle}>{item.label}</p>
-                      <p className="mt-1 truncate font-mono text-[0.625rem]" style={paletteMutedStyle}>{item.token}</p>
-                    </div>
-                    <span
-                      className="col-span-2 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap sm:col-span-1"
-                      style={{ ...paletteTextStyle, fontFamily, fontSize: `${size}px`, fontWeight, lineHeight: item.lineHeight }}
-                    >
-                      {item.role === 'heading' ? 'Diseño con intención' : 'Una guía clara se lee sin esfuerzo.'}
-                    </span>
-                    <span className="col-start-2 row-start-1 text-right font-mono text-xs font-semibold tabular-nums sm:col-start-3" style={paletteTextStyle}>
-                      {size}<span className="font-normal" style={paletteMutedStyle}>px</span>
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
+          <TypeScalePreview
+            base={base} ratio={ratio} headingFamily={headingFont} bodyFamily={bodyFont}
+            headingWeight={headingWeight} bodyWeight={bodyWeight} headingName={headingFamily}
+            bodyName={bodyFamily} background={rolePalette.fondo.hex} surface={rolePalette.superficie.hex}
+            text={rolePalette.texto.hex} border={rolePalette.borde.hex}
+            overrides={overrides} spacing={spacing} largerSteps={largerSteps} smallerSteps={smallerSteps}
+          />
         ) : (
           <section className="space-y-5">
             <div

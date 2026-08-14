@@ -5,6 +5,8 @@ import type { FontPair } from '@lib/typography/pairings';
 import type { AppliedTypography } from '@lib/typography/typeState';
 import type { TypeScaleBase, TypeScaleRatio } from '@lib/typography/typeScale';
 import type { CustomFont } from '@lib/typography/customFonts';
+import type { SizeOverrides } from '@/components/font-pairing/FineTuneSizes';
+import type { TypographySpacing } from '@/components/font-pairing/SpacingControls';
 import type { PaletteType } from '@lib/color/paletteClassification';
 
 import { ImageUploader } from '@/components/color-engine/ImageUploader';
@@ -53,6 +55,14 @@ export type StudioToolsInput = {
   onTypeScaleBaseChange: (base: TypeScaleBase) => void;
   onTypeScaleRatioChange: (ratio: TypeScaleRatio) => void;
   onHeadingWeightChange: (weight: number) => void;
+  typeScaleOverrides: SizeOverrides;
+  typographySpacing: TypographySpacing;
+  largerTypeScaleSteps: number;
+  smallerTypeScaleSteps: number;
+  onTypeScaleOverridesChange: (overrides: SizeOverrides) => void;
+  onTypographySpacingChange: (spacing: TypographySpacing) => void;
+  onAddLargerTypeScaleStep: () => void;
+  onAddSmallerTypeScaleStep: () => void;
   onApplyCustomFont: (input: CustomFontSubmitInput) => Promise<void>;
   isGenerating: boolean;
   selectionReady: boolean;
@@ -135,6 +145,14 @@ export function buildStudioToolSections(
           onBaseChange={input.onTypeScaleBaseChange}
           onRatioChange={input.onTypeScaleRatioChange}
           onHeadingWeightChange={input.onHeadingWeightChange}
+          overrides={input.typeScaleOverrides}
+          spacing={input.typographySpacing}
+          largerSteps={input.largerTypeScaleSteps}
+          smallerSteps={input.smallerTypeScaleSteps}
+          onOverridesChange={input.onTypeScaleOverridesChange}
+          onSpacingChange={input.onTypographySpacingChange}
+          onAddLargerStep={input.onAddLargerTypeScaleStep}
+          onAddSmallerStep={input.onAddSmallerTypeScaleStep}
           onApplyCustomFont={input.onApplyCustomFont}
           embedded
         />

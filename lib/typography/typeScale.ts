@@ -25,6 +25,27 @@ export type TypeScaleReadout = {
   small: number;
 };
 
+export type TypeScaleLevel = {
+  id: string;
+  label: string;
+  computedSize: number;
+  role: 'heading' | 'body';
+  token: string;
+};
+
+const FULL_SCALE_ROWS = [
+  { id: 'display', label: 'Display', step: 5, role: 'heading', token: '--type-display' },
+  { id: 'h1', label: 'H1', step: 4, role: 'heading', token: '--type-h1' },
+  { id: 'h2', label: 'H2', step: 3, role: 'heading', token: '--type-h2' },
+  { id: 'h3', label: 'H3', step: 2, role: 'heading', token: '--type-h3' },
+  { id: 'h4', label: 'H4', step: 1, role: 'heading', token: '--type-h4' },
+  { id: 'h5', label: 'H5', step: 0, role: 'body', token: '--type-h5' },
+  { id: 'h6', label: 'H6', step: -1, role: 'body', token: '--type-h6' },
+  { id: 'lead', label: 'Lead', step: 1, role: 'body', token: '--type-lead' },
+  { id: 'body', label: 'Body', step: 0, role: 'body', token: '--type-body' },
+  { id: 'small', label: 'Small', step: -1, role: 'body', token: '--type-small' },
+] as const;
+
 /** size(n) = round(base * ratio^n) */
 export function typeScaleSize(base: number, ratio: number, step: number): number {
   return Math.round(base * ratio ** step);
@@ -38,4 +59,29 @@ export function buildTypeScaleReadout(base: number, ratio: number): TypeScaleRea
     body: typeScaleSize(base, ratio, 0),
     small: typeScaleSize(base, ratio, -1),
   };
+}
+
+export function buildTypeScaleLevels(
+  base: number,
+  ratio: number,
+  largerSteps = 0,
+  smallerSteps = 0,
+): TypeScaleLevel[] {
+  const larger = Array.from({ length: largerSteps }, (_, index) => ({
+    id: `display-${index + 2}`,
+    label: `Display ${index + 2}`,
+    computedSize: typeScaleSize(base, ratio, 6 + index),
+    role: 'heading' as const,
+    token: `--type-display-${index + 2}`,
+  })).reverse();
+  const core = FULL_SCALE_ROWS.map((row) => ({ ...row, computedSize: typeScaleSize(base, ratio, row.step) }));
+  const smaller = Array.from({ length: smallerSteps }, (_, index) => ({
+    id: `micro-${index + 1}`,
+    label: index === 0 ? 'Micro' : `Micro ${index + 1}`,
+    computedSize: typeScaleSize(base, ratio, -2 - index),
+    role: 'body' as const,
+    token: `--type-micro-${index + 1}`,
+  }));
+
+  return [...larger, ...core, ...smaller];
 }

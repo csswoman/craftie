@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { Settings } from 'lucide-react';
 
 import type { AppliedTypography } from '@lib/typography/typeState';
@@ -10,9 +10,13 @@ import {
   TYPE_SCALE_RATIOS,
   TYPE_SCALE_RATIO_OPTIONS,
   buildTypeScaleReadout,
+  buildTypeScaleLevels,
   type TypeScaleBase,
   type TypeScaleRatio,
 } from '@lib/typography/typeScale';
+
+import { FineTuneSizes, type SizeOverrides } from './FineTuneSizes';
+import { SpacingControls, type TypographySpacing } from './SpacingControls';
 
 import {
   RoleRow,
@@ -32,6 +36,16 @@ export type AppliedTypeZoneProps = {
   onBaseChange: (base: TypeScaleBase) => void;
   onRatioChange: (ratio: TypeScaleRatio) => void;
   onHeadingWeightChange: (weight: number) => void;
+  overrides: SizeOverrides;
+  spacing: TypographySpacing;
+  largerSteps: number;
+  smallerSteps: number;
+  onOverridesChange: (overrides: SizeOverrides) => void;
+  onSpacingChange: (spacing: TypographySpacing) => void;
+  onAddLargerStep: () => void;
+  onAddSmallerStep: () => void;
+  configOpen: boolean;
+  onConfigOpenChange: (open: boolean) => void;
 };
 
 const HEADING_WEIGHT_OPTIONS = [500, 600, 700] as const;
@@ -47,9 +61,22 @@ export function AppliedTypeZone({
   onBaseChange,
   onRatioChange,
   onHeadingWeightChange,
+  overrides,
+  spacing,
+  largerSteps,
+  smallerSteps,
+  onOverridesChange,
+  onSpacingChange,
+  onAddLargerStep,
+  onAddSmallerStep,
+  configOpen,
+  onConfigOpenChange,
 }: AppliedTypeZoneProps) {
-  const [showConfig, setShowConfig] = useState(false);
   const readout = buildTypeScaleReadout(base, ratio);
+  const levels = useMemo(
+    () => buildTypeScaleLevels(base, ratio, largerSteps, smallerSteps),
+    [base, ratio, largerSteps, smallerSteps],
+  );
   const bothPinned = pinHeading && pinBody;
 
   return (
@@ -60,13 +87,13 @@ export function AppliedTypeZone({
         </p>
         <button
           type="button"
-          onClick={() => setShowConfig((current) => !current)}
-          aria-pressed={showConfig}
-          aria-expanded={showConfig}
-          aria-label={showConfig ? 'Ocultar ajustes de escala' : 'Mostrar ajustes de escala'}
-          title={showConfig ? 'Ocultar ajustes de escala' : 'Ajustes de escala y peso'}
+          onClick={() => onConfigOpenChange(!configOpen)}
+          aria-pressed={configOpen}
+          aria-expanded={configOpen}
+          aria-label={configOpen ? 'Ocultar ajustes de escala' : 'Mostrar ajustes de escala'}
+          title={configOpen ? 'Ocultar ajustes de escala' : 'Ajustes de escala y peso'}
           className={`grid size-7 shrink-0 place-items-center rounded-md border transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
-            showConfig
+            configOpen
               ? 'border-primary/45 bg-primary/10 text-primary'
               : 'border-border bg-bg text-muted hover:border-primary/45 hover:text-primary'
           }`}
@@ -103,7 +130,7 @@ export function AppliedTypeZone({
         </p>
       ) : null}
 
-      {showConfig ? (
+      {configOpen ? (
         <>
           <div className="mt-4 grid min-w-0 grid-cols-2 gap-4">
             <SegmentedField label="Base">
@@ -154,6 +181,16 @@ export function AppliedTypeZone({
             <ScaleToken label="body" value={readout.body} />
             <ScaleToken label="small" value={readout.small} />
           </p>
+          <div className="mt-4 space-y-3 border-t border-border/70 pt-4">
+            <FineTuneSizes
+              levels={levels}
+              overrides={overrides}
+              onOverridesChange={onOverridesChange}
+              onAddLargerStep={onAddLargerStep}
+              onAddSmallerStep={onAddSmallerStep}
+            />
+            <SpacingControls value={spacing} onChange={onSpacingChange} />
+          </div>
         </>
       ) : null}
     </div>

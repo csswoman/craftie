@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import type { AppliedTypography } from '@lib/typography/typeState';
 import type { TypeScaleBase, TypeScaleRatio } from '@lib/typography/typeScale';
 import type { FontPair } from '@lib/typography/pairings';
@@ -11,6 +12,8 @@ import {
   type CustomFontSubmitInput,
 } from '@/components/font-pairing/CustomFontEntry';
 import { PairingList } from '@/components/font-pairing/PairingList';
+import type { SizeOverrides } from '@/components/font-pairing/FineTuneSizes';
+import type { TypographySpacing } from '@/components/font-pairing/SpacingControls';
 
 export type SidebarTypographySectionProps = {
   fontPairings: FontPair[];
@@ -30,6 +33,14 @@ export type SidebarTypographySectionProps = {
   onBaseChange: (base: TypeScaleBase) => void;
   onRatioChange: (ratio: TypeScaleRatio) => void;
   onHeadingWeightChange: (weight: number) => void;
+  overrides: SizeOverrides;
+  spacing: TypographySpacing;
+  largerSteps: number;
+  smallerSteps: number;
+  onOverridesChange: (overrides: SizeOverrides) => void;
+  onSpacingChange: (spacing: TypographySpacing) => void;
+  onAddLargerStep: () => void;
+  onAddSmallerStep: () => void;
   onApplyCustomFont: (input: CustomFontSubmitInput) => Promise<void>;
   embedded?: boolean;
 };
@@ -52,8 +63,17 @@ export function SidebarTypographySection({
   onBaseChange,
   onRatioChange,
   onHeadingWeightChange,
+  overrides,
+  spacing,
+  largerSteps,
+  smallerSteps,
+  onOverridesChange,
+  onSpacingChange,
+  onAddLargerStep,
+  onAddSmallerStep,
   onApplyCustomFont,
 }: SidebarTypographySectionProps) {
+  const [configOpen, setConfigOpen] = useState(false);
   const listInert = pinHeading && pinBody;
 
   return (
@@ -69,18 +89,23 @@ export function SidebarTypographySection({
         onBaseChange={onBaseChange}
         onRatioChange={onRatioChange}
         onHeadingWeightChange={onHeadingWeightChange}
+        overrides={overrides}
+        spacing={spacing}
+        largerSteps={largerSteps}
+        smallerSteps={smallerSteps}
+        onOverridesChange={onOverridesChange}
+        onSpacingChange={onSpacingChange}
+        onAddLargerStep={onAddLargerStep}
+        onAddSmallerStep={onAddSmallerStep}
+        configOpen={configOpen}
+        onConfigOpenChange={setConfigOpen}
       />
-      <PairingList
-        pairings={fontPairings}
-        recommendedPairings={recommendedPairings}
-        selectedCatalogPairId={selectedCatalogPairId}
-        listInert={listInert}
-        onSelectPairing={onSelectPairing}
-        onPreviewPairing={onPreviewPairing}
-        onClearPreview={onClearPreview}
-        variant="tools"
-      />
-      <CustomFontEntry customFonts={customFonts} onApply={onApplyCustomFont} />
+      {!configOpen ? (
+        <>
+          <PairingList pairings={fontPairings} recommendedPairings={recommendedPairings} selectedCatalogPairId={selectedCatalogPairId} listInert={listInert} onSelectPairing={onSelectPairing} onPreviewPairing={onPreviewPairing} onClearPreview={onClearPreview} variant="tools" />
+          <CustomFontEntry customFonts={customFonts} onApply={onApplyCustomFont} />
+        </>
+      ) : null}
     </div>
   );
 }

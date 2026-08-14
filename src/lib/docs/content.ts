@@ -95,6 +95,7 @@ export const DOCS_GROUPS: DocsGroup[] = [
               'Trabajar en OKLCH — luminosidad, intensidad y matiz para variantes y escalas.',
               'Revisar accesibilidad — contraste WCAG; APCA como lectura perceptual complementaria.',
               'Probar tipografías — parejas titular/cuerpo, Google Fonts o fuentes locales en contenido real.',
+              'Afinar la escala — sobrescribe niveles individuales y ajusta interlineado/tracking por separado en titulares y cuerpo.',
               'Previsualizar interfaces — botones, navegación, paneles y datos en maquetas del canvas.',
               'Exportar el sistema — CSS, design tokens, JSON para Tokens Studio, DESIGN.md y brand kit.',
             ],

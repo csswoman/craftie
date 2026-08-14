@@ -11,6 +11,8 @@ import type { FontPair } from '@lib/typography/pairings';
 import type { AppliedTypography } from '@lib/typography/typeState';
 import type { TypeScaleBase, TypeScaleRatio } from '@lib/typography/typeScale';
 import type { SelectableColor } from '@lib/color/selectableColors';
+import type { SizeOverrides } from '@/components/font-pairing/FineTuneSizes';
+import type { TypographySpacing } from '@/components/font-pairing/SpacingControls';
 
 import { ColorDetailsDrawer } from '@/components/color-engine/ColorDetailsDrawer';
 import { useCanvasView } from '@/context/CanvasViewContext';
@@ -36,6 +38,10 @@ export type PaletteCanvasProps = {
   isTypePreviewing?: boolean;
   typeScaleBase?: TypeScaleBase;
   typeScaleRatio?: TypeScaleRatio;
+  typeScaleOverrides?: SizeOverrides;
+  typographySpacing?: TypographySpacing;
+  largerTypeScaleSteps?: number;
+  smallerTypeScaleSteps?: number;
   paletteCatalog?: SelectableColor[];
   imagePreviewUrl?: string | null;
   imageFileName?: string | null;
@@ -56,6 +62,10 @@ export function PaletteCanvas({
   isTypePreviewing = false,
   typeScaleBase = 16,
   typeScaleRatio = 1.25,
+  typeScaleOverrides = {},
+  typographySpacing = { headingLineHeight: 1.2, headingLetterSpacing: -0.02, bodyLineHeight: 1.5, bodyLetterSpacing: 0 },
+  largerTypeScaleSteps = 0,
+  smallerTypeScaleSteps = 0,
   paletteCatalog = [],
   imagePreviewUrl = null,
   imageFileName = null,
@@ -183,6 +193,10 @@ export function PaletteCanvas({
                   view={activeView}
                   base={typeScaleBase}
                   ratio={typeScaleRatio}
+                  overrides={typeScaleOverrides}
+                  spacing={typographySpacing}
+                  largerSteps={largerTypeScaleSteps}
+                  smallerSteps={smallerTypeScaleSteps}
                   selectedPairing={selectedPairing}
                   appliedTypography={appliedTypography}
                   recommendedPairings={recommendedPairings}

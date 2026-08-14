@@ -2,6 +2,8 @@ import type { FontPair } from '@lib/typography/pairings';
 import type { AppliedTypography } from '@lib/typography/typeState';
 import type { TypeScaleBase, TypeScaleRatio } from '@lib/typography/typeScale';
 import type { SelectableColor } from '@lib/color/selectableColors';
+import type { SizeOverrides } from '@/components/font-pairing/FineTuneSizes';
+import type { TypographySpacing } from '@/components/font-pairing/SpacingControls';
 
 import { PaletteCanvas } from '@/components/color/PaletteCanvas';
 export function SelectColorsWorkspaceMain({
@@ -14,6 +16,10 @@ export function SelectColorsWorkspaceMain({
   isTypePreviewing,
   typeScaleBase,
   typeScaleRatio,
+  typeScaleOverrides,
+  typographySpacing,
+  largerTypeScaleSteps,
+  smallerTypeScaleSteps,
   onAddColorByHex,
   paletteCatalog,
   imagePreviewUrl,
@@ -31,6 +37,10 @@ export function SelectColorsWorkspaceMain({
   isTypePreviewing: boolean;
   typeScaleBase: TypeScaleBase;
   typeScaleRatio: TypeScaleRatio;
+  typeScaleOverrides: SizeOverrides;
+  typographySpacing: TypographySpacing;
+  largerTypeScaleSteps: number;
+  smallerTypeScaleSteps: number;
   onAddColorByHex: (hex: string, customName?: string) => string | null;
   paletteCatalog: SelectableColor[];
   imagePreviewUrl: string | null;
@@ -51,6 +61,10 @@ export function SelectColorsWorkspaceMain({
       isTypePreviewing={isTypePreviewing}
       typeScaleBase={typeScaleBase}
       typeScaleRatio={typeScaleRatio}
+      typeScaleOverrides={typeScaleOverrides}
+      typographySpacing={typographySpacing}
+      largerTypeScaleSteps={largerTypeScaleSteps}
+      smallerTypeScaleSteps={smallerTypeScaleSteps}
       paletteCatalog={paletteCatalog}
       onAddColorByHex={onAddColorByHex}
       imagePreviewUrl={imagePreviewUrl}

@@ -1,5 +1,7 @@
 'use client';
 
+import { useCallback } from 'react';
+
 import { DESIGN_STYLES } from '@lib/styles/presets';
 
 import { ConfirmResetWorkspaceDialog } from '@/components/layout/ConfirmResetWorkspaceDialog';
@@ -17,7 +19,7 @@ import { useSelectColorsWorkspaceController } from '@/components/color/useSelect
 import { StyleGallery } from '@/components/color-engine/StyleGallery';
 import { StudioCanvas } from '@/components/layout/StudioCanvas';
 import { WorkspaceHeader } from '@/components/layout/WorkspaceHeader';
-import { CanvasViewProvider } from '@/context/CanvasViewContext';
+import { CanvasViewProvider, useCanvasView } from '@/context/CanvasViewContext';
 import { RolePaletteProvider } from '@/context/RolePaletteContext';
 
 export function SelectColorsWorkspace() {
@@ -34,6 +36,11 @@ function SelectColorsWorkspaceContent() {
   const workspace = useSelectColorsWorkspaceController();
   const hasInspirationSource = workspace.catalogSource !== 'none';
   const { activeTab, setActiveTab } = useToolsTabState();
+  const { selectView } = useCanvasView();
+  const handleToolsTabChange = useCallback((tab: 'colors' | 'typography') => {
+    setActiveTab(tab);
+    selectView(tab === 'typography' ? 'type-scale' : 'colors');
+  }, [selectView, setActiveTab]);
 
   const toolSectionsInput = {
     catalogSource: workspace.catalogSource,
@@ -62,6 +69,14 @@ function SelectColorsWorkspaceContent() {
     onTypeScaleBaseChange: workspace.setTypeScaleBase,
     onTypeScaleRatioChange: workspace.setTypeScaleRatio,
     onHeadingWeightChange: workspace.setHeadingWeight,
+    typeScaleOverrides: workspace.typeScaleOverrides,
+    typographySpacing: workspace.typographySpacing,
+    largerTypeScaleSteps: workspace.largerTypeScaleSteps,
+    smallerTypeScaleSteps: workspace.smallerTypeScaleSteps,
+    onTypeScaleOverridesChange: workspace.setTypeScaleOverrides,
+    onTypographySpacingChange: workspace.setTypographySpacing,
+    onAddLargerTypeScaleStep: workspace.addLargerTypeScaleStep,
+    onAddSmallerTypeScaleStep: workspace.addSmallerTypeScaleStep,
     customFonts: workspace.customFonts,
     imagePaletteType: workspace.imagePaletteType,
     paletteTypeOverride: workspace.paletteTypeOverride,
@@ -151,10 +166,10 @@ function SelectColorsWorkspaceContent() {
           <SelectColorsWorkspaceSidebar
             {...toolSectionsInput}
             activeTab={activeTab}
-            onActiveTabChange={setActiveTab}
+            onActiveTabChange={handleToolsTabChange}
           />
         }
-        sidebarHeaderExtra={<ToolsTabToggle activeTab={activeTab} onActiveTabChange={setActiveTab} />}
+        sidebarHeaderExtra={<ToolsTabToggle activeTab={activeTab} onActiveTabChange={handleToolsTabChange} />}
         mobileToolsDock={<StudioToolsMobileDock sections={mobileToolSections} />}
         main={
           <SelectColorsWorkspaceMain
@@ -167,6 +182,10 @@ function SelectColorsWorkspaceContent() {
             isTypePreviewing={workspace.isTypePreviewing}
             typeScaleBase={workspace.typeScaleBase}
             typeScaleRatio={workspace.typeScaleRatio}
+            typeScaleOverrides={workspace.typeScaleOverrides}
+            typographySpacing={workspace.typographySpacing}
+            largerTypeScaleSteps={workspace.largerTypeScaleSteps}
+            smallerTypeScaleSteps={workspace.smallerTypeScaleSteps}
             onAddColorByHex={workspace.handleAddColorByHex}
             paletteCatalog={workspace.paletteCatalog}
             imagePreviewUrl={workspace.imagePreviewUrl}

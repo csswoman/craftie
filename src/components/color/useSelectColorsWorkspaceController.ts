@@ -42,6 +42,8 @@ import {
   writeCustomFontsSession,
 } from '@/lib/browser/customFonts';
 import type { CustomFontSubmitInput } from '@/components/font-pairing/CustomFontEntry';
+import type { SizeOverrides } from '@/components/font-pairing/FineTuneSizes';
+import type { TypographySpacing } from '@/components/font-pairing/SpacingControls';
 import { extractPaletteColorsFromImage } from '@/lib/browser/imageExtractor';
 import { getImageFingerprint } from '@/lib/browser/imageFingerprint';
 import { readSelectedFontPairId, writeSelectedFontPairId } from '@/lib/browser/selectedFontPair';
@@ -65,6 +67,15 @@ export function useSelectColorsWorkspaceController() {
   const [catalogSource, setCatalogSource] = useState<'none' | 'curated' | 'image'>('none');
   const [selectedStyleId, setSelectedStyleId] = useState<string | null>(null);
   const [typeUi, setTypeUi] = useState<TypeUiState>(() => createInitialTypeUiState());
+  const [typeScaleOverrides, setTypeScaleOverrides] = useState<SizeOverrides>({});
+  const [typographySpacing, setTypographySpacing] = useState<TypographySpacing>({
+    headingLineHeight: 1.2,
+    headingLetterSpacing: -0.02,
+    bodyLineHeight: 1.5,
+    bodyLetterSpacing: 0,
+  });
+  const [largerTypeScaleSteps, setLargerTypeScaleSteps] = useState(0);
+  const [smallerTypeScaleSteps, setSmallerTypeScaleSteps] = useState(0);
   const [isImageExtracting, setIsImageExtracting] = useState(false);
   const [isImageRegenerating, setIsImageRegenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -293,6 +304,10 @@ export function useSelectColorsWorkspaceController() {
     setResetConfirmOpen(false);
 
     setTypeUi(createInitialTypeUiState());
+    setTypeScaleOverrides({});
+    setTypographySpacing({ headingLineHeight: 1.2, headingLetterSpacing: -0.02, bodyLineHeight: 1.5, bodyLetterSpacing: 0 });
+    setLargerTypeScaleSteps(0);
+    setSmallerTypeScaleSteps(0);
   }, [clearRolePalette]);
 
   const requestCraftieHome = useCallback(() => {
@@ -405,6 +420,14 @@ export function useSelectColorsWorkspaceController() {
       ...current,
       applied: { ...current.applied, headingWeight: weight },
     }));
+  }
+
+  function handleAddLargerTypeScaleStep() {
+    setLargerTypeScaleSteps((current) => current + 1);
+  }
+
+  function handleAddSmallerTypeScaleStep() {
+    setSmallerTypeScaleSteps((current) => current + 1);
   }
 
   async function handleApplyCustomFont(input: CustomFontSubmitInput) {
@@ -554,6 +577,10 @@ export function useSelectColorsWorkspaceController() {
     pinBody: typeUi.pinBody,
     typeScaleBase: typeUi.base,
     typeScaleRatio: typeUi.ratio,
+    typeScaleOverrides,
+    typographySpacing,
+    largerTypeScaleSteps,
+    smallerTypeScaleSteps,
     customFonts: typeUi.customFonts,
     isTypePreviewing: typeUi.hovered !== null,
     selectedStyleId,
@@ -571,6 +598,10 @@ export function useSelectColorsWorkspaceController() {
     setTypeScaleBase: handleTypeScaleBaseChange,
     setTypeScaleRatio: handleTypeScaleRatioChange,
     setHeadingWeight: handleHeadingWeightChange,
+    setTypeScaleOverrides,
+    setTypographySpacing,
+    addLargerTypeScaleStep: handleAddLargerTypeScaleStep,
+    addSmallerTypeScaleStep: handleAddSmallerTypeScaleStep,
     applyCustomFont: handleApplyCustomFont,
     statusMessage,
   };
