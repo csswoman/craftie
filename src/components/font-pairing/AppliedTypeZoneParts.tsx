@@ -10,6 +10,24 @@ export function ScaleToken({ label, value }: { label: string; value: number }) {
   );
 }
 
+export function TypeWeightBadge({
+  weight,
+  tone = 'muted',
+}: {
+  weight: number;
+  tone?: 'muted' | 'ink';
+}) {
+  return (
+    <span
+      className={`inline-flex min-w-7 shrink-0 items-center justify-center rounded-md border border-border bg-surface-raised px-1.5 py-0.5 text-chrome-caption tabular-nums ${
+        tone === 'ink' ? 'font-medium text-ink' : 'font-medium text-muted'
+      }`}
+    >
+      {weight}
+    </span>
+  );
+}
+
 export function RoleRow({
   label,
   family,
@@ -25,8 +43,12 @@ export function RoleRow({
   pinned: boolean;
   onTogglePin: () => void;
 }) {
+  const pinHint = pinned
+    ? `Desfijar ${label}: vuelve a cambiar al elegir otro par`
+    : `Fijar ${label}: se mantiene al elegir otro par`;
+
   return (
-    <div className="flex min-w-0 items-center gap-2.5 py-2.5">
+    <div className="flex min-w-0 items-center gap-2 py-2.5">
       <span className="w-[3.25rem] shrink-0 text-chrome-label font-medium text-muted">{label}</span>
       <span
         className="min-w-0 flex-1 truncate text-chrome-title font-medium leading-[1.25] text-ink"
@@ -35,16 +57,14 @@ export function RoleRow({
       >
         {family}
       </span>
-      <span className="shrink-0 rounded-md bg-surface-raised px-1.5 py-0.5 text-chrome-caption tabular-nums text-muted">
-        {weight}
-      </span>
+      <TypeWeightBadge weight={weight} />
       <button
         type="button"
         onClick={onTogglePin}
         aria-pressed={pinned}
-        aria-label={pinned ? `Desfijar ${label}` : `Fijar ${label}`}
-        title={pinned ? `Desfijar ${label}` : `Fijar ${label}: se mantiene al elegir otro par`}
-        className={`grid size-7 shrink-0 place-items-center rounded-md border transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+        aria-label={pinHint}
+        title={pinHint}
+        className={`inline-flex h-7 shrink-0 items-center gap-1 whitespace-nowrap rounded-md border px-1.5 transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
           pinned
             ? 'border-primary/45 bg-primary/10 text-primary'
             : 'border-border bg-bg text-muted hover:border-primary/45 hover:text-primary'
@@ -56,6 +76,7 @@ export function RoleRow({
           fill={pinned ? 'currentColor' : 'none'}
           aria-hidden="true"
         />
+        <span className="text-chrome-caption font-medium">{pinned ? 'Fijado' : 'Fijar'}</span>
       </button>
     </div>
   );

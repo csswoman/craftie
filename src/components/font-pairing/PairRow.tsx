@@ -2,10 +2,9 @@
 
 import type { FontPair } from '@lib/typography/pairings';
 import { buildFontFamilyStack } from '@lib/typography/googleFonts';
+import { specimenForPair } from '@lib/typography/pairSpecimen';
 
-export const PAIR_SPECIMEN_HEADING = 'Ship the brand story';
-export const PAIR_SPECIMEN_BODY =
-  'El cuerpo se mantiene neutro y la paleta lleva la personalidad.';
+import { TypeWeightBadge } from './AppliedTypeZoneParts';
 
 export type PairRowProps = {
   pairing: FontPair;
@@ -32,12 +31,12 @@ export function PairRow({
   onSelect,
   onPreview,
   onClearPreview,
-  variant = 'default',
 }: PairRowProps) {
   const headingFont = buildFontFamilyStack(pairing.heading);
   const bodyFont = buildFontFamilyStack(pairing.body);
   const headingWeight = roleWeight(pairing, 'heading');
   const bodyWeight = roleWeight(pairing, 'body');
+  const specimen = specimenForPair(pairing);
 
   return (
     <button
@@ -46,18 +45,23 @@ export function PairRow({
       onPointerEnter={() => onPreview?.(pairing)}
       onPointerLeave={() => onClearPreview?.()}
       aria-pressed={selected}
-      className={`block w-full min-w-0 max-w-full overflow-hidden rounded-xl border border-l-[3px] px-3.5 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+      className={`block w-full min-w-0 max-w-full overflow-hidden rounded-xl border px-3.5 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
         selected
-          ? 'border-primary/30 border-l-primary bg-primary/8'
-          : 'border-border/70 border-l-transparent bg-bg hover:border-border'
+          ? 'border-primary/45 bg-primary/8'
+          : 'border-border/70 bg-bg hover:border-border'
       }`}
     >
-      <p className="flex min-w-0 items-baseline justify-between gap-2 uppercase tracking-[0.05em] text-muted">
-        <span className="min-w-0 truncate text-[10.5px] font-semibold">
+      <p className="flex min-w-0 items-center justify-between gap-2">
+        <span
+          className={`min-w-0 truncate text-chrome-caption ${
+            selected ? 'font-bold text-primary' : 'font-semibold text-ink'
+          }`}
+        >
           {pairing.heading.family} · {pairing.body.family}
         </span>
-        <span className="shrink-0 text-[10.5px] font-normal tabular-nums">
-          {headingWeight} / {bodyWeight}
+        <span className="flex shrink-0 items-center gap-1">
+          <TypeWeightBadge weight={headingWeight} tone="ink" />
+          <TypeWeightBadge weight={bodyWeight} />
         </span>
       </p>
 
@@ -69,9 +73,9 @@ export function PairRow({
           fontFamily: headingFont,
           fontWeight: headingWeight,
         }}
-        title={PAIR_SPECIMEN_HEADING}
+        title={specimen.heading}
       >
-        {PAIR_SPECIMEN_HEADING}
+        {specimen.heading}
       </p>
 
       <p
@@ -82,9 +86,9 @@ export function PairRow({
           fontFamily: bodyFont,
           fontWeight: bodyWeight,
         }}
-        title={PAIR_SPECIMEN_BODY}
+        title={specimen.body}
       >
-        {PAIR_SPECIMEN_BODY}
+        {specimen.body}
       </p>
     </button>
   );

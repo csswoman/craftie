@@ -12,6 +12,7 @@ import {
 import { loadGoogleFonts } from '@/lib/browser/googleFonts';
 import { PairingFilterChips } from './PairingFilterChips';
 import { PairGroup } from './PairingListRows';
+import { PairingSearchControl } from './PairingSearchControl';
 
 export type PairingListProps = {
   pairings: FontPair[];
@@ -98,29 +99,15 @@ export function PairingList({
 
   return (
     <div className={`min-w-0 space-y-3 ${listInert ? 'opacity-60' : ''}`}>
-      <div className="flex min-w-0 items-center gap-2">
-        <div className="scrollbar-none min-w-0 flex-1 overflow-x-auto">
-          <PairingFilterChips value={category} onChange={setCategory} isTools={isTools} />
-        </div>
-
+      <div className="min-w-0 space-y-2">
+        <PairingFilterChips value={category} onChange={setCategory} isTools={isTools} />
         {showSearch ? (
-          <div className="w-32 shrink-0" role="search">
-            <label className="sr-only" htmlFor="pairing-search-input">
-              Buscar pares tipográficos
-            </label>
-            <input
-              id="pairing-search-input"
-              type="search"
-              value={query}
-              placeholder="Buscar pares…"
-              autoComplete="off"
-              disabled={listInert}
-              onChange={(event) => setQuery(event.target.value)}
-              className={`h-8 w-full rounded-lg border border-border bg-bg px-2.5 text-ink placeholder:text-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-not-allowed ${
-                isTools ? 'text-tools-body' : 'text-[0.9375rem]'
-              }`}
-            />
-          </div>
+          <PairingSearchControl
+            query={query}
+            onQueryChange={setQuery}
+            disabled={listInert}
+            isTools={isTools}
+          />
         ) : null}
       </div>
 

@@ -80,46 +80,54 @@ export function AppliedTypeZone({
   const bothPinned = pinHeading && pinBody;
 
   return (
-    <div className="sticky top-0 z-10 min-w-0 shrink-0 overflow-x-hidden border-b border-border/70 bg-bg pb-4 pt-1">
-      <div className="flex min-h-8 items-center justify-between">
-        <p className="text-chrome-caption font-semibold uppercase tracking-[0.08em] text-primary">
-          Aplicado
-        </p>
-        <button
-          type="button"
-          onClick={() => onConfigOpenChange(!configOpen)}
-          aria-pressed={configOpen}
-          aria-expanded={configOpen}
-          aria-label={configOpen ? 'Ocultar ajustes de escala' : 'Mostrar ajustes de escala'}
-          title={configOpen ? 'Ocultar ajustes de escala' : 'Ajustes de escala y peso'}
-          className={`grid size-7 shrink-0 place-items-center rounded-md border transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
-            configOpen
-              ? 'border-primary/45 bg-primary/10 text-primary'
-              : 'border-border bg-bg text-muted hover:border-primary/45 hover:text-primary'
-          }`}
-        >
-          <Settings size={13} strokeWidth={1.5} aria-hidden="true" />
-        </button>
-      </div>
+    <div className="sticky top-0 z-10 min-w-0 shrink-0 bg-bg pb-4 pt-1">
+      <section
+        aria-labelledby="applied-type-heading"
+        className="overflow-hidden rounded-xl border border-border bg-surface"
+      >
+        <div className="flex min-h-9 items-center justify-between gap-2 border-b border-border px-3 py-1.5">
+          <p
+            id="applied-type-heading"
+            className="text-chrome-caption font-semibold uppercase tracking-[0.08em] text-primary"
+          >
+            Aplicado
+          </p>
+          <button
+            type="button"
+            onClick={() => onConfigOpenChange(!configOpen)}
+            aria-pressed={configOpen}
+            aria-expanded={configOpen}
+            aria-label={configOpen ? 'Ocultar ajustes de escala' : 'Mostrar ajustes de escala'}
+            title={configOpen ? 'Ocultar ajustes de escala' : 'Ajustes de escala y peso'}
+            className={`grid size-7 shrink-0 place-items-center rounded-md border transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+              configOpen
+                ? 'border-primary/45 bg-primary/10 text-primary'
+                : 'border-border bg-bg text-muted hover:border-primary/45 hover:text-primary'
+            }`}
+          >
+            <Settings size={13} strokeWidth={1.5} aria-hidden="true" />
+          </button>
+        </div>
 
-      <div className="mt-3 divide-y divide-border/70 border-y border-border/70">
-        <RoleRow
-          label="Titular"
-          family={applied.headingFamily}
-          weight={applied.headingWeight}
-          stack={familyStackFromApplied(applied.headingFamily, applied.headingClassification)}
-          pinned={pinHeading}
-          onTogglePin={onTogglePinHeading}
-        />
-        <RoleRow
-          label="Cuerpo"
-          family={applied.bodyFamily}
-          weight={applied.bodyWeight}
-          stack={familyStackFromApplied(applied.bodyFamily, applied.bodyClassification)}
-          pinned={pinBody}
-          onTogglePin={onTogglePinBody}
-        />
-      </div>
+        <div className="divide-y divide-border/70 bg-bg px-3">
+          <RoleRow
+            label="Titular"
+            family={applied.headingFamily}
+            weight={applied.headingWeight}
+            stack={familyStackFromApplied(applied.headingFamily, applied.headingClassification)}
+            pinned={pinHeading}
+            onTogglePin={onTogglePinHeading}
+          />
+          <RoleRow
+            label="Cuerpo"
+            family={applied.bodyFamily}
+            weight={applied.bodyWeight}
+            stack={familyStackFromApplied(applied.bodyFamily, applied.bodyClassification)}
+            pinned={pinBody}
+            onTogglePin={onTogglePinBody}
+          />
+        </div>
+      </section>
 
       {bothPinned ? (
         <p

@@ -20,7 +20,7 @@ export function PairingFilterChips({
 
   return (
     <div
-      className="flex w-max min-w-full flex-nowrap gap-1.5"
+      className="flex flex-wrap gap-1.5"
       role="group"
       aria-label="Filtrar pares por carácter"
     >
