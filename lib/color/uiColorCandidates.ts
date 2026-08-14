@@ -167,6 +167,93 @@ export function autoFillDataGaps(tokens: SemanticTokens, colors: SelectableColor
   return result;
 }
 
+/** Hue offsets used to escape a clustered source family when auto-filling gaps. */
+const FILL_GAP_HUE_OFFSETS = [34, 86, 138, 190, 242, 294] as const;
+
+function buildHueSpreadSynthetics(
+  tokens: SemanticTokens,
+  selected: SemanticTokenName,
+): UiColorCandidate[] {
+  if (tokens.primary.gap) return [];
+  const primary = toOklch(tokens.primary.hex);
+  if (!primary || typeof primary.h !== 'number') return [];
+
+  const occupied = occupiedSeries(tokens, selected);
+  const occupiedHexes = new Set(occupied.map((series) => normalizeHex(series.hex)));
+  const baseLightness = primary.l ?? 0.5;
+  const chroma = Math.max(0.055, primary.c ?? 0.08);
+  const baseHue = primary.h;
+  const out: UiColorCandidate[] = [];
+  const seen = new Set<string>();
+
+  for (const lightnessDelta of [0.18, 0.28, 0.12]) {
+    for (const offset of FILL_GAP_HUE_OFFSETS) {
+      const lightness = baseLightness >= 0.5
+        ? Math.max(0.12, baseLightness - lightnessDelta)
+        : Math.min(0.9, baseLightness + lightnessDelta);
+      const hex = normalizeHex(oklchChannelsToHex(lightness, chroma, (baseHue + offset + 360) % 360));
+      if (seen.has(hex) || occupiedHexes.has(hex)) continue;
+      seen.add(hex);
+      const fitness = candidateFitness(hex, tokens, occupied.map((series) => series.hex));
+      const channels = toOklch(hex);
+      const separation = dataSeparation(hex, occupied);
+      out.push({
+        id: `synthetic-hue-${offset}-${lightnessDelta}`,
+        hex,
+        name: nameForHex(hex, [{ hex: tokens.primary.hex }, { hex }]),
+        detail: `hue +${offset}° · L Δ${lightnessDelta}`,
+        origin: 'synthetic',
+        fitness,
+        dataProfile: buildDataSeriesProfile({
+          fitness,
+          origin: 'synthetic',
+          hue: channels?.h ?? 0,
+          separation,
+        }),
+        dataSeparation: separation,
+        score: contrastRatio(hex, tokens.background.hex) + (channels?.c ?? 0),
+      });
+    }
+  }
+
+  return out;
+}
+
+export function fillRemainingAccentGaps(
+  tokens: SemanticTokens,
+  colors: SelectableColor[],
+): Array<{ token: SemanticTokenName; hex: string }> {
+  const working: SemanticTokens = { ...tokens };
+  const result: Array<{ token: SemanticTokenName; hex: string }> = [];
+
+  for (const tokenName of DATA_TOKEN_NAMES) {
+    if (!working[tokenName].gap) continue;
+
+    const pool = [
+      ...buildDataCandidates(working, colors, tokenName),
+      ...buildHueSpreadSynthetics(working, tokenName),
+    ];
+
+    const byHex = new Map<string, UiColorCandidate>();
+    for (const candidate of pool) {
+      const key = normalizeHex(candidate.hex);
+      const previous = byHex.get(key);
+      if (!previous || candidate.score > previous.score) byHex.set(key, candidate);
+    }
+
+    const winner = [...byHex.values()]
+      .filter((candidate) => candidate.fitness.asData.ok)
+      .sort((left, right) => right.score - left.score)[0];
+
+    if (!winner) continue;
+
+    result.push({ token: tokenName, hex: winner.hex });
+    working[tokenName] = { hex: winner.hex, source: 'override' };
+  }
+
+  return result;
+}
+
 export function buildExpressiveCandidates(colors: SelectableColor[], tokens: SemanticTokens): UiColorCandidate[] {
   const seen = new Set<string>();
   const candidates: UiColorCandidate[] = [];
