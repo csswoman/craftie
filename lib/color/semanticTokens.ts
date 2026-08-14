@@ -278,13 +278,16 @@ export function ensureSurfaceLightnessSeparation(
   const borderL = border.l ?? 0;
   const chroma = surface.c ?? 0;
   const hue = surface.h ?? bg.h ?? 0;
-
-  if (Math.abs(bgL - surfaceL) >= MIN_BG_SURFACE_LIGHTNESS_DELTA) {
-    return surfaceHex;
-  }
-
   const low = Math.min(bgL, borderL);
   const high = Math.max(bgL, borderL);
+
+  if (Math.abs(bgL - surfaceL) >= MIN_BG_SURFACE_LIGHTNESS_DELTA) {
+    const clampedSurfaceL = Math.min(high, Math.max(low, surfaceL));
+    return clampedSurfaceL === surfaceL
+      ? surfaceHex
+      : oklchChannelsToHex(clampedSurfaceL, chroma, hue);
+  }
+
   const desired =
     theme === 'light'
       ? bgL - MIN_BG_SURFACE_LIGHTNESS_DELTA

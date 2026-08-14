@@ -53,4 +53,17 @@ describe('background/surface lightness separation', () => {
       MIN_BG_SURFACE_LIGHTNESS_DELTA - 1e-6,
     );
   });
+
+  it('clamps a sufficiently separated surface that is past the border', () => {
+    const bg = '#FAFAFA';
+    const surfacePastBorder = '#B0B0B0';
+    const border = '#E0E0E0';
+    const next = ensureSurfaceLightnessSeparation(bg, surfacePastBorder, border, 'light');
+    const bgL = toOklch(bg)?.l ?? 0;
+    const borderL = toOklch(border)?.l ?? 0;
+    const nextL = toOklch(next)?.l ?? 0;
+
+    expect(nextL).toBeGreaterThanOrEqual(Math.min(bgL, borderL) - 1e-6);
+    expect(nextL).toBeLessThanOrEqual(Math.max(bgL, borderL) + 1e-6);
+  });
 });
