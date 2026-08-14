@@ -57,21 +57,21 @@ export function PaletteCanvasToolbar({
           <PaletteRandomizeButton />
         </>
       ) : null}
-      {showAccentsToggle ? (
-        <button
-          type="button"
-          aria-pressed={accentsActive}
-          onClick={onToggleAccents}
-          className={`min-h-10 shrink-0 rounded-lg border px-2.5 text-[0.86rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 sm:px-3 ${
-            accentsActive
-              ? 'border-[var(--chrome-green)] bg-[var(--chrome-green-soft)] text-[var(--chrome-green)]'
-              : 'border-border bg-bg text-muted hover:bg-surface-raised hover:text-ink'
-          }`}
-        >
-          {accentsActive ? 'Ver roles' : 'Ver acentos'}
-        </button>
-      ) : null}
-      <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2.5">
+      <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+        {showAccentsToggle ? (
+          <button
+            type="button"
+            aria-pressed={accentsActive}
+            onClick={onToggleAccents}
+            className={`inline-flex h-11 shrink-0 items-center rounded-lg border px-3 text-chrome-label font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+              accentsActive
+                ? 'border-[var(--chrome-green)] bg-[var(--chrome-green-soft)] text-[var(--chrome-green)]'
+                : 'border-line bg-transparent text-ink hover:bg-surface-raised'
+            }`}
+          >
+            {accentsActive ? 'Ver roles' : 'Ver acentos'}
+          </button>
+        ) : null}
         <div className="hidden shrink-0 lg:block [&>div]:min-w-0">
           <CanvasViewSelector activeId={activeView} palette={palette} onSelect={onSelectView} />
         </div>

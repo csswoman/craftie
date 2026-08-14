@@ -2,6 +2,9 @@
 
 import { useId } from 'react';
 
+const ACTION_CLASS =
+  'inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-bg px-3 text-chrome-label font-semibold text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25';
+
 export function CuratedSourceActions({
   onOpenInspiration,
   onImageFileSelected,
@@ -12,18 +15,11 @@ export function CuratedSourceActions({
   const inputId = useId();
 
   return (
-    <div className="grid grid-cols-2 gap-2 border-b border-line-soft pb-3">
-      <button
-        type="button"
-        onClick={onOpenInspiration}
-        className="min-h-10 rounded-md border border-line bg-bg px-2 text-[0.71875rem] font-semibold text-forest transition-colors hover:bg-line-soft focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25"
-      >
+    <div className="grid grid-cols-2 gap-3">
+      <button type="button" onClick={onOpenInspiration} className={ACTION_CLASS}>
         Cambiar estilo
       </button>
-      <label
-        htmlFor={inputId}
-        className="flex min-h-10 cursor-pointer items-center justify-center rounded-md border border-line bg-bg px-2 text-[0.71875rem] font-semibold text-forest transition-colors hover:bg-line-soft focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25"
-      >
+      <label htmlFor={inputId} className={`cursor-pointer ${ACTION_CLASS}`}>
         Usar imagen
       </label>
       <input

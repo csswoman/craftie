@@ -96,7 +96,7 @@ export function AccentSlotCell({
           expanded
             ? isWideLayout
               ? 'min-h-24 flex-row items-center justify-start gap-5 px-7 py-6'
-              : 'min-h-[5.25rem] flex-row items-center justify-between gap-3 px-4 py-3'
+              : 'min-h-[5.75rem] flex-row items-center justify-between gap-3 px-4 py-3'
             : 'h-16 px-1 pb-1.5 pt-6'
         } ${isActive ? 'z-[1] shadow-[inset_0_0_0_2px] shadow-primary' : ''} ${
           !assigned
@@ -133,7 +133,7 @@ export function AccentSlotCell({
             className={`block max-w-full truncate font-medium tracking-normal opacity-90 ${
               expanded
                 ? mobileExpanded
-                  ? 'text-[0.6875rem] leading-tight'
+                  ? 'text-[0.8125rem] leading-snug'
                   : 'text-chrome-label'
                 : 'px-0.5 text-chrome-caption'
             }`}
@@ -142,12 +142,12 @@ export function AccentSlotCell({
           </span>
           {expanded ? (
             mobileExpanded ? (
-              <div className="flex min-w-0 items-baseline gap-1.5">
-                <p className="min-w-0 truncate text-[1rem] font-semibold leading-tight">
+              <div className="min-w-0">
+                <p className="mt-0.5 min-w-0 truncate text-[1.1875rem] font-semibold leading-snug">
                   {assigned ? name : 'Sin asignar'}
                 </p>
                 {assigned ? (
-                  <p className="shrink-0 font-mono text-[0.6875rem] font-semibold tracking-normal opacity-90">
+                  <p className="mt-0.5 font-mono text-[0.875rem] font-semibold tracking-normal opacity-90">
                     {hex.toUpperCase()}
                   </p>
                 ) : null}

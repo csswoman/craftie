@@ -90,19 +90,26 @@ export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) 
     setActiveSectionId((current) => (current === sectionId ? null : sectionId));
   }
 
+  // Image sheet is short; the dock tab already names the section.
+  const showSheetTitle = activeSection !== null && activeSection.id !== 'image';
+  const sheetTitle =
+    activeSection?.id === 'view' ? 'Vistas del lienzo' : (activeSection?.label ?? '');
+  const sheetLabel =
+    activeSection?.id === 'view' ? 'Vistas del lienzo' : (activeSection?.label ?? 'Herramientas');
+
   return (
     <>
       {sheetOpen ? (
         <button
           type="button"
           aria-label="Cerrar herramientas"
-          className="fixed inset-0 z-25 bg-ink/20 motion-reduce:transition-none lg:hidden"
+          className="z-modal-backdrop fixed inset-0 bg-forest-darker/45 backdrop-blur-[2px] transition-[opacity,backdrop-filter] motion-reduce:backdrop-blur-none motion-reduce:transition-none lg:hidden"
           onClick={closeSheet}
         />
       ) : null}
 
       <div
-        className="fixed inset-x-0 bottom-0 z-26 flex flex-col lg:hidden"
+        className="z-modal fixed inset-x-0 bottom-0 flex flex-col lg:hidden"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
         {sheetOpen && activeSection ? (
@@ -110,13 +117,21 @@ export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) 
             ref={sheetRef}
             role="dialog"
             aria-modal="true"
-            aria-label={activeSection.id === 'view' ? 'Vistas del lienzo' : activeSection.label}
-            className="flex max-h-[min(58vh,28rem)] min-h-0 flex-col overflow-hidden rounded-t-2xl border border-b-0 border-border bg-bg shadow-(--shadow-float) motion-reduce:transition-none"
+            aria-label={sheetLabel}
+            className="flex max-h-[min(58vh,28rem)] min-h-0 flex-col overflow-hidden rounded-t-2xl border border-b-0 border-border bg-bg shadow-[0_-8px_32px_rgb(15_43_30/18%)] motion-reduce:transition-none"
           >
-            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border/70 px-4 py-2.5">
-              <p className="min-w-0 truncate text-tools-section font-semibold text-ink">
-                {activeSection.id === 'view' ? 'Vistas del lienzo' : activeSection.label}
-              </p>
+            <div
+              className={`flex shrink-0 items-center gap-3 px-2 ${
+                showSheetTitle
+                  ? 'justify-between border-b border-border/70 px-4 py-2.5'
+                  : 'justify-end py-1'
+              }`}
+            >
+              {showSheetTitle ? (
+                <p className="min-w-0 truncate text-tools-section font-semibold text-ink">
+                  {sheetTitle}
+                </p>
+              ) : null}
               <button
                 type="button"
                 data-tools-sheet-close=""
@@ -127,7 +142,11 @@ export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) 
                 <CloseIcon />
               </button>
             </div>
-            <div className="studio-tools-panel scrollbar-chrome min-h-0 flex-1 overflow-y-auto p-(--chrome-space-3)">
+            <div
+              className={`studio-tools-panel scrollbar-chrome min-h-0 flex-1 overflow-y-auto px-(--chrome-space-3) ${
+                activeSection.id === 'image' ? 'pb-(--chrome-space-3) pt-1' : 'p-(--chrome-space-3)'
+              }`}
+            >
               {activeSection.id === 'view' && canvasView ? (
                 <CanvasViewPickerList
                   activeId={canvasView.activeView}
@@ -143,7 +162,7 @@ export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) 
 
         <nav
           aria-label="Herramientas del estudio"
-          className="border-t border-border bg-bg/95 backdrop-blur-sm"
+          className="border-t border-border bg-bg"
         >
           <div className="flex items-stretch gap-1 px-2 py-2">
             {dockSections.map((section) => (
