@@ -77,14 +77,17 @@ function SelectColorsWorkspaceContent() {
     onTypographySpacingChange: workspace.setTypographySpacing,
     onAddLargerTypeScaleStep: workspace.addLargerTypeScaleStep,
     onAddSmallerTypeScaleStep: workspace.addSmallerTypeScaleStep,
-    customFonts: workspace.customFonts,
     imagePaletteType: workspace.imagePaletteType,
     paletteTypeOverride: workspace.paletteTypeOverride,
     onPaletteTypeChange: workspace.handlePaletteTypeChange,
     onApplyCustomFont: workspace.applyCustomFont,
     isGenerating: workspace.isGenerating,
     selectionReady: workspace.selectionReady,
-    onGenerate: workspace.handleGenerate,
+    onGenerate: () => {
+      if (workspace.handleGenerate()) {
+        selectView('style-guide');
+      }
+    },
   };
   const mobileToolSections = useSelectColorsWorkspaceToolSections(toolSectionsInput, 'mobile');
   const inspirationModal = (

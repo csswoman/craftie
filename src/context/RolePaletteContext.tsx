@@ -815,7 +815,13 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   const canUndoEdit = canUndo(editHistory);
   const canRedoEdit = canRedo(editHistory);
 
-  const selectionReady = useMemo(() => validateRolePalette(rolePalette).ok, [rolePalette]);
+  const selectionReady = useMemo(
+    () =>
+      semanticTokens !== null
+      && PALETTE_ROLE_ORDER.every((role) => !semanticTokens[tokenNameForPaletteRole(role)].gap)
+      && validateRolePalette(rolePalette).ok,
+    [rolePalette, semanticTokens],
+  );
 
   const value = useMemo<RolePaletteContextValue>(
     () => ({

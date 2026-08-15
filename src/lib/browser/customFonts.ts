@@ -104,6 +104,12 @@ export async function loadGoogleFontFamily(family: string): Promise<void> {
   if (faces.length === 0 && !document.fonts.check(`400 16px "${family}"`)) {
     throw new Error(`No se encontró la familia “${family}” en Google Fonts.`);
   }
+
+  await withTimeout(
+    document.fonts.ready.then(() => undefined),
+    LOAD_TIMEOUT_MS,
+    `Tiempo de espera al aplicar la fuente “${family}”.`,
+  );
 }
 
 export function assertLocalFontFile(file: File): void {

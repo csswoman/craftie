@@ -8,9 +8,7 @@ import {
   type UiStatusColorSet,
   type UiStatusRole,
 } from '@lib/color/uiStatusColors';
-
 import { useAutoHideScrollbar } from '@/lib/browser/useAutoHideScrollbar';
-
 import { CreateBrandGuideFooter } from './CreateBrandGuideFooter';
 import { UiCompactRoleRow } from './UiCompactRoleRow';
 import { UiCompactStatusSlot } from './UiCompactStatusSlot';
@@ -19,12 +17,10 @@ import {
   COMPACT_ROLE_GROUPS,
   type CompactRoleGroupId,
 } from './uiColorPanelGroups';
-
 const GROUP_ICONS: Record<CompactRoleGroupId, LucideIcon> = {
   brand: Palette,
   foundations: Layers,
 };
-
 export function UiCompactColorPanel({
   tokens,
   colors,
@@ -57,7 +53,10 @@ export function UiCompactColorPanel({
   onCreateGuide: () => void;
 }) {
   const scrollRef = useAutoHideScrollbar<HTMLDivElement>();
-
+  const missingGuideRoles = Object.values(COMPACT_ROLE_GROUPS)
+    .flatMap((group) => group.roles)
+    .filter((role) => tokens[role.token].gap)
+    .map((role) => role.label);
   const sections = (
     <>
       {(['brand', 'foundations'] as const).map((groupId) => {
@@ -83,6 +82,11 @@ export function UiCompactColorPanel({
                 />
               ))}
             </ul>
+            {groupId === 'brand' && showCreateGuide && !canCreateGuide && missingGuideRoles.length > 0 ? (
+              <p className="mt-2 rounded-md bg-surface px-3 py-2 text-tools-meta-scale leading-snug text-muted">
+                Para ver la guía, asigna un color a: {missingGuideRoles.join(', ')}.
+              </p>
+            ) : null}
           </PanelSection>
         );
       })}
@@ -136,7 +140,7 @@ export function UiCompactColorPanel({
       tokens={tokens}
       canCreateGuide={canCreateGuide}
       creatingGuide={creatingGuide}
-      pinned={fillHeight}
+      pinned
       onCreateGuide={onCreateGuide}
     />
   ) : null;

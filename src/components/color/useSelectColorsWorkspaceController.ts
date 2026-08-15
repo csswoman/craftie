@@ -41,7 +41,7 @@ import {
   restoreGoogleCustomFonts,
   writeCustomFontsSession,
 } from '@/lib/browser/customFonts';
-import type { CustomFontSubmitInput } from '@/components/font-pairing/CustomFontEntry';
+import type { CustomFontSubmitInput } from '@/components/font-pairing/CustomFontModal';
 import type { SizeOverrides } from '@/components/font-pairing/FineTuneSizes';
 import type { TypographySpacing } from '@/components/font-pairing/SpacingControls';
 import { extractPaletteColorsFromImage } from '@/lib/browser/imageExtractor';
@@ -232,9 +232,9 @@ export function useSelectColorsWorkspaceController() {
     setGeneratedPalette(generatePaletteFromRolePalette(rolePalette));
   }, [rolePalette, isReviewPhase]);
 
-  const handleGenerate = useCallback(() => {
+  const handleGenerate = useCallback((): boolean => {
     if (generatingRef.current) {
-      return;
+      return false;
     }
 
     generatingRef.current = true;
@@ -247,13 +247,14 @@ export function useSelectColorsWorkspaceController() {
         setError(selectionResult.error);
         setGeneratedPalette(null);
         setStatusMessage(null);
-        return;
+        return false;
       }
 
       setError(null);
       const nextPalette = generatePaletteFromRolePalette(rolePalette!);
       setGeneratedPalette(nextPalette);
-      setStatusMessage('Guía de marca lista. Revisa contraste y tipografía, luego exporta.');
+      setStatusMessage('Vista previa lista. Revisa la guía y usa Exportar para descargarla.');
+      return true;
     } finally {
       generatingRef.current = false;
       setIsGenerating(false);

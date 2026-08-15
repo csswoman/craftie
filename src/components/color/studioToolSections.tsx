@@ -4,7 +4,6 @@ import type { SelectableColor } from '@lib/color/selectableColors';
 import type { FontPair } from '@lib/typography/pairings';
 import type { AppliedTypography } from '@lib/typography/typeState';
 import type { TypeScaleBase, TypeScaleRatio } from '@lib/typography/typeScale';
-import type { CustomFont } from '@lib/typography/customFonts';
 import type { SizeOverrides } from '@/components/font-pairing/FineTuneSizes';
 import type { TypographySpacing } from '@/components/font-pairing/SpacingControls';
 import type { PaletteType } from '@lib/color/paletteClassification';
@@ -13,7 +12,7 @@ import { ImageUploader } from '@/components/color-engine/ImageUploader';
 import { SidebarTypographySection } from '@/components/color/SidebarTypographySection';
 import { UiColorPanel } from '@/components/color/UiColorPanel';
 import { CuratedSourceActions } from '@/components/color/CuratedSourceActions';
-import type { CustomFontSubmitInput } from '@/components/font-pairing/CustomFontEntry';
+import type { CustomFontSubmitInput } from '@/components/font-pairing/CustomFontModal';
 import { Button } from '@/components/ui/Button';
 
 export type StudioToolSectionId = 'image' | 'source' | 'adjustments' | 'typography' | 'view';
@@ -40,7 +39,6 @@ export type StudioToolsInput = {
   pinBody: boolean;
   typeScaleBase: TypeScaleBase;
   typeScaleRatio: TypeScaleRatio;
-  customFonts: CustomFont[];
   imagePaletteType: PaletteType | null;
   paletteTypeOverride: PaletteType | null;
   onImageFileSelected: (file: File) => void;
@@ -136,7 +134,6 @@ export function buildStudioToolSections(
           pinBody={input.pinBody}
           base={input.typeScaleBase}
           ratio={input.typeScaleRatio}
-          customFonts={input.customFonts}
           onSelectPairing={input.onSelectPairing}
           onPreviewPairing={input.onPreviewPairing}
           onClearPreview={input.onClearPreview}

@@ -1,102 +1,41 @@
 'use client';
 
-import { useState } from 'react';
-import { Plus } from 'lucide-react';
-
 import type { CustomFont } from '@lib/typography/customFonts';
-import type { CustomFontRole } from '@lib/typography/customFonts';
+import type { CustomFontSubmitInput } from './CustomFontModal';
 
-import { CustomFontModal, type CustomFontSubmitInput } from './CustomFontModal';
+import { GoogleFontAutocomplete } from './GoogleFontAutocomplete';
 
 export type { CustomFontSubmitInput };
 
 export type CustomFontEntryProps = {
   customFonts: CustomFont[];
+  headingFamily: string;
+  bodyFamily: string;
   onApply: (input: CustomFontSubmitInput) => Promise<void>;
 };
 
-export function CustomFontEntry({ customFonts, onApply }: CustomFontEntryProps) {
-  const [open, setOpen] = useState(false);
-  const [busyId, setBusyId] = useState<string | null>(null);
-
-  async function applyExisting(font: CustomFont, role: CustomFontRole) {
-    setBusyId(`${font.id}:${role}`);
-    try {
-      await onApply({ family: font.family, source: font.source, role });
-    } finally {
-      setBusyId(null);
-    }
-  }
-
+export function CustomFontEntry({
+  customFonts: _customFonts,
+  headingFamily,
+  bodyFamily,
+  onApply,
+}: CustomFontEntryProps) {
   return (
-    <div className="space-y-2">
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-border bg-transparent px-3 py-2.5 text-[11px] font-semibold text-muted transition-colors hover:border-ink/30 hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-      >
-        <Plus size={14} strokeWidth={2} absoluteStrokeWidth aria-hidden="true" />
-        Fuente personalizada
-      </button>
-
-      {customFonts.length > 0 ? (
-        <ul className="space-y-1.5">
-          {customFonts.map((font) => (
-            <li
-              key={font.id}
-              className="flex min-w-0 items-center gap-2 rounded-md border border-border/60 bg-surface-raised/40 px-2 py-1.5"
-            >
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-tools-meta text-ink" title={font.family}>
-                  {font.family}
-                </p>
-                <p className="text-[10px] text-muted">
-                  {font.source === 'google' ? 'Google' : 'Local'}
-                </p>
-              </div>
-              <div className="flex shrink-0 gap-1">
-                <RoleApplyButton
-                  label="Titular"
-                  busy={busyId === `${font.id}:heading`}
-                  disabled={busyId !== null}
-                  onClick={() => void applyExisting(font, 'heading')}
-                />
-                <RoleApplyButton
-                  label="Cuerpo"
-                  busy={busyId === `${font.id}:body`}
-                  disabled={busyId !== null}
-                  onClick={() => void applyExisting(font, 'body')}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-
-      <CustomFontModal open={open} onClose={() => setOpen(false)} onApply={onApply} />
+    <div className="grid min-w-0 grid-cols-2 gap-2 border-t border-border pt-3">
+      <GoogleFontAutocomplete
+        key={`heading:${headingFamily}`}
+        label="Titular"
+        role="heading"
+        initialFamily={headingFamily}
+        onApply={(family, role) => onApply({ family, source: 'google', role })}
+      />
+      <GoogleFontAutocomplete
+        key={`body:${bodyFamily}`}
+        label="Cuerpo"
+        role="body"
+        initialFamily={bodyFamily}
+        onApply={(family, role) => onApply({ family, source: 'google', role })}
+      />
     </div>
-  );
-}
-
-function RoleApplyButton({
-  label,
-  busy,
-  disabled,
-  onClick,
-}: {
-  label: string;
-  busy: boolean;
-  disabled: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="rounded border border-border bg-surface px-1.5 py-0.5 text-[10px] font-semibold text-ink transition-colors hover:border-ink/30 hover:bg-bg disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-    >
-      {busy ? '…' : label}
-    </button>
   );
 }

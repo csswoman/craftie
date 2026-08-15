@@ -13,7 +13,7 @@ const STEPS = [
   },
   {
     title: 'Guía de marca',
-    body: 'Congela el sistema con «Crear guía de marca» (Ctrl/⌘+Enter).',
+    body: 'Abre la vista previa con «Ver guía de marca» (Ctrl/⌘+Enter).',
     detail: 'Progreso «X de 7 listos» en el footer del panel.',
   },
   {

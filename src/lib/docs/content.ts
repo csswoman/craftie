@@ -65,7 +65,7 @@ export const DOCS_GROUPS: DocsGroup[] = [
         ],
         [
           'Abre `/` → estilo curado o imagen.',
-          'Asigna roles en panel Colores → «Crear guía de marca».',
+          'Asigna roles en panel Colores → «Ver guía de marca».',
           'Revisa tipografía y maquetas → Exportar.',
         ],
         [
@@ -151,7 +151,7 @@ export const DOCS_GROUPS: DocsGroup[] = [
             bullets: [
               'Panel lateral Colores: pestañas Sistema y Acentos; bloque de imagen al inicio.',
               'Canvas: paleta por columnas, vistas del sistema y maquetas.',
-              'Footer «Crear guía de marca» con progreso (X de 7 listos).',
+              'Footer «Ver guía de marca» con progreso (X de 7 roles listos).',
             ],
           },
           {
@@ -252,7 +252,7 @@ export const DOCS_GROUPS: DocsGroup[] = [
             bullets: [
               'Candidatos etiquetados (fuente / sintético), opción «Sin asignar».',
               'Editor inline L/C con preview en el canvas.',
-              'Contador de progreso hacia «Crear guía de marca».',
+              'Contador de progreso hacia «Ver guía de marca».',
             ],
           },
         ],
@@ -551,7 +551,7 @@ export const DOCS_GROUPS: DocsGroup[] = [
           {
             heading: 'Atajos',
             bullets: [
-              'Ctrl/⌘+Enter — Crear guía de marca (antes de crearla).',
+              'Ctrl/⌘+Enter — Ver guía de marca.',
               'Ctrl/⌘+Z — Deshacer edición de paleta.',
               'Ctrl/⌘+Shift+Z o Ctrl/⌘+Y — Rehacer.',
               'Esc — cerrar menús o vistas ampliadas.',

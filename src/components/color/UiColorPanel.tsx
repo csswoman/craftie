@@ -143,12 +143,6 @@ export function UiColorPanel({
 
   return (
     <div ref={panelRef} className="flex h-full min-h-0 flex-col pb-2">
-      {mobile ? (
-        <header className="mb-3 shrink-0 border-b border-line-soft pb-4">
-          <h1 className="font-display text-[1.375rem] font-medium leading-none text-forest">Craftie</h1>
-          <p className="mt-1 text-xs text-muted">Colores y tipografía</p>
-        </header>
-      ) : null}
       <div className="shrink-0">
         <UiColorViewTabs activeView={activeView} getTabProps={getTabProps} onChange={changeView} />
       </div>

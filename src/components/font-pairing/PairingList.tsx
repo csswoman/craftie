@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import type { FontPair } from '@lib/typography/pairings';
 import {
@@ -13,6 +14,8 @@ import { loadGoogleFonts } from '@/lib/browser/googleFonts';
 import { PairingFilterChips } from './PairingFilterChips';
 import { PairGroup } from './PairingListRows';
 import { PairingSearchControl } from './PairingSearchControl';
+
+const CATALOG_PAGE_SIZE = 12;
 
 export type PairingListProps = {
   pairings: FontPair[];
@@ -37,6 +40,7 @@ export function PairingList({
 }: PairingListProps) {
   const [category, setCategory] = useState<PairingCategoryValue>('all');
   const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
   const isTools = variant === 'tools';
   const emptyClass = isTools ? 'text-tools-body' : 'text-[0.9375rem]';
   const showSearch = shouldShowPairingSearch(pairings.length);
@@ -62,6 +66,13 @@ export function PairingList({
     [filteredPairings, recommendedIds],
   );
 
+  const pageCount = Math.max(1, Math.ceil(catalog.length / CATALOG_PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const catalogPage = useMemo(() => {
+    const start = (currentPage - 1) * CATALOG_PAGE_SIZE;
+    return catalog.slice(start, start + CATALOG_PAGE_SIZE);
+  }, [catalog, currentPage]);
+
   useEffect(() => {
     if (selectedCatalogPairId) {
       const selected = pairings.find((pair) => pair.id === selectedCatalogPairId);
@@ -72,15 +83,23 @@ export function PairingList({
   }, [pairings, selectedCatalogPairId]);
 
   useEffect(() => {
-    if (filteredPairings.length === 0) {
-      return;
-    }
-    loadGoogleFonts(filteredPairings.slice(0, 12));
-  }, [filteredPairings]);
+    loadGoogleFonts([...suggested, ...catalogPage]);
+  }, [catalogPage, suggested]);
+
+  const handleCategoryChange = (value: PairingCategoryValue) => {
+    setCategory(value);
+    setPage(1);
+  };
+
+  const handleQueryChange = (value: string) => {
+    setQuery(value);
+    setPage(1);
+  };
 
   const clearFilters = () => {
     setQuery('');
     setCategory('all');
+    setPage(1);
   };
 
   if (pairings.length === 0) {
@@ -100,11 +119,11 @@ export function PairingList({
   return (
     <div className={`min-w-0 space-y-3 ${listInert ? 'opacity-60' : ''}`}>
       <div className="min-w-0 space-y-2">
-        <PairingFilterChips value={category} onChange={setCategory} isTools={isTools} />
+        <PairingFilterChips value={category} onChange={handleCategoryChange} isTools={isTools} />
         {showSearch ? (
           <PairingSearchControl
             query={query}
-            onQueryChange={setQuery}
+            onQueryChange={handleQueryChange}
             disabled={listInert}
             isTools={isTools}
           />
@@ -113,6 +132,7 @@ export function PairingList({
 
       <p className="sr-only" aria-live="polite">
         {filteredPairings.length} pares
+        {pageCount > 1 ? `. Página ${currentPage} de ${pageCount}.` : ''}
         {listInert ? '. Lista inactiva: ambos roles fijados.' : ''}
       </p>
 
@@ -145,7 +165,7 @@ export function PairingList({
           ) : null}
           <PairGroup
             heading={suggested.length > 0 ? 'Catálogo' : null}
-            pairings={suggested.length > 0 ? catalog : filteredPairings}
+            pairings={catalogPage}
             selectedCatalogPairId={selectedCatalogPairId}
             inert={listInert}
             onSelect={selectHandler}
@@ -153,6 +173,34 @@ export function PairingList({
             onClearPreview={clearHandler}
             variant={variant}
           />
+          {pageCount > 1 ? (
+            <nav
+              className="flex items-center justify-between gap-2 border-t border-border pt-3"
+              aria-label="Paginación del catálogo tipográfico"
+            >
+              <button
+                type="button"
+                onClick={() => setPage(currentPage - 1)}
+                disabled={listInert || currentPage === 1}
+                className="inline-flex min-h-8 items-center gap-1 rounded-md px-2 text-chrome-caption font-medium text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-45"
+              >
+                <ChevronLeft size={14} strokeWidth={1.75} aria-hidden="true" />
+                Anterior
+              </button>
+              <span className="text-tools-meta tabular-nums text-muted">
+                Página {currentPage} de {pageCount}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPage(currentPage + 1)}
+                disabled={listInert || currentPage === pageCount}
+                className="inline-flex min-h-8 items-center gap-1 rounded-md px-2 text-chrome-caption font-medium text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-45"
+              >
+                Siguiente
+                <ChevronRight size={14} strokeWidth={1.75} aria-hidden="true" />
+              </button>
+            </nav>
+          ) : null}
         </div>
       )}
     </div>

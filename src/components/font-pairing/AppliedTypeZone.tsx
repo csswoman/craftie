@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { Settings } from 'lucide-react';
 
 import type { AppliedTypography } from '@lib/typography/typeState';
+import type { CustomFontRole } from '@lib/typography/customFonts';
 import { familyStackFromApplied } from '@lib/typography/typeState';
 import {
   TYPE_SCALE_BASES,
@@ -36,6 +37,7 @@ export type AppliedTypeZoneProps = {
   onBaseChange: (base: TypeScaleBase) => void;
   onRatioChange: (ratio: TypeScaleRatio) => void;
   onHeadingWeightChange: (weight: number) => void;
+  onApplyGoogleFont: (family: string, role: CustomFontRole) => Promise<void>;
   overrides: SizeOverrides;
   spacing: TypographySpacing;
   largerSteps: number;
@@ -46,6 +48,7 @@ export type AppliedTypeZoneProps = {
   onAddSmallerStep: () => void;
   configOpen: boolean;
   onConfigOpenChange: (open: boolean) => void;
+  stickToPanelTop?: boolean;
 };
 
 const HEADING_WEIGHT_OPTIONS = [500, 600, 700] as const;
@@ -61,6 +64,7 @@ export function AppliedTypeZone({
   onBaseChange,
   onRatioChange,
   onHeadingWeightChange,
+  onApplyGoogleFont,
   overrides,
   spacing,
   largerSteps,
@@ -71,6 +75,7 @@ export function AppliedTypeZone({
   onAddSmallerStep,
   configOpen,
   onConfigOpenChange,
+  stickToPanelTop = false,
 }: AppliedTypeZoneProps) {
   const readout = buildTypeScaleReadout(base, ratio);
   const levels = useMemo(
@@ -80,7 +85,11 @@ export function AppliedTypeZone({
   const bothPinned = pinHeading && pinBody;
 
   return (
-    <div className="sticky top-0 z-10 min-w-0 shrink-0 bg-bg pb-4 pt-1">
+    <div
+      className={`sticky z-10 min-w-0 shrink-0 bg-bg pb-4 pt-1 ${
+        stickToPanelTop ? '-mt-[var(--chrome-space-3)] top-[-15px] xl:top-0' : 'top-0'
+      }`}
+    >
       <section
         aria-labelledby="applied-type-heading"
         className="overflow-hidden rounded-xl border border-border bg-surface"
@@ -117,6 +126,8 @@ export function AppliedTypeZone({
             stack={familyStackFromApplied(applied.headingFamily, applied.headingClassification)}
             pinned={pinHeading}
             onTogglePin={onTogglePinHeading}
+            role="heading"
+            onApplyFamily={onApplyGoogleFont}
           />
           <RoleRow
             label="Cuerpo"
@@ -125,6 +136,8 @@ export function AppliedTypeZone({
             stack={familyStackFromApplied(applied.bodyFamily, applied.bodyClassification)}
             pinned={pinBody}
             onTogglePin={onTogglePinBody}
+            role="body"
+            onApplyFamily={onApplyGoogleFont}
           />
         </div>
       </section>

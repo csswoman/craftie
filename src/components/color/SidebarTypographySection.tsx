@@ -4,13 +4,9 @@ import { useState } from 'react';
 import type { AppliedTypography } from '@lib/typography/typeState';
 import type { TypeScaleBase, TypeScaleRatio } from '@lib/typography/typeScale';
 import type { FontPair } from '@lib/typography/pairings';
-import type { CustomFont } from '@lib/typography/customFonts';
 
 import { AppliedTypeZone } from '@/components/font-pairing/AppliedTypeZone';
-import {
-  CustomFontEntry,
-  type CustomFontSubmitInput,
-} from '@/components/font-pairing/CustomFontEntry';
+import type { CustomFontSubmitInput } from '@/components/font-pairing/CustomFontModal';
 import { PairingList } from '@/components/font-pairing/PairingList';
 import type { SizeOverrides } from '@/components/font-pairing/FineTuneSizes';
 import type { TypographySpacing } from '@/components/font-pairing/SpacingControls';
@@ -24,7 +20,6 @@ export type SidebarTypographySectionProps = {
   pinBody: boolean;
   base: TypeScaleBase;
   ratio: TypeScaleRatio;
-  customFonts: CustomFont[];
   onSelectPairing: (pairing: FontPair) => void;
   onPreviewPairing: (pairing: FontPair) => void;
   onClearPreview: () => void;
@@ -54,7 +49,6 @@ export function SidebarTypographySection({
   pinBody,
   base,
   ratio,
-  customFonts,
   onSelectPairing,
   onPreviewPairing,
   onClearPreview,
@@ -72,6 +66,7 @@ export function SidebarTypographySection({
   onAddLargerStep,
   onAddSmallerStep,
   onApplyCustomFont,
+  embedded = false,
 }: SidebarTypographySectionProps) {
   const [configOpen, setConfigOpen] = useState(false);
   const listInert = pinHeading && pinBody;
@@ -89,6 +84,9 @@ export function SidebarTypographySection({
         onBaseChange={onBaseChange}
         onRatioChange={onRatioChange}
         onHeadingWeightChange={onHeadingWeightChange}
+        onApplyGoogleFont={(family, role) =>
+          onApplyCustomFont({ family, source: 'google', role })
+        }
         overrides={overrides}
         spacing={spacing}
         largerSteps={largerSteps}
@@ -99,11 +97,11 @@ export function SidebarTypographySection({
         onAddSmallerStep={onAddSmallerStep}
         configOpen={configOpen}
         onConfigOpenChange={setConfigOpen}
+        stickToPanelTop={embedded}
       />
       {!configOpen ? (
         <>
           <PairingList pairings={fontPairings} recommendedPairings={recommendedPairings} selectedCatalogPairId={selectedCatalogPairId} listInert={listInert} onSelectPairing={onSelectPairing} onPreviewPairing={onPreviewPairing} onClearPreview={onClearPreview} variant="tools" />
-          <CustomFontEntry customFonts={customFonts} onApply={onApplyCustomFont} />
         </>
       ) : null}
     </div>

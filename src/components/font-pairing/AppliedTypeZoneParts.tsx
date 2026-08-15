@@ -1,5 +1,8 @@
 import type { ReactNode } from 'react';
 import { Pin } from 'lucide-react';
+import type { CustomFontRole } from '@lib/typography/customFonts';
+
+import { GoogleFontAutocomplete } from './GoogleFontAutocomplete';
 
 export function ScaleToken({ label, value }: { label: string; value: number }) {
   return (
@@ -35,6 +38,8 @@ export function RoleRow({
   stack,
   pinned,
   onTogglePin,
+  role,
+  onApplyFamily,
 }: {
   label: string;
   family: string;
@@ -42,6 +47,8 @@ export function RoleRow({
   stack: string;
   pinned: boolean;
   onTogglePin: () => void;
+  role?: CustomFontRole;
+  onApplyFamily?: (family: string, role: CustomFontRole) => Promise<void>;
 }) {
   const pinHint = pinned
     ? `Desfijar ${label}: vuelve a cambiar al elegir otro par`
@@ -50,13 +57,24 @@ export function RoleRow({
   return (
     <div className="flex min-w-0 items-center gap-2 py-2.5">
       <span className="w-[3.25rem] shrink-0 text-chrome-label font-medium text-muted">{label}</span>
-      <span
-        className="min-w-0 flex-1 truncate text-chrome-title font-medium leading-[1.25] text-ink"
-        style={{ fontFamily: stack, fontWeight: weight }}
-        title={family}
-      >
-        {family}
-      </span>
+      {role && onApplyFamily ? (
+        <GoogleFontAutocomplete
+          key={`${role}:${family}`}
+          label={label}
+          role={role}
+          initialFamily={family}
+          onApply={onApplyFamily}
+          hideLabel
+        />
+      ) : (
+        <span
+          className="min-w-0 flex-1 truncate text-chrome-title font-medium leading-[1.25] text-ink"
+          style={{ fontFamily: stack, fontWeight: weight }}
+          title={family}
+        >
+          {family}
+        </span>
+      )}
       <TypeWeightBadge weight={weight} />
       <button
         type="button"

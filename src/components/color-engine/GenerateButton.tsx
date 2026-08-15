@@ -19,7 +19,7 @@ export function GenerateButton({ onClick, disabled = false, busy = false }: Gene
         aria-busy={busy}
         className="w-full"
       >
-        {busy ? 'Creando guía…' : 'Crear guía de marca'}
+        {busy ? 'Abriendo guía…' : 'Ver guía de marca'}
       </Button>
       <p className="text-center text-chrome-caption leading-relaxed text-muted">
         Completa los 7 roles para crear la guía y poder exportar.
