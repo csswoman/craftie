@@ -3,6 +3,11 @@ import { NextResponse } from 'next/server';
 import type { GoogleFontCategory, GoogleFontOption } from '@lib/typography/googleFontsCatalog';
 
 const GOOGLE_FONTS_METADATA_URL = 'https://fonts.google.com/metadata/fonts';
+
+// Revalidate the generated (small) response once per day. We intentionally avoid
+// caching the raw upstream fetch because its payload (~3.6MB) exceeds Next.js's
+// 2MB fetch-cache limit, which would otherwise log a cache warning on every call.
+export const revalidate = 86_400;
 const VALID_CATEGORIES = new Set<GoogleFontCategory>([
   'serif',
   'sans-serif',
@@ -23,7 +28,7 @@ function normalizeCategory(category: string): GoogleFontCategory | null {
 }
 
 export async function GET() {
-  const response = await fetch(GOOGLE_FONTS_METADATA_URL, { next: { revalidate: 86_400 } });
+  const response = await fetch(GOOGLE_FONTS_METADATA_URL, { cache: 'no-store' });
 
   if (!response.ok) {
     return NextResponse.json(
