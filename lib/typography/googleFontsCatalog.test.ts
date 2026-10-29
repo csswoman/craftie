@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  filterGoogleFontsByCategory,
   filterGoogleFontsByPrefix,
   searchGoogleFonts,
   type GoogleFontOption,
@@ -87,5 +88,53 @@ describe('searchGoogleFonts', () => {
   it('returns an empty list for blank queries and respects the limit', () => {
     expect(searchGoogleFonts(groteskFonts, '   ')).toEqual([]);
     expect(searchGoogleFonts(groteskFonts, 'grotesk', 1)).toHaveLength(1);
+  });
+
+  it('restricts results to the requested category before ranking', () => {
+    const families = searchGoogleFonts(groteskFonts, 'grotesk', 8, {
+      category: 'display',
+    }).map((font) => font.family);
+    expect(families).toEqual(['Grotesk Remix']);
+  });
+
+  it("keeps every category when the filter is 'all'", () => {
+    const families = searchGoogleFonts(groteskFonts, 'grotesk', 8, {
+      category: 'all',
+    }).map((font) => font.family);
+    expect(families).toContain('Space Grotesk');
+    expect(families).toContain('Grotesk Remix');
+  });
+});
+
+describe('filterGoogleFontsByCategory', () => {
+  const sample: GoogleFontOption[] = [
+    { family: 'Lora', category: 'serif' },
+    { family: 'Nunito', category: 'sans-serif' },
+    { family: 'Bungee', category: 'display' },
+    { family: 'Fira Code', category: 'monospace' },
+  ];
+
+  it("returns a copy of the list unchanged for 'all'", () => {
+    const result = filterGoogleFontsByCategory(sample, 'all');
+    expect(result).toEqual(sample);
+    expect(result).not.toBe(sample);
+  });
+
+  it('keeps only fonts in the requested category and preserves order', () => {
+    expect(filterGoogleFontsByCategory(sample, 'serif').map((f) => f.family)).toEqual([
+      'Lora',
+    ]);
+    expect(filterGoogleFontsByCategory(sample, 'monospace').map((f) => f.family)).toEqual([
+      'Fira Code',
+    ]);
+  });
+
+  it('returns an empty list when no font matches the category', () => {
+    expect(
+      filterGoogleFontsByCategory(
+        [{ family: 'Lora', category: 'serif' }],
+        'handwriting',
+      ),
+    ).toEqual([]);
   });
 });

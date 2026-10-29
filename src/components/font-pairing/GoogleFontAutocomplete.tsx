@@ -5,11 +5,15 @@ import { createPortal } from 'react-dom';
 
 import {
   searchGoogleFonts,
+  type GoogleFontCategoryFilter,
   type GoogleFontOption,
 } from '@lib/typography/googleFontsCatalog';
 import type { CustomFontRole } from '@lib/typography/customFonts';
 
 import { getGoogleFontsCatalog } from '@/lib/browser/googleFontsCatalog';
+
+import { GoogleFontCategoryChips } from './GoogleFontCategoryChips';
+import { GoogleFontOptionList } from './GoogleFontOptionList';
 
 export function GoogleFontAutocomplete({
   label,
@@ -29,6 +33,7 @@ export function GoogleFontAutocomplete({
   const inputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLUListElement>(null);
   const [query, setQuery] = useState(initialFamily);
+  const [category, setCategory] = useState<GoogleFontCategoryFilter>('all');
   const [fonts, setFonts] = useState<GoogleFontOption[] | null>(null);
   const [loadingList, setLoadingList] = useState(false);
   const [applyingFont, setApplyingFont] = useState(false);
@@ -36,11 +41,10 @@ export function GoogleFontAutocomplete({
   const [error, setError] = useState<string | null>(null);
   const [focused, setFocused] = useState(false);
   const [menuPosition, setMenuPosition] = useState<{ left: number; top: number; width: number } | null>(null);
-  const [hoveredFamily, setHoveredFamily] = useState<{ family: string; left: number; top: number } | null>(null);
 
   const suggestions = useMemo(
-    () => (fonts ? searchGoogleFonts(fonts, query) : []),
-    [fonts, query],
+    () => (fonts ? searchGoogleFonts(fonts, query, 8, { category }) : []),
+    [fonts, query, category],
   );
   const expanded = focused && suggestions.length > 0 && !applyingFont;
 
@@ -129,6 +133,12 @@ export function GoogleFontAutocomplete({
     void loadList();
   }
 
+  function handleCategoryChange(next: GoogleFontCategoryFilter) {
+    setCategory(next);
+    setActiveIndex(-1);
+    void loadList();
+  }
+
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
     if (event.key === 'ArrowDown') {
       event.preventDefault();
@@ -175,6 +185,7 @@ export function GoogleFontAutocomplete({
         autoComplete="off"
         className="w-full rounded-md border border-border bg-surface-raised px-3 py-2 text-tools-body text-ink transition-opacity placeholder:text-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-wait disabled:opacity-60"
       />
+      <GoogleFontCategoryChips value={category} onChange={handleCategoryChange} />
       {loadingList || applyingFont ? (
         <p className="mt-1 text-tools-meta text-muted" role="status">
           {loadingList ? 'Cargando catálogo…' : 'Cargando…'}
@@ -182,59 +193,15 @@ export function GoogleFontAutocomplete({
       ) : null}
       {expanded && menuPosition && typeof document !== 'undefined'
         ? createPortal(
-          <ul
+          <GoogleFontOptionList
             ref={menuRef}
-            id={`${listboxId}-options`}
-            role="listbox"
-            aria-label={`Sugerencias para ${label}`}
-            className="z-dropdown max-h-60 overflow-y-auto rounded-md border border-border bg-bg p-1"
-            style={{
-              position: 'fixed',
-              left: menuPosition.left,
-              top: menuPosition.top,
-              width: menuPosition.width,
-            }}
-          >
-            {suggestions.map((font, index) => (
-              <li
-                key={font.family}
-                id={`${listboxId}-option-${index}`}
-                role="option"
-                aria-selected={activeIndex === index}
-                onMouseDown={(event) => event.preventDefault()}
-                onMouseEnter={(event) => {
-                  const rect = event.currentTarget.getBoundingClientRect();
-                  setHoveredFamily({
-                    family: font.family,
-                    left: Math.min(rect.right + 8, window.innerWidth - 248),
-                    top: rect.top,
-                  });
-                }}
-                onMouseLeave={() => setHoveredFamily(null)}
-                onClick={() => void selectFont(font)}
-                className={`flex cursor-pointer items-center justify-between gap-3 rounded px-2.5 py-2 text-tools-body text-ink ${activeIndex === index ? 'bg-surface-raised' : 'hover:bg-surface-raised'
-                  }`}
-              >
-                <span className="truncate" title={font.family}>
-                  {font.family}
-                </span>
-                <span className="shrink-0 text-tools-meta text-muted">{font.category}</span>
-              </li>
-            ))}
-          </ul>
-          ,
-          document.body,
-        )
-        : null}
-      {hoveredFamily && typeof document !== 'undefined'
-        ? createPortal(
-          <span
-            role="tooltip"
-            className="z-modal-backdrop pointer-events-none fixed max-w-60 rounded-md border border-border bg-ink px-2 py-1 text-tools-meta text-bg"
-            style={{ left: hoveredFamily.left, top: hoveredFamily.top }}
-          >
-            {hoveredFamily.family}
-          </span>,
+            listboxId={listboxId}
+            label={label}
+            suggestions={suggestions}
+            activeIndex={activeIndex}
+            position={menuPosition}
+            onSelect={(font) => void selectFont(font)}
+          />,
           document.body,
         )
         : null}
