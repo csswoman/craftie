@@ -19,6 +19,7 @@ import {
 } from '@lib/typography/paletteAwarePairing';
 import type { StudioFlowStepId } from '@lib/studio/studioFlow';
 import { hasWorkspaceProgress } from '@lib/studio/workspaceProgress';
+import { buildExampleWorkspaceSnapshot } from '@lib/studio/exampleWorkspace';
 import {
   appliedToLoadablePair,
   applyPairToTypography,
@@ -52,7 +53,12 @@ import { extractPaletteColorsFromImage } from '@/lib/browser/imageExtractor';
 import { getImageFingerprint } from '@/lib/browser/imageFingerprint';
 import { readSelectedFontPairId, writeSelectedFontPairId } from '@/lib/browser/selectedFontPair';
 import { requestStudioToolFocus } from '@/lib/browser/studioToolFocus';
-import { clearShareHash } from '@/lib/browser/shareUrl';
+import { clearShareHash, readShareHash } from '@/lib/browser/shareUrl';
+import { readWorkspaceSnapshot } from '@/lib/browser/workspaceStorage';
+import {
+  readOnboardingDismissed,
+  writeOnboardingDismissed,
+} from '@/lib/browser/onboardingDismiss';
 import type { LocalProject } from '@lib/studio/projectModel';
 
 export function useSelectColorsWorkspaceController() {
@@ -73,6 +79,7 @@ export function useSelectColorsWorkspaceController() {
     applySnapshot,
   } = useRolePalette();
   const [catalogSource, setCatalogSource] = useState<'none' | 'curated' | 'image'>('none');
+  const [onboardingHintVisible, setOnboardingHintVisible] = useState(false);
   const [selectedStyleId, setSelectedStyleId] = useState<string | null>(null);
   const [typeUi, setTypeUi] = useState<TypeUiState>(() => createInitialTypeUiState());
   const [typeScaleOverrides, setTypeScaleOverrides] = useState<SizeOverrides>({});
@@ -131,6 +138,33 @@ export function useSelectColorsWorkspaceController() {
         URL.revokeObjectURL(imagePreviewUrlRef.current);
       }
     };
+  }, []);
+
+  // First-load onboarding: when the visitor arrives with no shared link and no
+  // stored workspace, preload a deterministic example palette so the studio
+  // opens populated instead of empty, and surface a dismissible hint. The
+  // RolePaletteContext still hydrates any stored/shared snapshot on its own; we
+  // only step in when there is genuinely nothing to restore.
+  useEffect(() => {
+    const hasSharedState = readShareHash() !== null;
+    const hasStoredState = readWorkspaceSnapshot() !== null;
+
+    if (hasSharedState || hasStoredState) {
+      return;
+    }
+
+    applySnapshot(buildExampleWorkspaceSnapshot());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCatalogSource('curated');
+
+    if (!readOnboardingDismissed()) {
+      setOnboardingHintVisible(true);
+    }
+  }, [applySnapshot]);
+
+  const dismissOnboardingHint = useCallback(() => {
+    writeOnboardingDismissed(true);
+    setOnboardingHintVisible(false);
   }, []);
 
   const isImageBusy = isImageExtracting || isImageRegenerating;
@@ -574,6 +608,8 @@ export function useSelectColorsWorkspaceController() {
 
   return {
     catalogSource,
+    onboardingHintVisible,
+    dismissOnboardingHint,
     canExport,
     exportBlockedReason,
     error,

@@ -8,6 +8,7 @@ import { ConfirmResetWorkspaceDialog } from '@/components/layout/ConfirmResetWor
 import { MyProjectsDrawer } from '@/components/projects/MyProjectsDrawer';
 import { useLocalProjects } from '@/components/projects/useLocalProjects';
 import { InspirationModal } from '@/components/color/InspirationModal';
+import { OnboardingHint } from '@/components/color/OnboardingHint';
 import { SelectColorsWorkspaceMain } from '@/components/color/SelectColorsWorkspaceMain';
 import { EmptyWorkspaceCard } from '@/components/color/EmptyWorkspaceCard';
 import {
@@ -182,6 +183,10 @@ function SelectColorsWorkspaceContent() {
   return (
     <div className="canvas-dots flex min-h-dvh flex-col lg:h-dvh lg:min-h-0 lg:overflow-hidden">
       {sharedChrome}
+
+      {workspace.onboardingHintVisible ? (
+        <OnboardingHint onDismiss={workspace.dismissOnboardingHint} />
+      ) : null}
 
       <StudioCanvas
         sidebar={
