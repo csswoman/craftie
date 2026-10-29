@@ -13,6 +13,10 @@ import {
 import type { SelectableColor } from '@lib/color/selectableColors';
 import { DESIGN_STYLES } from '@lib/styles/presets';
 import { FONT_PAIRS, getRecommendedPairings, type FontPair } from '@lib/typography/pairings';
+import {
+  getPaletteAwareRecommendations,
+  hasPaletteContext,
+} from '@lib/typography/paletteAwarePairing';
 import type { StudioFlowStepId } from '@lib/studio/studioFlow';
 import { hasWorkspaceProgress } from '@lib/studio/workspaceProgress';
 import {
@@ -215,10 +219,23 @@ export function useSelectColorsWorkspaceController() {
     return DESIGN_STYLES.find((style) => style.id === selectedStyleId)?.mood ?? [];
   }, [selectedStyleId]);
 
-  const recommendedPairings = useMemo(
-    () => getRecommendedPairings(activeMoods, 3),
-    [activeMoods],
-  );
+  const recommendedPairings = useMemo<FontPair[]>(() => {
+    const paletteTextHex = generatedPalette?.onSurface ?? null;
+    const paletteBackgroundHex = generatedPalette?.surface ?? null;
+
+    if (hasPaletteContext(paletteTextHex, paletteBackgroundHex)) {
+      return getPaletteAwareRecommendations(
+        {
+          mood: activeMoods,
+          paletteTextHex: paletteTextHex!,
+          paletteBackgroundHex: paletteBackgroundHex!,
+        },
+        3,
+      );
+    }
+
+    return getRecommendedPairings(activeMoods, 3);
+  }, [activeMoods, generatedPalette]);
   const fontPairings = FONT_PAIRS;
 
   const isReviewPhase = generatedPalette !== null;
