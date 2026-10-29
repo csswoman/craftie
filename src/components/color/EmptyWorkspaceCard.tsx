@@ -1,5 +1,6 @@
 'use client';
 
+import { CaseStudyIntro } from '@/components/layout/CaseStudyIntro';
 import { ImageUploader } from '@/components/color-engine/ImageUploader';
 import { Button } from '@/components/ui/Button';
 
@@ -23,55 +24,67 @@ export function EmptyWorkspaceCard({
   onOpenInspiration,
 }: EmptyWorkspaceCardProps) {
   return (
-    <section aria-labelledby="workspace-empty-title" className="w-full max-w-lg">
-      {/* eslint-disable-next-line @next/next/no-img-element -- Static public SVG illustration. */}
-      <img
-        src="/craftie-img.svg"
-        alt=""
-        width={400}
-        height={400}
-        className="mx-auto h-auto w-full max-w-[14rem] select-none sm:max-w-xs"
-        draggable={false}
-      />
-
-      <h2
-        id="workspace-empty-title"
-        className="mt-5 text-balance font-display text-[1.375rem] font-medium leading-snug text-ink"
-      >
-        Empieza con una inspiración
-      </h2>
-      <p className="prose-measure mt-2 text-pretty text-chrome-label leading-relaxed text-muted">
-        Elige un estilo o sube una imagen. Craftie carga colores semilla al instante para tu marca.
-      </p>
-
-      <Button
-        type="button"
-        variant="primary"
-        className="mt-5 min-h-11 w-full rounded-lg"
-        onClick={onOpenInspiration}
-      >
-        Elegir estilo curado
-      </Button>
-
-      <div className="mt-6 border-t border-border pt-5">
-        <p className="mb-3 text-chrome-label font-semibold text-ink">O sube una imagen</p>
-        <ImageUploader
-          fileName={fileName}
-          hasPreview={hasPreview}
-          isLoading={isImageBusy}
-          previewUrl={imagePreviewUrl}
-          onFileSelected={onImageFileSelected}
-          onRegenerate={onImageRegenerate}
-          variant="embedded"
-          showHeader={false}
-          showDropzone={!hasPreview}
-          showChangeImageControl={false}
+    <section
+      aria-labelledby="workspace-empty-title"
+      className="grid w-full max-w-5xl items-center gap-8 lg:grid-cols-[1.1fr_minmax(0,22rem)] lg:gap-12"
+    >
+      {/* Left: dog illustration + portfolio case-study framing. */}
+      <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
+        {/* eslint-disable-next-line @next/next/no-img-element -- Static public SVG illustration. */}
+        <img
+          src="/craftie-img.svg"
+          alt=""
+          width={400}
+          height={400}
+          className="h-auto w-full max-w-[12rem] select-none sm:max-w-[14rem]"
+          draggable={false}
         />
+        <div className="mt-6 w-full lg:mt-8">
+          <CaseStudyIntro />
+        </div>
       </div>
 
-      <p className="mt-5 text-chrome-caption leading-relaxed text-muted">
-        Después: toca cualquier rol para ajustar su color y revisar el contraste en contexto.
-      </p>
+      {/* Right: the inspiration action card. */}
+      <div className="w-full max-w-md justify-self-center panel-float p-6 lg:justify-self-end lg:p-7">
+        <h2
+          id="workspace-empty-title"
+          className="text-balance font-display text-[1.5rem] font-medium leading-snug text-ink"
+        >
+          Empieza por aquí
+        </h2>
+        <p className="mt-2 text-pretty text-chrome-body leading-relaxed text-muted">
+          Elige un estilo que te guste o sube una imagen. Craftie crea tu paleta al instante.
+        </p>
+
+        <Button
+          type="button"
+          variant="primary"
+          className="mt-5 min-h-11 w-full rounded-lg"
+          onClick={onOpenInspiration}
+        >
+          Explorar estilos
+        </Button>
+
+        <div className="mt-6 border-t border-border pt-5">
+          <p className="mb-3 text-chrome-label font-semibold text-ink">O sube una imagen</p>
+          <ImageUploader
+            fileName={fileName}
+            hasPreview={hasPreview}
+            isLoading={isImageBusy}
+            previewUrl={imagePreviewUrl}
+            onFileSelected={onImageFileSelected}
+            onRegenerate={onImageRegenerate}
+            variant="embedded"
+            showHeader={false}
+            showDropzone={!hasPreview}
+            showChangeImageControl={false}
+          />
+        </div>
+
+        <p className="mt-5 text-chrome-caption leading-relaxed text-muted">
+          Después podrás ajustar cada color y ver cómo queda tu diseño al momento.
+        </p>
+      </div>
     </section>
   );
 }
