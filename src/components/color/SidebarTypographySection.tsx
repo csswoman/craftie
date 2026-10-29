@@ -28,6 +28,7 @@ export type SidebarTypographySectionProps = {
   onBaseChange: (base: TypeScaleBase) => void;
   onRatioChange: (ratio: TypeScaleRatio) => void;
   onHeadingWeightChange: (weight: number) => void;
+  onBodyWeightChange: (weight: number) => void;
   overrides: SizeOverrides;
   spacing: TypographySpacing;
   largerSteps: number;
@@ -57,6 +58,7 @@ export function SidebarTypographySection({
   onBaseChange,
   onRatioChange,
   onHeadingWeightChange,
+  onBodyWeightChange,
   overrides,
   spacing,
   largerSteps,
@@ -84,6 +86,7 @@ export function SidebarTypographySection({
         onBaseChange={onBaseChange}
         onRatioChange={onRatioChange}
         onHeadingWeightChange={onHeadingWeightChange}
+        onBodyWeightChange={onBodyWeightChange}
         onApplyGoogleFont={(family, role) =>
           onApplyCustomFont({ family, source: 'google', role })
         }

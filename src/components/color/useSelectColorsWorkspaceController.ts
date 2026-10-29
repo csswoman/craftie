@@ -495,6 +495,13 @@ export function useSelectColorsWorkspaceController() {
     }));
   }
 
+  function handleBodyWeightChange(weight: number) {
+    setTypeUi((current) => ({
+      ...current,
+      applied: { ...current.applied, bodyWeight: weight },
+    }));
+  }
+
   function handleAddLargerTypeScaleStep() {
     setLargerTypeScaleSteps((current) => current + 1);
   }
@@ -680,6 +687,7 @@ export function useSelectColorsWorkspaceController() {
     setTypeScaleBase: handleTypeScaleBaseChange,
     setTypeScaleRatio: handleTypeScaleRatioChange,
     setHeadingWeight: handleHeadingWeightChange,
+    setBodyWeight: handleBodyWeightChange,
     setTypeScaleOverrides,
     setTypographySpacing,
     addLargerTypeScaleStep: handleAddLargerTypeScaleStep,

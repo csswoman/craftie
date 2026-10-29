@@ -74,6 +74,7 @@ function SelectColorsWorkspaceContent() {
     onTypeScaleBaseChange: workspace.setTypeScaleBase,
     onTypeScaleRatioChange: workspace.setTypeScaleRatio,
     onHeadingWeightChange: workspace.setHeadingWeight,
+    onBodyWeightChange: workspace.setBodyWeight,
     typeScaleOverrides: workspace.typeScaleOverrides,
     typographySpacing: workspace.typographySpacing,
     largerTypeScaleSteps: workspace.largerTypeScaleSteps,
@@ -163,7 +164,7 @@ function SelectColorsWorkspaceContent() {
       <div className="canvas-dots flex h-dvh flex-col overflow-hidden">
         {sharedChrome}
 
-        <div className="flex min-h-0 flex-1 items-center justify-center p-4">
+        <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto p-4 sm:p-6 lg:p-8">
           <EmptyWorkspaceCard
             fileName={workspace.imageFileName}
             hasPreview={workspace.imagePreviewUrl !== null}

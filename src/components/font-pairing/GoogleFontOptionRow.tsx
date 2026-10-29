@@ -36,18 +36,17 @@ export function GoogleFontOptionRow({
       aria-selected={active}
       onMouseDown={(event) => event.preventDefault()}
       onClick={() => onSelect(font)}
-      className={`flex cursor-pointer items-center justify-between gap-3 rounded px-2.5 py-2 text-tools-body text-ink ${
-        active ? 'bg-surface-raised' : 'hover:bg-surface-raised'
-      }`}
+      className={`flex cursor-pointer items-center justify-between gap-3 rounded px-2 py-1.5 text-chrome-label text-ink ${active ? 'bg-surface-raised' : 'hover:bg-surface-raised'
+        }`}
     >
       <span
-        className="truncate"
+        className="truncate text-[0.8125rem] leading-[1.3]"
         title={font.family}
         style={previewReady ? { fontFamily: `"${font.family}"` } : undefined}
       >
         {font.family}
       </span>
-      <span className="shrink-0 text-tools-meta text-muted">{font.category}</span>
+      <span className="shrink-0 text-chrome-caption text-muted">{font.category}</span>
     </li>
   );
 }

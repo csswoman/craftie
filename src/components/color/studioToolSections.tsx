@@ -53,6 +53,7 @@ export type StudioToolsInput = {
   onTypeScaleBaseChange: (base: TypeScaleBase) => void;
   onTypeScaleRatioChange: (ratio: TypeScaleRatio) => void;
   onHeadingWeightChange: (weight: number) => void;
+  onBodyWeightChange: (weight: number) => void;
   typeScaleOverrides: SizeOverrides;
   typographySpacing: TypographySpacing;
   largerTypeScaleSteps: number;
@@ -111,16 +112,18 @@ export function buildStudioToolSections(
 
   const sections: StudioToolSection[] = [
     { id: 'image', label: 'Imagen', content: imageSection },
-    { id: 'source', label: 'Colores', content: (
-      <UiColorPanel
-        colors={input.paletteCatalog}
-        mobile={target === 'mobile'}
-        showCreateGuide={!input.isReviewPhase}
-        canCreateGuide={input.selectionReady}
-        creatingGuide={input.isGenerating}
-        onCreateGuide={input.onGenerate}
-      />
-    ) },
+    {
+      id: 'source', label: 'Colores', content: (
+        <UiColorPanel
+          colors={input.paletteCatalog}
+          mobile={target === 'mobile'}
+          showCreateGuide={!input.isReviewPhase}
+          canCreateGuide={input.selectionReady}
+          creatingGuide={input.isGenerating}
+          onCreateGuide={input.onGenerate}
+        />
+      )
+    },
     {
       id: 'typography',
       label: 'Tipografía',
@@ -142,6 +145,7 @@ export function buildStudioToolSections(
           onBaseChange={input.onTypeScaleBaseChange}
           onRatioChange={input.onTypeScaleRatioChange}
           onHeadingWeightChange={input.onHeadingWeightChange}
+          onBodyWeightChange={input.onBodyWeightChange}
           overrides={input.typeScaleOverrides}
           spacing={input.typographySpacing}
           largerSteps={input.largerTypeScaleSteps}

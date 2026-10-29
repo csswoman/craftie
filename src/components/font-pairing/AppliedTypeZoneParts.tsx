@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Pin } from 'lucide-react';
+import { ChevronDown, Pin } from 'lucide-react';
 import type { CustomFontRole } from '@lib/typography/customFonts';
 
 import { GoogleFontAutocomplete } from './GoogleFontAutocomplete';
@@ -22,12 +22,49 @@ export function TypeWeightBadge({
 }) {
   return (
     <span
-      className={`inline-flex min-w-7 shrink-0 items-center justify-center rounded-md border border-border bg-surface-raised px-1.5 py-0.5 text-chrome-caption tabular-nums ${
-        tone === 'ink' ? 'font-medium text-ink' : 'font-medium text-muted'
-      }`}
+      className={`inline-flex min-w-7 shrink-0 items-center justify-center rounded-md border border-border bg-surface-raised px-1.5 py-0.5 text-chrome-caption tabular-nums ${tone === 'ink' ? 'font-medium text-ink' : 'font-medium text-muted'
+        }`}
     >
       {weight}
     </span>
+  );
+}
+
+export function TypeWeightSelect({
+  weight,
+  options,
+  onChange,
+  ariaLabel,
+}: {
+  weight: number;
+  options: readonly number[];
+  onChange: (weight: number) => void;
+  ariaLabel: string;
+}) {
+  const choices = options.includes(weight) ? options : [...options, weight].sort((a, b) => a - b);
+
+  return (
+    <label className="relative inline-flex shrink-0">
+      <span className="sr-only">{ariaLabel}</span>
+      <select
+        value={weight}
+        onChange={(event) => onChange(Number(event.target.value))}
+        aria-label={ariaLabel}
+        className="h-7 min-w-[3.25rem] shrink-0 cursor-pointer appearance-none rounded-md border border-border bg-surface-raised py-0.5 pl-2 pr-5 text-chrome-caption font-medium tabular-nums text-ink transition-colors hover:border-primary/45 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+      >
+        {choices.map((value) => (
+          <option key={value} value={value}>
+            {value}
+          </option>
+        ))}
+      </select>
+      <ChevronDown
+        size={12}
+        strokeWidth={1.5}
+        aria-hidden="true"
+        className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-muted"
+      />
+    </label>
   );
 }
 
@@ -35,6 +72,8 @@ export function RoleRow({
   label,
   family,
   weight,
+  weightOptions,
+  onWeightChange,
   stack,
   pinned,
   onTogglePin,
@@ -44,6 +83,8 @@ export function RoleRow({
   label: string;
   family: string;
   weight: number;
+  weightOptions?: readonly number[];
+  onWeightChange?: (weight: number) => void;
   stack: string;
   pinned: boolean;
   onTogglePin: () => void;
@@ -75,18 +116,26 @@ export function RoleRow({
           {family}
         </span>
       )}
-      <TypeWeightBadge weight={weight} />
+      {weightOptions && onWeightChange ? (
+        <TypeWeightSelect
+          weight={weight}
+          options={weightOptions}
+          onChange={onWeightChange}
+          ariaLabel={`Peso de ${label}`}
+        />
+      ) : (
+        <TypeWeightBadge weight={weight} />
+      )}
       <button
         type="button"
         onClick={onTogglePin}
         aria-pressed={pinned}
         aria-label={pinHint}
         title={pinHint}
-        className={`inline-flex h-7 shrink-0 items-center gap-1 whitespace-nowrap rounded-md border px-1.5 transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
-          pinned
-            ? 'border-primary/45 bg-primary/10 text-primary'
-            : 'border-border bg-bg text-muted hover:border-primary/45 hover:text-primary'
-        }`}
+        className={`inline-flex h-7 shrink-0 items-center gap-1 whitespace-nowrap rounded-md border px-1.5 transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${pinned
+          ? 'border-primary/45 bg-primary/10 text-primary'
+          : 'border-border bg-bg text-muted hover:border-primary/45 hover:text-primary'
+          }`}
       >
         <Pin
           size={13}
@@ -126,11 +175,10 @@ export function SegmentButton({
       onClick={onClick}
       aria-pressed={active}
       aria-label={ariaLabel}
-      className={`min-h-7 min-w-0 flex-1 rounded-md px-0.5 text-chrome-caption tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
-        active
-          ? 'bg-primary font-semibold text-bg'
-          : 'bg-transparent font-normal text-muted hover:bg-primary/10 hover:text-primary'
-      }`}
+      className={`min-h-7 min-w-0 flex-1 rounded-md px-0.5 text-chrome-caption tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${active
+        ? 'bg-primary font-semibold text-bg'
+        : 'bg-transparent font-normal text-muted hover:bg-primary/10 hover:text-primary'
+        }`}
     >
       {label}
     </button>

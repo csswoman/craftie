@@ -12,7 +12,6 @@ import type { CustomFontRole } from '@lib/typography/customFonts';
 
 import { getGoogleFontsCatalog } from '@/lib/browser/googleFontsCatalog';
 
-import { GoogleFontCategoryChips } from './GoogleFontCategoryChips';
 import { GoogleFontOptionList } from './GoogleFontOptionList';
 
 export function GoogleFontAutocomplete({
@@ -31,7 +30,7 @@ export function GoogleFontAutocomplete({
   const listboxId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const menuRef = useRef<HTMLUListElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState(initialFamily);
   const [category, setCategory] = useState<GoogleFontCategoryFilter>('all');
   const [fonts, setFonts] = useState<GoogleFontOption[] | null>(null);
@@ -46,7 +45,7 @@ export function GoogleFontAutocomplete({
     () => (fonts ? searchGoogleFonts(fonts, query, 8, { category }) : []),
     [fonts, query, category],
   );
-  const expanded = focused && suggestions.length > 0 && !applyingFont;
+  const expanded = focused && !applyingFont && (fonts !== null || loadingList);
 
   const updateMenuPosition = useCallback(() => {
     const rect = inputRef.current?.getBoundingClientRect();
@@ -185,10 +184,9 @@ export function GoogleFontAutocomplete({
         autoComplete="off"
         className="w-full rounded-md border border-border bg-surface-raised px-3 py-2 text-tools-body text-ink transition-opacity placeholder:text-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-wait disabled:opacity-60"
       />
-      <GoogleFontCategoryChips value={category} onChange={handleCategoryChange} />
-      {loadingList || applyingFont ? (
+      {applyingFont ? (
         <p className="mt-1 text-tools-meta text-muted" role="status">
-          {loadingList ? 'Cargando catálogo…' : 'Cargando…'}
+          Cargando…
         </p>
       ) : null}
       {expanded && menuPosition && typeof document !== 'undefined'
@@ -200,6 +198,9 @@ export function GoogleFontAutocomplete({
             suggestions={suggestions}
             activeIndex={activeIndex}
             position={menuPosition}
+            category={category}
+            onCategoryChange={handleCategoryChange}
+            loading={loadingList}
             onSelect={(font) => void selectFont(font)}
           />,
           document.body,

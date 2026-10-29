@@ -2,10 +2,14 @@
 
 import { forwardRef, useCallback, useRef, useState } from 'react';
 
-import type { GoogleFontOption } from '@lib/typography/googleFontsCatalog';
+import type {
+  GoogleFontCategoryFilter,
+  GoogleFontOption,
+} from '@lib/typography/googleFontsCatalog';
 
 import { loadGoogleFontFamily } from '@/lib/browser/customFonts';
 
+import { GoogleFontCategoryChips } from './GoogleFontCategoryChips';
 import { GoogleFontOptionRow } from './GoogleFontOptionRow';
 
 export type GoogleFontOptionListProps = {
@@ -14,6 +18,9 @@ export type GoogleFontOptionListProps = {
   suggestions: GoogleFontOption[];
   activeIndex: number;
   position: { left: number; top: number; width: number };
+  category: GoogleFontCategoryFilter;
+  onCategoryChange: (value: GoogleFontCategoryFilter) => void;
+  loading: boolean;
   onSelect: (font: GoogleFontOption) => void;
 };
 
@@ -22,10 +29,20 @@ export type GoogleFontOptionListProps = {
  * option only (never the whole catalog), guarding against duplicate loads.
  */
 export const GoogleFontOptionList = forwardRef<
-  HTMLUListElement,
+  HTMLDivElement,
   GoogleFontOptionListProps
 >(function GoogleFontOptionList(
-  { listboxId, label, suggestions, activeIndex, position, onSelect },
+  {
+    listboxId,
+    label,
+    suggestions,
+    activeIndex,
+    position,
+    category,
+    onCategoryChange,
+    loading,
+    onSelect,
+  },
   ref,
 ) {
   const [readyFamilies, setReadyFamilies] = useState<ReadonlySet<string>>(
@@ -53,30 +70,49 @@ export const GoogleFontOptionList = forwardRef<
   }, []);
 
   return (
-    <ul
+    <div
       ref={ref}
-      id={`${listboxId}-options`}
-      role="listbox"
-      aria-label={`Sugerencias para ${label}`}
-      className="z-dropdown max-h-60 overflow-y-auto rounded-md border border-border bg-bg p-1"
+      className="z-dropdown flex max-h-72 flex-col overflow-hidden rounded-md border border-border bg-bg shadow-lg"
       style={{
         position: 'fixed',
         left: position.left,
         top: position.top,
-        width: position.width,
+        width: 'max-content',
+        minWidth: position.width,
+        maxWidth: `calc(100vw - ${position.left + 12}px)`,
       }}
     >
-      {suggestions.map((font, index) => (
-        <GoogleFontOptionRow
-          key={font.family}
-          font={font}
-          optionId={`${listboxId}-option-${index}`}
-          active={activeIndex === index}
-          previewReady={readyFamilies.has(font.family)}
-          onRequestPreview={requestPreview}
-          onSelect={onSelect}
-        />
-      ))}
-    </ul>
+      <div className="border-b border-border/70 px-2 py-1.5">
+        <GoogleFontCategoryChips value={category} onChange={onCategoryChange} />
+      </div>
+      {loading ? (
+        <p className="px-2.5 py-3 text-chrome-caption text-muted" role="status">
+          Cargando catálogo…
+        </p>
+      ) : suggestions.length === 0 ? (
+        <p className="px-2.5 py-3 text-chrome-caption text-muted">
+          Sin coincidencias para este filtro.
+        </p>
+      ) : (
+        <ul
+          id={`${listboxId}-options`}
+          role="listbox"
+          aria-label={`Sugerencias para ${label}`}
+          className="min-h-0 flex-1 overflow-y-auto p-1"
+        >
+          {suggestions.map((font, index) => (
+            <GoogleFontOptionRow
+              key={font.family}
+              font={font}
+              optionId={`${listboxId}-option-${index}`}
+              active={activeIndex === index}
+              previewReady={readyFamilies.has(font.family)}
+              onRequestPreview={requestPreview}
+              onSelect={onSelect}
+            />
+          ))}
+        </ul>
+      )}
+    </div>
   );
 });

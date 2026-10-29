@@ -37,6 +37,7 @@ export type AppliedTypeZoneProps = {
   onBaseChange: (base: TypeScaleBase) => void;
   onRatioChange: (ratio: TypeScaleRatio) => void;
   onHeadingWeightChange: (weight: number) => void;
+  onBodyWeightChange: (weight: number) => void;
   onApplyGoogleFont: (family: string, role: CustomFontRole) => Promise<void>;
   overrides: SizeOverrides;
   spacing: TypographySpacing;
@@ -52,6 +53,7 @@ export type AppliedTypeZoneProps = {
 };
 
 const HEADING_WEIGHT_OPTIONS = [500, 600, 700] as const;
+const BODY_WEIGHT_OPTIONS = [300, 400, 500, 600] as const;
 
 export function AppliedTypeZone({
   applied,
@@ -64,6 +66,7 @@ export function AppliedTypeZone({
   onBaseChange,
   onRatioChange,
   onHeadingWeightChange,
+  onBodyWeightChange,
   onApplyGoogleFont,
   overrides,
   spacing,
@@ -86,9 +89,8 @@ export function AppliedTypeZone({
 
   return (
     <div
-      className={`sticky z-10 min-w-0 shrink-0 bg-bg pb-4 pt-1 ${
-        stickToPanelTop ? '-mt-[var(--chrome-space-3)] top-[-15px] xl:top-0' : 'top-0'
-      }`}
+      className={`sticky z-10 min-w-0 shrink-0 bg-bg pb-4 pt-1 ${stickToPanelTop ? '-mt-[var(--chrome-space-3)] top-[-15px] xl:top-0' : 'top-0'
+        }`}
     >
       <section
         aria-labelledby="applied-type-heading"
@@ -108,11 +110,10 @@ export function AppliedTypeZone({
             aria-expanded={configOpen}
             aria-label={configOpen ? 'Ocultar ajustes de escala' : 'Mostrar ajustes de escala'}
             title={configOpen ? 'Ocultar ajustes de escala' : 'Ajustes de escala y peso'}
-            className={`grid size-7 shrink-0 place-items-center rounded-md border transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
-              configOpen
-                ? 'border-primary/45 bg-primary/10 text-primary'
-                : 'border-border bg-bg text-muted hover:border-primary/45 hover:text-primary'
-            }`}
+            className={`grid size-7 shrink-0 place-items-center rounded-md border transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${configOpen
+              ? 'border-primary/45 bg-primary/10 text-primary'
+              : 'border-border bg-bg text-muted hover:border-primary/45 hover:text-primary'
+              }`}
           >
             <Settings size={13} strokeWidth={1.5} aria-hidden="true" />
           </button>
@@ -123,6 +124,8 @@ export function AppliedTypeZone({
             label="Titular"
             family={applied.headingFamily}
             weight={applied.headingWeight}
+            weightOptions={HEADING_WEIGHT_OPTIONS}
+            onWeightChange={onHeadingWeightChange}
             stack={familyStackFromApplied(applied.headingFamily, applied.headingClassification)}
             pinned={pinHeading}
             onTogglePin={onTogglePinHeading}
@@ -133,6 +136,8 @@ export function AppliedTypeZone({
             label="Cuerpo"
             family={applied.bodyFamily}
             weight={applied.bodyWeight}
+            weightOptions={BODY_WEIGHT_OPTIONS}
+            onWeightChange={onBodyWeightChange}
             stack={familyStackFromApplied(applied.bodyFamily, applied.bodyClassification)}
             pinned={pinBody}
             onTogglePin={onTogglePinBody}
@@ -178,20 +183,6 @@ export function AppliedTypeZone({
                   />
                 );
               })}
-            </SegmentedField>
-          </div>
-
-          <div className="mt-4">
-            <SegmentedField label="Peso titular">
-              {HEADING_WEIGHT_OPTIONS.map((value) => (
-                <SegmentButton
-                  key={value}
-                  active={applied.headingWeight === value}
-                  onClick={() => onHeadingWeightChange(value)}
-                  label={`${value}`}
-                  ariaLabel={`Peso titular ${value}`}
-                />
-              ))}
             </SegmentedField>
           </div>
 
