@@ -280,6 +280,8 @@ export type RolePaletteContextValue = {
   assignFromHexes: (hexes: string[]) => void;
   /** Current serializable workspace snapshot (for share links). */
   getShareSnapshot: () => WorkspaceSnapshot;
+  /** Restore a serializable snapshot at runtime (reopening a saved project). */
+  applySnapshot: (snapshot: WorkspaceSnapshot) => void;
 };
 
 type RolePaletteProviderProps = {
@@ -330,6 +332,32 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   // autosave effect never writes the fresh INITIAL_EDITABLE before (or over)
   // a restored snapshot.
   const hydratedRef = useRef(false);
+
+  // Restore every serializable field from a snapshot. Shared by the mount
+  // hydrate pass (localStorage / share hash) and the runtime reopen path used
+  // by saved projects, so both stay byte-identical.
+  const applySnapshot = useCallback((snapshot: WorkspaceSnapshot) => {
+    setPaletteRevision((revision) => revision + 1);
+    setEditHistory(
+      createHistory({
+        tokenOverridesByTheme: snapshot.tokenOverridesByTheme,
+        clearedSemanticTokens: snapshot.clearedSemanticTokens,
+        roleNames: snapshot.roleNames,
+        lockedRolesByTheme: snapshot.lockedRolesByTheme,
+        savedVibrancy: snapshot.savedVibrancy,
+        neutralStyle: snapshot.neutralStyle,
+        forcedStatusSources: snapshot.forcedStatusSources,
+        forcedStatusColors: snapshot.forcedStatusColors,
+      }),
+    );
+    setExtractedColors(snapshot.extractedColors);
+    setPaletteType(snapshot.paletteType);
+    setIllustrationSeed(snapshot.illustrationSeed);
+    setPreviewVibrancyState(snapshot.savedVibrancy);
+    setStatusColorsEnabled(!STATUS_COLORS_ON_DEMAND);
+    setTokenEditPreviewState(null);
+    setActiveRole(null);
+  }, []);
 
   useEffect(() => {
     // A valid `#p=...` share hash takes precedence over the stored snapshot so
@@ -993,6 +1021,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       clearRolePalette,
       assignFromHexes,
       getShareSnapshot,
+      applySnapshot,
     }),
     [
       rolePalette,
@@ -1043,6 +1072,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       clearRolePalette,
       assignFromHexes,
       getShareSnapshot,
+      applySnapshot,
     ],
   );
 

@@ -1,10 +1,12 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import { DESIGN_STYLES } from '@lib/styles/presets';
 
 import { ConfirmResetWorkspaceDialog } from '@/components/layout/ConfirmResetWorkspaceDialog';
+import { MyProjectsDrawer } from '@/components/projects/MyProjectsDrawer';
+import { useLocalProjects } from '@/components/projects/useLocalProjects';
 import { InspirationModal } from '@/components/color/InspirationModal';
 import { SelectColorsWorkspaceMain } from '@/components/color/SelectColorsWorkspaceMain';
 import { EmptyWorkspaceCard } from '@/components/color/EmptyWorkspaceCard';
@@ -35,6 +37,8 @@ export function SelectColorsWorkspace() {
 function SelectColorsWorkspaceContent() {
   const workspace = useSelectColorsWorkspaceController();
   const hasInspirationSource = workspace.catalogSource !== 'none';
+  const projects = useLocalProjects();
+  const [myProjectsOpen, setMyProjectsOpen] = useState(false);
   const { activeTab, setActiveTab } = useToolsTabState();
   const { selectView } = useCanvasView();
   const handleToolsTabChange = useCallback((tab: 'colors' | 'typography') => {
@@ -114,6 +118,7 @@ function SelectColorsWorkspaceContent() {
       <WorkspaceHeader
         canExport={workspace.canExport}
         onCraftieHome={workspace.requestCraftieHome}
+        onOpenMyProjects={() => setMyProjectsOpen(true)}
         onExportCss={workspace.handleExportCss}
         onExportTokensJson={workspace.handleExportTokensJson}
         onExportFigmaTokens={workspace.handleExportFigmaTokens}
@@ -135,6 +140,18 @@ function SelectColorsWorkspaceContent() {
         open={workspace.resetConfirmOpen}
         onCancel={workspace.cancelResetWorkspace}
         onConfirm={workspace.confirmResetWorkspace}
+      />
+
+      <MyProjectsDrawer
+        open={myProjectsOpen}
+        onClose={() => setMyProjectsOpen(false)}
+        projects={projects.projects}
+        loading={projects.loading}
+        canSave={workspace.selectionReady}
+        getSnapshot={workspace.getShareSnapshot}
+        onSave={projects.saveCurrent}
+        onOpenProject={workspace.handleOpenProject}
+        onDeleteProject={(project) => void projects.deleteProject(project.id)}
       />
     </>
   );

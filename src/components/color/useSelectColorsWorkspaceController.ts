@@ -52,6 +52,8 @@ import { extractPaletteColorsFromImage } from '@/lib/browser/imageExtractor';
 import { getImageFingerprint } from '@/lib/browser/imageFingerprint';
 import { readSelectedFontPairId, writeSelectedFontPairId } from '@/lib/browser/selectedFontPair';
 import { requestStudioToolFocus } from '@/lib/browser/studioToolFocus';
+import { clearShareHash } from '@/lib/browser/shareUrl';
+import type { LocalProject } from '@lib/studio/projectModel';
 
 export function useSelectColorsWorkspaceController() {
   const [generatedPalette, setGeneratedPalette] = useState<GeneratedPalette | null>(null);
@@ -68,6 +70,7 @@ export function useSelectColorsWorkspaceController() {
     assignFromHexes,
     assignFromExtracted,
     getShareSnapshot,
+    applySnapshot,
   } = useRolePalette();
   const [catalogSource, setCatalogSource] = useState<'none' | 'curated' | 'image'>('none');
   const [selectedStyleId, setSelectedStyleId] = useState<string | null>(null);
@@ -363,6 +366,23 @@ export function useSelectColorsWorkspaceController() {
     resetWorkspace();
   }, [resetWorkspace]);
 
+  const handleOpenProject = useCallback(
+    (project: LocalProject) => {
+      // A reopened project owns the workspace, so drop any share hash so the
+      // mount-hydrate precedence never resurrects an older linked palette.
+      clearShareHash();
+      applySnapshot(project.snapshot);
+      // Mark the workspace as sourced so the editor (not the empty state)
+      // renders; the snapshot already carries the extracted colors.
+      setCatalogSource('curated');
+      setSelectedStyleId(null);
+      setGeneratedPalette(null);
+      setError(null);
+      setStatusMessage(`Proyecto «${project.name}» abierto.`);
+    },
+    [applySnapshot],
+  );
+
   function handleFlowStepFocus(stepId: StudioFlowStepId) {
     if (stepId === 'review') {
       return;
@@ -572,6 +592,8 @@ export function useSelectColorsWorkspaceController() {
     handleExportFigmaTokens,
     handleExportTokensJson,
     handleCopyShareLink,
+    handleOpenProject,
+    getShareSnapshot,
     handleFlowStepFocus,
     handleGenerate,
     handleImageExtractionError,
