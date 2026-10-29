@@ -4,7 +4,7 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState, type Keyboard
 import { createPortal } from 'react-dom';
 
 import {
-  filterGoogleFontsByPrefix,
+  searchGoogleFonts,
   type GoogleFontOption,
 } from '@lib/typography/googleFontsCatalog';
 import type { CustomFontRole } from '@lib/typography/customFonts';
@@ -39,7 +39,7 @@ export function GoogleFontAutocomplete({
   const [hoveredFamily, setHoveredFamily] = useState<{ family: string; left: number; top: number } | null>(null);
 
   const suggestions = useMemo(
-    () => (fonts ? filterGoogleFontsByPrefix(fonts, query) : []),
+    () => (fonts ? searchGoogleFonts(fonts, query) : []),
     [fonts, query],
   );
   const expanded = focused && suggestions.length > 0 && !applyingFont;
@@ -182,62 +182,61 @@ export function GoogleFontAutocomplete({
       ) : null}
       {expanded && menuPosition && typeof document !== 'undefined'
         ? createPortal(
-        <ul
-          ref={menuRef}
-          id={`${listboxId}-options`}
-          role="listbox"
-          aria-label={`Sugerencias para ${label}`}
-          className="z-dropdown max-h-60 overflow-y-auto rounded-md border border-border bg-bg p-1"
-          style={{
-            position: 'fixed',
-            left: menuPosition.left,
-            top: menuPosition.top,
-            width: menuPosition.width,
-          }}
-        >
-          {suggestions.map((font, index) => (
-            <li
-              key={font.family}
-              id={`${listboxId}-option-${index}`}
-              role="option"
-              aria-selected={activeIndex === index}
-              onMouseDown={(event) => event.preventDefault()}
-              onMouseEnter={(event) => {
-                const rect = event.currentTarget.getBoundingClientRect();
-                setHoveredFamily({
-                  family: font.family,
-                  left: Math.min(rect.right + 8, window.innerWidth - 248),
-                  top: rect.top,
-                });
-              }}
-              onMouseLeave={() => setHoveredFamily(null)}
-              onClick={() => void selectFont(font)}
-              className={`flex cursor-pointer items-center justify-between gap-3 rounded px-2.5 py-2 text-tools-body text-ink ${
-                activeIndex === index ? 'bg-surface-raised' : 'hover:bg-surface-raised'
-              }`}
-            >
-              <span className="truncate" title={font.family}>
-                {font.family}
-              </span>
-              <span className="shrink-0 text-tools-meta text-muted">{font.category}</span>
-            </li>
-          ))}
-        </ul>
+          <ul
+            ref={menuRef}
+            id={`${listboxId}-options`}
+            role="listbox"
+            aria-label={`Sugerencias para ${label}`}
+            className="z-dropdown max-h-60 overflow-y-auto rounded-md border border-border bg-bg p-1"
+            style={{
+              position: 'fixed',
+              left: menuPosition.left,
+              top: menuPosition.top,
+              width: menuPosition.width,
+            }}
+          >
+            {suggestions.map((font, index) => (
+              <li
+                key={font.family}
+                id={`${listboxId}-option-${index}`}
+                role="option"
+                aria-selected={activeIndex === index}
+                onMouseDown={(event) => event.preventDefault()}
+                onMouseEnter={(event) => {
+                  const rect = event.currentTarget.getBoundingClientRect();
+                  setHoveredFamily({
+                    family: font.family,
+                    left: Math.min(rect.right + 8, window.innerWidth - 248),
+                    top: rect.top,
+                  });
+                }}
+                onMouseLeave={() => setHoveredFamily(null)}
+                onClick={() => void selectFont(font)}
+                className={`flex cursor-pointer items-center justify-between gap-3 rounded px-2.5 py-2 text-tools-body text-ink ${activeIndex === index ? 'bg-surface-raised' : 'hover:bg-surface-raised'
+                  }`}
+              >
+                <span className="truncate" title={font.family}>
+                  {font.family}
+                </span>
+                <span className="shrink-0 text-tools-meta text-muted">{font.category}</span>
+              </li>
+            ))}
+          </ul>
           ,
           document.body,
         )
         : null}
       {hoveredFamily && typeof document !== 'undefined'
         ? createPortal(
-            <span
-              role="tooltip"
-              className="z-modal-backdrop pointer-events-none fixed max-w-60 rounded-md border border-border bg-ink px-2 py-1 text-tools-meta text-bg"
-              style={{ left: hoveredFamily.left, top: hoveredFamily.top }}
-            >
-              {hoveredFamily.family}
-            </span>,
-            document.body,
-          )
+          <span
+            role="tooltip"
+            className="z-modal-backdrop pointer-events-none fixed max-w-60 rounded-md border border-border bg-ink px-2 py-1 text-tools-meta text-bg"
+            style={{ left: hoveredFamily.left, top: hoveredFamily.top }}
+          >
+            {hoveredFamily.family}
+          </span>,
+          document.body,
+        )
         : null}
       {error ? (
         <p id={`${listboxId}-error`} className="mt-1 text-tools-meta text-fail" role="alert">
