@@ -3,6 +3,9 @@
 import { CaseStudyIntro } from '@/components/layout/CaseStudyIntro';
 import { ImageUploader } from '@/components/color-engine/ImageUploader';
 import { Button } from '@/components/ui/Button';
+import { RecentProjects } from '@/components/color/RecentProjects';
+import { StartFromColorForm } from '@/components/color/StartFromColorForm';
+import type { LocalProject } from '@lib/studio/projectModel';
 
 export type EmptyWorkspaceCardProps = {
   fileName: string | null;
@@ -12,6 +15,9 @@ export type EmptyWorkspaceCardProps = {
   onImageFileSelected: (file: File) => void;
   onImageRegenerate: () => void;
   onOpenInspiration: () => void;
+  onStartFromHex: (hex: string) => string | null;
+  recentProjects: LocalProject[];
+  onOpenProject: (project: LocalProject) => void;
 };
 
 export function EmptyWorkspaceCard({
@@ -22,6 +28,9 @@ export function EmptyWorkspaceCard({
   onImageFileSelected,
   onImageRegenerate,
   onOpenInspiration,
+  onStartFromHex,
+  recentProjects,
+  onOpenProject,
 }: EmptyWorkspaceCardProps) {
   return (
     <section
@@ -40,7 +49,11 @@ export function EmptyWorkspaceCard({
           draggable={false}
         />
         <div className="mt-6 w-full lg:mt-8">
-          <CaseStudyIntro />
+          {recentProjects.length > 0 ? (
+            <RecentProjects projects={recentProjects} onOpen={onOpenProject} />
+          ) : (
+            <CaseStudyIntro />
+          )}
         </div>
       </div>
 
@@ -53,7 +66,7 @@ export function EmptyWorkspaceCard({
           Empieza por aquí
         </h2>
         <p className="mt-2 text-pretty text-chrome-body leading-relaxed text-muted">
-          Elige un estilo que te guste o sube una imagen. Craftie crea tu paleta al instante.
+          Elige un estilo, sube una imagen o parte de un color. Craftie crea tu paleta al instante.
         </p>
 
         <Button
@@ -79,6 +92,10 @@ export function EmptyWorkspaceCard({
             showDropzone={!hasPreview}
             showChangeImageControl={false}
           />
+        </div>
+
+        <div className="mt-6 border-t border-border pt-5">
+          <StartFromColorForm onStart={onStartFromHex} />
         </div>
 
         <p className="mt-5 text-chrome-caption leading-relaxed text-muted">

@@ -2,12 +2,14 @@
 
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 
-import { ChevronDownIcon, DownloadIcon, ImageIcon, LinkIcon } from '@/components/layout/ExportMenuIcons';
+import { ChevronDownIcon, DownloadIcon } from '@/components/layout/ExportMenuIcons';
+import { ExportMenuItem } from '@/components/layout/ExportMenuItem';
 
 export type ExportMenuProps = {
   canExport: boolean;
   exportBlockedReason?: string | null;
   onExportCss: () => void;
+  onCopyCss: () => void;
   onExportTokensJson: () => void;
   onExportFigmaTokens: () => void;
   onExportDesignMd: () => void;
@@ -21,6 +23,11 @@ const EXPORT_OPTIONS = [
     id: 'share-link',
     label: 'Copiar enlace',
     description: 'Comparte esta paleta con una URL que la restaura al abrirla.',
+  },
+  {
+    id: 'copy-css',
+    label: 'Copiar CSS',
+    description: 'Copia las variables CSS al portapapeles, sin descargar un archivo.',
   },
   {
     id: 'css',
@@ -72,6 +79,7 @@ export function ExportMenu({
   canExport,
   exportBlockedReason,
   onExportCss,
+  onCopyCss,
   onExportTokensJson,
   onExportFigmaTokens,
   onExportDesignMd,
@@ -150,6 +158,9 @@ export function ExportMenu({
       case 'share-link':
         onCopyShareLink();
         return;
+      case 'copy-css':
+        onCopyCss();
+        return;
       case 'css':
         onExportCss();
         return;
@@ -209,28 +220,13 @@ export function ExportMenu({
         >
           <ul className="space-y-0.5">
             {EXPORT_OPTIONS.map((option) => (
-              <li key={option.id} role="none">
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={() => handleSelect(option.id)}
-                  className="flex w-full items-start gap-3 rounded-lg px-2.5 py-2 text-left text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-                >
-                  {option.id === 'share-link' ? (
-                    <LinkIcon />
-                  ) : option.id === 'image' ? (
-                    <ImageIcon />
-                  ) : (
-                    <DownloadIcon />
-                  )}
-                  <span>
-                    <span className="block text-chrome-label font-semibold">{option.label}</span>
-                    <span className="mt-0.5 block text-chrome-caption leading-snug text-muted">
-                      {option.description}
-                    </span>
-                  </span>
-                </button>
-              </li>
+              <ExportMenuItem
+                key={option.id}
+                id={option.id}
+                label={option.label}
+                description={option.description}
+                onSelect={() => handleSelect(option.id)}
+              />
             ))}
           </ul>
         </div>

@@ -19,7 +19,6 @@ import { exportPaletteImage } from '@/lib/browser/exportPaletteImage';
 import {
   buildShareUrl,
   copyTextToClipboard,
-  writeShareHash,
 } from '@/lib/browser/shareUrl';
 
 export function useWorkspaceExports({
@@ -85,6 +84,18 @@ export function useWorkspaceExports({
   function handleExportCss() {
     if (!requireExportable()) return;
     download('tokens.css', toCss(tokenSet), 'text/css;charset=utf-8', 'tokens.css descargado.');
+  }
+
+  async function handleCopyCss() {
+    if (!requireExportable()) return;
+    const copied = await copyTextToClipboard(toCss(tokenSet));
+    if (!copied) {
+      setError('No se pudo copiar el CSS. Descárgalo desde Exportar.');
+      setStatusMessage(null);
+      return;
+    }
+    setError(null);
+    setStatusMessage('CSS copiado al portapapeles.');
   }
 
   function handleExportTokensJson() {
@@ -156,7 +167,6 @@ export function useWorkspaceExports({
 
   async function handleCopyShareLink() {
     const encoded = encodeShareSnapshot(getShareSnapshot());
-    writeShareHash(encoded);
     const url = buildShareUrl(encoded);
 
     if (url === null) {
@@ -181,6 +191,7 @@ export function useWorkspaceExports({
     exportBlockedReason,
     handleExportBrandKit,
     handleExportCss,
+    handleCopyCss,
     handleExportDesignMd,
     handleExportFigmaTokens,
     handleExportTokensJson,

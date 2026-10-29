@@ -5,6 +5,8 @@ import { getLayoutMode, layoutModeTokenEntries, type LayoutModeId, type LayoutSl
 import { ANALYTICS_VISUAL_SLOTS } from './AnalyticsLayoutPreview';
 import { DASHBOARD_VISUAL_SLOTS } from './DashboardLayoutPreview';
 import { LANDING_VISUAL_SLOTS } from './LandingLayoutPreview';
+import { EDITORIAL_VISUAL_SLOTS } from './EditorialLayoutPreview';
+import { STORE_VISUAL_SLOTS } from './StoreLayoutPreview';
 import { MEDIA_VISUAL_SLOTS } from './MediaLayoutPreview';
 import { MOBILE_VISUAL_SLOTS } from './MobileLayoutPreview';
 
@@ -14,6 +16,8 @@ const MODE_VISUAL_SLOTS: Record<LayoutModeId, readonly LayoutSlot[]> = {
   media: MEDIA_VISUAL_SLOTS,
   analytics: ANALYTICS_VISUAL_SLOTS,
   mobile: MOBILE_VISUAL_SLOTS,
+  editorial: EDITORIAL_VISUAL_SLOTS,
+  store: STORE_VISUAL_SLOTS,
 };
 
 describe('layout preview slot wiring', () => {

@@ -9,6 +9,9 @@ export type CanvasViewId =
   | 'landing'
   | 'player'
   | 'analytics'
+  | 'mobile'
+  | 'editorial'
+  | 'store'
   | 'illustration';
 
 export type CanvasViewMeta = {
@@ -27,6 +30,9 @@ export const CANVAS_VIEWS: readonly CanvasViewMeta[] = [
   { id: 'landing', group: 'layout', name: 'Landing', description: 'Página de aterrizaje' },
   { id: 'player', group: 'layout', name: 'Reproductor', description: 'Player de música' },
   { id: 'analytics', group: 'layout', name: 'Analytics', description: 'Dashboard dark mode' },
+  { id: 'mobile', group: 'layout', name: 'App móvil', description: 'Pantalla de teléfono' },
+  { id: 'editorial', group: 'layout', name: 'Editorial', description: 'Artículo y blog' },
+  { id: 'store', group: 'layout', name: 'Tienda', description: 'Catálogo de producto' },
   { id: 'illustration', group: 'preview', name: 'Ilustración', description: 'Composición generativa con la paleta' },
 ];
 

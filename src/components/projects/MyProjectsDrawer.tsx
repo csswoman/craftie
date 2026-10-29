@@ -5,9 +5,9 @@ import { useRef, useState } from 'react';
 import { X } from 'lucide-react';
 
 import type { LocalProject } from '@lib/studio/projectModel';
-import type { WorkspaceSnapshot } from '@lib/studio/workspaceSnapshot';
 
 import { ProjectListItem } from '@/components/projects/ProjectListItem';
+import type { SaveResult } from '@/components/projects/useLocalProjects';
 import { useDialogAccessibility } from '@/lib/browser/useDialogAccessibility';
 
 export type MyProjectsDrawerProps = {
@@ -16,11 +16,18 @@ export type MyProjectsDrawerProps = {
   projects: LocalProject[];
   loading: boolean;
   canSave: boolean;
-  getSnapshot: () => WorkspaceSnapshot;
-  onSave: (name: string, snapshot: WorkspaceSnapshot) => Promise<{ ok: true } | { ok: false; error: string }>;
+  currentProject: LocalProject | null;
+  onSaveAsNew: (name: string) => Promise<SaveResult>;
+  onRename: (id: string, name: string) => Promise<SaveResult>;
+  onDuplicate: (id: string) => Promise<SaveResult>;
   onOpenProject: (project: LocalProject) => void;
   onDeleteProject: (project: LocalProject) => void;
 };
+
+const INPUT_CLASS =
+  'min-w-0 flex-1 rounded-lg border border-border bg-bg px-3 py-2 text-chrome-body text-ink placeholder:text-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:opacity-60';
+const PRIMARY_BUTTON =
+  'shrink-0 rounded-lg bg-primary px-4 py-2 text-chrome-label font-semibold text-white transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-50';
 
 export function MyProjectsDrawer({
   open,
@@ -28,14 +35,17 @@ export function MyProjectsDrawer({
   projects,
   loading,
   canSave,
-  getSnapshot,
-  onSave,
+  currentProject,
+  onSaveAsNew,
+  onRename,
+  onDuplicate,
   onOpenProject,
   onDeleteProject,
 }: MyProjectsDrawerProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const [name, setName] = useState('');
-  const [saving, setSaving] = useState(false);
+  const [renameDraft, setRenameDraft] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
   useDialogAccessibility({
@@ -50,20 +60,21 @@ export function MyProjectsDrawer({
     return null;
   }
 
-  async function handleSave() {
-    if (saving) return;
-    setSaving(true);
+  async function run(action: () => Promise<SaveResult>, success: string, onOk?: () => void) {
+    if (busy) return;
+    setBusy(true);
     setFeedback(null);
-    const result = await onSave(name, getSnapshot());
-    setSaving(false);
-
+    const result = await action();
+    setBusy(false);
     if (result.ok) {
-      setName('');
-      setFeedback('Proyecto guardado.');
+      onOk?.();
+      setFeedback(success);
     } else {
       setFeedback(result.error);
     }
   }
+
+  const renameValue = renameDraft ?? currentProject?.name ?? '';
 
   return (
     <div className="fixed inset-0 z-dropdown flex justify-end overscroll-contain bg-ink/20">
@@ -81,8 +92,8 @@ export function MyProjectsDrawer({
               Mis proyectos
             </h2>
             <p className="prose-measure mt-1 text-chrome-label leading-relaxed text-muted">
-              Guarda paletas con nombre en este navegador y vuelve a abrirlas
-              cuando quieras. No se envía nada a ningún servidor.
+              Un proyecto se guarda solo mientras trabajas. Todo queda en este
+              navegador; no se envía nada a ningún servidor.
             </p>
           </div>
           <button
@@ -96,47 +107,77 @@ export function MyProjectsDrawer({
           </button>
         </header>
 
-        <div className="shrink-0 border-b border-border/40 px-4 py-4 sm:px-5">
-          <label
-            htmlFor="project-name"
-            className="block text-chrome-label font-medium text-ink"
-          >
-            Guardar paleta actual
-          </label>
-          <div className="mt-2 flex gap-2">
-            <input
-              id="project-name"
-              data-project-name-input
-              type="text"
-              value={name}
-              maxLength={80}
-              disabled={!canSave}
-              placeholder="Nombre del proyecto"
-              onChange={(event) => setName(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  event.preventDefault();
-                  void handleSave();
-                }
-              }}
-              className="min-w-0 flex-1 rounded-lg border border-border bg-bg px-3 py-2 text-chrome-body text-ink placeholder:text-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:opacity-60"
-            />
-            <button
-              type="button"
-              onClick={() => void handleSave()}
-              disabled={!canSave || saving || name.trim().length === 0}
-              className="shrink-0 rounded-lg bg-primary px-4 py-2 text-chrome-label font-semibold text-white transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {saving ? 'Guardando…' : 'Guardar'}
-            </button>
-          </div>
-          {!canSave ? (
-            <p className="mt-2 text-chrome-caption text-muted">
-              Genera una paleta primero para poder guardarla.
-            </p>
+        <div className="shrink-0 space-y-4 border-b border-border/40 px-4 py-4 sm:px-5">
+          {currentProject ? (
+            <div>
+              <label htmlFor="project-rename" className="block text-chrome-label font-medium text-ink">
+                Proyecto abierto
+              </label>
+              <div className="mt-2 flex gap-2">
+                <input
+                  id="project-rename"
+                  type="text"
+                  value={renameValue}
+                  maxLength={80}
+                  onChange={(event) => setRenameDraft(event.target.value)}
+                  className={INPUT_CLASS}
+                />
+                <button
+                  type="button"
+                  className={PRIMARY_BUTTON}
+                  disabled={busy || renameValue.trim().length === 0 || renameValue.trim() === currentProject.name}
+                  onClick={() =>
+                    void run(() => onRename(currentProject.id, renameValue), 'Nombre actualizado.', () =>
+                      setRenameDraft(null),
+                    )
+                  }
+                >
+                  Renombrar
+                </button>
+              </div>
+            </div>
           ) : null}
+
+          <div>
+            <label htmlFor="project-name" className="block text-chrome-label font-medium text-ink">
+              {currentProject ? 'Guardar como proyecto nuevo' : 'Guardar paleta actual como proyecto'}
+            </label>
+            <div className="mt-2 flex gap-2">
+              <input
+                id="project-name"
+                data-project-name-input
+                type="text"
+                value={name}
+                maxLength={80}
+                disabled={!canSave}
+                placeholder="Nombre del proyecto"
+                onChange={(event) => setName(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    void run(() => onSaveAsNew(name), 'Proyecto guardado.', () => setName(''));
+                  }
+                }}
+                className={INPUT_CLASS}
+              />
+              <button
+                type="button"
+                onClick={() => void run(() => onSaveAsNew(name), 'Proyecto guardado.', () => setName(''))}
+                disabled={!canSave || busy || name.trim().length === 0}
+                className={PRIMARY_BUTTON}
+              >
+                {busy ? 'Guardando…' : 'Guardar'}
+              </button>
+            </div>
+            {!canSave ? (
+              <p className="mt-2 text-chrome-caption text-muted">
+                Elige una paleta primero para poder guardarla.
+              </p>
+            ) : null}
+          </div>
+
           {feedback ? (
-            <p role="status" className="mt-2 text-chrome-caption text-muted">
+            <p role="status" className="text-chrome-caption text-muted">
               {feedback}
             </p>
           ) : null}
@@ -156,10 +197,12 @@ export function MyProjectsDrawer({
                 <ProjectListItem
                   key={project.id}
                   project={project}
+                  isCurrent={project.id === currentProject?.id}
                   onOpen={(selected) => {
                     onOpenProject(selected);
                     onClose();
                   }}
+                  onDuplicate={(selected) => void run(() => onDuplicate(selected.id), 'Proyecto duplicado.')}
                   onDelete={onDeleteProject}
                 />
               ))}

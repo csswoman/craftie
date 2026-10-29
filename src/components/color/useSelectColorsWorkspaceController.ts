@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { GeneratedPalette } from '@lib/color/formulas';
+import { normalizeHex } from '@lib/color/normalizeHex';
 import { buildImagePalette } from '@lib/color/imagePalette';
 import type { PaletteType } from '@lib/color/paletteClassification';
 import { validateImageFile } from '@lib/color/imageExtractor';
@@ -38,6 +39,7 @@ import { useWorkspaceExports } from '@/components/color/useWorkspaceExports';
 import { useWorkspaceInspiration } from '@/components/color/useWorkspaceInspiration';
 import { useWorkspacePaletteActions } from '@/components/color/useWorkspacePaletteActions';
 import { useWorkspaceShortcuts } from '@/components/color/useWorkspaceShortcuts';
+import { useCanvasView } from '@/context/CanvasViewContext';
 import { useRolePalette } from '@/context/RolePaletteContext';
 import {
   loadGoogleFontFamily,
@@ -77,7 +79,10 @@ export function useSelectColorsWorkspaceController() {
     assignFromExtracted,
     getShareSnapshot,
     applySnapshot,
+    setSnapshotExtras,
+    restoredExtras,
   } = useRolePalette();
+  const { activeView, selectView } = useCanvasView();
   const [catalogSource, setCatalogSource] = useState<'none' | 'curated' | 'image'>('none');
   const [onboardingHintVisible, setOnboardingHintVisible] = useState(false);
   const [selectedStyleId, setSelectedStyleId] = useState<string | null>(null);
@@ -131,6 +136,36 @@ export function useSelectColorsWorkspaceController() {
       setTypeUi((current) => ({ ...current, customFonts: available }));
     });
   }, []);
+
+  // Publish confirmed typography and the active canvas view so they travel with
+  // autosave, share links and saved projects. Hover previews and pins are
+  // transient and never published.
+  useEffect(() => {
+    setSnapshotExtras({
+      typography: { applied: typeUi.applied, base: typeUi.base, ratio: typeUi.ratio },
+      canvasView: activeView,
+    });
+  }, [typeUi.applied, typeUi.base, typeUi.ratio, activeView, restoredExtras?.token, setSnapshotExtras]);
+
+  // Re-apply typography / canvas view whenever the context restores a snapshot
+  // (mount hydrate, share link or reopened project).
+  useEffect(() => {
+    if (!restoredExtras) return;
+    const { typography, canvasView } = restoredExtras.extras;
+    // Snapshots saved before typography was persisted fall back to the defaults
+    // so a reopened project never inherits the previous project's fonts.
+    const defaults = createInitialTypeUiState();
+    const resolved = typography ?? defaults;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setTypeUi((current) => ({
+      ...current,
+      applied: resolved.applied,
+      base: resolved.base,
+      ratio: resolved.ratio,
+      hovered: null,
+    }));
+    if (canvasView) selectView(canvasView);
+  }, [restoredExtras, selectView]);
 
   useEffect(() => {
     return () => {
@@ -565,6 +600,7 @@ export function useSelectColorsWorkspaceController() {
     handleImagePaletteExtracted,
     handleImageRegenerateStart,
     handleSelectStyle,
+    handleSelectCuratedHexes,
   } = useWorkspaceInspiration({
     assignFromHexes,
     assignFromExtracted,
@@ -578,6 +614,17 @@ export function useSelectColorsWorkspaceController() {
     setPaletteCatalog,
     setSelectedStyleId,
   });
+
+  function handleStartFromHex(input: string): string | null {
+    let hex: string;
+    try {
+      hex = normalizeHex(input);
+    } catch {
+      return 'Escribe un color válido, por ejemplo #1F6F54.';
+    }
+    handleSelectCuratedHexes([hex]);
+    return null;
+  }
 
   const { handleAddColorByHex, handleRenameColor, handleReplacePreviewColor } =
     useWorkspacePaletteActions({
@@ -598,6 +645,7 @@ export function useSelectColorsWorkspaceController() {
     exportBlockedReason,
     handleExportBrandKit,
     handleExportCss,
+    handleCopyCss,
     handleExportDesignMd,
     handleExportFigmaTokens,
     handleExportTokensJson,
@@ -613,8 +661,14 @@ export function useSelectColorsWorkspaceController() {
     setStatusMessage,
   });
 
+  // A palette restored from autosave, a share link or a project has no inspiration
+  // source of its own; treat it as sourced so the editor renders instead of the
+  // empty state.
+  const effectiveCatalogSource: typeof catalogSource =
+    catalogSource === 'none' && rolePalette !== null ? 'curated' : catalogSource;
+
   return {
-    catalogSource,
+    catalogSource: effectiveCatalogSource,
     onboardingHintVisible,
     dismissOnboardingHint,
     canExport,
@@ -632,11 +686,13 @@ export function useSelectColorsWorkspaceController() {
     handleAddColorByHex,
     handleExportBrandKit,
     handleExportCss,
+    handleCopyCss,
     handleExportDesignMd,
     handleExportFigmaTokens,
     handleExportTokensJson,
     handleExportImage,
     handleCopyShareLink,
+    handleStartFromHex,
     handleOpenProject,
     getShareSnapshot,
     handleFlowStepFocus,

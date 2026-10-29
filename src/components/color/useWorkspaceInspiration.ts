@@ -50,6 +50,10 @@ export function useWorkspaceInspiration({
     setInspirationModalOpen(false);
   }
 
+  function handleSelectCuratedHexes(hexes: string[]) {
+    applyCuratedInspiration(hexes, null);
+  }
+
   function handleImageExtractionStart() {
     setIsImageExtracting(true);
     setIsImageRegenerating(false);
@@ -92,5 +96,6 @@ export function useWorkspaceInspiration({
     handleImagePaletteExtracted,
     handleImageRegenerateStart,
     handleSelectStyle,
+    handleSelectCuratedHexes,
   };
 }

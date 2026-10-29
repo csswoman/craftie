@@ -92,7 +92,13 @@ import {
   readWorkspaceSnapshot,
   writeWorkspaceSnapshot,
 } from '@/lib/browser/workspaceStorage';
-import { readShareHash } from '@/lib/browser/shareUrl';
+import { clearShareHash, readShareHash } from '@/lib/browser/shareUrl';
+import {
+  extrasFromSnapshot,
+  sameExtras,
+  type RestoredSnapshotExtras,
+  type SnapshotExtras,
+} from '@/context/snapshotExtras';
 
 function stripPairedOnTokens(
   overrides: SemanticTokenOverrides,
@@ -282,6 +288,13 @@ export type RolePaletteContextValue = {
   getShareSnapshot: () => WorkspaceSnapshot;
   /** Restore a serializable snapshot at runtime (reopening a saved project). */
   applySnapshot: (snapshot: WorkspaceSnapshot) => void;
+  /**
+   * Publish typography / canvas view so they travel with autosave, share links
+   * and saved projects. Written by the workspace controller.
+   */
+  setSnapshotExtras: (extras: SnapshotExtras) => void;
+  /** Set whenever a snapshot is restored; the controller re-applies it to its own state. */
+  restoredExtras: RestoredSnapshotExtras | null;
 };
 
 type RolePaletteProviderProps = {
@@ -332,6 +345,18 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   // autosave effect never writes the fresh INITIAL_EDITABLE before (or over)
   // a restored snapshot.
   const hydratedRef = useRef(false);
+  const [snapshotExtras, setSnapshotExtrasState] = useState<SnapshotExtras>({});
+  const setSnapshotExtras = useCallback((next: SnapshotExtras) => {
+    setSnapshotExtrasState((current) => (sameExtras(current, next) ? current : next));
+  }, []);
+  const [restoredExtras, setRestoredExtras] = useState<RestoredSnapshotExtras | null>(null);
+  const restoreCounterRef = useRef(0);
+  const restoreExtras = useCallback((snapshot: WorkspaceSnapshot) => {
+    const extras = extrasFromSnapshot(snapshot);
+    restoreCounterRef.current += 1;
+    setSnapshotExtrasState(extras);
+    setRestoredExtras({ extras, token: restoreCounterRef.current });
+  }, []);
 
   // Restore every serializable field from a snapshot. Shared by the mount
   // hydrate pass (localStorage / share hash) and the runtime reopen path used
@@ -357,7 +382,8 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
     setStatusColorsEnabled(!STATUS_COLORS_ON_DEMAND);
     setTokenEditPreviewState(null);
     setActiveRole(null);
-  }, []);
+    restoreExtras(snapshot);
+  }, [restoreExtras]);
 
   useEffect(() => {
     // A valid `#p=...` share hash takes precedence over the stored snapshot so
@@ -385,9 +411,13 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       setPaletteType(snapshot.paletteType);
       setIllustrationSeed(snapshot.illustrationSeed);
       setPreviewVibrancyState(snapshot.savedVibrancy);
+      restoreExtras(snapshot);
     }
+    // The link has been consumed: drop it so later reloads use the autosaved
+    // state instead of resurrecting this older snapshot.
+    if (shareHash) clearShareHash();
     hydratedRef.current = true;
-  }, []);
+  }, [restoreExtras]);
 
   // Debounced autosave: whenever a serializable field changes, persist the
   // snapshot ~500ms later. Skipped until the initial hydrate pass completes.
@@ -408,6 +438,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
           extractedColors,
           paletteType,
           illustrationSeed,
+          ...snapshotExtras,
         }),
       );
     }, 500);
@@ -425,6 +456,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
     extractedColors,
     paletteType,
     illustrationSeed,
+    snapshotExtras,
   ]);
 
   // Current serializable snapshot, for share links and any other consumer that
@@ -442,8 +474,10 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       extractedColors,
       paletteType,
       illustrationSeed,
+      ...snapshotExtras,
     }),
     [
+      snapshotExtras,
       tokenOverridesByTheme,
       clearedSemanticTokens,
       roleNames,
@@ -1022,6 +1056,8 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       assignFromHexes,
       getShareSnapshot,
       applySnapshot,
+      setSnapshotExtras,
+      restoredExtras,
     }),
     [
       rolePalette,
@@ -1073,6 +1109,8 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       assignFromHexes,
       getShareSnapshot,
       applySnapshot,
+      setSnapshotExtras,
+      restoredExtras,
     ],
   );
 

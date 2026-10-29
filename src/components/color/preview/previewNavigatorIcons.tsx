@@ -6,6 +6,8 @@ const UI_MODE_ICONS: Record<UiLayoutModeId, string> = {
   media: 'M6 4h8v12H6V4zm2 5h4v2H8V9z',
   analytics: 'M4 14h2V9H4v5zm4 0h2V6H8v8zm4 0h2V4h-2v10zm4 0h2V11h-2v3',
   mobile: 'M7 3h6v14H7V3zm2 12h2',
+  editorial: 'M4 4h12M4 8h7M4 12h12M4 16h9',
+  store: 'M4 7h12l-1 9H5L4 7zm3-2a3 3 0 0 1 6 0',
 };
 
 const ILLUSTRATION_ICON = 'M4 4h5v7H4V4zm7 0h5v4h-5V4zM4 13h7v3H4v-3zm9 0h3v3h-3v-3z';

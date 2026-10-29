@@ -8,6 +8,25 @@ import type {
 } from '../color/semanticTokens';
 import type { ThemeId } from '../color/themePalette';
 import type { ForcedStatusColor, UiStatusRole } from '../color/uiStatusColors';
+import type { FontClassification } from '../typography/fontPairTypes';
+import {
+  TYPE_SCALE_BASES,
+  TYPE_SCALE_RATIOS,
+  type TypeScaleBase,
+  type TypeScaleRatio,
+} from '../typography/typeScale';
+import type { AppliedTypography } from '../typography/typeState';
+import { CANVAS_VIEWS, type CanvasViewId } from '../color/canvasViews';
+
+/**
+ * Confirmed typography decisions. Hover previews and pins are transient and
+ * intentionally excluded.
+ */
+export type SnapshotTypography = {
+  applied: AppliedTypography;
+  base: TypeScaleBase;
+  ratio: TypeScaleRatio;
+};
 
 /**
  * Serializable view of the Select-Colors workspace. Mirrors the sub-state the
@@ -28,6 +47,10 @@ export type WorkspaceSnapshot = {
   extractedColors: ExtractedColor[];
   paletteType: PaletteType | undefined;
   illustrationSeed: number;
+  /** Optional so snapshots written before typography was persisted still load. */
+  typography?: SnapshotTypography;
+  /** Active canvas view (e.g. a web layout), optional for the same reason. */
+  canvasView?: CanvasViewId;
 };
 
 const SNAPSHOT_VERSION = 1 as const;
@@ -105,6 +128,57 @@ function isPaletteType(value: unknown): value is PaletteType {
   );
 }
 
+const FONT_CLASSIFICATIONS: readonly FontClassification[] = [
+  'serif',
+  'sans-serif',
+  'display',
+  'monospace',
+];
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0 && value.length <= 120;
+}
+
+function isWeight(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 100 && value <= 900;
+}
+
+function parseTypography(value: unknown): SnapshotTypography | undefined {
+  if (!isObject(value) || !isObject(value.applied)) return undefined;
+  const applied = value.applied;
+  if (
+    !isNonEmptyString(applied.headingFamily)
+    || !isNonEmptyString(applied.bodyFamily)
+    || !isWeight(applied.headingWeight)
+    || !isWeight(applied.bodyWeight)
+    || !FONT_CLASSIFICATIONS.includes(applied.headingClassification as FontClassification)
+    || !FONT_CLASSIFICATIONS.includes(applied.bodyClassification as FontClassification)
+    || (applied.catalogPairId !== null && typeof applied.catalogPairId !== 'string')
+    || !TYPE_SCALE_BASES.includes(value.base as TypeScaleBase)
+    || !TYPE_SCALE_RATIOS.includes(value.ratio as TypeScaleRatio)
+  ) {
+    return undefined;
+  }
+
+  return {
+    applied: {
+      catalogPairId: applied.catalogPairId as string | null,
+      headingFamily: applied.headingFamily,
+      bodyFamily: applied.bodyFamily,
+      headingWeight: applied.headingWeight,
+      bodyWeight: applied.bodyWeight,
+      headingClassification: applied.headingClassification as FontClassification,
+      bodyClassification: applied.bodyClassification as FontClassification,
+    },
+    base: value.base as TypeScaleBase,
+    ratio: value.ratio as TypeScaleRatio,
+  };
+}
+
+function parseCanvasView(value: unknown): CanvasViewId | undefined {
+  return CANVAS_VIEWS.find((view) => view.id === value)?.id;
+}
+
 /** Serialize the workspace snapshot into a versioned JSON string. */
 export function serializeWorkspace(state: WorkspaceSnapshot): string {
   const envelope: WorkspaceSnapshotEnvelope = {
@@ -162,5 +236,8 @@ export function deserializeWorkspace(raw: unknown): WorkspaceSnapshot | null {
     extractedColors: parsed.extractedColors,
     paletteType: parsed.paletteType as PaletteType | undefined,
     illustrationSeed: parsed.illustrationSeed,
+    // Optional blocks never invalidate an otherwise-good snapshot.
+    typography: parseTypography(parsed.typography),
+    canvasView: parseCanvasView(parsed.canvasView),
   };
 }

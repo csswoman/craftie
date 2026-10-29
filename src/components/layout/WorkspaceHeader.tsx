@@ -8,12 +8,23 @@ import { ExportMenu } from '@/components/layout/ExportMenu';
 import { WorkspaceMobileMenu } from '@/components/layout/WorkspaceMobileMenu';
 import { HELP_ITEMS, HintIcon } from '@/components/layout/workspaceHelp';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import type { ProjectSaveStatus } from '@/components/projects/useLocalProjects';
+
+const SAVE_STATUS_LABEL: Record<ProjectSaveStatus, string> = {
+  idle: 'Borrador',
+  saving: 'Guardando…',
+  saved: 'Guardado',
+  error: 'No se pudo guardar',
+};
 
 export type WorkspaceHeaderProps = {
   canExport: boolean;
+  projectName: string | null;
+  saveStatus: ProjectSaveStatus;
   onCraftieHome: () => void;
   onOpenMyProjects: () => void;
   onExportCss: () => void;
+  onCopyCss: () => void;
   onExportTokensJson: () => void;
   onExportFigmaTokens: () => void;
   onExportDesignMd: () => void;
@@ -24,9 +35,12 @@ export type WorkspaceHeaderProps = {
 
 export function WorkspaceHeader({
   canExport,
+  projectName,
+  saveStatus,
   onCraftieHome,
   onOpenMyProjects,
   onExportCss,
+  onCopyCss,
   onExportTokensJson,
   onExportFigmaTokens,
   onExportDesignMd,
@@ -38,6 +52,7 @@ export function WorkspaceHeader({
     <ExportMenu
       canExport={canExport}
       onExportCss={onExportCss}
+      onCopyCss={onCopyCss}
       onExportTokensJson={onExportTokensJson}
       onExportFigmaTokens={onExportFigmaTokens}
       onExportDesignMd={onExportDesignMd}
@@ -59,6 +74,18 @@ export function WorkspaceHeader({
           <h1 className="font-display text-(--chrome-text-display) font-medium leading-none">
             Craftie
           </h1>
+        </button>
+
+        <button
+          type="button"
+          onClick={onOpenMyProjects}
+          title={projectName ? 'Abrir Mis proyectos' : 'Guardar como proyecto'}
+          className="flex min-h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-lg px-2 text-chrome-label text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 sm:flex-none sm:justify-start"
+        >
+          <span className="truncate font-semibold text-ink">{projectName ?? 'Sin título'}</span>
+          <span role="status" className={`shrink-0 ${saveStatus === 'error' ? 'font-semibold text-fail' : ''}`}>
+            · {projectName ? SAVE_STATUS_LABEL[saveStatus] : 'Borrador'}
+          </span>
         </button>
 
         <div className="flex min-w-0 items-center justify-end gap-1">

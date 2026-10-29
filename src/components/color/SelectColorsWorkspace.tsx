@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 
 import { DESIGN_STYLES } from '@lib/styles/presets';
+import type { LocalProject } from '@lib/studio/projectModel';
 
 import { ConfirmResetWorkspaceDialog } from '@/components/layout/ConfirmResetWorkspaceDialog';
 import { MyProjectsDrawer } from '@/components/projects/MyProjectsDrawer';
@@ -38,7 +39,16 @@ export function SelectColorsWorkspace() {
 function SelectColorsWorkspaceContent() {
   const workspace = useSelectColorsWorkspaceController();
   const hasInspirationSource = workspace.catalogSource !== 'none';
-  const projects = useLocalProjects();
+  const projects = useLocalProjects(workspace.getShareSnapshot, hasInspirationSource);
+  const { handleOpenProject } = workspace;
+  const { setCurrent } = projects;
+  const openProject = useCallback(
+    (project: LocalProject) => {
+      handleOpenProject(project);
+      setCurrent(project.id);
+    },
+    [handleOpenProject, setCurrent],
+  );
   const [myProjectsOpen, setMyProjectsOpen] = useState(false);
   const { activeTab, setActiveTab } = useToolsTabState();
   const { selectView } = useCanvasView();
@@ -119,9 +129,12 @@ function SelectColorsWorkspaceContent() {
 
       <WorkspaceHeader
         canExport={workspace.canExport}
+        projectName={projects.currentProject?.name ?? null}
+        saveStatus={projects.saveStatus}
         onCraftieHome={workspace.requestCraftieHome}
         onOpenMyProjects={() => setMyProjectsOpen(true)}
         onExportCss={workspace.handleExportCss}
+        onCopyCss={workspace.handleCopyCss}
         onExportTokensJson={workspace.handleExportTokensJson}
         onExportFigmaTokens={workspace.handleExportFigmaTokens}
         onExportDesignMd={workspace.handleExportDesignMd}
@@ -151,9 +164,11 @@ function SelectColorsWorkspaceContent() {
         projects={projects.projects}
         loading={projects.loading}
         canSave={workspace.selectionReady}
-        getSnapshot={workspace.getShareSnapshot}
-        onSave={projects.saveCurrent}
-        onOpenProject={workspace.handleOpenProject}
+        currentProject={projects.currentProject}
+        onSaveAsNew={projects.saveAsNew}
+        onRename={projects.rename}
+        onDuplicate={projects.duplicate}
+        onOpenProject={openProject}
         onDeleteProject={(project) => void projects.deleteProject(project.id)}
       />
     </>
@@ -173,6 +188,9 @@ function SelectColorsWorkspaceContent() {
             onImageFileSelected={workspace.handleImageFileSelected}
             onImageRegenerate={workspace.handleImageRegenerate}
             onOpenInspiration={() => workspace.setInspirationModalOpen(true)}
+            onStartFromHex={workspace.handleStartFromHex}
+            recentProjects={projects.projects}
+            onOpenProject={openProject}
           />
         </div>
 

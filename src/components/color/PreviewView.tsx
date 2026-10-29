@@ -28,6 +28,8 @@ import {
 
 import { useRolePalette } from '@/context/RolePaletteContext';
 import { AnalyticsLayoutPreview } from '@/components/color/preview/AnalyticsLayoutPreview';
+import { EditorialLayoutPreview } from '@/components/color/preview/EditorialLayoutPreview';
+import { StoreLayoutPreview } from '@/components/color/preview/StoreLayoutPreview';
 import { DashboardLayoutPreview } from '@/components/color/preview/DashboardLayoutPreview';
 import { IllustrationPreview } from '@/components/color/preview/IllustrationPreview';
 import { LandingLayoutPreview } from '@/components/color/preview/LandingLayoutPreview';
@@ -201,6 +203,10 @@ function ActiveLayoutPreview({
       return <AnalyticsLayoutPreview colors={colors} fonts={fonts} onEditSlot={onEditSlot} />;
     case 'mobile':
       return <MobileLayoutPreview colors={colors} fonts={fonts} onEditSlot={onEditSlot} />;
+    case 'editorial':
+      return <EditorialLayoutPreview colors={colors} fonts={fonts} onEditSlot={onEditSlot} />;
+    case 'store':
+      return <StoreLayoutPreview colors={colors} fonts={fonts} onEditSlot={onEditSlot} />;
     case 'dashboard':
     default:
       return <DashboardLayoutPreview colors={colors} fonts={fonts} onEditSlot={onEditSlot} />;

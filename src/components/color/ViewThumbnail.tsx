@@ -7,6 +7,9 @@ import {
   PanelsTopLeft,
   Type,
   BookOpen,
+  Newspaper,
+  ShoppingBag,
+  Smartphone,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 
@@ -41,6 +44,9 @@ export function ViewThumbnail({ id, palette }: { id: CanvasViewId; palette: stri
     landing: <PanelsTopLeft className="size-3.5" aria-hidden="true" />,
     player: <Music2 className="size-3.5" aria-hidden="true" />,
     analytics: <ChartNoAxesColumn className="size-3.5" aria-hidden="true" />,
+    mobile: <Smartphone className="size-3.5" aria-hidden="true" />,
+    editorial: <Newspaper className="size-3.5" aria-hidden="true" />,
+    store: <ShoppingBag className="size-3.5" aria-hidden="true" />,
     illustration: <ImageIcon className="size-3.5" aria-hidden="true" />,
   };
   return (

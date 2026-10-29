@@ -114,3 +114,43 @@ export function sortProjectsByUpdatedAt(projects: LocalProject[]): LocalProject[
 export function touchProject(project: LocalProject, now: number): LocalProject {
   return { ...project, updatedAt: now };
 }
+
+/** Rename a project, keeping its identity. `null` when the name is empty. */
+export function renameProject(
+  project: LocalProject,
+  name: string,
+  now: number,
+): LocalProject | null {
+  const normalizedName = normalizeProjectName(name);
+  if (normalizedName.length === 0) return null;
+  return { ...project, name: normalizedName, updatedAt: now };
+}
+
+/** Replace a project's snapshot (and thumbnail) in place, stamping `updatedAt`. */
+export function updateProjectSnapshot(
+  project: LocalProject,
+  snapshot: WorkspaceSnapshot,
+  now: number,
+  thumbnail: string | null = project.thumbnail,
+): LocalProject {
+  return { ...project, snapshot, thumbnail, updatedAt: now };
+}
+
+/**
+ * Independent copy with a fresh identity. The name gets a " (copia)" suffix
+ * (clamped to the maximum length) so the two are distinguishable in the list.
+ */
+export function duplicateProject(
+  project: LocalProject,
+  { id, now }: { id: string; now: number },
+): LocalProject {
+  const suffix = ' (copia)';
+  const base = project.name.slice(0, MAX_NAME_LENGTH - suffix.length);
+  return {
+    ...project,
+    id,
+    name: `${base}${suffix}`,
+    createdAt: now,
+    updatedAt: now,
+  };
+}

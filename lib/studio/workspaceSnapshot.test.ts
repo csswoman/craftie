@@ -122,3 +122,43 @@ describe('serializeWorkspace / deserializeWorkspace', () => {
     ).toBeNull();
   });
 });
+
+describe('optional typography and canvas view', () => {
+  const typography = {
+    applied: {
+      catalogPairId: null,
+      headingFamily: 'Lora',
+      bodyFamily: 'Nunito',
+      headingWeight: 600,
+      bodyWeight: 400,
+      headingClassification: 'serif' as const,
+      bodyClassification: 'sans-serif' as const,
+    },
+    base: 18 as const,
+    ratio: 1.333 as const,
+  };
+
+  it('round-trips typography and canvas view', () => {
+    const snapshot = { ...minimalSnapshot(), typography, canvasView: 'landing' as const };
+    expect(deserializeWorkspace(serializeWorkspace(snapshot))).toEqual(snapshot);
+  });
+
+  it('still loads snapshots written before typography existed', () => {
+    const result = deserializeWorkspace(serializeWorkspace(minimalSnapshot()));
+    expect(result?.typography).toBeUndefined();
+    expect(result?.canvasView).toBeUndefined();
+  });
+
+  it('drops invalid optional blocks without rejecting the snapshot', () => {
+    const envelope = {
+      version: 1,
+      ...minimalSnapshot(),
+      typography: { ...typography, base: 99 },
+      canvasView: 'not-a-view',
+    };
+    const result = deserializeWorkspace(JSON.stringify(envelope));
+    expect(result).not.toBeNull();
+    expect(result?.typography).toBeUndefined();
+    expect(result?.canvasView).toBeUndefined();
+  });
+});

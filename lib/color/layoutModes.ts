@@ -1,7 +1,7 @@
 import { pickActionFillTokens } from './actionFill';
 import type { SemanticTokenName, SemanticTokens } from './semanticTokens';
 
-export type UiLayoutModeId = 'dashboard' | 'landing' | 'media' | 'analytics' | 'mobile';
+export type UiLayoutModeId = 'dashboard' | 'landing' | 'media' | 'analytics' | 'mobile' | 'editorial' | 'store';
 
 export type UiCommonLayoutSlot =
   | 'appBackground'
@@ -120,6 +120,18 @@ export const UI_LAYOUT_MODES: UiLayoutModeDefinition[] = [
       secondaryAction: 'secondary',
       secondaryActionText: 'on-secondary',
     },
+  },
+  {
+    id: 'editorial',
+    label: 'Editorial',
+    description: 'Long-form reading page: neutral surfaces, one accent, text-first hierarchy.',
+    commonSlots: baseCommonSlots,
+  },
+  {
+    id: 'store',
+    label: 'Tienda',
+    description: 'Storefront: neutral product grid, one clear purchase action, expressive product swatches.',
+    commonSlots: baseCommonSlots,
   },
 ];
 

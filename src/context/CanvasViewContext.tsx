@@ -10,8 +10,9 @@ import {
 } from 'react';
 
 import type { CanvasViewId } from '@lib/color/canvasViews';
+import type { UiLayoutModeId } from '@lib/color/layoutModes';
 
-export type PreviewActiveMode = 'dashboard' | 'landing' | 'media' | 'analytics';
+export type PreviewActiveMode = UiLayoutModeId;
 
 export type CanvasViewContextValue = {
   activeView: CanvasViewId;
@@ -27,7 +28,14 @@ export function CanvasViewProvider({ children }: { children: ReactNode }) {
 
   const selectView = useCallback((view: CanvasViewId) => {
     setActiveView(view);
-    if (view === 'dashboard' || view === 'landing' || view === 'analytics') {
+    if (
+      view === 'dashboard'
+      || view === 'landing'
+      || view === 'analytics'
+      || view === 'mobile'
+      || view === 'editorial'
+      || view === 'store'
+    ) {
       setActiveMode(view);
     }
     if (view === 'player') {

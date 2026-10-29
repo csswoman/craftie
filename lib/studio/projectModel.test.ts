@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import {
   createProject,
+  duplicateProject,
+  renameProject,
+  updateProjectSnapshot,
   normalizeProjectName,
   sortProjectsByUpdatedAt,
   touchProject,
@@ -161,5 +164,40 @@ describe('sortProjectsByUpdatedAt', () => {
     const before = input.map((p) => p.id);
     sortProjectsByUpdatedAt(input);
     expect(input.map((p) => p.id)).toEqual(before);
+  });
+});
+
+describe('project mutations', () => {
+  const base = createProject('Cafetería', snapshot(), { id: 'a', now: 1 })!;
+
+  it('renames keeping identity and rejects empty names', () => {
+    const renamed = renameProject(base, '  Café  Sur ', 5)!;
+    expect(renamed.id).toBe('a');
+    expect(renamed.name).toBe('Café Sur');
+    expect(renamed.updatedAt).toBe(5);
+    expect(renameProject(base, '   ', 5)).toBeNull();
+  });
+
+  it('updates the snapshot in place and keeps createdAt', () => {
+    const next = { ...snapshot(), illustrationSeed: 9 };
+    const updated = updateProjectSnapshot(base, next, 7, 'data:x');
+    expect(updated.id).toBe('a');
+    expect(updated.createdAt).toBe(1);
+    expect(updated.updatedAt).toBe(7);
+    expect(updated.snapshot.illustrationSeed).toBe(9);
+    expect(updated.thumbnail).toBe('data:x');
+  });
+
+  it('duplicates with a new id, copy suffix and fresh timestamps', () => {
+    const copy = duplicateProject(base, { id: 'b', now: 9 });
+    expect(copy.id).toBe('b');
+    expect(copy.name).toBe('Cafetería (copia)');
+    expect(copy.createdAt).toBe(9);
+    expect(copy.snapshot).toEqual(base.snapshot);
+  });
+
+  it('keeps duplicated names within the maximum length', () => {
+    const long = { ...base, name: 'x'.repeat(80) };
+    expect(duplicateProject(long, { id: 'c', now: 1 }).name.length).toBeLessThanOrEqual(80);
   });
 });
