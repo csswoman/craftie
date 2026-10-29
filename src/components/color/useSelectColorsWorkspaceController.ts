@@ -63,6 +63,7 @@ export function useSelectColorsWorkspaceController() {
     renameRole,
     assignFromHexes,
     assignFromExtracted,
+    getShareSnapshot,
   } = useRolePalette();
   const [catalogSource, setCatalogSource] = useState<'none' | 'curated' | 'image'>('none');
   const [selectedStyleId, setSelectedStyleId] = useState<string | null>(null);
@@ -509,10 +510,10 @@ export function useSelectColorsWorkspaceController() {
       renameRole,
       rolePalette,
       setCatalogSource,
-    setError,
-    setGeneratedPalette,
-    setPaletteCatalog,
-  });
+      setError,
+      setGeneratedPalette,
+      setPaletteCatalog,
+    });
 
   const {
     canExport,
@@ -522,11 +523,13 @@ export function useSelectColorsWorkspaceController() {
     handleExportDesignMd,
     handleExportFigmaTokens,
     handleExportTokensJson,
+    handleCopyShareLink,
   } = useWorkspaceExports({
     rolePalette: exportRolePalette,
     tokenOverridesByTheme,
     exportStatusTokenOverrides,
     selectedPairing,
+    getShareSnapshot,
     setError,
     setStatusMessage,
   });
@@ -551,6 +554,7 @@ export function useSelectColorsWorkspaceController() {
     handleExportDesignMd,
     handleExportFigmaTokens,
     handleExportTokensJson,
+    handleCopyShareLink,
     handleFlowStepFocus,
     handleGenerate,
     handleImageExtractionError,

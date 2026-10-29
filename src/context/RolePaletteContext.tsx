@@ -85,11 +85,14 @@ import {
 import {
   deserializeWorkspace,
   serializeWorkspace,
+  type WorkspaceSnapshot,
 } from '@lib/studio/workspaceSnapshot';
+import { decodeShareSnapshot } from '@lib/studio/shareLink';
 import {
   readWorkspaceSnapshot,
   writeWorkspaceSnapshot,
 } from '@/lib/browser/workspaceStorage';
+import { readShareHash } from '@/lib/browser/shareUrl';
 
 function stripPairedOnTokens(
   overrides: SemanticTokenOverrides,
@@ -275,6 +278,8 @@ export type RolePaletteContextValue = {
   toggleLock: (role: PaletteRoleId) => void;
   clearRolePalette: () => void;
   assignFromHexes: (hexes: string[]) => void;
+  /** Current serializable workspace snapshot (for share links). */
+  getShareSnapshot: () => WorkspaceSnapshot;
 };
 
 type RolePaletteProviderProps = {
@@ -327,7 +332,12 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   const hydratedRef = useRef(false);
 
   useEffect(() => {
-    const snapshot = deserializeWorkspace(readWorkspaceSnapshot());
+    // A valid `#p=...` share hash takes precedence over the stored snapshot so
+    // an opened link always wins over whatever the visitor had locally.
+    const shareHash = readShareHash();
+    const snapshot =
+      (shareHash ? decodeShareSnapshot(shareHash) : null)
+      ?? deserializeWorkspace(readWorkspaceSnapshot());
     if (snapshot) {
       // Restore client-only persisted state once the browser document exists.
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -388,6 +398,37 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
     paletteType,
     illustrationSeed,
   ]);
+
+  // Current serializable snapshot, for share links and any other consumer that
+  // needs the full persistable state without reaching into private sub-state.
+  const getShareSnapshot = useCallback(
+    (): WorkspaceSnapshot => ({
+      tokenOverridesByTheme,
+      clearedSemanticTokens,
+      roleNames,
+      lockedRolesByTheme,
+      savedVibrancy,
+      neutralStyle,
+      forcedStatusSources,
+      forcedStatusColors,
+      extractedColors,
+      paletteType,
+      illustrationSeed,
+    }),
+    [
+      tokenOverridesByTheme,
+      clearedSemanticTokens,
+      roleNames,
+      lockedRolesByTheme,
+      savedVibrancy,
+      neutralStyle,
+      forcedStatusSources,
+      forcedStatusColors,
+      extractedColors,
+      paletteType,
+      illustrationSeed,
+    ],
+  );
 
   const commitEdit = useCallback(
     (updater: (current: EditablePaletteState) => EditablePaletteState) => {
@@ -951,6 +992,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       toggleLock,
       clearRolePalette,
       assignFromHexes,
+      getShareSnapshot,
     }),
     [
       rolePalette,
@@ -1000,6 +1042,7 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       toggleLock,
       clearRolePalette,
       assignFromHexes,
+      getShareSnapshot,
     ],
   );
 

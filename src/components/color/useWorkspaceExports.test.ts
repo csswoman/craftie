@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { RolePalette, RoleSlot } from '@lib/color/rolePalette';
 import { generatePaletteFromRolePalette } from '@lib/color/rolePalette';
 import type { SemanticTokenOverrides } from '@lib/color/semanticTokens';
+import type { WorkspaceSnapshot } from '@lib/studio/workspaceSnapshot';
 
 import { useWorkspaceExports } from './useWorkspaceExports';
 import { downloadTextFile } from '@/lib/browser/download';
@@ -10,6 +11,22 @@ import { downloadTextFile } from '@/lib/browser/download';
 vi.mock('@/lib/browser/download', () => ({
   downloadTextFile: vi.fn(() => ({ ok: true })),
 }));
+
+function emptySnapshot(): WorkspaceSnapshot {
+  return {
+    tokenOverridesByTheme: { light: {}, dark: {} },
+    clearedSemanticTokens: [],
+    roleNames: {},
+    lockedRolesByTheme: { light: [], dark: [] },
+    savedVibrancy: 0.5,
+    neutralStyle: 'pure',
+    forcedStatusSources: {},
+    forcedStatusColors: {},
+    extractedColors: [],
+    paletteType: undefined,
+    illustrationSeed: 0,
+  };
+}
 
 function slot(role: keyof RolePalette, hex: string): RoleSlot {
   return { role, hex, name: role, source: 'extracted' };
@@ -40,6 +57,7 @@ function useSetup(overrides?: {
     tokenOverridesByTheme: overrides?.tokenOverridesByTheme ?? tokenOverridesByTheme,
     exportStatusTokenOverrides: overrides?.exportStatusTokenOverrides,
     selectedPairing: null,
+    getShareSnapshot: emptySnapshot,
     setError,
     setStatusMessage,
   });
