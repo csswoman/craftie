@@ -1,7 +1,7 @@
 import { pickActionFillTokens } from './actionFill';
 import type { SemanticTokenName, SemanticTokens } from './semanticTokens';
 
-export type UiLayoutModeId = 'dashboard' | 'landing' | 'media' | 'analytics';
+export type UiLayoutModeId = 'dashboard' | 'landing' | 'media' | 'analytics' | 'mobile';
 
 export type UiCommonLayoutSlot =
   | 'appBackground'
@@ -109,6 +109,16 @@ export const UI_LAYOUT_MODES: UiLayoutModeDefinition[] = [
       primaryAction: 'surface',
       primaryActionText: 'on-surface',
       accent: 'data-1',
+    },
+  },
+  {
+    id: 'mobile',
+    label: 'Mobile',
+    description: 'Compact phone screen: neutral chrome, one primary action, expressive data chips.',
+    commonSlots: baseCommonSlots,
+    modeSlots: {
+      secondaryAction: 'secondary',
+      secondaryActionText: 'on-secondary',
     },
   },
 ];
