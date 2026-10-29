@@ -12,13 +12,22 @@ import {
 import { generateDesignMd } from '@lib/export/generateDesignMd';
 import { toCss, toTokensStudio, toW3cJson } from '@lib/export/serializeExportTokens';
 import type { FontPair } from '@lib/typography/pairings';
+import { encodeShareSnapshot } from '@lib/studio/shareLink';
+import type { WorkspaceSnapshot } from '@lib/studio/workspaceSnapshot';
 import { downloadTextFile } from '@/lib/browser/download';
+import { exportPaletteImage } from '@/lib/browser/exportPaletteImage';
+import {
+  buildShareUrl,
+  copyTextToClipboard,
+  writeShareHash,
+} from '@/lib/browser/shareUrl';
 
 export function useWorkspaceExports({
   rolePalette,
   tokenOverridesByTheme,
   exportStatusTokenOverrides = {},
   selectedPairing,
+  getShareSnapshot,
   setError,
   setStatusMessage,
   kitName = 'craftie-tokens',
@@ -31,6 +40,8 @@ export function useWorkspaceExports({
   /** Confirmed status colors (success/warning/error) merged into the light slot for export. */
   exportStatusTokenOverrides?: SemanticTokenOverrides;
   selectedPairing: FontPair | null;
+  /** Builds the current serializable workspace snapshot for the share link. */
+  getShareSnapshot: () => WorkspaceSnapshot;
   setError: (error: string | null) => void;
   setStatusMessage: (message: string | null) => void;
   kitName?: string;
@@ -122,6 +133,49 @@ export function useWorkspaceExports({
     );
   }
 
+  async function handleExportImage() {
+    if (!requireExportable() || !rolePalette) return;
+
+    const result = await exportPaletteImage({
+      palette: rolePalette,
+      title: kitName,
+      pairing: selectedPairing
+        ? { heading: selectedPairing.heading.family, body: selectedPairing.body.family }
+        : null,
+    });
+
+    if (!result.ok) {
+      setError(result.error);
+      setStatusMessage(null);
+      return;
+    }
+
+    setError(null);
+    setStatusMessage('Imagen (.png) descargada con tu paleta y tipografía.');
+  }
+
+  async function handleCopyShareLink() {
+    const encoded = encodeShareSnapshot(getShareSnapshot());
+    writeShareHash(encoded);
+    const url = buildShareUrl(encoded);
+
+    if (url === null) {
+      setError('No se pudo generar el enlace para compartir.');
+      setStatusMessage(null);
+      return;
+    }
+
+    const copied = await copyTextToClipboard(url);
+    if (!copied) {
+      setError('No se pudo copiar el enlace. Cópialo manualmente desde la barra de direcciones.');
+      setStatusMessage(null);
+      return;
+    }
+
+    setError(null);
+    setStatusMessage('Enlace copiado. Compártelo para abrir esta paleta.');
+  }
+
   return {
     canExport,
     exportBlockedReason,
@@ -130,5 +184,7 @@ export function useWorkspaceExports({
     handleExportDesignMd,
     handleExportFigmaTokens,
     handleExportTokensJson,
+    handleExportImage,
+    handleCopyShareLink,
   };
 }

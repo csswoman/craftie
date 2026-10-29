@@ -2,6 +2,8 @@
 
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 
+import { ChevronDownIcon, DownloadIcon, ImageIcon, LinkIcon } from '@/components/layout/ExportMenuIcons';
+
 export type ExportMenuProps = {
   canExport: boolean;
   exportBlockedReason?: string | null;
@@ -10,9 +12,16 @@ export type ExportMenuProps = {
   onExportFigmaTokens: () => void;
   onExportDesignMd: () => void;
   onExportBrandKit: () => void;
+  onExportImage: () => void;
+  onCopyShareLink: () => void;
 };
 
 const EXPORT_OPTIONS = [
+  {
+    id: 'share-link',
+    label: 'Copiar enlace',
+    description: 'Comparte esta paleta con una URL que la restaura al abrirla.',
+  },
   {
     id: 'css',
     label: 'CSS variables',
@@ -38,6 +47,11 @@ const EXPORT_OPTIONS = [
     label: 'Brand kit (.json)',
     description: 'Paquete todo-en-uno con colores y tipografía.',
   },
+  {
+    id: 'image',
+    label: 'Imagen (.png)',
+    description: 'Tarjeta con la paleta y la tipografía activa para compartir.',
+  },
 ] as const;
 
 const TRIGGER_BASE =
@@ -62,6 +76,8 @@ export function ExportMenu({
   onExportFigmaTokens,
   onExportDesignMd,
   onExportBrandKit,
+  onExportImage,
+  onCopyShareLink,
 }: ExportMenuProps) {
   const [open, setOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState<{ top: string; left: string } | null>(null);
@@ -131,6 +147,9 @@ export function ExportMenu({
   function handleSelect(optionId: (typeof EXPORT_OPTIONS)[number]['id']) {
     setOpen(false);
     switch (optionId) {
+      case 'share-link':
+        onCopyShareLink();
+        return;
       case 'css':
         onExportCss();
         return;
@@ -145,6 +164,9 @@ export function ExportMenu({
         return;
       case 'brand-kit':
         onExportBrandKit();
+        return;
+      case 'image':
+        onExportImage();
         return;
     }
   }
@@ -194,7 +216,13 @@ export function ExportMenu({
                   onClick={() => handleSelect(option.id)}
                   className="flex w-full items-start gap-3 rounded-lg px-2.5 py-2 text-left text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
                 >
-                  <DownloadIcon />
+                  {option.id === 'share-link' ? (
+                    <LinkIcon />
+                  ) : option.id === 'image' ? (
+                    <ImageIcon />
+                  ) : (
+                    <DownloadIcon />
+                  )}
                   <span>
                     <span className="block text-chrome-label font-semibold">{option.label}</span>
                     <span className="mt-0.5 block text-chrome-caption leading-snug text-muted">
@@ -211,37 +239,3 @@ export function ExportMenu({
   );
 }
 
-function DownloadIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4 shrink-0" fill="none">
-      <path
-        d="M8 2.5v7M5.5 7 8 9.5 10.5 7M3 12.5h10"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function ChevronDownIcon({ open }: { open: boolean }) {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 16 16"
-      className={`size-4 transition-transform duration-200 motion-reduce:transition-none ${
-        open ? 'rotate-180' : ''
-      }`}
-      fill="none"
-    >
-      <path
-        d="M4.5 6.25 8 9.75l3.5-3.5"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}

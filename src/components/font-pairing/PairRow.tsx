@@ -45,17 +45,15 @@ export function PairRow({
       onPointerEnter={() => onPreview?.(pairing)}
       onPointerLeave={() => onClearPreview?.()}
       aria-pressed={selected}
-      className={`block w-full min-w-0 max-w-full overflow-hidden rounded-xl border px-3.5 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
-        selected
+      className={`block w-full min-w-0 max-w-full overflow-hidden rounded-xl border px-3.5 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${selected
           ? 'border-primary/45 bg-primary/8'
           : 'border-border/70 bg-bg hover:border-border'
-      }`}
+        }`}
     >
       <p className="flex min-w-0 items-center justify-between gap-2">
         <span
-          className={`min-w-0 truncate text-chrome-caption ${
-            selected ? 'font-bold text-primary' : 'font-semibold text-ink'
-          }`}
+          className={`min-w-0 truncate text-chrome-caption ${selected ? 'font-bold text-primary' : 'font-semibold text-ink'
+            }`}
         >
           {pairing.heading.family} · {pairing.body.family}
         </span>
@@ -66,9 +64,8 @@ export function PairRow({
       </p>
 
       <p
-        className={`mt-2 min-w-0 truncate text-[1.25rem] leading-tight text-ink ${
-          fontsReady ? '' : 'opacity-70'
-        }`}
+        className={`mt-2 min-w-0 truncate text-[1.25rem] leading-tight text-ink ${fontsReady ? '' : 'opacity-70'
+          }`}
         style={{
           fontFamily: headingFont,
           fontWeight: headingWeight,
@@ -79,9 +76,8 @@ export function PairRow({
       </p>
 
       <p
-        className={`mt-1 min-w-0 line-clamp-2 text-[13px] leading-snug text-muted ${
-          fontsReady ? '' : 'opacity-70'
-        }`}
+        className={`mt-1 min-w-0 line-clamp-2 text-[13px] leading-snug text-muted ${fontsReady ? '' : 'opacity-70'
+          }`}
         style={{
           fontFamily: bodyFont,
           fontWeight: bodyWeight,
@@ -90,6 +86,21 @@ export function PairRow({
       >
         {specimen.body}
       </p>
+
+      {pairing.rationale ? (
+        <p className="mt-2 min-w-0 text-[11px] leading-snug text-muted">
+          {pairing.rationale}
+        </p>
+      ) : null}
+
+      {pairing.wcagNote ? (
+        <p className="mt-1 min-w-0 text-[11px] leading-snug text-muted/80">
+          <span className="font-semibold uppercase tracking-[0.06em] text-muted">
+            WCAG
+          </span>{' '}
+          {pairing.wcagNote}
+        </p>
+      ) : null}
     </button>
   );
 }

@@ -32,6 +32,7 @@ import { DashboardLayoutPreview } from '@/components/color/preview/DashboardLayo
 import { IllustrationPreview } from '@/components/color/preview/IllustrationPreview';
 import { LandingLayoutPreview } from '@/components/color/preview/LandingLayoutPreview';
 import { MediaLayoutPreview } from '@/components/color/preview/MediaLayoutPreview';
+import { MobileLayoutPreview } from '@/components/color/preview/MobileLayoutPreview';
 import { PreviewContrastWarnings } from '@/components/color/preview/PreviewChrome';
 import type { PreviewFonts } from '@/components/color/preview/previewTypography';
 import {
@@ -151,9 +152,8 @@ export function PreviewView({
         aria-hidden={!isTypePreviewing}
       >
         <p
-          className={`rounded-full border border-border bg-bg/95 px-3 py-1 text-chrome-caption font-medium text-ink shadow-none backdrop-blur-sm transition-opacity ${
-            isTypePreviewing ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`rounded-full border border-border bg-bg/95 px-3 py-1 text-chrome-caption font-medium text-ink shadow-none backdrop-blur-sm transition-opacity ${isTypePreviewing ? 'opacity-100' : 'opacity-0'
+            }`}
         >
           ● Vista previa — clic para aplicar
         </p>
@@ -199,6 +199,8 @@ function ActiveLayoutPreview({
       return <MediaLayoutPreview colors={colors} fonts={fonts} onEditSlot={onEditSlot} />;
     case 'analytics':
       return <AnalyticsLayoutPreview colors={colors} fonts={fonts} onEditSlot={onEditSlot} />;
+    case 'mobile':
+      return <MobileLayoutPreview colors={colors} fonts={fonts} onEditSlot={onEditSlot} />;
     case 'dashboard':
     default:
       return <DashboardLayoutPreview colors={colors} fonts={fonts} onEditSlot={onEditSlot} />;

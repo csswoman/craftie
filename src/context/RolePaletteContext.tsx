@@ -4,7 +4,9 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -80,6 +82,17 @@ import {
   type UsageColor,
   type UsageIntent,
 } from '@lib/color/usageColor';
+import {
+  deserializeWorkspace,
+  serializeWorkspace,
+  type WorkspaceSnapshot,
+} from '@lib/studio/workspaceSnapshot';
+import { decodeShareSnapshot } from '@lib/studio/shareLink';
+import {
+  readWorkspaceSnapshot,
+  writeWorkspaceSnapshot,
+} from '@/lib/browser/workspaceStorage';
+import { readShareHash } from '@/lib/browser/shareUrl';
 
 function stripPairedOnTokens(
   overrides: SemanticTokenOverrides,
@@ -265,6 +278,10 @@ export type RolePaletteContextValue = {
   toggleLock: (role: PaletteRoleId) => void;
   clearRolePalette: () => void;
   assignFromHexes: (hexes: string[]) => void;
+  /** Current serializable workspace snapshot (for share links). */
+  getShareSnapshot: () => WorkspaceSnapshot;
+  /** Restore a serializable snapshot at runtime (reopening a saved project). */
+  applySnapshot: (snapshot: WorkspaceSnapshot) => void;
 };
 
 type RolePaletteProviderProps = {
@@ -309,6 +326,136 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   const tokenOverrides = useMemo(
     () => tokenOverridesByTheme[activeTheme] ?? {},
     [tokenOverridesByTheme, activeTheme],
+  );
+
+  // Tracks whether the initial localStorage hydration pass has run, so the
+  // autosave effect never writes the fresh INITIAL_EDITABLE before (or over)
+  // a restored snapshot.
+  const hydratedRef = useRef(false);
+
+  // Restore every serializable field from a snapshot. Shared by the mount
+  // hydrate pass (localStorage / share hash) and the runtime reopen path used
+  // by saved projects, so both stay byte-identical.
+  const applySnapshot = useCallback((snapshot: WorkspaceSnapshot) => {
+    setPaletteRevision((revision) => revision + 1);
+    setEditHistory(
+      createHistory({
+        tokenOverridesByTheme: snapshot.tokenOverridesByTheme,
+        clearedSemanticTokens: snapshot.clearedSemanticTokens,
+        roleNames: snapshot.roleNames,
+        lockedRolesByTheme: snapshot.lockedRolesByTheme,
+        savedVibrancy: snapshot.savedVibrancy,
+        neutralStyle: snapshot.neutralStyle,
+        forcedStatusSources: snapshot.forcedStatusSources,
+        forcedStatusColors: snapshot.forcedStatusColors,
+      }),
+    );
+    setExtractedColors(snapshot.extractedColors);
+    setPaletteType(snapshot.paletteType);
+    setIllustrationSeed(snapshot.illustrationSeed);
+    setPreviewVibrancyState(snapshot.savedVibrancy);
+    setStatusColorsEnabled(!STATUS_COLORS_ON_DEMAND);
+    setTokenEditPreviewState(null);
+    setActiveRole(null);
+  }, []);
+
+  useEffect(() => {
+    // A valid `#p=...` share hash takes precedence over the stored snapshot so
+    // an opened link always wins over whatever the visitor had locally.
+    const shareHash = readShareHash();
+    const snapshot =
+      (shareHash ? decodeShareSnapshot(shareHash) : null)
+      ?? deserializeWorkspace(readWorkspaceSnapshot());
+    if (snapshot) {
+      // Restore client-only persisted state once the browser document exists.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setEditHistory(
+        createHistory({
+          tokenOverridesByTheme: snapshot.tokenOverridesByTheme,
+          clearedSemanticTokens: snapshot.clearedSemanticTokens,
+          roleNames: snapshot.roleNames,
+          lockedRolesByTheme: snapshot.lockedRolesByTheme,
+          savedVibrancy: snapshot.savedVibrancy,
+          neutralStyle: snapshot.neutralStyle,
+          forcedStatusSources: snapshot.forcedStatusSources,
+          forcedStatusColors: snapshot.forcedStatusColors,
+        }),
+      );
+      setExtractedColors(snapshot.extractedColors);
+      setPaletteType(snapshot.paletteType);
+      setIllustrationSeed(snapshot.illustrationSeed);
+      setPreviewVibrancyState(snapshot.savedVibrancy);
+    }
+    hydratedRef.current = true;
+  }, []);
+
+  // Debounced autosave: whenever a serializable field changes, persist the
+  // snapshot ~500ms later. Skipped until the initial hydrate pass completes.
+  useEffect(() => {
+    if (!hydratedRef.current) return;
+
+    const timeout = setTimeout(() => {
+      writeWorkspaceSnapshot(
+        serializeWorkspace({
+          tokenOverridesByTheme,
+          clearedSemanticTokens,
+          roleNames,
+          lockedRolesByTheme,
+          savedVibrancy,
+          neutralStyle,
+          forcedStatusSources,
+          forcedStatusColors,
+          extractedColors,
+          paletteType,
+          illustrationSeed,
+        }),
+      );
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [
+    tokenOverridesByTheme,
+    clearedSemanticTokens,
+    roleNames,
+    lockedRolesByTheme,
+    savedVibrancy,
+    neutralStyle,
+    forcedStatusSources,
+    forcedStatusColors,
+    extractedColors,
+    paletteType,
+    illustrationSeed,
+  ]);
+
+  // Current serializable snapshot, for share links and any other consumer that
+  // needs the full persistable state without reaching into private sub-state.
+  const getShareSnapshot = useCallback(
+    (): WorkspaceSnapshot => ({
+      tokenOverridesByTheme,
+      clearedSemanticTokens,
+      roleNames,
+      lockedRolesByTheme,
+      savedVibrancy,
+      neutralStyle,
+      forcedStatusSources,
+      forcedStatusColors,
+      extractedColors,
+      paletteType,
+      illustrationSeed,
+    }),
+    [
+      tokenOverridesByTheme,
+      clearedSemanticTokens,
+      roleNames,
+      lockedRolesByTheme,
+      savedVibrancy,
+      neutralStyle,
+      forcedStatusSources,
+      forcedStatusColors,
+      extractedColors,
+      paletteType,
+      illustrationSeed,
+    ],
   );
 
   const commitEdit = useCallback(
@@ -374,11 +521,11 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   const statusColors = useMemo(
     () => statusColorsEnabled && baseSemanticTokens
       ? buildUiStatusColors({
-          colors: extractedColors,
-          backgroundHex: baseSemanticTokens.background.hex,
-          forcedSources: forcedStatusSources,
-          forcedColors: forcedStatusColors,
-        })
+        colors: extractedColors,
+        backgroundHex: baseSemanticTokens.background.hex,
+        forcedSources: forcedStatusSources,
+        forcedColors: forcedStatusColors,
+      })
       : null,
     [baseSemanticTokens, extractedColors, forcedStatusColors, forcedStatusSources, statusColorsEnabled],
   );
@@ -474,11 +621,11 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
     () =>
       rolePalette
         ? {
-            ...extractSeedsFromPalette(rolePalette),
-            extracted: extractedColors,
-            vibrancy: savedVibrancy,
-            illustrationSeed,
-          }
+          ...extractSeedsFromPalette(rolePalette),
+          extracted: extractedColors,
+          vibrancy: savedVibrancy,
+          illustrationSeed,
+        }
         : null,
     [extractedColors, illustrationSeed, rolePalette, savedVibrancy],
   );
@@ -873,6 +1020,8 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       toggleLock,
       clearRolePalette,
       assignFromHexes,
+      getShareSnapshot,
+      applySnapshot,
     }),
     [
       rolePalette,
@@ -922,6 +1071,8 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
       toggleLock,
       clearRolePalette,
       assignFromHexes,
+      getShareSnapshot,
+      applySnapshot,
     ],
   );
 

@@ -13,8 +13,13 @@ import {
 import type { SelectableColor } from '@lib/color/selectableColors';
 import { DESIGN_STYLES } from '@lib/styles/presets';
 import { FONT_PAIRS, getRecommendedPairings, type FontPair } from '@lib/typography/pairings';
+import {
+  getPaletteAwareRecommendations,
+  hasPaletteContext,
+} from '@lib/typography/paletteAwarePairing';
 import type { StudioFlowStepId } from '@lib/studio/studioFlow';
 import { hasWorkspaceProgress } from '@lib/studio/workspaceProgress';
+import { buildExampleWorkspaceSnapshot } from '@lib/studio/exampleWorkspace';
 import {
   appliedToLoadablePair,
   applyPairToTypography,
@@ -48,6 +53,13 @@ import { extractPaletteColorsFromImage } from '@/lib/browser/imageExtractor';
 import { getImageFingerprint } from '@/lib/browser/imageFingerprint';
 import { readSelectedFontPairId, writeSelectedFontPairId } from '@/lib/browser/selectedFontPair';
 import { requestStudioToolFocus } from '@/lib/browser/studioToolFocus';
+import { clearShareHash, readShareHash } from '@/lib/browser/shareUrl';
+import { readWorkspaceSnapshot } from '@/lib/browser/workspaceStorage';
+import {
+  readOnboardingDismissed,
+  writeOnboardingDismissed,
+} from '@/lib/browser/onboardingDismiss';
+import type { LocalProject } from '@lib/studio/projectModel';
 
 export function useSelectColorsWorkspaceController() {
   const [generatedPalette, setGeneratedPalette] = useState<GeneratedPalette | null>(null);
@@ -63,8 +75,11 @@ export function useSelectColorsWorkspaceController() {
     renameRole,
     assignFromHexes,
     assignFromExtracted,
+    getShareSnapshot,
+    applySnapshot,
   } = useRolePalette();
   const [catalogSource, setCatalogSource] = useState<'none' | 'curated' | 'image'>('none');
+  const [onboardingHintVisible, setOnboardingHintVisible] = useState(false);
   const [selectedStyleId, setSelectedStyleId] = useState<string | null>(null);
   const [typeUi, setTypeUi] = useState<TypeUiState>(() => createInitialTypeUiState());
   const [typeScaleOverrides, setTypeScaleOverrides] = useState<SizeOverrides>({});
@@ -123,6 +138,33 @@ export function useSelectColorsWorkspaceController() {
         URL.revokeObjectURL(imagePreviewUrlRef.current);
       }
     };
+  }, []);
+
+  // First-load onboarding: when the visitor arrives with no shared link and no
+  // stored workspace, preload a deterministic example palette so the studio
+  // opens populated instead of empty, and surface a dismissible hint. The
+  // RolePaletteContext still hydrates any stored/shared snapshot on its own; we
+  // only step in when there is genuinely nothing to restore.
+  useEffect(() => {
+    const hasSharedState = readShareHash() !== null;
+    const hasStoredState = readWorkspaceSnapshot() !== null;
+
+    if (hasSharedState || hasStoredState) {
+      return;
+    }
+
+    applySnapshot(buildExampleWorkspaceSnapshot());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCatalogSource('curated');
+
+    if (!readOnboardingDismissed()) {
+      setOnboardingHintVisible(true);
+    }
+  }, [applySnapshot]);
+
+  const dismissOnboardingHint = useCallback(() => {
+    writeOnboardingDismissed(true);
+    setOnboardingHintVisible(false);
   }, []);
 
   const isImageBusy = isImageExtracting || isImageRegenerating;
@@ -214,10 +256,23 @@ export function useSelectColorsWorkspaceController() {
     return DESIGN_STYLES.find((style) => style.id === selectedStyleId)?.mood ?? [];
   }, [selectedStyleId]);
 
-  const recommendedPairings = useMemo(
-    () => getRecommendedPairings(activeMoods, 3),
-    [activeMoods],
-  );
+  const recommendedPairings = useMemo<FontPair[]>(() => {
+    const paletteTextHex = generatedPalette?.onSurface ?? null;
+    const paletteBackgroundHex = generatedPalette?.surface ?? null;
+
+    if (hasPaletteContext(paletteTextHex, paletteBackgroundHex)) {
+      return getPaletteAwareRecommendations(
+        {
+          mood: activeMoods,
+          paletteTextHex: paletteTextHex!,
+          paletteBackgroundHex: paletteBackgroundHex!,
+        },
+        3,
+      );
+    }
+
+    return getRecommendedPairings(activeMoods, 3);
+  }, [activeMoods, generatedPalette]);
   const fontPairings = FONT_PAIRS;
 
   const isReviewPhase = generatedPalette !== null;
@@ -344,6 +399,23 @@ export function useSelectColorsWorkspaceController() {
   const confirmResetWorkspace = useCallback(() => {
     resetWorkspace();
   }, [resetWorkspace]);
+
+  const handleOpenProject = useCallback(
+    (project: LocalProject) => {
+      // A reopened project owns the workspace, so drop any share hash so the
+      // mount-hydrate precedence never resurrects an older linked palette.
+      clearShareHash();
+      applySnapshot(project.snapshot);
+      // Mark the workspace as sourced so the editor (not the empty state)
+      // renders; the snapshot already carries the extracted colors.
+      setCatalogSource('curated');
+      setSelectedStyleId(null);
+      setGeneratedPalette(null);
+      setError(null);
+      setStatusMessage(`Proyecto «${project.name}» abierto.`);
+    },
+    [applySnapshot],
+  );
 
   function handleFlowStepFocus(stepId: StudioFlowStepId) {
     if (stepId === 'review') {
@@ -509,10 +581,10 @@ export function useSelectColorsWorkspaceController() {
       renameRole,
       rolePalette,
       setCatalogSource,
-    setError,
-    setGeneratedPalette,
-    setPaletteCatalog,
-  });
+      setError,
+      setGeneratedPalette,
+      setPaletteCatalog,
+    });
 
   const {
     canExport,
@@ -522,17 +594,22 @@ export function useSelectColorsWorkspaceController() {
     handleExportDesignMd,
     handleExportFigmaTokens,
     handleExportTokensJson,
+    handleExportImage,
+    handleCopyShareLink,
   } = useWorkspaceExports({
     rolePalette: exportRolePalette,
     tokenOverridesByTheme,
     exportStatusTokenOverrides,
     selectedPairing,
+    getShareSnapshot,
     setError,
     setStatusMessage,
   });
 
   return {
     catalogSource,
+    onboardingHintVisible,
+    dismissOnboardingHint,
     canExport,
     exportBlockedReason,
     error,
@@ -551,6 +628,10 @@ export function useSelectColorsWorkspaceController() {
     handleExportDesignMd,
     handleExportFigmaTokens,
     handleExportTokensJson,
+    handleExportImage,
+    handleCopyShareLink,
+    handleOpenProject,
+    getShareSnapshot,
     handleFlowStepFocus,
     handleGenerate,
     handleImageExtractionError,
