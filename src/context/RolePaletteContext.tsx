@@ -4,7 +4,9 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -80,6 +82,14 @@ import {
   type UsageColor,
   type UsageIntent,
 } from '@lib/color/usageColor';
+import {
+  deserializeWorkspace,
+  serializeWorkspace,
+} from '@lib/studio/workspaceSnapshot';
+import {
+  readWorkspaceSnapshot,
+  writeWorkspaceSnapshot,
+} from '@/lib/browser/workspaceStorage';
 
 function stripPairedOnTokens(
   overrides: SemanticTokenOverrides,
@@ -311,6 +321,74 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
     [tokenOverridesByTheme, activeTheme],
   );
 
+  // Tracks whether the initial localStorage hydration pass has run, so the
+  // autosave effect never writes the fresh INITIAL_EDITABLE before (or over)
+  // a restored snapshot.
+  const hydratedRef = useRef(false);
+
+  useEffect(() => {
+    const snapshot = deserializeWorkspace(readWorkspaceSnapshot());
+    if (snapshot) {
+      // Restore client-only persisted state once the browser document exists.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setEditHistory(
+        createHistory({
+          tokenOverridesByTheme: snapshot.tokenOverridesByTheme,
+          clearedSemanticTokens: snapshot.clearedSemanticTokens,
+          roleNames: snapshot.roleNames,
+          lockedRolesByTheme: snapshot.lockedRolesByTheme,
+          savedVibrancy: snapshot.savedVibrancy,
+          neutralStyle: snapshot.neutralStyle,
+          forcedStatusSources: snapshot.forcedStatusSources,
+          forcedStatusColors: snapshot.forcedStatusColors,
+        }),
+      );
+      setExtractedColors(snapshot.extractedColors);
+      setPaletteType(snapshot.paletteType);
+      setIllustrationSeed(snapshot.illustrationSeed);
+      setPreviewVibrancyState(snapshot.savedVibrancy);
+    }
+    hydratedRef.current = true;
+  }, []);
+
+  // Debounced autosave: whenever a serializable field changes, persist the
+  // snapshot ~500ms later. Skipped until the initial hydrate pass completes.
+  useEffect(() => {
+    if (!hydratedRef.current) return;
+
+    const timeout = setTimeout(() => {
+      writeWorkspaceSnapshot(
+        serializeWorkspace({
+          tokenOverridesByTheme,
+          clearedSemanticTokens,
+          roleNames,
+          lockedRolesByTheme,
+          savedVibrancy,
+          neutralStyle,
+          forcedStatusSources,
+          forcedStatusColors,
+          extractedColors,
+          paletteType,
+          illustrationSeed,
+        }),
+      );
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [
+    tokenOverridesByTheme,
+    clearedSemanticTokens,
+    roleNames,
+    lockedRolesByTheme,
+    savedVibrancy,
+    neutralStyle,
+    forcedStatusSources,
+    forcedStatusColors,
+    extractedColors,
+    paletteType,
+    illustrationSeed,
+  ]);
+
   const commitEdit = useCallback(
     (updater: (current: EditablePaletteState) => EditablePaletteState) => {
       setEditHistory((history) => pushHistory(history, updater(history.present)));
@@ -374,11 +452,11 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
   const statusColors = useMemo(
     () => statusColorsEnabled && baseSemanticTokens
       ? buildUiStatusColors({
-          colors: extractedColors,
-          backgroundHex: baseSemanticTokens.background.hex,
-          forcedSources: forcedStatusSources,
-          forcedColors: forcedStatusColors,
-        })
+        colors: extractedColors,
+        backgroundHex: baseSemanticTokens.background.hex,
+        forcedSources: forcedStatusSources,
+        forcedColors: forcedStatusColors,
+      })
       : null,
     [baseSemanticTokens, extractedColors, forcedStatusColors, forcedStatusSources, statusColorsEnabled],
   );
@@ -474,11 +552,11 @@ export function RolePaletteProvider({ children }: RolePaletteProviderProps) {
     () =>
       rolePalette
         ? {
-            ...extractSeedsFromPalette(rolePalette),
-            extracted: extractedColors,
-            vibrancy: savedVibrancy,
-            illustrationSeed,
-          }
+          ...extractSeedsFromPalette(rolePalette),
+          extracted: extractedColors,
+          vibrancy: savedVibrancy,
+          illustrationSeed,
+        }
         : null,
     [extractedColors, illustrationSeed, rolePalette, savedVibrancy],
   );
