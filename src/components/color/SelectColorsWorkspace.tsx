@@ -124,6 +124,7 @@ function SelectColorsWorkspaceContent() {
         onExportFigmaTokens={workspace.handleExportFigmaTokens}
         onExportDesignMd={workspace.handleExportDesignMd}
         onExportBrandKit={workspace.handleExportBrandKit}
+        onExportImage={workspace.handleExportImage}
         onCopyShareLink={workspace.handleCopyShareLink}
       />
 

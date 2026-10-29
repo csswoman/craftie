@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 
-import { ChevronDownIcon, DownloadIcon, LinkIcon } from '@/components/layout/ExportMenuIcons';
+import { ChevronDownIcon, DownloadIcon, ImageIcon, LinkIcon } from '@/components/layout/ExportMenuIcons';
 
 export type ExportMenuProps = {
   canExport: boolean;
@@ -12,6 +12,7 @@ export type ExportMenuProps = {
   onExportFigmaTokens: () => void;
   onExportDesignMd: () => void;
   onExportBrandKit: () => void;
+  onExportImage: () => void;
   onCopyShareLink: () => void;
 };
 
@@ -46,6 +47,11 @@ const EXPORT_OPTIONS = [
     label: 'Brand kit (.json)',
     description: 'Paquete todo-en-uno con colores y tipografía.',
   },
+  {
+    id: 'image',
+    label: 'Imagen (.png)',
+    description: 'Tarjeta con la paleta y la tipografía activa para compartir.',
+  },
 ] as const;
 
 const TRIGGER_BASE =
@@ -70,6 +76,7 @@ export function ExportMenu({
   onExportFigmaTokens,
   onExportDesignMd,
   onExportBrandKit,
+  onExportImage,
   onCopyShareLink,
 }: ExportMenuProps) {
   const [open, setOpen] = useState(false);
@@ -158,6 +165,9 @@ export function ExportMenu({
       case 'brand-kit':
         onExportBrandKit();
         return;
+      case 'image':
+        onExportImage();
+        return;
     }
   }
 
@@ -206,7 +216,13 @@ export function ExportMenu({
                   onClick={() => handleSelect(option.id)}
                   className="flex w-full items-start gap-3 rounded-lg px-2.5 py-2 text-left text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
                 >
-                  {option.id === 'share-link' ? <LinkIcon /> : <DownloadIcon />}
+                  {option.id === 'share-link' ? (
+                    <LinkIcon />
+                  ) : option.id === 'image' ? (
+                    <ImageIcon />
+                  ) : (
+                    <DownloadIcon />
+                  )}
                   <span>
                     <span className="block text-chrome-label font-semibold">{option.label}</span>
                     <span className="mt-0.5 block text-chrome-caption leading-snug text-muted">

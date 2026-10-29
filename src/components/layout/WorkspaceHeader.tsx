@@ -18,6 +18,7 @@ export type WorkspaceHeaderProps = {
   onExportFigmaTokens: () => void;
   onExportDesignMd: () => void;
   onExportBrandKit: () => void;
+  onExportImage: () => void;
   onCopyShareLink: () => void;
 };
 
@@ -30,6 +31,7 @@ export function WorkspaceHeader({
   onExportFigmaTokens,
   onExportDesignMd,
   onExportBrandKit,
+  onExportImage,
   onCopyShareLink,
 }: WorkspaceHeaderProps) {
   const exportMenu = (
@@ -40,6 +42,7 @@ export function WorkspaceHeader({
       onExportFigmaTokens={onExportFigmaTokens}
       onExportDesignMd={onExportDesignMd}
       onExportBrandKit={onExportBrandKit}
+      onExportImage={onExportImage}
       onCopyShareLink={onCopyShareLink}
     />
   );

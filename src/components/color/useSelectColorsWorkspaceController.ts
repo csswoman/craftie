@@ -560,6 +560,7 @@ export function useSelectColorsWorkspaceController() {
     handleExportDesignMd,
     handleExportFigmaTokens,
     handleExportTokensJson,
+    handleExportImage,
     handleCopyShareLink,
   } = useWorkspaceExports({
     rolePalette: exportRolePalette,
@@ -591,6 +592,7 @@ export function useSelectColorsWorkspaceController() {
     handleExportDesignMd,
     handleExportFigmaTokens,
     handleExportTokensJson,
+    handleExportImage,
     handleCopyShareLink,
     handleOpenProject,
     getShareSnapshot,

@@ -15,6 +15,7 @@ import type { FontPair } from '@lib/typography/pairings';
 import { encodeShareSnapshot } from '@lib/studio/shareLink';
 import type { WorkspaceSnapshot } from '@lib/studio/workspaceSnapshot';
 import { downloadTextFile } from '@/lib/browser/download';
+import { exportPaletteImage } from '@/lib/browser/exportPaletteImage';
 import {
   buildShareUrl,
   copyTextToClipboard,
@@ -132,6 +133,27 @@ export function useWorkspaceExports({
     );
   }
 
+  async function handleExportImage() {
+    if (!requireExportable() || !rolePalette) return;
+
+    const result = await exportPaletteImage({
+      palette: rolePalette,
+      title: kitName,
+      pairing: selectedPairing
+        ? { heading: selectedPairing.heading.family, body: selectedPairing.body.family }
+        : null,
+    });
+
+    if (!result.ok) {
+      setError(result.error);
+      setStatusMessage(null);
+      return;
+    }
+
+    setError(null);
+    setStatusMessage('Imagen (.png) descargada con tu paleta y tipografía.');
+  }
+
   async function handleCopyShareLink() {
     const encoded = encodeShareSnapshot(getShareSnapshot());
     writeShareHash(encoded);
@@ -162,6 +184,7 @@ export function useWorkspaceExports({
     handleExportDesignMd,
     handleExportFigmaTokens,
     handleExportTokensJson,
+    handleExportImage,
     handleCopyShareLink,
   };
 }

@@ -26,14 +26,37 @@ export function LinkIcon() {
   );
 }
 
+export function ImageIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4 shrink-0" fill="none">
+      <rect
+        x="2.5"
+        y="3"
+        width="11"
+        height="10"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <circle cx="6" cy="6.5" r="1" fill="currentColor" />
+      <path
+        d="M3 11.5 6 8.5l2 2 2.5-2.5L13 10.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function ChevronDownIcon({ open }: { open: boolean }) {
   return (
     <svg
       aria-hidden="true"
       viewBox="0 0 16 16"
-      className={`size-4 transition-transform duration-200 motion-reduce:transition-none ${
-        open ? 'rotate-180' : ''
-      }`}
+      className={`size-4 transition-transform duration-200 motion-reduce:transition-none ${open ? 'rotate-180' : ''
+        }`}
       fill="none"
     >
       <path
