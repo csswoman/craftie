@@ -25,6 +25,7 @@ import { StudioCanvas } from '@/components/layout/StudioCanvas';
 import { WorkspaceHeader } from '@/components/layout/WorkspaceHeader';
 import { CanvasViewProvider, useCanvasView } from '@/context/CanvasViewContext';
 import { RolePaletteProvider } from '@/context/RolePaletteContext';
+import { TypeRolesContext } from '@/context/TypeRolesContext';
 
 export function SelectColorsWorkspace() {
   return (
@@ -200,6 +201,7 @@ function SelectColorsWorkspaceContent() {
   }
 
   return (
+    <TypeRolesContext.Provider value={workspace.typeRoles}>
     <div className="canvas-dots flex min-h-dvh flex-col lg:h-dvh lg:min-h-0 lg:overflow-hidden">
       {sharedChrome}
 
@@ -245,5 +247,6 @@ function SelectColorsWorkspaceContent() {
 
       {inspirationModal}
     </div>
+    </TypeRolesContext.Provider>
   );
 }

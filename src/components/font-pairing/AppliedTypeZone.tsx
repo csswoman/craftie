@@ -18,6 +18,7 @@ import {
 
 import { FineTuneSizes, type SizeOverrides } from './FineTuneSizes';
 import { SpacingControls, type TypographySpacing } from './SpacingControls';
+import { TypeRolesPanel } from './TypeRolesPanel';
 
 import {
   RoleRow,
@@ -110,12 +111,13 @@ export function AppliedTypeZone({
             aria-expanded={configOpen}
             aria-label={configOpen ? 'Ocultar ajustes de escala' : 'Mostrar ajustes de escala'}
             title={configOpen ? 'Ocultar ajustes de escala' : 'Ajustes de escala y peso'}
-            className={`grid size-7 shrink-0 place-items-center rounded-md border transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${configOpen
+            className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border px-2.5 text-chrome-caption transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${configOpen
               ? 'border-primary/45 bg-primary/10 text-primary'
               : 'border-border bg-bg text-muted hover:border-primary/45 hover:text-primary'
               }`}
           >
             <Settings size={13} strokeWidth={1.5} aria-hidden="true" />
+            <span>{configOpen ? 'Ver pares' : 'Ajustes de texto'}</span>
           </button>
         </div>
 
@@ -202,6 +204,7 @@ export function AppliedTypeZone({
               onAddSmallerStep={onAddSmallerStep}
             />
             <SpacingControls value={spacing} onChange={onSpacingChange} />
+            <TypeRolesPanel headingWeight={applied.headingWeight} bodyWeight={applied.bodyWeight} />
           </div>
         </>
       ) : null}

@@ -21,20 +21,22 @@ import { resolveActiveFontPair } from '@lib/typography/activePairing';
 import { buildFontFamilyStack } from '@lib/typography/googleFonts';
 import type { FontPair } from '@lib/typography/pairings';
 import {
+  isTypeRoleId,
+  TYPE_ROLE_IDS,
+  typeRoleCssVariables,
+  withRoleWeights,
+  type ResolvedTypeRole,
+  type TypeRoleId,
+} from '@lib/typography/typeRoles';
+import {
   buildTypeScaleReadout,
   type TypeScaleBase,
   type TypeScaleRatio,
 } from '@lib/typography/typeScale';
 
 import { useRolePalette } from '@/context/RolePaletteContext';
-import { AnalyticsLayoutPreview } from '@/components/color/preview/AnalyticsLayoutPreview';
-import { EditorialLayoutPreview } from '@/components/color/preview/EditorialLayoutPreview';
-import { StoreLayoutPreview } from '@/components/color/preview/StoreLayoutPreview';
-import { DashboardLayoutPreview } from '@/components/color/preview/DashboardLayoutPreview';
+import { ActiveLayoutPreview } from '@/components/color/ActiveLayoutPreview';
 import { IllustrationPreview } from '@/components/color/preview/IllustrationPreview';
-import { LandingLayoutPreview } from '@/components/color/preview/LandingLayoutPreview';
-import { MediaLayoutPreview } from '@/components/color/preview/MediaLayoutPreview';
-import { MobileLayoutPreview } from '@/components/color/preview/MobileLayoutPreview';
 import { PreviewContrastWarnings } from '@/components/color/preview/PreviewChrome';
 import type { PreviewFonts } from '@/components/color/preview/previewTypography';
 import {
@@ -42,6 +44,9 @@ import {
   type SemanticTokenPopoverAnchor,
 } from '@/components/color/SemanticTokenColorPopover';
 import { loadGoogleFonts } from '@/lib/browser/googleFonts';
+import { PreviewEditModeToggle, type PreviewEditMode } from '@/components/color/PreviewEditModeToggle';
+import { TypeRolePopover, type TypeRolePopoverAnchor } from '@/components/color/TypeRolePopover';
+import { useTypeRoles } from '@/context/TypeRolesContext';
 
 export type PreviewViewProps = {
   recommendedPairings: FontPair[];
@@ -78,6 +83,9 @@ export function PreviewView({
     regenerateIllustrationSeed,
   } = useRolePalette();
   const [tokenPopover, setTokenPopover] = useState<SemanticTokenPopoverAnchor | null>(null);
+  const [rolePopover, setRolePopover] = useState<TypeRolePopoverAnchor | null>(null);
+  const [editMode, setEditMode] = useState<PreviewEditMode>('color');
+  const typeRoles = useTypeRoles();
 
   const liveRolePalette = previewRolePalette ?? rolePalette;
   const liveSemanticTokens = previewSemanticTokens ?? semanticTokens;
@@ -88,9 +96,32 @@ export function PreviewView({
     [typeScaleBase, typeScaleRatio],
   );
 
+  const loadablePairing = useMemo(
+    () => withRoleWeights(previewPairing, typeRoles.weights),
+    [previewPairing, typeRoles.weights],
+  );
+
   useEffect(() => {
-    loadGoogleFonts([previewPairing]);
-  }, [previewPairing]);
+    loadGoogleFonts([loadablePairing]);
+  }, [loadablePairing]);
+
+  // While hovering a pairing, roles without their own weight follow its weights.
+  const effectiveRoles = useMemo(() => {
+    if (!hoveredPairing) {
+      return typeRoles.roles;
+    }
+    const weights = {
+      heading: hoveredPairing.heading.defaultWeight ?? 700,
+      body: hoveredPairing.body.defaultWeight ?? 400,
+    };
+
+    return Object.fromEntries(
+      TYPE_ROLE_IDS.map((id) => {
+        const role = typeRoles.roles[id];
+        return [id, role.overridden.weight ? role : { ...role, weight: weights[role.family] }];
+      }),
+    ) as Record<TypeRoleId, ResolvedTypeRole>;
+  }, [hoveredPairing, typeRoles.roles]);
 
   const fonts = useMemo<PreviewFonts>(
     () => ({
@@ -126,6 +157,22 @@ export function PreviewView({
     setTokenPopover({ tokenName, rect: element.getBoundingClientRect() });
   }
 
+  function handleTextEditClick(event: React.MouseEvent<HTMLElement>) {
+    if (editMode !== 'text') {
+      return;
+    }
+    const target = event.target as Element;
+    const roleId = getComputedStyle(target).getPropertyValue('--type-role').trim();
+
+    if (!isTypeRoleId(roleId)) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    setRolePopover({ roleId, rect: target.getBoundingClientRect() });
+  }
+
   const previewWidthClass = family.id === 'illustration'
     ? 'max-w-5xl'
     : PREVIEW_LAYOUT_WIDTH_CLASS;
@@ -135,12 +182,12 @@ export function PreviewView({
     ['--font-body' as string]: fonts.bodyFamily,
     ['--weight-heading' as string]: String(fonts.headingWeight ?? 700),
     ['--weight-body' as string]: String(fonts.bodyWeight ?? 400),
-    ['--weight-ui' as string]: '600',
     ['--size-h1' as string]: `${sizes.h1}px`,
     ['--size-h2' as string]: `${sizes.h2}px`,
     ['--size-h3' as string]: `${sizes.h3}px`,
     ['--size-body' as string]: `${sizes.body}px`,
     ['--size-small' as string]: `${sizes.small}px`,
+    ...typeRoleCssVariables(effectiveRoles),
   };
   const statusTokenStyle = statusColors ? statusColorCssVariables(statusColors) : {};
 
@@ -160,7 +207,16 @@ export function PreviewView({
           ● Vista previa — clic para aplicar
         </p>
       </div>
-      <div className={`mx-auto flex w-full ${previewWidthClass} flex-col gap-4 p-5 pb-8 sm:gap-5 sm:p-8`}>
+      {family.id !== 'illustration' ? (
+        <div className="pointer-events-none sticky top-14 z-20 flex justify-end px-4 sm:px-8">
+          <PreviewEditModeToggle value={editMode} onChange={setEditMode} />
+        </div>
+      ) : null}
+      <div
+        data-edit-mode={editMode}
+        onClickCapture={handleTextEditClick}
+        className={`mx-auto flex w-full ${previewWidthClass} flex-col gap-4 p-5 pb-8 sm:gap-5 sm:p-8`}
+      >
         {tokens.warnings.length > 0 ? <PreviewContrastWarnings warnings={tokens.warnings} /> : null}
         {family.id === 'illustration' ? (
           <IllustrationPreview
@@ -179,36 +235,11 @@ export function PreviewView({
         )}
       </div>
       <SemanticTokenColorPopover anchor={tokenPopover} onClose={() => setTokenPopover(null)} />
+      <TypeRolePopover
+        anchor={rolePopover}
+        defaultWeights={{ heading: fonts.headingWeight ?? 700, body: fonts.bodyWeight ?? 400 }}
+        onClose={() => setRolePopover(null)}
+      />
     </div>
   );
-}
-
-function ActiveLayoutPreview({
-  mode,
-  colors,
-  fonts,
-  onEditSlot,
-}: {
-  mode: UiLayoutModeId;
-  colors: ResolvedLayoutColors;
-  fonts: PreviewFonts;
-  onEditSlot: (slot: UiLayoutSlot, element: HTMLElement) => void;
-}) {
-  switch (mode) {
-    case 'landing':
-      return <LandingLayoutPreview colors={colors} fonts={fonts} onEditSlot={onEditSlot} />;
-    case 'media':
-      return <MediaLayoutPreview colors={colors} fonts={fonts} onEditSlot={onEditSlot} />;
-    case 'analytics':
-      return <AnalyticsLayoutPreview colors={colors} fonts={fonts} onEditSlot={onEditSlot} />;
-    case 'mobile':
-      return <MobileLayoutPreview colors={colors} fonts={fonts} onEditSlot={onEditSlot} />;
-    case 'editorial':
-      return <EditorialLayoutPreview colors={colors} fonts={fonts} onEditSlot={onEditSlot} />;
-    case 'store':
-      return <StoreLayoutPreview colors={colors} fonts={fonts} onEditSlot={onEditSlot} />;
-    case 'dashboard':
-    default:
-      return <DashboardLayoutPreview colors={colors} fonts={fonts} onEditSlot={onEditSlot} />;
-  }
 }

@@ -3,6 +3,8 @@
 import { ChevronDown, LineChart } from 'lucide-react';
 import { useState } from 'react';
 
+import { TYPE_SPACING_LIMITS } from '@lib/typography/typeGlobal';
+
 export type TypographySpacing = {
   headingLineHeight: number;
   headingLetterSpacing: number;
@@ -66,13 +68,13 @@ export function SpacingControls({ value, onChange }: SpacingControlsProps) {
         <div className="space-y-5 border-t border-border px-4 py-4">
           <fieldset className="space-y-4">
             <legend className="text-chrome-caption font-semibold uppercase tracking-[0.08em] text-muted">Titulares</legend>
-            <SliderField label="Heading Leading" value={value.headingLineHeight} min={1} max={1.4} suffix="" onChange={(headingLineHeight) => onChange({ ...value, headingLineHeight })} />
-            <SliderField label="Heading Tracking" value={value.headingLetterSpacing} min={-0.05} max={0.02} suffix="em" onChange={(headingLetterSpacing) => onChange({ ...value, headingLetterSpacing })} />
+            <SliderField label="Heading Leading" value={value.headingLineHeight} min={TYPE_SPACING_LIMITS.headingLineHeight.min} max={TYPE_SPACING_LIMITS.headingLineHeight.max} suffix="" onChange={(headingLineHeight) => onChange({ ...value, headingLineHeight })} />
+            <SliderField label="Heading Tracking" value={value.headingLetterSpacing} min={TYPE_SPACING_LIMITS.headingLetterSpacing.min} max={TYPE_SPACING_LIMITS.headingLetterSpacing.max} suffix="em" onChange={(headingLetterSpacing) => onChange({ ...value, headingLetterSpacing })} />
           </fieldset>
           <fieldset className="space-y-4 border-t border-border pt-5">
             <legend className="text-chrome-caption font-semibold uppercase tracking-[0.08em] text-muted">Cuerpo</legend>
-            <SliderField label="Body Leading" value={value.bodyLineHeight} min={1.2} max={1.8} suffix="" onChange={(bodyLineHeight) => onChange({ ...value, bodyLineHeight })} />
-            <SliderField label="Body Tracking" value={value.bodyLetterSpacing} min={-0.02} max={0.04} suffix="em" onChange={(bodyLetterSpacing) => onChange({ ...value, bodyLetterSpacing })} />
+            <SliderField label="Body Leading" value={value.bodyLineHeight} min={TYPE_SPACING_LIMITS.bodyLineHeight.min} max={TYPE_SPACING_LIMITS.bodyLineHeight.max} suffix="" onChange={(bodyLineHeight) => onChange({ ...value, bodyLineHeight })} />
+            <SliderField label="Body Tracking" value={value.bodyLetterSpacing} min={TYPE_SPACING_LIMITS.bodyLetterSpacing.min} max={TYPE_SPACING_LIMITS.bodyLetterSpacing.max} suffix="em" onChange={(bodyLetterSpacing) => onChange({ ...value, bodyLetterSpacing })} />
           </fieldset>
         </div>
       ) : null}

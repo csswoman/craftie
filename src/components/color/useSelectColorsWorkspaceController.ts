@@ -50,6 +50,9 @@ import {
   writeCustomFontsSession,
 } from '@/lib/browser/customFonts';
 import type { CustomFontSubmitInput } from '@/components/font-pairing/CustomFontModal';
+import type { TypeLevelOverrides } from '@lib/typography/typeLevels';
+import type { TypeRoleOverrides } from '@lib/typography/typeRoles';
+import { useTypeRolesValue } from '@/components/color/useTypeRolesValue';
 import type { SizeOverrides } from '@/components/font-pairing/FineTuneSizes';
 import type { TypographySpacing } from '@/components/font-pairing/SpacingControls';
 import { extractPaletteColorsFromImage } from '@/lib/browser/imageExtractor';
@@ -106,6 +109,8 @@ export function useSelectColorsWorkspaceController() {
     bodyLineHeight: 1.5,
     bodyLetterSpacing: 0,
   });
+  const [typeRoleOverrides, setTypeRoleOverrides] = useState<TypeRoleOverrides>({});
+  const [typeLevelOverrides, setTypeLevelOverrides] = useState<TypeLevelOverrides>({});
   const [largerTypeScaleSteps, setLargerTypeScaleSteps] = useState(0);
   const [smallerTypeScaleSteps, setSmallerTypeScaleSteps] = useState(0);
   const [isImageExtracting, setIsImageExtracting] = useState(false);
@@ -154,10 +159,16 @@ export function useSelectColorsWorkspaceController() {
   // transient and never published.
   useEffect(() => {
     setSnapshotExtras({
-      typography: { applied: typeUi.applied, base: typeUi.base, ratio: typeUi.ratio },
+      typography: {
+        applied: typeUi.applied,
+        base: typeUi.base,
+        ratio: typeUi.ratio,
+        ...(Object.keys(typeRoleOverrides).length > 0 ? { typeRoles: typeRoleOverrides } : {}),
+        ...(Object.keys(typeLevelOverrides).length > 0 ? { typeLevels: typeLevelOverrides } : {}),
+      },
       canvasView: activeView,
     });
-  }, [typeUi.applied, typeUi.base, typeUi.ratio, activeView, restoredExtras?.token, setSnapshotExtras]);
+  }, [typeUi.applied, typeUi.base, typeUi.ratio, typeRoleOverrides, typeLevelOverrides, activeView, restoredExtras?.token, setSnapshotExtras]);
 
   // Re-apply typography / canvas view whenever the context restores a snapshot
   // (mount hydrate, share link or reopened project).
@@ -176,6 +187,8 @@ export function useSelectColorsWorkspaceController() {
       ratio: resolved.ratio,
       hovered: null,
     }));
+    setTypeRoleOverrides(typography?.typeRoles ?? {});
+    setTypeLevelOverrides(typography?.typeLevels ?? {});
     if (canvasView) selectView(canvasView);
   }, [restoredExtras, selectView]);
 
@@ -409,6 +422,8 @@ export function useSelectColorsWorkspaceController() {
 
     setTypeUi(createInitialTypeUiState());
     setTypeScaleOverrides({});
+    setTypeRoleOverrides({});
+    setTypeLevelOverrides({});
     setTypographySpacing({ headingLineHeight: 1.2, headingLetterSpacing: -0.02, bodyLineHeight: 1.5, bodyLetterSpacing: 0 });
     setLargerTypeScaleSteps(0);
     setSmallerTypeScaleSteps(0);
@@ -600,6 +615,23 @@ export function useSelectColorsWorkspaceController() {
     return appliedToLoadablePair(typeUi.applied);
   }, [typeUi.applied]);
 
+  const typeRoles = useTypeRolesValue({
+    headingWeight: typeUi.applied.headingWeight,
+    bodyWeight: typeUi.applied.bodyWeight,
+    spacing: typographySpacing,
+    sizeOverrides: typeScaleOverrides,
+    base: typeUi.base,
+    ratio: typeUi.ratio,
+    overrides: typeRoleOverrides,
+    setOverrides: setTypeRoleOverrides,
+    levelOverrides: typeLevelOverrides,
+    setLevelOverrides: setTypeLevelOverrides,
+    setSizeOverrides: setTypeScaleOverrides,
+    setHeadingWeight: handleHeadingWeightChange,
+    setBodyWeight: handleBodyWeightChange,
+    setSpacing: setTypographySpacing,
+  });
+
   const hoveredPairing = useMemo(() => {
     if (!typeUi.hovered) {
       return null;
@@ -670,6 +702,7 @@ export function useSelectColorsWorkspaceController() {
     tokenOverridesByTheme,
     exportStatusTokenOverrides,
     selectedPairing,
+    typeRoles: typeRoles.roles,
     getShareSnapshot,
     setError,
     setStatusMessage,
@@ -738,6 +771,7 @@ export function useSelectColorsWorkspaceController() {
     typeScaleRatio: typeUi.ratio,
     typeScaleOverrides,
     typographySpacing,
+    typeRoles,
     largerTypeScaleSteps,
     smallerTypeScaleSteps,
     customFonts: typeUi.customFonts,
