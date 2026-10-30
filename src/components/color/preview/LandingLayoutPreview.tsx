@@ -36,10 +36,10 @@ export const LANDING_VISUAL_SLOTS = [
   'mutedText',
   'border',
   'divider',
-  'data1',
-  'data2',
-  'data3',
-  'data4',
+  'brand1',
+  'brand2',
+  'brand3',
+  'brand4',
   'success',
 ] as const;
 

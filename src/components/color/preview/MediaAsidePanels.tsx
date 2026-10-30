@@ -64,15 +64,15 @@ export function MediaAsidePanels({ colors, fonts, onEditSlot }: MediaAsidePanels
             </PreviewSlotTarget>
           </div>
           <PreviewSlotTarget
-            slot="data3"
+            slot="brand1"
             onEditSlot={onEditSlot}
             className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full"
-            style={{ backgroundColor: colors.data3 }}
+            style={{ backgroundColor: colors.brand1 }}
           />
         </div>
         <div className="mt-4 space-y-1">
           {MEDIA_QUEUE.map((item, index) => {
-            const swatch = [colors.data1, colors.data2, colors.data3][index]!;
+            const swatch = [colors.brand1, colors.brand2, colors.brand3][index]!;
 
             return (
               <div

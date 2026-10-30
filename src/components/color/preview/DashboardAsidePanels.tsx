@@ -12,7 +12,7 @@ type DashboardActivityItem = {
   detail: string;
   initials: string;
   color: string;
-  slot: 'data1' | 'data2' | 'data3';
+  slot: 'brand1' | 'brand2' | 'brand3';
 };
 
 type DashboardAsidePanelsProps = {
@@ -51,9 +51,9 @@ export function DashboardAsidePanels({
           El fondo todavía no cumple AA. El resto de la paleta ya está nombrado.
         </PreviewSlotTarget>
         <div className="mt-5 flex flex-wrap gap-2">
-          <Tag label="Nombres" color={colors.data1} surfaceHex={colors.surfaceElevated} slot="data1" onEditSlot={onEditSlot} />
-          <Tag label="Color" color={colors.data2} surfaceHex={colors.surfaceElevated} slot="data2" onEditSlot={onEditSlot} />
-          <Tag label="Tipografía" color={colors.data3} surfaceHex={colors.surfaceElevated} slot="data3" onEditSlot={onEditSlot} />
+          <Tag label="Nombres" color={colors.brand1} surfaceHex={colors.surfaceElevated} slot="brand1" onEditSlot={onEditSlot} />
+          <Tag label="Color" color={colors.brand2} surfaceHex={colors.surfaceElevated} slot="brand2" onEditSlot={onEditSlot} />
+          <Tag label="Tipografía" color={colors.brand3} surfaceHex={colors.surfaceElevated} slot="brand3" onEditSlot={onEditSlot} />
         </div>
         <div className="mt-6">
           <div className="mb-3 flex items-center justify-between gap-3">
@@ -87,7 +87,7 @@ export function DashboardAsidePanels({
               className="preview-list-in flex items-start gap-3"
               style={{ animationDelay: previewStaggerDelay(index, 80) }}
             >
-              <Avatar initials={item.initials} color={item.color} slot={item.slot} onEditSlot={onEditSlot} size={28} />
+              <Avatar initials={item.initials} color={item.color} slot={item.slot} surfaceHex={colors.surface} onEditSlot={onEditSlot} size={28} />
               <div className="min-w-0 pt-0.5">
                 <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={titleStyle(fonts)}>
                   {item.label}

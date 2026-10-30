@@ -33,9 +33,9 @@ export const MEDIA_VISUAL_SLOTS = [
   'primaryActionText',
   'accent',
   'success',
-  'data1',
-  'data2',
-  'data3',
+  'brand1',
+  'brand2',
+  'brand3',
 ] as const;
 
 export { MEDIA_CONTAINER_CLASS };

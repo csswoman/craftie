@@ -41,10 +41,10 @@ export const STORE_VISUAL_SLOTS = [
   'primaryActionText',
   'accent',
   'success',
-  'data1',
-  'data2',
-  'data3',
-  'data4',
+  'brand1',
+  'brand2',
+  'brand3',
+  'brand4',
 ] as const;
 
 export function StoreLayoutPreview({
@@ -59,7 +59,7 @@ export function StoreLayoutPreview({
   const [filter, setFilter] = useState<string>(STORE_FILTERS[0]);
   const [cart, setCart] = useState<string[]>([]);
   const primaryFill = vividFill(colors.primaryAction, colors.surface);
-  const swatches = [colors.data1, colors.data2, colors.data3, colors.data4];
+  const swatches = [colors.brand1, colors.brand2, colors.brand3, colors.brand4];
   const visible = STORE_PRODUCTS.filter(
     (product) => filter === 'Todo' || (filter === 'Nuevo' ? product.badge === 'Nuevo' : product.badge !== undefined),
   );

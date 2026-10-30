@@ -5,9 +5,9 @@ export const MEDIA_QUEUE = [
 ] as const;
 
 export const MEDIA_MOODS = [
-  { label: 'Mezcla', slot: 'data1' as const },
-  { label: 'Foco', slot: 'data2' as const },
-  { label: 'Secado', slot: 'data3' as const },
+  { label: 'Mezcla', slot: 'brand1' as const },
+  { label: 'Foco', slot: 'brand2' as const },
+  { label: 'Secado', slot: 'brand3' as const },
 ] as const;
 
 export const MEDIA_STATS = [

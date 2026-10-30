@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
+import type { ResolvedLayoutColors, UiLayoutSlot } from '@lib/color/layoutModes';
 
 import { PreviewIcon } from './previewIcons';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
@@ -41,12 +41,12 @@ export const MOBILE_VISUAL_SLOTS = [
   'primaryAction',
   'primaryActionText',
   'accent',
-  'data1',
-  'data2',
-  'data3',
-  'data4',
-  'data5',
-  'data6',
+  'brand1',
+  'brand2',
+  'brand3',
+  'brand4',
+  'brand5',
+  'brand6',
 ] as const;
 
 export { MOBILE_CONTAINER_CLASS };
@@ -65,11 +65,8 @@ export function MobileLayoutPreview({
   const primaryFill = vividFill(colors.primaryAction, colors.surface);
   const onPrimary = onVividFill(primaryFill);
   const [pinned, ...rest] = MOBILE_PALETTES;
-  const dataSwatches = [colors.data1, colors.data2, colors.data3, colors.data4, colors.data5, colors.data6];
-
-  function swatchHex(slot: string): string {
-    const index = Number(slot.replace('data', '')) - 1;
-    return dataSwatches[index] ?? colors.accent;
+  function swatchHex(slot: UiLayoutSlot): string {
+    return colors[slot] ?? colors.accent;
   }
 
   return (

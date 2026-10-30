@@ -31,10 +31,10 @@ describe('Craftie landing content', () => {
       'Export',
     ]);
     expect(STUDIO_TRAIL.map((item) => item.slot)).toEqual([
-      'data1',
-      'data2',
-      'data3',
-      'data4',
+      'brand1',
+      'brand2',
+      'brand3',
+      'brand4',
     ]);
   });
 

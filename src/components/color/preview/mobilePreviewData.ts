@@ -11,8 +11,8 @@ export const MOBILE_TABS: Array<{ label: string; icon: PreviewIconName }> = [
 ];
 
 export const MOBILE_SUMMARY = [
-  { label: 'Guardadas', value: '18', slot: 'data1' as const },
-  { label: 'Contraste AA', value: '96%', slot: 'data2' as const },
+  { label: 'Guardadas', value: '18', slot: 'brand1' as const },
+  { label: 'Contraste AA', value: '96%', slot: 'brand2' as const },
 ] as const;
 
 export const MOBILE_PALETTES: Array<{
@@ -20,9 +20,9 @@ export const MOBILE_PALETTES: Array<{
   note: string;
   swatches: readonly UiLayoutSlot[];
 }> = [
-  { name: 'Terracota en seco', note: 'Lista para exportar', swatches: ['data1', 'data2', 'data3'] },
-  { name: 'Salvia tranquila', note: 'Contraste por revisar', swatches: ['data2', 'data4', 'data5'] },
-  { name: 'Ocre de taller', note: 'Boceto reciente', swatches: ['data3', 'data1', 'data6'] },
+  { name: 'Terracota en seco', note: 'Lista para exportar', swatches: ['brand1', 'brand2', 'brand3'] },
+  { name: 'Salvia tranquila', note: 'Contraste por revisar', swatches: ['brand2', 'brand4', 'brand5'] },
+  { name: 'Ocre de taller', note: 'Boceto reciente', swatches: ['brand3', 'brand1', 'brand6'] },
 ];
 
 /** Status copy for the pinned palette card, chosen by remaining review items. */

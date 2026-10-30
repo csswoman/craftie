@@ -52,10 +52,10 @@ export function previewStaggerDelay(index: number, stepMs = 55): string {
 }
 
 export const PALETTE_REVIEW_ROLES = [
-  { label: 'Primario', slot: 'data1', pending: false },
-  { label: 'Acento', slot: 'data2', pending: false },
-  { label: 'Fondo', slot: 'data3', pending: true },
-  { label: 'Apoyo', slot: 'data4', pending: false },
+  { label: 'Primario', slot: 'brand1', pending: false },
+  { label: 'Acento', slot: 'brand3', pending: false },
+  { label: 'Fondo', slot: 'appBackground', pending: true },
+  { label: 'Apoyo', slot: 'brand2', pending: false },
 ] as const;
 
 export function getPaletteReviewStatus(pendingCount: number): string {
@@ -65,13 +65,13 @@ export function getPaletteReviewStatus(pendingCount: number): string {
 }
 
 export function buildDashboardActivity(colors: {
-  data1: string;
-  data2: string;
-  data3: string;
+  brand1: string;
+  brand2: string;
+  brand3: string;
 }) {
   return [
-    { label: 'Bosque, paleta aprobada', detail: 'Lupo · hace 2 min', initials: 'LB', color: colors.data1, slot: 'data1' as const },
-    { label: 'Guía de marca exportada', detail: 'Estudio Nube · hace 18 min', initials: 'EN', color: colors.data2, slot: 'data2' as const },
-    { label: 'Contraste subido a AAA', detail: 'Atelier Pigmento · hace 1 h', initials: 'AP', color: colors.data3, slot: 'data3' as const },
+    { label: 'Bosque, paleta aprobada', detail: 'Lupo · hace 2 min', initials: 'LB', color: colors.brand1, slot: 'brand1' as const },
+    { label: 'Guía de marca exportada', detail: 'Estudio Nube · hace 18 min', initials: 'EN', color: colors.brand2, slot: 'brand2' as const },
+    { label: 'Contraste subido a AAA', detail: 'Atelier Pigmento · hace 1 h', initials: 'AP', color: colors.brand3, slot: 'brand3' as const },
   ] as const;
 }

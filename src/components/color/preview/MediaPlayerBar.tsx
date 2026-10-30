@@ -126,15 +126,15 @@ export function MediaPlayerBar({
         </div>
 
         <div className="hidden min-w-0 items-center justify-end gap-2 @min-[720px]/media:flex">
-          <PreviewSlotTarget slot="data2" onEditSlot={onEditSlot} style={{ color: colors.data2 }}>
+          <PreviewSlotTarget slot="brand2" onEditSlot={onEditSlot} style={{ color: colors.brand2 }}>
             <PreviewIcon name="heart" size={13} />
           </PreviewSlotTarget>
           <PreviewIcon name="sparkles" size={12} style={{ color: colors.mutedText }} />
           <div className="w-24">
             <ProgressBar
               value={MEDIA_NOW_PLAYING.volume}
-              color={colors.data1}
-              slot="data1"
+              color={colors.brand1}
+              slot="brand1"
               onEditSlot={onEditSlot}
             />
           </div>

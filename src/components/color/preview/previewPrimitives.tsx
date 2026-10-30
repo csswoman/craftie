@@ -23,8 +23,14 @@ export function Avatar({
   color,
   slot,
   onEditSlot,
+  surfaceHex,
   size = 32,
-}: SlotColorProps & { initials: string; size?: number }) {
+}: SlotColorProps & { initials: string; surfaceHex?: string; size?: number }) {
+  // The tint over the surface is the real background of the initials; keep the
+  // hue but move lightness until they pass AA on it.
+  const background = surfaceHex ? mix(color, surfaceHex, 0.8) : null;
+  const ink = background ? readableOn(color, background, 4.5) : color;
+
   return (
     <PreviewSlotTarget
       slot={slot}
@@ -35,7 +41,7 @@ export function Avatar({
         height: size,
         fontSize: size * 0.36,
         backgroundColor: tint(color, 20),
-        color,
+        color: ink,
       }}
     >
       {initials}

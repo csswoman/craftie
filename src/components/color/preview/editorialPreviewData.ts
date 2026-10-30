@@ -20,9 +20,9 @@ export const EDITORIAL_ARTICLE = {
 } as const;
 
 export const EDITORIAL_RELATED: Array<{ title: string; meta: string; slot: UiLayoutSlot }> = [
-  { title: 'Neutros con carácter', meta: '5 min', slot: 'data1' },
-  { title: 'Cuándo romper la escala', meta: '7 min', slot: 'data2' },
-  { title: 'Un titular, dos pesos', meta: '4 min', slot: 'data3' },
+  { title: 'Neutros con carácter', meta: '5 min', slot: 'brand1' },
+  { title: 'Cuándo romper la escala', meta: '7 min', slot: 'brand2' },
+  { title: 'Un titular, dos pesos', meta: '4 min', slot: 'brand3' },
 ];
 
 export const EDITORIAL_TAGS = ['Contraste', 'Tipografía', 'Sistema'] as const;

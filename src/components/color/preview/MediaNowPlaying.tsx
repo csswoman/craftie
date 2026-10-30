@@ -149,8 +149,8 @@ export function MediaNowPlaying({
               <div className="min-w-0 flex-1">
                 <ProgressBar
                   value={MEDIA_NOW_PLAYING.volume}
-                  color={colors.data1}
-                  slot="data1"
+                  color={colors.brand1}
+                  slot="brand1"
                   onEditSlot={onEditSlot}
                 />
               </div>

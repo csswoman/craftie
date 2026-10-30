@@ -2,13 +2,14 @@ import type { ResolvedLayoutColors, UiLayoutSlot } from '@lib/color/layoutModes'
 
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { previewStaggerDelay } from './dashboardPreviewData';
+import { readableInk } from './previewColor';
 import { STUDIO_STEPS } from './landingPreviewData';
 import { bodyStyle, headingStyle, titleStyle, type PreviewFonts } from './previewTypography';
 
+/** Brand color as numeral ink: hue kept, lightness moved to AA on the section surface. */
 function stepAccent(colors: ResolvedLayoutColors, slot: UiLayoutSlot): string {
-  if (slot === 'data1') return colors.data1;
-  if (slot === 'data2') return colors.data2;
-  return colors.data3;
+  const surface = colors.supportSurface ?? colors.surface;
+  return readableInk(colors[slot] ?? colors.accent, surface);
 }
 
 export function LandingFeatureGrid({

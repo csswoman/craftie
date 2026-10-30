@@ -16,10 +16,10 @@ export type StoreProduct = {
 };
 
 export const STORE_PRODUCTS: StoreProduct[] = [
-  { name: 'Taza de barro', detail: 'Esmalte mate · 300 ml', price: 24, slot: 'data1', badge: 'Nuevo' },
-  { name: 'Mantel de lino', detail: 'Lavado · 140 × 200 cm', price: 68, slot: 'data2' },
-  { name: 'Cuaderno cosido', detail: 'Papel sin ácido · A5', price: 16, slot: 'data3', badge: 'Últimas unidades' },
-  { name: 'Jarra de gres', detail: 'Hecha a mano · 1 l', price: 42, slot: 'data4' },
+  { name: 'Taza de barro', detail: 'Esmalte mate · 300 ml', price: 24, slot: 'brand1', badge: 'Nuevo' },
+  { name: 'Mantel de lino', detail: 'Lavado · 140 × 200 cm', price: 68, slot: 'brand2' },
+  { name: 'Cuaderno cosido', detail: 'Papel sin ácido · A5', price: 16, slot: 'brand3', badge: 'Últimas unidades' },
+  { name: 'Jarra de gres', detail: 'Hecha a mano · 1 l', price: 42, slot: 'brand4' },
 ];
 
 export const STORE_FREE_SHIPPING_THRESHOLD = 60;

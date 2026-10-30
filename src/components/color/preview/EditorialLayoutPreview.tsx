@@ -39,9 +39,9 @@ export const EDITORIAL_VISUAL_SLOTS = [
   'primaryAction',
   'primaryActionText',
   'accent',
-  'data1',
-  'data2',
-  'data3',
+  'brand1',
+  'brand2',
+  'brand3',
 ] as const;
 
 export function EditorialLayoutPreview({
@@ -55,7 +55,7 @@ export function EditorialLayoutPreview({
 }) {
   const primaryFill = vividFill(colors.primaryAction, colors.surface);
   const onPrimary = onVividFill(primaryFill);
-  const dataByIndex = [colors.data1, colors.data2, colors.data3];
+  const dataByIndex = [colors.brand1, colors.brand2, colors.brand3];
 
   return (
     <PreviewSlotTarget

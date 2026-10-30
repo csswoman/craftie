@@ -7,10 +7,10 @@ export const LANDING_NAV = ['Estudio', 'Paletas', 'Guías'] as const;
 export const LANDING_GUTTER_CLASS = 'px-6 @min-[720px]/landing:px-8';
 
 export const STUDIO_TRAIL = [
-  { label: 'Semilla', slot: 'data1' as const },
-  { label: 'Roles', slot: 'data2' as const },
-  { label: 'Contraste', slot: 'data3' as const },
-  { label: 'Export', slot: 'data4' as const },
+  { label: 'Semilla', slot: 'brand1' as const },
+  { label: 'Roles', slot: 'brand2' as const },
+  { label: 'Contraste', slot: 'brand3' as const },
+  { label: 'Export', slot: 'brand4' as const },
 ] as const;
 
 export const STUDIO_STEPS: Array<{
@@ -23,26 +23,26 @@ export const STUDIO_STEPS: Array<{
     title: 'Mezclar',
     text: 'Un color semilla se convierte en roles de interfaz.',
     icon: 'layers',
-    slot: 'data1',
+    slot: 'brand1',
   },
   {
     title: 'Contrastar',
     text: 'Cada par texto–fondo se mide contra WCAG AA.',
     icon: 'shield',
-    slot: 'data2',
+    slot: 'brand2',
   },
   {
     title: 'Entregar',
     text: 'Tipografía y guía listas para exportar.',
     icon: 'check',
-    slot: 'data3',
+    slot: 'brand3',
   },
 ];
 
 export const PLANS = [
-  { name: 'Boceto', price: '$0', tagline: 'Paletas para uso personal', slot: 'data1' as const },
+  { name: 'Boceto', price: '$0', tagline: 'Paletas para uso personal', slot: 'brand2' as const },
   { name: 'Estudio', price: '$18', tagline: 'Guía, contraste y tipografía', slot: 'primaryAction' as const, featured: true },
-  { name: 'Atelier', price: '$42', tagline: 'Varias marcas en un equipo', slot: 'data4' as const },
+  { name: 'Atelier', price: '$42', tagline: 'Varias marcas en un equipo', slot: 'brand3' as const },
 ] as const;
 
 export const CRAFTIE_QUOTE = {

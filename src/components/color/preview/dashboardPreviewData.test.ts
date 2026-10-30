@@ -55,18 +55,19 @@ describe('Craftie dashboard content', () => {
     expect(STUDIO_SUBTITLE).toContain('contraste');
   });
 
-  it('reviews the palette by named roles, one per data color', () => {
+  it('reviews the palette by named roles, one per palette color', () => {
     expect(PALETTE_REVIEW_ROLES.map((role) => role.label)).toEqual([
       'Primario',
       'Acento',
       'Fondo',
       'Apoyo',
     ]);
+    // Palette roles are shown in the palette's own colors, not chart colors.
     expect(PALETTE_REVIEW_ROLES.map((role) => role.slot)).toEqual([
-      'data1',
-      'data2',
-      'data3',
-      'data4',
+      'brand1',
+      'brand3',
+      'appBackground',
+      'brand2',
     ]);
   });
 
@@ -76,11 +77,11 @@ describe('Craftie dashboard content', () => {
     expect(getPaletteReviewStatus(2)).toBe('2 ajustes pendientes');
   });
 
-  it('uses studio activity that exercises three data colors', () => {
+  it('uses studio activity that exercises three brand colors', () => {
     const activity = buildDashboardActivity({
-      data1: '#111111',
-      data2: '#222222',
-      data3: '#333333',
+      brand1: '#111111',
+      brand2: '#222222',
+      brand3: '#333333',
     });
 
     expect(activity.map((item) => item.color)).toEqual([
