@@ -7,6 +7,7 @@ All notable changes to Craftie are documented here. The format follows [Keep a C
 ### Added
 - `LICENSE` (MIT), `CONTRIBUTING.md`, issue and pull request templates, `.editorconfig`, `.nvmrc`.
 - Coverage reporting (`pnpm test:coverage`) with thresholds enforced in CI.
+- Playwright end-to-end tests (`pnpm test:e2e`) run in CI, and README screenshots.
 - Security headers, richer metadata, `robots` and web manifest.
 
 ### Changed

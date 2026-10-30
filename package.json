@@ -22,7 +22,8 @@
     "verify": "pnpm lint && pnpm check:component-size && pnpm typecheck && pnpm test",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "culori": "^4.0.2",
@@ -33,6 +34,7 @@
     "react-dom": "^19.2.7"
   },
   "devDependencies": {
+    "@playwright/test": "1.64.1",
     "@tailwindcss/postcss": "^4.3.1",
     "@types/culori": "^4.0.1",
     "@types/node": "^26.0.0",

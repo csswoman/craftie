@@ -24,5 +24,9 @@ jobs:
         run: pnpm test:coverage
       - name: Build
         run: pnpm build
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+      - name: End-to-end tests
+        run: pnpm test:e2e
       - name: Audit
         run: pnpm audit --audit-level moderate

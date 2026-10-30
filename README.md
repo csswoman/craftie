@@ -2,6 +2,12 @@
 
 Craftie is a web studio for building brand systems from color, inspiration, and typography. The current workflow takes users from an image or curated style to an editable palette, validates it for legibility, and exports a reusable guide.
 
+## Screenshots
+
+![Role palette in light theme](docs/screenshots/workspace-light.png)
+![Role palette in dark theme](docs/screenshots/workspace-dark.png)
+![Typography pairings and type scale](docs/screenshots/typography.png)
+
 ## What it currently does
 
 ### Inspiration and color extraction
@@ -137,6 +143,7 @@ pnpm lint                  # Run ESLint
 pnpm typecheck             # Check TypeScript types
 pnpm test                  # Run Vitest tests
 pnpm test:coverage         # Run tests with coverage thresholds for lib/
+pnpm test:e2e              # Playwright end-to-end tests (run pnpm build first)
 pnpm test:watch            # Run Vitest in watch mode
 pnpm check:component-size  # Check the 250-line component limit
 pnpm verify                # Run all checks above
