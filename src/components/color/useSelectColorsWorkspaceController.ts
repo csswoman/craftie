@@ -71,6 +71,7 @@ export function useSelectColorsWorkspaceController() {
     rolePalette,
     seeds,
     exportRolePalette,
+    neutralScale,
     exportStatusTokenOverrides,
     tokenOverridesByTheme,
     selectionReady,
@@ -665,6 +666,7 @@ export function useSelectColorsWorkspaceController() {
     handleCopyShareLink,
   } = useWorkspaceExports({
     rolePalette: exportRolePalette,
+    neutralScale,
     tokenOverridesByTheme,
     exportStatusTokenOverrides,
     selectedPairing,

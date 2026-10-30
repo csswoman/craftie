@@ -22,7 +22,7 @@ export const COMPACT_ROLE_GROUPS: Record<
   },
   foundations: {
     title: 'Fundaciones',
-    subtitle: '4 roles · neutrales teñidos y contraste en contexto',
+    subtitle: '4 roles · blanco, grises y negro para la interfaz',
     roles: [
       { token: 'background', label: 'Fondo' },
       { token: 'surface', label: 'Superficie' },

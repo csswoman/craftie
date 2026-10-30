@@ -1,4 +1,5 @@
 import type { ExtractedColor } from '@lib/color/imageExtractor';
+import type { NeutralScale } from '@lib/color/neutralScale';
 import type { PaletteType } from '@lib/color/paletteClassification';
 import type {
   HexSourceOptions,
@@ -31,6 +32,8 @@ export type RolePaletteContextValue = {
   getColorForUsage: (intent: UsageIntent) => UsageColor | null;
   /** Role palette locked to the `light` theme, independent of `activeTheme`, for stable export. */
   exportRolePalette: RolePalette | null;
+  /** White-to-black UI neutral scale with the palette's tint. */
+  neutralScale: NeutralScale | null;
   /** Confirmed status colors projected to semantic token overrides (success/warning/error). */
   exportStatusTokenOverrides: SemanticTokenOverrides;
   semanticTokens: SemanticTokens | null;

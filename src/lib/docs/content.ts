@@ -230,7 +230,7 @@ export const DOCS_GROUPS: DocsGroup[] = [
           {
             heading: 'Fundaciones',
             bullets: [
-              'Fondo, Superficie, Borde, Texto — neutrales teñidos y contraste en contexto.',
+              'Fondo, Superficie, Borde, Texto — blanco, grises y casi negro con apenas un rastro del tono de marca, más la escala neutra completa (neutral-0 a neutral-1000).',
             ],
           },
           {

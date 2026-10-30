@@ -16,7 +16,11 @@ import {
 } from '@lib/color/rolePalette';
 import { projectSemanticTokensToRolePalette, tokenNameForPaletteRole } from '@lib/color/semanticRoleProjection';
 import { getPairedOnTokenForFill } from '@lib/color/semanticTokenTargets';
-import { deriveSemanticTokens, type SemanticTokenOverrides } from '@lib/color/semanticTokens';
+import {
+  deriveNeutralScaleForSources,
+  deriveSemanticTokens,
+  type SemanticTokenOverrides,
+} from '@lib/color/semanticTokens';
 import type { ThemeId } from '@lib/color/themePalette';
 import { resolveUiExpressiveGaps } from '@lib/color/uiExpressiveGaps';
 import { applyUiStatusColors, buildUiStatusColors } from '@lib/color/uiStatusColors';
@@ -199,6 +203,10 @@ export function useDerivedPalette({
     tokenOverridesByTheme,
   ]);
 
+  const neutralScale = useMemo(
+    () => (extractedColors.length === 0 ? null : deriveNeutralScaleForSources(extractedColors, neutralStyle)),
+    [extractedColors, neutralStyle],
+  );
   // Confirmed explicit status colors live in `forcedStatusColors`, outside `tokenOverridesByTheme`.
   const exportStatusTokenOverrides = useMemo(
     () => statusColorsAsTokenOverrides(forcedStatusColors),
@@ -232,6 +240,7 @@ export function useDerivedPalette({
       getColorForUsage: getColorForUsageBound,
       exportRolePalette,
       exportStatusTokenOverrides,
+      neutralScale,
       semanticTokens,
       previewRolePalette,
       previewSemanticTokens,
@@ -240,6 +249,7 @@ export function useDerivedPalette({
       selectionReady,
     }),
     [
+      neutralScale,
       rolePalette,
       getColorForUsageBound,
       exportRolePalette,

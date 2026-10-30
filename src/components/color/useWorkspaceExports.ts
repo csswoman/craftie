@@ -1,6 +1,7 @@
 'use client';
 
 import { generatePaletteFromRolePalette } from '@lib/color/rolePalette';
+import type { NeutralScale } from '@lib/color/neutralScale';
 import type { RolePalette } from '@lib/color/rolePalette';
 import type { SemanticTokenOverrides } from '@lib/color/semanticTokens';
 import { buildBrandKit, serializeBrandKit } from '@lib/export/brandKit';
@@ -23,6 +24,7 @@ import {
 
 export function useWorkspaceExports({
   rolePalette,
+  neutralScale = null,
   tokenOverridesByTheme,
   exportStatusTokenOverrides = {},
   selectedPairing,
@@ -32,6 +34,7 @@ export function useWorkspaceExports({
   kitName = 'craftie-tokens',
 }: {
   rolePalette: RolePalette | null;
+  neutralScale?: NeutralScale | null;
   tokenOverridesByTheme: {
     light: SemanticTokenOverrides;
     dark: SemanticTokenOverrides;
@@ -52,6 +55,7 @@ export function useWorkspaceExports({
   };
   const tokenSet = buildExportTokenSet({
     rolePalette,
+    neutralScale,
     tokenOverridesByTheme: exportOverridesByTheme,
     pairing: selectedPairing,
     name: kitName,

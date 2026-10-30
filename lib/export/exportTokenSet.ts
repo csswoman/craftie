@@ -4,6 +4,7 @@ import type { RolePalette } from '../color/rolePalette';
 import type { SemanticTokenName, SemanticTokenOverrides } from '../color/semanticTokens';
 import { PALETTE_ROLE_ORDER } from '../color/roleTypes';
 import type { FontPair } from '../typography/pairings';
+import { NEUTRAL_SCALE_STEPS, type NeutralScale } from '../color/neutralScale';
 
 export const CORE_EXPORT_TOKENS = ['primary', 'background', 'on-background'] as const;
 
@@ -41,6 +42,8 @@ export type BuildExportTokenSetInput = {
     dark: SemanticTokenOverrides;
   };
   pairing: FontPair | null;
+  /** UI neutral scale, exported as neutral-0 … neutral-1000 for both themes. */
+  neutralScale?: NeutralScale | null;
   name?: string;
   exportedAt?: string;
 };
@@ -72,6 +75,13 @@ export function buildExportTokenSet(input: BuildExportTokenSetInput): ExportToke
     }
   }
 
+  if (input.neutralScale) {
+    // The scale is theme-independent: dark themes use the other end of it.
+    for (const step of NEUTRAL_SCALE_STEPS) {
+      setColor(colors, `neutral-${step}`, 'light', input.neutralScale[step]);
+      setColor(colors, `neutral-${step}`, 'dark', input.neutralScale[step]);
+    }
+  }
   for (const [token, hex] of Object.entries(input.tokenOverridesByTheme.light) as Array<
     [SemanticTokenName, string]
   >) {

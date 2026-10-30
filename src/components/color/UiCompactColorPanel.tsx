@@ -10,6 +10,7 @@ import {
 } from '@lib/color/uiStatusColors';
 import { useAutoHideScrollbar } from '@/lib/browser/useAutoHideScrollbar';
 import { CreateBrandGuideFooter } from './CreateBrandGuideFooter';
+import { NeutralScaleStrip } from './NeutralScaleStrip';
 import { UiCompactRoleRow } from './UiCompactRoleRow';
 import { UiCompactStatusSlot } from './UiCompactStatusSlot';
 import { UiSourceColorGrid } from './UiSourceColorGrid';
@@ -82,6 +83,7 @@ export function UiCompactColorPanel({
                 />
               ))}
             </ul>
+            {groupId === 'foundations' ? <NeutralScaleStrip /> : null}
             {groupId === 'brand' && showCreateGuide && !canCreateGuide && missingGuideRoles.length > 0 ? (
               <p className="mt-2 rounded-md bg-surface px-3 py-2 text-tools-meta-scale leading-snug text-muted">
                 Para ver la guía, asigna un color a: {missingGuideRoles.join(', ')}.
@@ -124,11 +126,7 @@ export function UiCompactColorPanel({
       <PanelSection
         title="Colores fuente"
         icon={Droplets}
-        trailing={(
-          <span className="text-tools-meta-scale font-semibold text-muted">
-            {colors.length} extraídos
-          </span>
-        )}
+        trailing={<span className="text-tools-meta-scale font-semibold text-muted">{colors.length} extraídos</span>}
       >
         <UiSourceColorGrid colors={colors} tokens={tokens} onOpen={onOpenSources} />
       </PanelSection>
