@@ -52,7 +52,7 @@ export function DashboardMetricCard({
         >
           {metric.label}
         </PreviewSlotTarget>
-        <StatDelta value={metric.trend} direction={metric.dir} color={trendColor} slot={metric.trendSlot} onEditSlot={onEditSlot} />
+        <StatDelta value={metric.trend} direction={metric.dir} color={trendColor} slot={metric.trendSlot} surfaceHex={colors.surface} onEditSlot={onEditSlot} />
       </div>
       <PreviewSlotTarget
         slot="text"

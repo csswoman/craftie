@@ -3,11 +3,13 @@
 import { useState } from 'react';
 
 import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
+import { readableOn } from '@lib/utils/colorMath';
 
 import { previewStaggerDelay } from './dashboardPreviewData';
 import { PreviewIcon } from './previewIcons';
-import { onVividFill, vividFill } from './previewColor';
+import { buttonPairOn, paletteTint } from './previewButtons';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
+import { StoreHeroArt } from './StoreHeroArt';
 import { StoreProductCard } from './StoreProductCard';
 import {
   getShippingNote,
@@ -18,6 +20,7 @@ import {
   STORE_PRODUCTS,
 } from './storePreviewData';
 import {
+  bodyStyle,
   buttonStyle,
   captionStyle,
   DEFAULT_PREVIEW_FONTS,
@@ -26,7 +29,6 @@ import {
   labelStyle,
   type PreviewFonts,
   previewRootTypeStyle,
-  titleStyle,
 } from './previewTypography';
 
 export const STORE_VISUAL_SLOTS = [
@@ -59,7 +61,13 @@ export function StoreLayoutPreview({
 }) {
   const [filter, setFilter] = useState<string>(STORE_FILTERS[0]);
   const [cart, setCart] = useState<string[]>([]);
-  const primaryFill = vividFill(colors.primaryAction, colors.surface);
+  const filterButton = buttonPairOn(colors, colors.appBackground);
+  const heroWash = paletteTint(colors.brand3, colors.appBackground, 0.16);
+  const heroButton = buttonPairOn(colors, heroWash);
+  const heroInk = readableOn(colors.text, heroWash);
+  const heroMuted = readableOn(colors.mutedText, heroWash);
+  const shipWash = paletteTint(colors.success, colors.appBackground, 0.2);
+  const shipInk = readableOn(colors.text, shipWash);
   const swatches = [colors.brand1, colors.brand2, colors.brand3, colors.brand4];
   const visible = STORE_PRODUCTS.filter(
     (product) => filter === 'Todo' || (filter === 'Nuevo' ? product.badge === 'Nuevo' : product.badge !== undefined),
@@ -84,8 +92,8 @@ export function StoreLayoutPreview({
       <PreviewSlotTarget
         slot="chrome"
         onEditSlot={onEditSlot}
-        className={`preview-rise flex items-center justify-between gap-4 border-b py-4 ${STORE_GUTTER_CLASS}`}
-        style={{ backgroundColor: colors.chrome, borderColor: colors.divider, animationDelay: previewStaggerDelay(0) }}
+        className={`preview-rise flex items-center justify-between gap-4 py-4 ${STORE_GUTTER_CLASS}`}
+        style={{ backgroundColor: colors.chrome, animationDelay: previewStaggerDelay(0) }}
       >
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
           Casa Barro
@@ -111,25 +119,40 @@ export function StoreLayoutPreview({
         className={`flex items-center gap-2 py-2.5 ${STORE_GUTTER_CLASS}`}
         style={{
           ...captionStyle(fonts),
-          backgroundColor: vividFill(colors.success, colors.surface),
-          color: onVividFill(vividFill(colors.success, colors.surface)),
+          backgroundColor: shipWash,
+          color: shipInk,
         }}
       >
         <PreviewIcon name="check" size={14} />
         <span role="status">{getShippingNote(cartTotal)}</span>
       </PreviewSlotTarget>
 
-      <section className={`preview-rise py-10 ${STORE_GUTTER_CLASS} @min-[720px]/store:py-14`} style={{ animationDelay: previewStaggerDelay(1) }}>
-        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="max-w-[18ch]" style={heroStyle(fonts)}>
-          Objetos para la mesa de cada día
-        </PreviewSlotTarget>
-        <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-3 max-w-[48ch] text-pretty" style={{ ...titleStyle(fonts), color: colors.mutedText }}>
-          Piezas hechas en pequeñas tiradas, con materiales que envejecen bien.
-        </PreviewSlotTarget>
+      <section className={`preview-rise py-8 ${STORE_GUTTER_CLASS} @min-[720px]/store:py-12`} style={{ animationDelay: previewStaggerDelay(1) }}>
+        <div
+          className="grid items-center gap-6 overflow-hidden rounded-2xl p-6 @min-[720px]/store:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] @min-[720px]/store:gap-10 @min-[720px]/store:p-10"
+          style={{ backgroundColor: heroWash, color: heroInk }}
+        >
+          <div className="min-w-0">
+            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="max-w-[16ch]" style={{ ...heroStyle(fonts), color: heroInk }}>
+              Objetos para la mesa de cada día
+            </PreviewSlotTarget>
+            <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-3 max-w-[44ch] text-pretty" style={bodyStyle(fonts, heroMuted)}>
+              Piezas hechas en pequeñas tiradas, con materiales que envejecen bien.
+            </PreviewSlotTarget>
+            <PreviewSlotTarget
+              slot="primaryAction"
+              onEditSlot={onEditSlot}
+              className="mt-6 inline-flex min-h-11 items-center rounded-[10px] px-5"
+              style={{ ...buttonStyle(fonts), backgroundColor: heroButton.fill, color: heroButton.on }}
+            >
+              Ver novedades
+            </PreviewSlotTarget>
+          </div>
+          <StoreHeroArt colors={colors} wash={heroWash} onEditSlot={onEditSlot} />
+        </div>
 
         <div
-          className="mt-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t pt-5"
-          style={{ borderColor: colors.divider }}
+          className="mt-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-3"
         >
           <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar productos">
             {STORE_FILTERS.map((option) => {
@@ -143,9 +166,9 @@ export function StoreLayoutPreview({
                   className="min-h-9 rounded-full border px-4"
                   style={{
                     ...buttonStyle(fonts),
-                    backgroundColor: active ? primaryFill : 'transparent',
-                    borderColor: active ? primaryFill : colors.border,
-                    color: active ? onVividFill(primaryFill) : colors.text,
+                    backgroundColor: active ? filterButton.fill : colors.surface,
+                    borderColor: active ? filterButton.fill : colors.border,
+                    color: active ? filterButton.on : colors.text,
                   }}
                 >
                   {option}
@@ -163,6 +186,7 @@ export function StoreLayoutPreview({
             <StoreProductCard
               key={product.name}
               product={product}
+              index={STORE_PRODUCTS.indexOf(product)}
               swatchHex={swatches[STORE_PRODUCTS.indexOf(product)] ?? colors.accent}
               colors={colors}
               fonts={fonts}

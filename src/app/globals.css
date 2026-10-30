@@ -4,9 +4,9 @@
 
 @theme {
   --color-bg: oklch(1 0 0);
-  --color-canvas: oklch(0.965 0.004 160);
-  --color-surface: oklch(0.975 0 0);
-  --color-surface-raised: oklch(0.955 0 0);
+  --color-canvas: oklch(0.945 0.006 160);
+  --color-surface: oklch(0.982 0.002 160);
+  --color-surface-raised: oklch(0.945 0.004 160);
   --color-forest: #1e4635;
   --color-forest-deep: #163728;
   --color-forest-darker: #0f2b1e;
@@ -17,7 +17,7 @@
   --color-line-soft: #eef2f0;
   --color-attention: #c47b2a;
   --color-attention-bg: #fbf1e4;
-  --color-border: oklch(0.9 0.003 160);
+  --color-border: oklch(0.86 0.005 160);
   --color-primary: oklch(0.35 0.077 160);
   --color-primary-hover: oklch(0.28 0.07 160);
   --color-accent: oklch(0.52 0.11 230);
@@ -92,12 +92,12 @@
 
 @layer theme {
   [data-theme='dark'] {
-    --color-bg: oklch(0.16 0.008 160);
+    --color-bg: oklch(0.18 0.009 160);
     --color-canvas: oklch(0.14 0.01 160);
-    --color-surface: oklch(0.19 0.01 160);
-    --color-surface-raised: oklch(0.22 0.012 160);
+    --color-surface: oklch(0.22 0.011 160);
+    --color-surface-raised: oklch(0.26 0.013 160);
     --color-ink: oklch(0.93 0.005 160);
-    --color-muted: oklch(0.65 0.01 160);
+    --color-muted: oklch(0.7 0.01 160);
     --color-forest: oklch(0.52 0.11 150);
     --color-forest-deep: oklch(0.58 0.12 150);
     --color-forest-darker: oklch(0.46 0.1 150);
@@ -106,7 +106,7 @@
     --color-line-soft: #293a32;
     --color-attention: #e0a45f;
     --color-attention-bg: #402f1d;
-    --color-border: oklch(0.28 0.01 160);
+    --color-border: oklch(0.34 0.012 160);
     --color-primary: oklch(0.62 0.1 160);
     --color-primary-hover: oklch(0.68 0.11 160);
     --color-accent: oklch(0.65 0.12 230);

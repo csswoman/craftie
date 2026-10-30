@@ -6,6 +6,7 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
 import { AnalyticsAsidePanels } from './AnalyticsAsidePanels';
 import { AnalyticsDetailPanels } from './AnalyticsDetailPanels';
+import { AnalyticsPaletteBoard } from './AnalyticsPaletteBoard';
 import { AnalyticsMetricCard } from './AnalyticsMetricCard';
 import { AnalyticsSourceInsights } from './AnalyticsSourceInsights';
 import { AnalyticsTreatPanel } from './AnalyticsTreatPanel';
@@ -23,6 +24,7 @@ import { PreviewIcon } from './previewIcons';
 import { tint } from './previewPrimitives';
 import {
   bodyStyle,
+  compactBodyStyle,
   buttonStyle,
   captionStyle,
   DEFAULT_PREVIEW_FONTS,
@@ -106,7 +108,7 @@ export function AnalyticsLayoutPreview({
             className="mt-3 text-pretty"
             style={bodyStyle(fonts, colors.mutedText)}
           >
-            Metas de perro artista: croquetas, carrera, pelota y charlar contigo.
+            Así avanza el estudio: paletas, contraste, guías y entregas.
           </PreviewSlotTarget>
         </div>
         <PreviewSlotTarget
@@ -156,15 +158,15 @@ export function AnalyticsLayoutPreview({
             <div className="flex flex-wrap items-start justify-between gap-6">
               <div className="min-w-0">
                 <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
-                  Cómo pasó el día
+                  En qué se fue el día
                 </PreviewSlotTarget>
                 <PreviewSlotTarget
                   slot="mutedText"
                   onEditSlot={onEditSlot}
                   className="mt-2 max-w-[40ch] text-pretty"
-                  style={bodyStyle(fonts, colors.mutedText)}
+                  style={compactBodyStyle(fonts, colors.mutedText)}
                 >
-                  Pasa el cursor por un segmento para ver dónde puso la energía Craftie.
+                  Pasa el cursor por un segmento para ver dónde se fue el tiempo.
                 </PreviewSlotTarget>
               </div>
               <div className="flex items-center gap-4">
@@ -209,6 +211,10 @@ export function AnalyticsLayoutPreview({
             <AnalyticsAsidePanels colors={colors} fonts={fonts} onEditSlot={onEditSlot} />
           </div>
         </section>
+
+        <div className="mt-6">
+          <AnalyticsPaletteBoard colors={colors} fonts={fonts} onEditSlot={onEditSlot} />
+        </div>
 
         <div className="mt-6">
           <AnalyticsTreatPanel colors={colors} fonts={fonts} onEditSlot={onEditSlot} />

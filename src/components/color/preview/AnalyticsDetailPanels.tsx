@@ -11,7 +11,7 @@ import {
 } from './analyticsPreviewData';
 import { AreaChart } from './previewCharts';
 import { ProgressBar, tint } from './previewPrimitives';
-import { bodyStyle, captionStyle, headingStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import { compactBodyStyle, captionStyle, headingStyle, titleStyle, type PreviewFonts } from './previewTypography';
 
 type DetailPanelProps = {
   colors: ResolvedLayoutColors;
@@ -33,15 +33,15 @@ export function AnalyticsDetailPanels({ colors, fonts, onEditSlot }: DetailPanel
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
-              Energía de la semana
+              Actividad de la semana
             </PreviewSlotTarget>
             <PreviewSlotTarget
               slot="mutedText"
               onEditSlot={onEditSlot}
               className="mt-2 max-w-[44ch] text-pretty"
-              style={bodyStyle(fonts, colors.mutedText)}
+              style={compactBodyStyle(fonts, colors.mutedText)}
             >
-              Cuánta cola movió Craftie de lunes a domingo.
+              Revisiones y ajustes de lunes a domingo.
             </PreviewSlotTarget>
           </div>
           <div className="flex items-center gap-3" style={captionStyle(fonts, colors.mutedText)}>
@@ -140,9 +140,9 @@ export function AnalyticsDetailPanels({ colors, fonts, onEditSlot }: DetailPanel
                 slot="text"
                 onEditSlot={onEditSlot}
                 className="mt-2 block text-pretty"
-                style={bodyStyle(fonts)}
+                style={compactBodyStyle(fonts)}
               >
-                {peakDay.day} lideró la cola: más movimiento que el resto de la semana.
+                {peakDay.day} fue el día más activo: más ajustes que el resto de la semana.
               </PreviewSlotTarget>
             </div>
           </div>
@@ -160,7 +160,7 @@ export function AnalyticsDetailPanels({ colors, fonts, onEditSlot }: DetailPanel
         >
           <div className="flex items-center justify-between gap-3">
             <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
-              Metas de Craftie
+              Metas del estudio
             </PreviewSlotTarget>
             <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={captionStyle(fonts, colors.mutedText)}>
               Este mes

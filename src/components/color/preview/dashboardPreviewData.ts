@@ -27,7 +27,7 @@ export function getStudioGreeting(hour: number): string {
 
 export const STUDIO_GREETING_FALLBACK = 'Buenas tardes';
 
-export const STUDIO_SUBTITLE = 'Atelier Pigmento espera revisión de contraste.';
+export const STUDIO_SUBTITLE = 'Atelier Pigmento espera tu visto bueno en el contraste.';
 
 export function dashboardRangeLabel(range: DashboardRange): string {
   if (range === '7d') return '7 días';
@@ -37,8 +37,8 @@ export function dashboardRangeLabel(range: DashboardRange): string {
 
 export function getWeeklyRhythmNote(percent: number): string {
   if (percent >= 90) return 'Queda una entrega.';
-  if (percent >= 70) return 'La semana va al día.';
-  return 'Hay entregas por cerrar.';
+  if (percent >= 70) return 'La semana va a buen ritmo.';
+  return 'Quedan entregas por cerrar.';
 }
 
 export function getPaletteProgressNote(percent: number): string {
@@ -70,8 +70,8 @@ export function buildDashboardActivity(colors: {
   brand3: string;
 }) {
   return [
-    { label: 'Bosque, paleta aprobada', detail: 'Lupo · hace 2 min', initials: 'LB', color: colors.brand1, slot: 'brand1' as const },
+    { label: 'Paleta Bosque aprobada', detail: 'Lupo · hace 2 min', initials: 'LB', color: colors.brand1, slot: 'brand1' as const },
     { label: 'Guía de marca exportada', detail: 'Estudio Nube · hace 18 min', initials: 'EN', color: colors.brand2, slot: 'brand2' as const },
-    { label: 'Contraste subido a AAA', detail: 'Atelier Pigmento · hace 1 h', initials: 'AP', color: colors.brand3, slot: 'brand3' as const },
+    { label: 'Contraste mejorado a AAA', detail: 'Atelier Pigmento · hace 1 h', initials: 'AP', color: colors.brand3, slot: 'brand3' as const },
   ] as const;
 }

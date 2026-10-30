@@ -1,10 +1,11 @@
 import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
+import { MediaCoverArt } from './MediaCoverArt';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { MEDIA_QUEUE, MEDIA_STATS } from './mediaPreviewData';
+import { onVividFill } from './previewColor';
 import { PreviewIcon } from './previewIcons';
-import { tint } from './previewPrimitives';
-import { bodyStyle, displayStyle, headingStyle, labelStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import { compactBodyStyle, displayStyle, headingStyle, labelStyle, titleStyle, type PreviewFonts } from './previewTypography';
 
 type MediaAsidePanelsProps = {
   colors: ResolvedLayoutColors;
@@ -15,33 +16,30 @@ type MediaAsidePanelsProps = {
 export function MediaAsidePanels({ colors, fonts, onEditSlot }: MediaAsidePanelsProps) {
   return (
     <div className="grid gap-5">
-      <PreviewSlotTarget
-        slot="surfaceElevated"
-        onEditSlot={onEditSlot}
-        className="preview-surface rounded-[14px] border p-5"
-        style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
-      >
-        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
-          Ritmo del estudio
-        </PreviewSlotTarget>
-        <div className="mt-5 grid grid-cols-2 gap-3">
-          {MEDIA_STATS.map((item) => (
-            <div key={item.label} className="min-w-0">
-              <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={labelStyle(fonts, colors.mutedText)}>
+      <div className="grid grid-cols-2 gap-3">
+        {MEDIA_STATS.map((item, index) => {
+          const slot = index === 0 ? 'brand1' : 'brand2';
+          const fill = colors[slot];
+          const ink = onVividFill(fill);
+
+          return (
+            <PreviewSlotTarget
+              key={item.label}
+              slot={slot}
+              onEditSlot={onEditSlot}
+              className="preview-lift min-w-0 rounded-[14px] p-4 shadow-[0_16px_26px_-18px_rgb(0_0_0/0.5)]"
+              style={{ backgroundColor: fill, color: ink }}
+            >
+              <span className="block" style={labelStyle(fonts, ink)}>
                 {item.label}
-              </PreviewSlotTarget>
-              <PreviewSlotTarget
-                slot="text"
-                onEditSlot={onEditSlot}
-                className="mt-1 block tabular-nums"
-                style={displayStyle(fonts)}
-              >
+              </span>
+              <span className="mt-1 block tabular-nums" style={displayStyle(fonts)}>
                 {item.value}
-              </PreviewSlotTarget>
-            </div>
-          ))}
-        </div>
-      </PreviewSlotTarget>
+              </span>
+            </PreviewSlotTarget>
+          );
+        })}
+      </div>
 
       <PreviewSlotTarget
         slot="surfaceElevated"
@@ -58,7 +56,7 @@ export function MediaAsidePanels({ colors, fonts, onEditSlot }: MediaAsidePanels
               slot="mutedText"
               onEditSlot={onEditSlot}
               className="mt-1 text-pretty"
-              style={bodyStyle(fonts, colors.mutedText)}
+              style={compactBodyStyle(fonts, colors.mutedText)}
             >
               Lo que Craftie pone mientras seca la pintura.
             </PreviewSlotTarget>
@@ -72,19 +70,15 @@ export function MediaAsidePanels({ colors, fonts, onEditSlot }: MediaAsidePanels
         </div>
         <div className="mt-5 space-y-1">
           {MEDIA_QUEUE.map((item, index) => {
-            const swatch = [colors.brand1, colors.brand2, colors.brand3][index]!;
-
             return (
               <div
                 key={item.track}
                 className="group flex items-center gap-3 rounded-[10px] px-1.5 py-2 transition-colors duration-150 hover:bg-[color-mix(in_srgb,currentColor_6%,transparent)]"
               >
-                <span
-                  className="h-8 w-8 shrink-0 rounded-[10px] transition-transform duration-200 ease-out group-hover:rotate-[-3deg] motion-reduce:transition-none motion-reduce:group-hover:rotate-0"
-                  style={{
-                    backgroundImage: `radial-gradient(circle at 30% 30%, ${tint(swatch, 72)}, ${tint(swatch, 28)})`,
-                  }}
-                  aria-hidden="true"
+                <MediaCoverArt
+                  colors={colors}
+                  seed={index}
+                  className="size-9 shrink-0 rounded-[10px] transition-transform duration-200 ease-out group-hover:rotate-[-3deg] motion-reduce:transition-none motion-reduce:group-hover:rotate-0"
                 />
                 <span className="flex min-w-0 flex-1 items-center gap-2">
                   <PreviewIcon
@@ -100,7 +94,7 @@ export function MediaAsidePanels({ colors, fonts, onEditSlot }: MediaAsidePanels
                       slot="mutedText"
                       onEditSlot={onEditSlot}
                       className="block truncate"
-                      style={bodyStyle(fonts, colors.mutedText)}
+                      style={compactBodyStyle(fonts, colors.mutedText)}
                     >
                       {item.artist}
                     </PreviewSlotTarget>

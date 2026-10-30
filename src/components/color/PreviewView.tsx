@@ -187,6 +187,8 @@ export function PreviewView({
     ['--size-h3' as string]: `${sizes.h3}px`,
     ['--size-body' as string]: `${sizes.body}px`,
     ['--size-small' as string]: `${sizes.small}px`,
+    ['--size-compact' as string]: `${sizes.compact}px`,
+    ['--size-micro' as string]: `${sizes.micro}px`,
     ...typeRoleCssVariables(effectiveRoles),
   };
   const statusTokenStyle = statusColors ? statusColorCssVariables(statusColors) : {};

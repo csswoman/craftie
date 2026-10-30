@@ -30,7 +30,7 @@ export function AnalyticsAsidePanels({
         style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
       >
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
-          Estado de ánimo
+          Pulso del día
         </PreviewSlotTarget>
         <div className="mt-5 grid gap-4 @min-[480px]/analyticsaside:grid-cols-3 @min-[800px]/analytics:grid-cols-1">
           {ANALYTICS_DAY_STATS.map((item) => (
@@ -53,6 +53,7 @@ export function AnalyticsAsidePanels({
                 direction={item.dir}
                 color={item.dir === 'up' ? colors.success : colors.error}
                 slot={item.dir === 'up' ? 'success' : 'error'}
+                surfaceHex={colors.surfaceElevated}
                 onEditSlot={onEditSlot}
               />
             </div>
@@ -67,7 +68,7 @@ export function AnalyticsAsidePanels({
         style={{ backgroundColor: colors.surface, borderColor: colors.border }}
       >
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
-          Sitios favoritos
+          Paletas más usadas
         </PreviewSlotTarget>
         <div className="mt-5 space-y-4">
           {ANALYTICS_TOP_ACTIVITIES.map((place, index) => (

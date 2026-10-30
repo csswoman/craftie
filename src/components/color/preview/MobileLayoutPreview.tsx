@@ -18,7 +18,7 @@ import {
 import { onVividFill, vividFill } from './previewColor';
 import { tint } from './previewPrimitives';
 import {
-  bodyStyle,
+  compactBodyStyle,
   brandStyle,
   buttonStyle,
   captionStyle,
@@ -204,7 +204,7 @@ export function MobileLayoutPreview({
                   <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="block truncate" style={titleStyle(fonts)}>
                     {palette.name}
                   </PreviewSlotTarget>
-                  <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="block truncate" style={bodyStyle(fonts, colors.mutedText)}>
+                  <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="block truncate" style={compactBodyStyle(fonts, colors.mutedText)}>
                     {palette.note}
                   </PreviewSlotTarget>
                 </span>

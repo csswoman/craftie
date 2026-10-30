@@ -31,15 +31,15 @@ export function AnalyticsTreatPanel({
     >
       <div className="flex items-center justify-between gap-3">
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
-          Premios
+          Entregas
         </PreviewSlotTarget>
-        <StatDelta value="12%" direction="up" color={colors.success} slot="success" onEditSlot={onEditSlot} />
+        <StatDelta value="12%" direction="up" color={colors.success} slot="success" surfaceHex={colors.surfaceElevated} onEditSlot={onEditSlot} />
       </div>
 
       <div className="mt-5 grid gap-5 @min-[720px]/analytics:grid-cols-[minmax(0,0.95fr)_minmax(0,1.15fr)]">
         <div className="min-w-0">
           <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="block tabular-nums" style={displayStyle(fonts)}>
-            1,254
+            248
           </PreviewSlotTarget>
           <PreviewSlotTarget
             slot="mutedText"
@@ -47,7 +47,7 @@ export function AnalyticsTreatPanel({
             className="mt-1 block"
             style={labelStyle(fonts, colors.mutedText)}
           >
-            acumulados este semestre
+            guías entregadas este semestre
           </PreviewSlotTarget>
 
           <div className="mt-4 flex flex-wrap gap-x-6 gap-y-3">
@@ -126,7 +126,7 @@ export function AnalyticsTreatPanel({
                     backgroundColor: colors.data1,
                     animationDelay: `${index * 45}ms`,
                   }}
-                  aria-label={`${ANALYTICS_MONTHS[index]} premios: ${value}`}
+                  aria-label={`${ANALYTICS_MONTHS[index]} entregas: ${value}`}
                 />
               </div>
             ))}
@@ -185,7 +185,7 @@ export function AnalyticsTreatPanel({
 
         <div className="min-w-0 space-y-3">
           <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={captionStyle(fonts, colors.mutedText)}>
-            Premios recientes
+            Entregas recientes
           </PreviewSlotTarget>
           {ANALYTICS_RECENT_TREATS.map((item) => (
             <div key={item.title} className="flex items-center gap-3">

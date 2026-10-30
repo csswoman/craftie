@@ -89,7 +89,16 @@ export const UI_LAYOUT_MODES: UiLayoutModeDefinition[] = [
     id: 'dashboard',
     label: 'Dashboard',
     description: 'Neutral workspace chrome with expressive color reserved for actions and key data.',
-    commonSlots: baseCommonSlots,
+    commonSlots: {
+      ...baseCommonSlots,
+      // Data marks use the palette's own accents instead of derived chart colors.
+      data1: 'primary',
+      data2: 'secondary',
+      data3: 'accent',
+      data4: 'primary-300',
+      data5: 'secondary-300',
+      data6: 'accent-300',
+    },
   },
   {
     id: 'landing',
@@ -118,12 +127,19 @@ export const UI_LAYOUT_MODES: UiLayoutModeDefinition[] = [
   {
     id: 'analytics',
     label: 'Analytics',
-    description: 'Strictly neutral chrome with expressive tokens used only as data series.',
+    description: 'Strictly neutral chrome with the palette accents (and their tints) as chart series.',
     commonSlots: {
       ...baseCommonSlots,
       primaryAction: 'surface',
       primaryActionText: 'on-surface',
-      accent: 'data-1',
+      // Series use the palette's own accents instead of derived chart colors.
+      accent: 'primary',
+      data1: 'primary',
+      data2: 'secondary',
+      data3: 'accent',
+      data4: 'primary-300',
+      data5: 'secondary-300',
+      data6: 'accent-300',
     },
   },
   {

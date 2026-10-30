@@ -2,10 +2,11 @@
 
 import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
+import { MediaCoverArt } from './MediaCoverArt';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { MEDIA_NOW_PLAYING } from './mediaPreviewData';
 import { PreviewIcon } from './previewIcons';
-import { EqualizerBars, ProgressBar, tint } from './previewPrimitives';
+import { EqualizerBars, ProgressBar } from './previewPrimitives';
 import { labelStyle, titleStyle, type PreviewFonts } from './previewTypography';
 
 type MediaPlayerBarProps = {
@@ -41,15 +42,7 @@ export function MediaPlayerBar({
     >
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 @min-[720px]/media:grid-cols-[minmax(0,1fr)_minmax(12rem,1.1fr)_minmax(0,1fr)]">
         <div className="flex min-w-0 items-center gap-2.5">
-          <PreviewSlotTarget
-            slot="accent"
-            onEditSlot={onEditSlot}
-            className="h-11 w-11 shrink-0 rounded-[10px] border"
-            style={{
-              borderColor: colors.divider,
-              backgroundImage: `radial-gradient(circle at 30% 25%, ${tint(colors.accent, 60)}, ${tint(colors.accent, 16)} 75%)`,
-            }}
-          />
+          <MediaCoverArt colors={colors} onEditSlot={onEditSlot} className="size-11 shrink-0 rounded-[10px]" />
           <div className="min-w-0">
             <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="block truncate" style={titleStyle(fonts)}>
               {MEDIA_NOW_PLAYING.title}

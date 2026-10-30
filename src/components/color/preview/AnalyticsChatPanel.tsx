@@ -124,14 +124,14 @@ export function AnalyticsChatPanel({
             } as CSSProperties
           }
           placeholder={ANALYTICS_CHAT.placeholder}
-          aria-label="Mensaje para Craftie"
+          aria-label="Responder a Lucía"
         />
         <button
           type="submit"
           onClick={(event) => event.stopPropagation()}
           className="grid h-9 w-9 shrink-0 place-items-center rounded-full transition-transform duration-150 ease-out hover:-translate-y-0.5 active:scale-90 focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
           style={{ backgroundColor: craftieFill, color: onCraftie, outlineColor: craftieFill }}
-          aria-label="Enviar mensaje a Craftie"
+          aria-label="Enviar respuesta a Lucía"
         >
           <PreviewIcon name="arrowRight" size={14} />
         </button>

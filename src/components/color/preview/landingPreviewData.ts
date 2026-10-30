@@ -19,44 +19,44 @@ export const STUDIO_STEPS: Array<{
   icon: PreviewIconName;
   slot: UiLayoutSlot;
 }> = [
-  {
-    title: 'Mezclar',
-    text: 'Un color semilla se convierte en roles de interfaz.',
-    icon: 'layers',
-    slot: 'brand1',
-  },
-  {
-    title: 'Contrastar',
-    text: 'Cada par texto–fondo se mide contra WCAG AA.',
-    icon: 'shield',
-    slot: 'brand2',
-  },
-  {
-    title: 'Entregar',
-    text: 'Tipografía y guía listas para exportar.',
-    icon: 'check',
-    slot: 'brand3',
-  },
-];
+    {
+      title: 'Mezclar',
+      text: 'De un color semilla salen los roles de tu interfaz.',
+      icon: 'layers',
+      slot: 'brand1',
+    },
+    {
+      title: 'Contrastar',
+      text: 'Cada pareja de texto y fondo se mide contra WCAG AA.',
+      icon: 'shield',
+      slot: 'brand2',
+    },
+    {
+      title: 'Entregar',
+      text: 'Tipografía y guía de marca listas para entregar.',
+      icon: 'check',
+      slot: 'brand3',
+    },
+  ];
 
 export const PLANS = [
-  { name: 'Boceto', price: '$0', tagline: 'Paletas para uso personal', slot: 'brand2' as const },
-  { name: 'Estudio', price: '$18', tagline: 'Guía, contraste y tipografía', slot: 'primaryAction' as const, featured: true },
-  { name: 'Atelier', price: '$42', tagline: 'Varias marcas en un equipo', slot: 'brand3' as const },
+  { name: 'Boceto', price: '$0', tagline: 'Paletas para proyectos personales', slot: 'brand2' as const },
+  { name: 'Estudio', price: '$18', tagline: 'Guía de marca, contraste y tipografía', slot: 'primaryAction' as const, featured: true },
+  { name: 'Atelier', price: '$42', tagline: 'Varias marcas, todo el equipo', slot: 'brand3' as const },
 ] as const;
 
 export const CRAFTIE_QUOTE = {
   author: 'Lucía Ríos',
   role: 'Diseñadora de marca',
   initials: 'LR',
-  text: 'No deja pasar un contraste flojo. Craftie mezcla con criterio de perro artista.',
+  text: 'No deja pasar un contraste flojo. Craftie mezcla con criterio de perro artista: buen olfato para el color y cero atajos.',
   badge: 'Contraste AA',
 } as const;
 
 export const HERO_COPY = {
-  kicker: 'Perro artista · contraste medido',
+  kicker: 'Perro artista · color con criterio',
   headline: 'Tu paleta, ya en contexto.',
-  body: 'Genera roles, comprueba WCAG y exporta una guía ligera. El color se juzga en una UI, no en un swatch suelto.',
+  body: 'Genera roles de color, comprueba WCAG y exporta una guía clara. El color se evalúa en una interfaz real, no en una muestra aislada.',
   primaryCta: 'Abrir estudio',
   secondaryCta: 'Ver contraste',
 } as const;

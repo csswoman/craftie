@@ -68,7 +68,7 @@ export function Tag({
     <PreviewSlotTarget
       slot={slot}
       onEditSlot={onEditSlot}
-      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.6875rem]"
+      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.75rem]"
       style={{ backgroundColor, color: foregroundColor, fontWeight: ROLE_WEIGHT.button }}
     >
       {icon ? <PreviewIcon name={icon} size={11} strokeWidth={2.25} /> : null}
@@ -83,13 +83,18 @@ export function StatDelta({
   color,
   slot,
   onEditSlot,
-}: SlotColorProps & { value: string; direction: 'up' | 'down' }) {
+  surfaceHex,
+}: SlotColorProps & { value: string; direction: 'up' | 'down'; surfaceHex?: string }) {
+  // With the surface known, the chip is an opaque tint and its text is moved to AA on it.
+  const background = surfaceHex ? mix(surfaceHex, color, 0.15) : tint(color, 15);
+  const ink = surfaceHex ? readableOn(color, background, 4.5) : color;
+
   return (
     <PreviewSlotTarget
       slot={slot}
       onEditSlot={onEditSlot}
-      className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full px-1.5 py-0.5 text-[0.6875rem] tabular-nums"
-      style={{ backgroundColor: tint(color, 15), color, fontWeight: ROLE_WEIGHT.button }}
+      className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full px-1.5 py-0.5 text-[0.75rem] tabular-nums"
+      style={{ backgroundColor: background, color: ink, fontWeight: ROLE_WEIGHT.button }}
     >
       <PreviewIcon name={direction === 'up' ? 'arrowUp' : 'arrowDown'} size={11} strokeWidth={2.5} />
       {value}
@@ -119,7 +124,7 @@ export function LiveDot({
 
   return (
     <span
-      className="inline-flex items-center gap-1.5 text-[0.6875rem]"
+      className="inline-flex items-center gap-1.5 text-[0.75rem]"
       style={{ color: surfaceHex ? readableOn(color, surfaceHex) : color, fontWeight: ROLE_WEIGHT.label }}
     >
       {dot}
@@ -168,7 +173,7 @@ export function SegmentedControl({
               event.stopPropagation();
               onChange(option);
             }}
-            className="rounded-full px-3 py-1.5 text-[0.6875rem] transition-colors duration-200 ease-out"
+            className="rounded-full px-3 py-1.5 text-[0.75rem] transition-colors duration-200 ease-out"
             style={{
               backgroundColor: active ? activeColor : 'transparent',
               color: active ? activeText : mutedText,

@@ -52,7 +52,7 @@ describe('layoutModes', () => {
     const entries = new Map(layoutModeTokenEntries(dashboard));
 
     expect(entries.get('primaryAction')).toBe('primary');
-    expect(entries.get('data4')).toBe('data-4');
+    expect(entries.get('data4')).toBe('primary-300');
     expect(entries.get('appBackground')).toBe('background');
   });
 

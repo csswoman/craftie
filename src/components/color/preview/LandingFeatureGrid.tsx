@@ -1,22 +1,17 @@
-import type { ResolvedLayoutColors, UiLayoutSlot } from '@lib/color/layoutModes';
+import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { previewStaggerDelay } from './dashboardPreviewData';
-import { readableInk } from './previewColor';
+import { onVividFill } from './previewColor';
+import { PreviewIcon } from './previewIcons';
 import { STUDIO_STEPS } from './landingPreviewData';
 import {
-  bodyStyle,
+  compactBodyStyle,
   brandStyle,
-  headingStyle,
   type PreviewFonts,
 } from './previewTypography';
 
-/** Brand color as numeral ink: hue kept, lightness moved to AA on the section surface. */
-function stepAccent(colors: ResolvedLayoutColors, slot: UiLayoutSlot): string {
-  const surface = colors.supportSurface ?? colors.surface;
-  return readableInk(colors[slot] ?? colors.accent, surface);
-}
-
+/** Each step carries its palette color as a solid tile, with an icon that reads on it. */
 export function LandingFeatureGrid({
   colors,
   fonts,
@@ -27,9 +22,9 @@ export function LandingFeatureGrid({
   onEditSlot?: PreviewSlotEditHandler;
 }) {
   return (
-    <ol className="flex flex-col gap-8 @min-[720px]/landing:flex-row @min-[720px]/landing:gap-8">
+    <ol className="flex flex-col gap-8 @min-[720px]/landing:flex-row @min-[720px]/landing:gap-10">
       {STUDIO_STEPS.map((item, index) => {
-        const accent = stepAccent(colors, item.slot);
+        const fill = colors[item.slot] ?? colors.accent;
 
         return (
           <li
@@ -40,12 +35,12 @@ export function LandingFeatureGrid({
             <PreviewSlotTarget
               slot={item.slot}
               onEditSlot={onEditSlot}
-              className="tabular-nums"
-              style={{ ...headingStyle(fonts), color: accent }}
+              className="grid size-11 shrink-0 place-items-center rounded-[12px] shadow-[0_10px_18px_-12px_rgb(0_0_0/0.5)]"
+              style={{ backgroundColor: fill, color: onVividFill(fill) }}
             >
-              {index + 1}
+              <PreviewIcon name={item.icon} size={18} />
             </PreviewSlotTarget>
-            <div className="flex min-w-0 flex-col gap-2">
+            <div className="flex min-w-0 flex-col gap-1.5">
               <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={brandStyle(fonts)}>
                 {item.title}
               </PreviewSlotTarget>
@@ -53,7 +48,7 @@ export function LandingFeatureGrid({
                 slot="mutedText"
                 onEditSlot={onEditSlot}
                 className="max-w-[34ch] text-pretty"
-                style={bodyStyle(fonts, colors.mutedText)}
+                style={compactBodyStyle(fonts, colors.mutedText)}
               >
                 {item.text}
               </PreviewSlotTarget>

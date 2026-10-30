@@ -22,7 +22,7 @@ export function AnalyticsSourceInsights({
     <div className="mt-6 flex flex-1 flex-col border-t pt-6" style={{ borderColor: colors.divider }}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
-          Ritmo de cola
+          Ritmo de trabajo
         </PreviewSlotTarget>
         <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={captionStyle(fonts, colors.mutedText)}>
           Últimos 7 días

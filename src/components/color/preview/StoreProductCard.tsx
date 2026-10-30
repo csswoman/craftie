@@ -2,10 +2,11 @@
 
 import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
+import { buttonPairOn } from './previewButtons';
 import { onVividFill, vividFill } from './previewColor';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { PreviewIcon } from './previewIcons';
-import { tint } from './previewPrimitives';
+import { StoreProductArt, STORE_SHAPES } from './StoreProductArt';
 import { formatStorePrice, type StoreProduct } from './storePreviewData';
 import {
   brandStyle,
@@ -18,6 +19,7 @@ import {
 export function StoreProductCard({
   product,
   swatchHex,
+  index,
   colors,
   fonts,
   inCart,
@@ -26,13 +28,15 @@ export function StoreProductCard({
 }: {
   product: StoreProduct;
   swatchHex: string;
+  index: number;
   colors: ResolvedLayoutColors;
   fonts: PreviewFonts;
   inCart: boolean;
   onToggle: () => void;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
-  const primaryFill = vividFill(colors.primaryAction, colors.surface);
+  const button = buttonPairOn(colors, colors.surface);
+  const dots = [colors.brand1, colors.brand2, colors.brand3, colors.brand4];
   const accentFill = vividFill(colors.accent, colors.surface);
 
   return (
@@ -42,14 +46,13 @@ export function StoreProductCard({
       className="group preview-surface preview-lift flex flex-col overflow-hidden rounded-xl border"
       style={{ backgroundColor: colors.surface, borderColor: colors.border }}
     >
-      <div className="relative aspect-[4/3] overflow-hidden" style={{ backgroundColor: tint(swatchHex, 82) }} aria-hidden="true">
-        <span
-          className="preview-zoom absolute -right-6 -top-8 size-32 rounded-full"
-          style={{ backgroundColor: tint(swatchHex, 62) }}
-        />
-        <span
-          className="preview-zoom absolute bottom-4 left-4 size-14 rounded-full"
-          style={{ backgroundColor: swatchHex, boxShadow: '0 14px 20px -10px rgb(0 0 0 / 0.35)' }}
+      <div className="relative">
+        <StoreProductArt
+          colors={colors}
+          shape={STORE_SHAPES[index % STORE_SHAPES.length]!}
+          swatchHex={swatchHex}
+          onEditSlot={onEditSlot}
+          className="aspect-[4/3] w-full"
         />
         {product.badge ? (
           <span
@@ -67,6 +70,16 @@ export function StoreProductCard({
         <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={captionStyle(fonts, colors.mutedText)}>
           {product.detail}
         </PreviewSlotTarget>
+        <div className="mt-1 flex items-center gap-1" aria-label="Colores disponibles">
+          {[0, 1, 2].map((offset) => (
+            <span
+              key={offset}
+              aria-hidden="true"
+              className="size-3.5 rounded-full"
+              style={{ backgroundColor: dots[(index + offset) % dots.length], boxShadow: `0 0 0 2px ${colors.surface}` }}
+            />
+          ))}
+        </div>
         <div className="mt-3 flex items-center justify-between gap-3">
           <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="tabular-nums" style={titleStyle(fonts)}>
             {formatStorePrice(product.price)}
@@ -81,9 +94,9 @@ export function StoreProductCard({
             className="min-h-9 rounded-lg border px-3 transition-colors focus-visible:outline-none focus-visible:ring-[3px]"
             style={{
               ...buttonStyle(fonts),
-              backgroundColor: inCart ? 'transparent' : primaryFill,
-              borderColor: inCart ? colors.border : primaryFill,
-              color: inCart ? colors.text : onVividFill(primaryFill),
+              backgroundColor: inCart ? 'transparent' : button.fill,
+              borderColor: inCart ? colors.text : button.fill,
+              color: inCart ? colors.text : button.on,
             }}
           >
             {inCart ? (

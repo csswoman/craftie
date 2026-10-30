@@ -5,7 +5,7 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { getPaletteProgressNote, previewStaggerDelay } from './dashboardPreviewData';
 import { Avatar, ProgressBar, Tag } from './previewPrimitives';
-import { bodyStyle, captionStyle, headingStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import { compactBodyStyle, captionStyle, headingStyle, titleStyle, type PreviewFonts } from './previewTypography';
 
 type DashboardActivityItem = {
   label: string;
@@ -46,7 +46,7 @@ export function DashboardAsidePanels({
           slot="mutedText"
           onEditSlot={onEditSlot}
           className="mt-3 max-w-[40ch] text-pretty"
-          style={bodyStyle(fonts, colors.mutedText)}
+          style={compactBodyStyle(fonts, colors.mutedText)}
         >
           El fondo todavía no cumple AA. El resto de la paleta ya está nombrado.
         </PreviewSlotTarget>

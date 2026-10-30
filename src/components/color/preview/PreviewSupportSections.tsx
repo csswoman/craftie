@@ -26,7 +26,7 @@ export function PreviewSupportBanner({
         color: tokens.supportBanner.color,
       }}
     >
-      <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.08em] opacity-75">
+      <p className="text-[0.75rem] font-semibold uppercase tracking-[0.08em] opacity-75">
         Sección de apoyo
       </p>
       <p className="mt-1 text-[0.875rem] leading-relaxed">
@@ -63,7 +63,7 @@ export function PreviewNavbar({
       }}
     >
       <p
-        className="border-b px-4 py-2 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] opacity-60"
+        className="border-b px-4 py-2 text-[0.75rem] font-semibold uppercase tracking-[0.08em] opacity-60"
         style={{ borderColor: palette.borde.hex }}
       >
         Barra de navegación
@@ -119,7 +119,7 @@ export function PreviewChips({
         color: palette.texto.hex,
       }}
     >
-      <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.08em] opacity-60">
+      <p className="text-[0.75rem] font-semibold uppercase tracking-[0.08em] opacity-60">
         Chips de estado
       </p>
       <div className="mt-3 flex flex-wrap gap-2">

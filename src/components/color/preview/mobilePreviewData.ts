@@ -21,7 +21,7 @@ export const MOBILE_PALETTES: Array<{
   swatches: readonly UiLayoutSlot[];
 }> = [
   { name: 'Terracota en seco', note: 'Lista para exportar', swatches: ['brand1', 'brand2', 'brand3'] },
-  { name: 'Salvia tranquila', note: 'Contraste por revisar', swatches: ['brand2', 'brand4', 'brand5'] },
+  { name: 'Salvia tranquila', note: 'Contraste pendiente de revisar', swatches: ['brand2', 'brand4', 'brand5'] },
   { name: 'Ocre de taller', note: 'Boceto reciente', swatches: ['brand3', 'brand1', 'brand6'] },
 ];
 

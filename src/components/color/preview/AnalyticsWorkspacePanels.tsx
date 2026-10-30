@@ -21,9 +21,9 @@ export function AnalyticsWorkspacePanels({
   onEditSlot?: PreviewSlotEditHandler;
 }) {
   const [enabled, setEnabled] = useState<Record<string, boolean>>({
-    walk: true,
-    hungry: true,
-    nap: false,
+    contrast: true,
+    export: true,
+    focus: false,
   });
   const accent = colors.accent;
   const onAccent = onVividFill(accent);
@@ -99,7 +99,7 @@ export function AnalyticsWorkspacePanels({
         style={{ backgroundColor: colors.surface, borderColor: colors.border }}
       >
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
-          Preferencias de Craftie
+          Preferencias del estudio
         </PreviewSlotTarget>
         <div className="mt-5 space-y-3.5">
           {ANALYTICS_SETTINGS.map((item) => {

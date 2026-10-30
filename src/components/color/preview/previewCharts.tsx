@@ -199,7 +199,7 @@ export function DonutChart({
         ))}
       </svg>
       <div className="absolute inset-0 grid place-content-center text-center">
-        <span className="text-[0.625rem] uppercase tracking-wide opacity-60">{centerLabel}</span>
+        <span className="text-[0.75rem] uppercase tracking-wide opacity-60">{centerLabel}</span>
         <span className="text-[1.25rem] leading-none" style={{ fontFamily: 'var(--font-heading)', fontWeight: 'var(--weight-heading)' }}>{centerValue}</span>
       </div>
     </div>

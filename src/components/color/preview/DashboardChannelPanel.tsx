@@ -13,7 +13,7 @@ import {
 import { PreviewIcon } from './previewIcons';
 import { readableInk } from './previewColor';
 import { Tag } from './previewPrimitives';
-import { bodyStyle, captionStyle, headingStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import { compactBodyStyle, captionStyle, headingStyle, titleStyle, type PreviewFonts } from './previewTypography';
 
 type DashboardChannelPanelProps = {
   colors: ResolvedLayoutColors;
@@ -46,7 +46,7 @@ export function DashboardChannelPanel({
           <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
             Revisión de paleta
           </PreviewSlotTarget>
-          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-2" style={bodyStyle(fonts, colors.mutedText)}>
+          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-2" style={compactBodyStyle(fonts, colors.mutedText)}>
             Atelier Pigmento · últimos {dashboardRangeLabel(range)}
           </PreviewSlotTarget>
         </div>
@@ -108,7 +108,7 @@ export function DashboardChannelPanel({
           slot="primaryAction"
           onEditSlot={onEditSlot}
           className="flex items-center gap-1.5 transition-transform duration-200 ease-out hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:hover:translate-x-0"
-          style={{ ...titleStyle(fonts), fontSize: 'var(--size-small)', color: actionInk }}
+          style={{ ...titleStyle(fonts), color: actionInk }}
         >
           Revisar contraste
           <PreviewIcon name="arrowRight" size={13} strokeWidth={2.25} />

@@ -52,7 +52,7 @@ export function AnalyticsMetricCard({
         >
           {kpi.label}
         </PreviewSlotTarget>
-        <StatDelta value={kpi.trend} direction={kpi.dir} color={trendColor} slot={trendSlot} onEditSlot={onEditSlot} />
+        <StatDelta value={kpi.trend} direction={kpi.dir} color={trendColor} slot={trendSlot} surfaceHex={colors.surface} onEditSlot={onEditSlot} />
       </div>
       <PreviewSlotTarget
         slot="text"

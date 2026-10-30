@@ -18,7 +18,7 @@ export const MEDIA_STATS = [
 export const MEDIA_NOW_PLAYING = {
   title: 'Pigmento fresco',
   artist: 'Craftie · sesión de color',
-  body: 'Mix para mezclar sin prisa: chrome calmado, controles claros y la paleta al frente.',
+  body: 'Una mezcla para trabajar sin prisa: interfaz tranquila, controles claros y la paleta como protagonista.',
   elapsed: '1:42',
   duration: '4:02',
   progress: 42,

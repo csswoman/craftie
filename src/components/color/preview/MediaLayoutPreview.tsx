@@ -10,7 +10,7 @@ import { MediaPlayerBar } from './MediaPlayerBar';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { previewStaggerDelay } from './dashboardPreviewData';
 import { getMediaSessionLabel, MEDIA_CONTAINER_CLASS } from './mediaPreviewData';
-import { onVividFill, vividFill } from './previewColor';
+import { buttonPairOn } from './previewButtons';
 import { LiveDot } from './previewPrimitives';
 import {
   DEFAULT_PREVIEW_FONTS,
@@ -51,8 +51,9 @@ export function MediaLayoutPreview({
 }) {
   const [playing, setPlaying] = useState(true);
   const session = getMediaSessionLabel(new Date().getHours());
-  const primaryFill = vividFill(colors.primaryAction, colors.surface);
-  const onPrimary = onVividFill(primaryFill);
+  const button = buttonPairOn(colors, colors.surface);
+  const primaryFill = button.fill;
+  const onPrimary = button.on;
 
   return (
     <PreviewSlotTarget
