@@ -2,7 +2,10 @@ import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const ROOT = process.cwd();
-const COMPONENTS_DIR = path.join(ROOT, 'src', 'components');
+const SCAN_DIRS = [
+  path.join(ROOT, 'src', 'components'),
+  path.join(ROOT, 'src', 'context'),
+];
 const MAX_LINES = 250;
 
 async function collectTsxFiles(directory) {
@@ -33,7 +36,7 @@ function countLines(content) {
   return content.split(/\r\n|\r|\n/).length;
 }
 
-const files = await collectTsxFiles(COMPONENTS_DIR);
+const files = (await Promise.all(SCAN_DIRS.map(collectTsxFiles))).flat();
 const oversized = [];
 
 for (const file of files) {
