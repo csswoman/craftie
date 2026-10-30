@@ -140,7 +140,7 @@ export function ImageUploader({
 
       {showDropzone ? (
         <div
-          className={`rounded-md border border-dashed px-4 py-6 transition-colors ${
+          className={`rounded-md border border-dashed px-4 ${isEmbedded ? 'py-4' : 'py-6'} transition-colors ${
             hasPreview ? 'mt-3 border-border bg-bg' : `${showHeader ? 'mt-4' : ''} border-border bg-bg`
           }`}
           onDragOver={(event) => {

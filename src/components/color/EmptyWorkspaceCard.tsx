@@ -58,15 +58,15 @@ export function EmptyWorkspaceCard({
       </div>
 
       {/* Right: the inspiration action card. */}
-      <div className="w-full max-w-md justify-self-center panel-float p-6 lg:justify-self-end lg:p-7">
+      <div className="w-full max-w-md justify-self-center rounded-xl border border-border bg-bg p-6 lg:justify-self-end lg:p-7">
         <h2
           id="workspace-empty-title"
-          className="text-balance font-display text-[1.5rem] font-medium leading-snug text-ink"
+          className="text-balance font-display text-[1.375rem] font-medium leading-snug text-ink"
         >
           Empieza por aquí
         </h2>
         <p className="mt-2 text-pretty text-chrome-body leading-relaxed text-muted">
-          Elige un estilo, sube una imagen o parte de un color. Craftie crea tu paleta al instante.
+          Elige un estilo, sube una imagen o escribe un color.
         </p>
 
         <Button
@@ -78,8 +78,8 @@ export function EmptyWorkspaceCard({
           Explorar estilos
         </Button>
 
-        <div className="mt-6 border-t border-border pt-5">
-          <p className="mb-3 text-chrome-label font-semibold text-ink">O sube una imagen</p>
+        <div className="mt-7">
+          <p className="mb-2 text-chrome-label font-semibold text-ink">Subir una imagen</p>
           <ImageUploader
             fileName={fileName}
             hasPreview={hasPreview}
@@ -94,13 +94,9 @@ export function EmptyWorkspaceCard({
           />
         </div>
 
-        <div className="mt-6 border-t border-border pt-5">
+        <div className="mt-7">
           <StartFromColorForm onStart={onStartFromHex} />
         </div>
-
-        <p className="mt-5 text-chrome-caption leading-relaxed text-muted">
-          Después podrás ajustar cada color y ver cómo queda tu diseño al momento.
-        </p>
       </div>
     </section>
   );

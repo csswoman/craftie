@@ -25,9 +25,21 @@ export function StartFromColorForm({ onStart }: { onStart: (hex: string) => stri
         submit();
       }}
     >
-      <label htmlFor={inputId} className="mb-3 block text-chrome-label font-semibold text-ink">
-        O parte de un color que ya tienes
-      </label>
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <label htmlFor={inputId} className="block text-chrome-label font-semibold text-ink">
+          Partir de un color (HEX)
+        </label>
+        <button
+          type="button"
+          onClick={() => {
+            setValue('#1F6F54');
+            setError(null);
+          }}
+          className="text-chrome-caption font-medium text-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:underline"
+        >
+          Ejemplo: <span className="font-mono text-primary">#1F6F54</span>
+        </button>
+      </div>
       <div className="flex gap-2">
         <input
           id={inputId}

@@ -129,6 +129,7 @@ function WorkspaceHelpTooltip() {
         type="button"
         title="Ver guía rápida"
         aria-label="Ver guía rápida de Craftie"
+        aria-describedby="workspace-help"
         className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2.5 py-2 text-chrome-label font-semibold text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 sm:px-3"
       >
         <HintIcon />
