@@ -56,6 +56,40 @@ describe('layoutModes', () => {
     expect(entries.get('appBackground')).toBe('background');
   });
 
+  it('maps decorative brand slots to the palette roles, not to chart colors', () => {
+    const dashboard = LAYOUT_MODES.find((mode) => mode.id === 'dashboard')!;
+    const entries = new Map(layoutModeTokenEntries(dashboard));
+
+    expect(entries.get('brand1')).toBe('primary');
+    expect(entries.get('brand2')).toBe('secondary');
+    expect(entries.get('brand3')).toBe('accent');
+    expect(entries.get('brand4')).toBe('primary-300');
+
+    const tokens = deriveSemanticTokens({
+      extracted: [
+        { hex: '#C03A2B', prominence: 0.4 },
+        { hex: '#2468C8', prominence: 0.35 },
+        { hex: '#1F8A4C', prominence: 0.25 },
+      ],
+    });
+    const colors = resolveLayoutColors(dashboard, tokens);
+
+    expect(colors.brand1).toBe(tokens.primary.hex);
+    expect(colors.brand2).toBe(tokens.secondary.hex);
+    expect(colors.brand3).toBe(tokens.accent.hex);
+  });
+
+  it('previews a gap status color in its suggestion instead of a gray placeholder', () => {
+    const dashboard = LAYOUT_MODES.find((mode) => mode.id === 'dashboard')!;
+    const tokens = deriveSemanticTokens({ extracted: [{ hex: '#1F6F54', prominence: 1 }] });
+    const pending = {
+      ...tokens,
+      success: { hex: '#777777', source: 'derived' as const, gap: 'pendiente', suggestedHex: '#1F8A4C' },
+    };
+
+    expect(resolveLayoutColors(dashboard, pending).success).toBe('#1F8A4C');
+  });
+
   it('rewires dashboard actions to a fill-ready primary step when the source is a pastel', () => {
     const dashboard = LAYOUT_MODES.find((mode) => mode.id === 'dashboard')!;
     const tokens = deriveSemanticTokens({

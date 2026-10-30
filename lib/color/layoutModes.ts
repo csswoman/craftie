@@ -18,6 +18,12 @@ export type UiCommonLayoutSlot =
   | 'success'
   | 'warning'
   | 'error'
+  | 'brand1'
+  | 'brand2'
+  | 'brand3'
+  | 'brand4'
+  | 'brand5'
+  | 'brand6'
   | 'data1'
   | 'data2'
   | 'data3'
@@ -61,6 +67,15 @@ const baseCommonSlots: Record<UiCommonLayoutSlot, SemanticTokenName> = {
   success: 'success',
   warning: 'warning',
   error: 'error',
+  // Decorative swatches (tags, avatars, product images, palette tiles) use the
+  // palette's own colors at their true value. data1-6 are chart colors, with
+  // lightness adjusted for 3:1 contrast, and must not stand in for the brand.
+  brand1: 'primary',
+  brand2: 'secondary',
+  brand3: 'accent',
+  brand4: 'primary-300',
+  brand5: 'secondary-300',
+  brand6: 'accent-300',
   data1: 'data-1',
   data2: 'data-2',
   data3: 'data-3',
@@ -166,7 +181,12 @@ export function resolveLayoutColors(
   tokens: SemanticTokens,
 ): ResolvedLayoutColors {
   return Object.fromEntries(
-    layoutModeTokenEntries(mode, tokens).map(([slot, tokenName]) => [slot, tokens[tokenName].hex]),
+    layoutModeTokenEntries(mode, tokens).map(([slot, tokenName]) => {
+      const entry = tokens[tokenName];
+      // A gap with a suggestion (status colors not confirmed yet) previews in
+      // the suggested color instead of a flat gray placeholder.
+      return [slot, entry.gap && entry.suggestedHex ? entry.suggestedHex : entry.hex];
+    }),
   ) as ResolvedLayoutColors;
 }
 

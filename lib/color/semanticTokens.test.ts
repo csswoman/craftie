@@ -329,6 +329,35 @@ describe('deriveSemanticTokens', () => {
     }
   });
 
+  it('leads the chart series with the brand roles in order', () => {
+    const tokens = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE });
+
+    expect(hueDistance(tokenHue(tokens['data-1'].hex), tokenHue(tokens.primary.hex))).toBeLessThanOrEqual(6);
+    expect(hueDistance(tokenHue(tokens['data-2'].hex), tokenHue(tokens.secondary.hex))).toBeLessThanOrEqual(6);
+    expect(hueDistance(tokenHue(tokens['data-3'].hex), tokenHue(tokens.accent.hex))).toBeLessThanOrEqual(6);
+  });
+
+  it('tints the hero with the primary: pale in light, deep in dark, always readable', () => {
+    const light = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE });
+    const dark = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, theme: 'dark' });
+
+    expect(tokenLightness(light['hero-surface'].hex)).toBeGreaterThan(0.88);
+    expect(hueDistance(tokenHue(light['hero-surface'].hex), tokenHue(light.primary.hex))).toBeLessThanOrEqual(8);
+    expect(tokenLightness(dark['hero-surface'].hex)).toBeLessThan(0.3);
+    expect(contrastRatio(light['on-hero'].hex, light['hero-surface'].hex)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(dark['on-hero'].hex, dark['hero-surface'].hex)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('reuses a raised white card for nested panels instead of a derived gray', () => {
+    const tokens = deriveSemanticTokens({
+      extracted: EXPRESSIVE_SAMPLE,
+      overrides: { background: '#FAF7F2', surface: '#FFFFFF' },
+    });
+
+    expect(tokens.surface.hex).toBe('#FFFFFF');
+    expect(tokens['surface-elevated'].hex).toBe('#FFFFFF');
+  });
+
   it('declares data gaps instead of inventing hues for neutral input', () => {
     const tokens = deriveSemanticTokens({ extracted: nearMonochromeExtracted() });
 

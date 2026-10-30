@@ -66,4 +66,16 @@ describe('background/surface lightness separation', () => {
     expect(nextL).toBeGreaterThanOrEqual(Math.min(bgL, borderL) - 1e-6);
     expect(nextL).toBeLessThanOrEqual(Math.max(bgL, borderL) + 1e-6);
   });
+
+  it('keeps a white card on a cream page as a raised surface', () => {
+    expect(ensureSurfaceLightnessSeparation('#FAF7F2', '#FFFFFF', '#E4DDD2', 'light')).toBe('#FFFFFF');
+  });
+
+  it('keeps the page tint when a gray-less card has to be nudged', () => {
+    const next = ensureSurfaceLightnessSeparation('#FAF7F2', '#FAF7F2', '#E4DDD2', 'light');
+    const channels = toOklch(next);
+
+    expect(channels?.c ?? 0).toBeGreaterThan(0.004);
+    expect(Math.abs((channels?.h ?? 0) - (toOklch('#FAF7F2')?.h ?? 0))).toBeLessThan(8);
+  });
 });

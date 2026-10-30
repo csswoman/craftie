@@ -2,7 +2,7 @@ import { converter } from 'culori';
 
 import type { ExtractedColor } from './imageExtractor';
 import { deriveForegroundForBackground } from './pairedForeground';
-import type { SemanticTokens } from './semanticTokens';
+import type { SemanticToken, SemanticTokens } from './semanticTokens';
 import {
   contrastRatio,
   maxOklchChromaForSrgb,
@@ -308,12 +308,18 @@ export function applyUiStatusColors(
   statusColors: UiStatusColorSet | null,
 ): SemanticTokens {
   if (!statusColors) {
-    const pending = {
+    const pending = (suggested: SemanticToken) => ({
       hex: tokens['on-surface-muted'].hex,
       source: 'derived' as const,
       gap: 'Los colores de estado todavía no se han generado.',
+      suggestedHex: suggested.hex,
+    });
+    return {
+      ...tokens,
+      success: pending(tokens.success),
+      warning: pending(tokens.warning),
+      error: pending(tokens.error),
     };
-    return { ...tokens, success: pending, warning: pending, error: pending };
   }
 
   return {

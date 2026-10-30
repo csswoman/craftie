@@ -97,6 +97,12 @@ export type SemanticToken = {
   source: SemanticTokenSource;
   originalHex?: string;
   gap?: string;
+  /**
+   * Color previews may show while the role is still a gap (for example the
+   * derived success green before status colors are confirmed). It is never
+   * exported or counted as assigned.
+   */
+  suggestedHex?: string;
 };
 
 export type SemanticTokens = Record<SemanticTokenName, SemanticToken>;
@@ -247,10 +253,18 @@ function token(
   return { hex: normalizeHex(hex), source, ...details };
 }
 
+/** A light card this much lighter than the page reads as raised, not as the same plane. */
+const RAISED_CARD_LIGHTNESS_DELTA = 0.015;
+
 /**
  * Why: tinted neutral ramps can collapse background and surface into one
  * visual plane; keep a minimum OKLCH lightness gap so layers read as distinct,
- * without changing hue/chroma or invading the border band.
+ * without invading the border band.
+ *
+ * A light-theme card lighter than the page (white cards on a cream page) is
+ * a valid raised surface and is kept. A corrected surface never loses the
+ * page's tint: a white card nudged darker would otherwise turn cool gray on a
+ * warm page.
  */
 export function ensureSurfaceLightnessSeparation(
   backgroundHex: string,
@@ -266,10 +280,15 @@ export function ensureSurfaceLightnessSeparation(
   const bgL = bg.l ?? 0;
   let surfaceL = surface.l ?? 0;
   const borderL = border.l ?? 0;
-  const chroma = surface.c ?? 0;
-  const hue = surface.h ?? bg.h ?? 0;
+  const surfaceTinted = (surface.c ?? 0) >= (bg.c ?? 0) * 0.5;
+  const chroma = surfaceTinted ? (surface.c ?? 0) : (bg.c ?? 0);
+  const hue = surfaceTinted ? (surface.h ?? bg.h ?? 0) : (bg.h ?? 0);
   const low = Math.min(bgL, borderL);
   const high = Math.max(bgL, borderL);
+
+  if (theme === 'light' && surfaceL - bgL >= RAISED_CARD_LIGHTNESS_DELTA) {
+    return surfaceHex;
+  }
 
   if (Math.abs(bgL - surfaceL) >= MIN_BG_SURFACE_LIGHTNESS_DELTA) {
     const clampedSurfaceL = Math.min(high, Math.max(low, surfaceL));
@@ -503,7 +522,7 @@ function deriveBaseSemanticTokens(
     token(rampNeutral(ramp.surface), 'derived'),
     overrides,
   );
-  const surfaceElevated = applyOverride(
+  const surfaceElevatedRamp = applyOverride(
     'surface-elevated',
     token(rampNeutral(ramp.elevated), 'derived'),
     overrides,
@@ -568,6 +587,14 @@ function deriveBaseSemanticTokens(
     separatedSurfaceHex === surface.hex
       ? surface
       : token(separatedSurfaceHex, surface.source === 'override' ? 'override' : 'derived');
+  // White cards on a tinted page: nested panels reuse the card color. A derived
+  // gray step here would turn some cards gray among white ones.
+  const raisedCards =
+    theme === 'light' &&
+    (toOklch(separatedSurface.hex)?.l ?? 0) - (toOklch(background.hex)?.l ?? 0) >= 0.015;
+  const surfaceElevated = raisedCards
+    ? applyOverride('surface-elevated', token(separatedSurface.hex, 'derived'), overrides)
+    : surfaceElevatedRamp;
   const onBackgroundMuted = applyOverride(
     'on-background-muted',
     deriveOnBackgroundMuted(onBackground.hex, separatedSurface.hex),
@@ -740,6 +767,20 @@ function harmonicSuggestion(
   return oklchChannelsToHex(lightness, chroma, (primaryHue + hueOffset + 360) % 360);
 }
 
+/**
+ * Chart sources in brand order: the assigned primary, secondary and accent
+ * lead, so the first series matches the brand; other source hues follow.
+ */
+function brandFirstSources(brand: SemanticToken[], others: FitnessColor[]): FitnessColor[] {
+  const leading = brand
+    .filter((entry) => !entry.gap)
+    .map((entry) => toExpressiveSource({ hex: entry.hex, prominence: 1 }))
+    .filter((entry) => entry.chroma >= EXPRESSIVE_SOURCE_CHROMA_MIN);
+  const seen = new Set(leading.map((entry) => entry.hex));
+
+  return [...leading, ...others.filter((entry) => !seen.has(entry.hex))];
+}
+
 function derivedPair(background: SemanticToken): SemanticToken {
   return token(deriveOnTokenHexForFill(background.hex), 'derived');
 }
@@ -773,13 +814,40 @@ function applyAreaAwareStrategy(
   const onPrimary = applyOverride('on-primary', derivedPair(primary), overrides);
   const onSecondary = applyOverride('on-secondary', derivedPair(secondary), overrides);
   const onAccent = applyOverride('on-accent', derivedPair(accent), overrides);
-  const dataSeries = sourceDataSeries(expressive, base.background.hex, theme, primary);
+  const dataSeries = sourceDataSeries(
+    brandFirstSources([primary, secondary, accent], expressive),
+    base.background.hex,
+    theme,
+    primary,
+  );
   const dataToken = (index: number): SemanticToken => dataSeries[index] ?? primary;
   const tonalTokens = Object.fromEntries([
     ...tonalTokenEntries('primary', primary, overrides),
     ...tonalTokenEntries('secondary', secondary, overrides),
     ...tonalTokenEntries('accent', accent, overrides),
   ]) as Pick<SemanticTokens, TonalTokenName | OnTonalTokenName>;
+  // A brand-led hero: the primary's pale tint (deep shade on dark) instead of a
+  // flat gray block. Without an assigned primary it stays a neutral surface.
+  const primaryAssigned = primary.source === 'extracted' || primary.source === 'override';
+  const heroSurface = applyOverride(
+    'hero-surface',
+    token(
+      primaryAssigned
+        ? tonalTokens[theme === 'dark' ? 'primary-900' : 'primary-100'].hex
+        : base['surface-elevated'].hex,
+      'derived',
+    ),
+    overrides,
+  );
+  // Neutral ink reads strongest on a pale brand tint; the hue-matched pair is
+  // the fallback when the neutral text does not reach 7:1.
+  const onHero = applyOverride(
+    'on-hero',
+    contrastRatio(base['on-surface'].hex, heroSurface.hex) >= 7
+      ? token(base['on-surface'].hex, 'derived')
+      : derivedPair(heroSurface),
+    overrides,
+  );
 
   return {
     ...base,
@@ -789,8 +857,8 @@ function applyAreaAwareStrategy(
     'on-primary': onPrimary,
     'on-secondary': onSecondary,
     'on-accent': onAccent,
-    'hero-surface': base['surface-elevated'],
-    'on-hero': base['on-surface'],
+    'hero-surface': heroSurface,
+    'on-hero': onHero,
     'data-1': applyOverride('data-1', dataToken(0), overrides),
     'data-2': applyOverride('data-2', dataToken(1), overrides),
     'data-3': applyOverride('data-3', dataToken(2), overrides),
