@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { Upload } from 'lucide-react';
 import type { AppliedTypography } from '@lib/typography/typeState';
 import type { TypeScaleBase, TypeScaleRatio } from '@lib/typography/typeScale';
 import type { FontPair } from '@lib/typography/pairings';
 
 import { AppliedTypeZone } from '@/components/font-pairing/AppliedTypeZone';
 import type { CustomFontSubmitInput } from '@/components/font-pairing/CustomFontModal';
+import { CustomFontModal } from '@/components/font-pairing/CustomFontModal';
 import { PairingList } from '@/components/font-pairing/PairingList';
 import type { SizeOverrides } from '@/components/font-pairing/FineTuneSizes';
 import type { TypographySpacing } from '@/components/font-pairing/SpacingControls';
@@ -71,6 +73,7 @@ export function SidebarTypographySection({
   embedded = false,
 }: SidebarTypographySectionProps) {
   const [configOpen, setConfigOpen] = useState(false);
+  const [uploadOpen, setUploadOpen] = useState(false);
   const listInert = pinHeading && pinBody;
 
   return (
@@ -101,6 +104,21 @@ export function SidebarTypographySection({
         configOpen={configOpen}
         onConfigOpenChange={setConfigOpen}
         stickToPanelTop={embedded}
+        footer={
+          <button
+            type="button"
+            onClick={() => setUploadOpen(true)}
+            className="inline-flex min-h-8 items-center gap-1.5 rounded-md text-chrome-caption font-medium text-muted transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+          >
+            <Upload size={13} strokeWidth={1.5} aria-hidden="true" />
+            Subir fuente propia
+          </button>
+        }
+      />
+      <CustomFontModal
+        open={uploadOpen}
+        onClose={() => setUploadOpen(false)}
+        onApply={onApplyCustomFont}
       />
       {!configOpen ? (
         <>

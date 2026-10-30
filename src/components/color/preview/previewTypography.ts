@@ -61,24 +61,34 @@ export function headingStyle(_fonts?: PreviewFonts): TypeRoleStyle {
 }
 
 export function titleStyle(_fonts?: PreviewFonts): TypeRoleStyle {
-  return roleStyle('title', 'body', 'var(--size-body)');
+  return roleStyle('title', 'body', 'var(--size-compact)');
 }
 
 export function bodyStyle(_fonts?: PreviewFonts, color?: string): TypeRoleStyle {
   return roleStyle('body', 'body', 'var(--size-body)', undefined, color);
 }
 
+/**
+ * Body copy for dense panels (card descriptions, list notes). Same role as
+ * `bodyStyle`, one step smaller: it follows the body role size at 7/8.
+ */
+export function compactBodyStyle(_fonts?: PreviewFonts, color?: string): TypeRoleStyle {
+  return roleStyle('body', 'body', 'var(--size-body)', {
+    fontSize: 'calc(var(--role-body-size, var(--size-body)) * 0.875)',
+  }, color);
+}
+
 export function labelStyle(_fonts?: PreviewFonts, color?: string): TypeRoleStyle {
-  return roleStyle('label', 'body', 'var(--size-small)', undefined, color);
+  return roleStyle('label', 'body', 'var(--size-compact)', undefined, color);
 }
 
 /** Small metadata at body weight, so labels do not compete with headings. */
 export function captionStyle(_fonts?: PreviewFonts, color?: string): TypeRoleStyle {
-  return roleStyle('caption', 'body', 'var(--size-small)', undefined, color);
+  return roleStyle('caption', 'body', 'var(--size-micro)', undefined, color);
 }
 
 export function eyebrowStyle(_fonts?: PreviewFonts, color?: string): TypeRoleStyle {
-  return roleStyle('eyebrow', 'body', 'var(--size-small)', { textTransform: 'uppercase' }, color);
+  return roleStyle('eyebrow', 'body', 'var(--size-micro)', { textTransform: 'uppercase' }, color);
 }
 
 /** Wordmarks and small headlines: the heading font at body size. */
@@ -88,7 +98,7 @@ export function brandStyle(_fonts?: PreviewFonts): TypeRoleStyle {
 
 /** Buttons, filters and active states: the strongest body-family weight. */
 export function buttonStyle(_fonts?: PreviewFonts, color?: string): TypeRoleStyle {
-  return roleStyle('button', 'body', 'var(--size-small)', undefined, color);
+  return roleStyle('button', 'body', 'var(--size-compact)', undefined, color);
 }
 
 /** Hero display for landing surfaces: tighter tracking, balanced wrap. */

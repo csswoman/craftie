@@ -41,6 +41,22 @@ site para conservar los pasos responsive de cada layout.
 | **Label** | `labelStyle(fonts, color?)` | body | body | normal | Etiquetas de métrica, nav, timestamps. |
 | **Eyebrow** | `eyebrowStyle(fonts, color?)` | body | body | 0.06em + UPPERCASE | El kicker pequeño encima de un título ("Week overview", "Now playing"). |
 
+### Tamaños por rol (base 16px)
+
+| Tamaño | Roles | Nivel de escala |
+|--------|-------|-----------------|
+| 12px | caption, eyebrow | `micro` |
+| 14px | title, label, button, y `compactBodyStyle` | `compact` |
+| 16px | body, brand | `body` |
+| 20 / 25 / 31px | heading / display / hero | `h3` / `h2` / `h1` |
+
+`compact` y `micro` son 7/8 y 3/4 de la base, no pasos de la razón modular, así que
+siguen a la base (14, 16, 18) pero no a la razón. Las pastillas y chips sin rol
+(`Tag`, `StatDelta`, `SegmentedControl`) usan 12px; no bajes de ahí.
+
+Prosa de portada o artículo → `bodyStyle` (16px). Descripciones dentro de paneles y
+tarjetas densas → `compactBodyStyle` (14px, sigue el tamaño del rol body).
+
 ### Por qué así
 
 - **Heading font solo en display/hero/heading.** El resto va en body font. Así

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { Settings } from 'lucide-react';
 
 import type { AppliedTypography } from '@lib/typography/typeState';
@@ -51,6 +51,8 @@ export type AppliedTypeZoneProps = {
   configOpen: boolean;
   onConfigOpenChange: (open: boolean) => void;
   stickToPanelTop?: boolean;
+  /** Optional action row rendered at the bottom of the applied card. */
+  footer?: ReactNode;
 };
 
 const HEADING_WEIGHT_OPTIONS = [500, 600, 700] as const;
@@ -80,6 +82,7 @@ export function AppliedTypeZone({
   configOpen,
   onConfigOpenChange,
   stickToPanelTop = false,
+  footer,
 }: AppliedTypeZoneProps) {
   const readout = buildTypeScaleReadout(base, ratio);
   const levels = useMemo(
@@ -147,6 +150,7 @@ export function AppliedTypeZone({
             onApplyFamily={onApplyGoogleFont}
           />
         </div>
+        {footer ? <div className="border-t border-border bg-bg px-3 py-2">{footer}</div> : null}
       </section>
 
       {bothPinned ? (

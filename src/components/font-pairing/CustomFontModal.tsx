@@ -26,7 +26,7 @@ export function CustomFontModal({
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
-  const [source, setSource] = useState<CustomFontSource>('google');
+  const [source, setSource] = useState<CustomFontSource>('local');
   const [family, setFamily] = useState('');
   const [role, setRole] = useState<CustomFontRole>('heading');
   const [file, setFile] = useState<File | null>(null);

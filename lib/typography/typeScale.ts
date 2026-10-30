@@ -23,6 +23,10 @@ export type TypeScaleReadout = {
   h3: number;
   body: number;
   small: number;
+  /** Dense UI tier (lists, controls, buttons): 14px at a 16px base. */
+  compact: number;
+  /** Smallest readable tier (metadata, eyebrows): 12px at a 16px base. */
+  micro: number;
 };
 
 export type TypeScaleLevel = {
@@ -62,6 +66,8 @@ export function buildTypeScaleReadout(base: number, ratio: number): TypeScaleRea
     h3: typeScaleSize(base, ratio, 1),
     body: typeScaleSize(base, ratio, 0),
     small: typeScaleSize(base, ratio, -1),
+    compact: Math.round(base * 0.875),
+    micro: Math.round(base * 0.75),
   };
 }
 

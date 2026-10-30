@@ -28,8 +28,10 @@ describe('resolveTypeRole defaults', () => {
     expect(resolveTypeRole('display', context)).toMatchObject({ size: 25, lineHeight: 1.05, letterSpacing: -0.01 });
     expect(resolveTypeRole('heading', context)).toMatchObject({ size: 20, lineHeight: 1.2, letterSpacing: -0.006 });
     expect(resolveTypeRole('body', context)).toMatchObject({ weight: 400, size: 16, lineHeight: 1.55, letterSpacing: 0 });
-    expect(resolveTypeRole('title', context)).toMatchObject({ lineHeight: 1.35 });
-    expect(resolveTypeRole('caption', context)).toMatchObject({ size: 13, lineHeight: 1.45 });
+    expect(resolveTypeRole('title', context)).toMatchObject({ size: 14, lineHeight: 1.35 });
+    expect(resolveTypeRole('label', context)).toMatchObject({ size: 14 });
+    expect(resolveTypeRole('eyebrow', context)).toMatchObject({ size: 12 });
+    expect(resolveTypeRole('caption', context)).toMatchObject({ size: 12, lineHeight: 1.45 });
     expect(resolveTypeRole('eyebrow', context)).toMatchObject({ lineHeight: 1.3, letterSpacing: 0.06, uppercase: true });
   });
 

@@ -18,13 +18,15 @@ describe('typeScaleSize', () => {
 });
 
 describe('buildTypeScaleReadout', () => {
-  it('returns the five product tokens for defaults', () => {
+  it('returns the product tokens and the compact UI tiers for defaults', () => {
     expect(buildTypeScaleReadout(16, 1.25)).toEqual({
       h1: 31,
       h2: 25,
       h3: 20,
       body: 16,
       small: 13,
+      compact: 14,
+      micro: 12,
     });
   });
 });

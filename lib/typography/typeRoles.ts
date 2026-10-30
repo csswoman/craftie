@@ -45,13 +45,13 @@ export const TYPE_ROLE_DEFINITIONS: Record<TypeRoleId, TypeRoleDefinition> = {
   hero: { id: 'hero', label: 'Hero', usage: 'Titular grande de portada', family: 'heading', sizeKey: 'h1', lineHeightOffset: -0.16, letterSpacingOffset: 0, weightOffset: 0 },
   display: { id: 'display', label: 'Display', usage: 'Cifra o título principal de un bloque', family: 'heading', sizeKey: 'h2', lineHeightOffset: -0.15, letterSpacingOffset: 0.01, weightOffset: 0 },
   heading: { id: 'heading', label: 'Titular', usage: 'Títulos de panel y sección', family: 'heading', sizeKey: 'h3', lineHeightOffset: 0, letterSpacingOffset: 0.014, weightOffset: -100 },
-  title: { id: 'title', label: 'Título', usage: 'Nombres en listas y tarjetas', family: 'body', sizeKey: 'body', lineHeightOffset: -0.15, letterSpacingOffset: 0, weightOffset: 100 },
+  title: { id: 'title', label: 'Título', usage: 'Nombres en listas y tarjetas', family: 'body', sizeKey: 'compact', lineHeightOffset: -0.15, letterSpacingOffset: 0, weightOffset: 100 },
   body: { id: 'body', label: 'Cuerpo', usage: 'Párrafos y descripciones', family: 'body', sizeKey: 'body', lineHeightOffset: 0.05, letterSpacingOffset: 0, weightOffset: 0 },
-  label: { id: 'label', label: 'Etiqueta', usage: 'Botones, navegación, controles', family: 'body', sizeKey: 'small', lineHeightOffset: -0.15, letterSpacingOffset: 0, weightOffset: 100 },
-  caption: { id: 'caption', label: 'Nota', usage: 'Metadatos y texto auxiliar', family: 'body', sizeKey: 'small', lineHeightOffset: -0.05, letterSpacingOffset: 0, weightOffset: 0 },
-  button: { id: 'button', label: 'Botón', usage: 'Botones, filtros y estados activos', family: 'body', sizeKey: 'small', lineHeightOffset: -0.15, letterSpacingOffset: 0, weightOffset: 200 },
+  label: { id: 'label', label: 'Etiqueta', usage: 'Botones, navegación, controles', family: 'body', sizeKey: 'compact', lineHeightOffset: -0.15, letterSpacingOffset: 0, weightOffset: 100 },
+  caption: { id: 'caption', label: 'Nota', usage: 'Metadatos y texto auxiliar', family: 'body', sizeKey: 'micro', lineHeightOffset: -0.05, letterSpacingOffset: 0, weightOffset: 0 },
+  button: { id: 'button', label: 'Botón', usage: 'Botones, filtros y estados activos', family: 'body', sizeKey: 'compact', lineHeightOffset: -0.15, letterSpacingOffset: 0, weightOffset: 200 },
   brand: { id: 'brand', label: 'Marca', usage: 'Logotipo y titulares pequeños en la fuente de titulares', family: 'heading', sizeKey: 'body', lineHeightOffset: 0.05, letterSpacingOffset: 0.02, weightOffset: -100 },
-  eyebrow: { id: 'eyebrow', label: 'Sobretítulo', usage: 'Etiqueta pequeña en mayúsculas', family: 'body', sizeKey: 'small', lineHeightOffset: -0.2, letterSpacingOffset: 0.06, weightOffset: 100, uppercase: true },
+  eyebrow: { id: 'eyebrow', label: 'Sobretítulo', usage: 'Etiqueta pequeña en mayúsculas', family: 'body', sizeKey: 'micro', lineHeightOffset: -0.2, letterSpacingOffset: 0.06, weightOffset: 100, uppercase: true },
 };
 
 export type TypeRoleOverride = {

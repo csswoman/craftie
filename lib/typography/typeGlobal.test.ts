@@ -28,7 +28,8 @@ describe('globalPatchForRole', () => {
   it('writes sizes to the scale level and clears them when they match the scale', () => {
     expect(globalPatchForRole('body', { size: 18 }, sizes).size).toEqual({ levelId: 'body', value: 18 });
     expect(globalPatchForRole('body', { size: 16 }, sizes).size).toEqual({ levelId: 'body', value: null });
-    expect(globalPatchForRole('eyebrow', { size: 12 }, sizes).size).toEqual({ levelId: 'small', value: 12 });
+    expect(globalPatchForRole('eyebrow', { size: 12 }, sizes).size).toEqual({ levelId: 'micro', value: null });
+    expect(globalPatchForRole('eyebrow', { size: 11 }, sizes).size).toEqual({ levelId: 'micro', value: 11 });
   });
 });
 

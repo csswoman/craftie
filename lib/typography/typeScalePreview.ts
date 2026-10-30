@@ -15,6 +15,10 @@ const BOTTOM_PAPER_MIX = 0.42;
 const INK_FADE = 0.62;
 const MUTED_MIX = 0.38;
 const HAIRLINE_MIX = 0.55;
+// Flat scale page: stronger separators, cards and secondary text so dark pages don't collapse into one block.
+const PAGE_MUTED_MIX = 0.3;
+const PAGE_HAIRLINE_MIX = 0.3;
+const PAGE_CHIP_MIX = 0.09;
 const PADDING_TOP = 32;
 const PADDING_BOTTOM = 16;
 const RAMP_CURVE = 0.5;
@@ -112,9 +116,9 @@ export function buildTypeScalePalette({
   return {
     background: fondo,
     ink: ensureContrast(texto, fondo, 7),
-    muted: ensureContrast(mix(texto, fondo, MUTED_MIX), fondo, 4.5),
-    hairline: mix(borde, fondo, HAIRLINE_MIX),
-    chip: mix(fondo, texto, 0.06),
+    muted: ensureContrast(mix(texto, fondo, PAGE_MUTED_MIX), fondo, 4.5),
+    hairline: mix(borde, fondo, PAGE_HAIRLINE_MIX),
+    chip: mix(fondo, texto, PAGE_CHIP_MIX),
   };
 }
 

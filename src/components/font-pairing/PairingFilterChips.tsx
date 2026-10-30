@@ -20,7 +20,7 @@ export function PairingFilterChips({
 
   return (
     <div
-      className="flex flex-wrap gap-1.5"
+      className="flex flex-wrap gap-1"
       role="group"
       aria-label="Filtrar pares por carácter"
     >
@@ -33,7 +33,7 @@ export function PairingFilterChips({
             type="button"
             onClick={() => onChange(filter.value)}
             aria-pressed={active}
-            className={`min-h-8 shrink-0 rounded-full px-2.5 py-1 ${chipClass} font-medium transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+            className={`min-h-8 shrink-0 rounded-full px-2 py-1 ${chipClass} font-medium transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
               active
                 ? 'bg-ink text-bg'
                 : 'bg-surface-raised text-muted hover:bg-border/60 hover:text-ink'
