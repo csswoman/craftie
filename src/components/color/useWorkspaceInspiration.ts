@@ -5,6 +5,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import type { GeneratedPalette } from '@lib/color/formulas';
 import type { ExtractedColor } from '@lib/color/imageExtractor';
 import type { ImagePaletteBuildResult } from '@lib/color/imagePalette';
+import type { HexSourceOptions } from '@lib/color/rolePalette';
 import type { SelectableColor } from '@lib/color/selectableColors';
 import { buildSourceCatalogFromHexes } from '@lib/color/sourceCatalog';
 import type { DesignStyle } from '@lib/styles/presets';
@@ -22,7 +23,7 @@ export function useWorkspaceInspiration({
   setPaletteCatalog,
   setSelectedStyleId,
 }: {
-  assignFromHexes: (hexes: string[]) => void;
+  assignFromHexes: (hexes: string[], options?: HexSourceOptions) => void;
   assignFromExtracted: (extracted: ExtractedColor[], paletteType?: ImagePaletteBuildResult['classification']['type']) => void;
   clearRolePalette: () => void;
   setCatalogSource: Dispatch<SetStateAction<'none' | 'curated' | 'image'>>;
@@ -38,7 +39,8 @@ export function useWorkspaceInspiration({
     setCatalogSource('curated');
     setPaletteCatalog(buildSourceCatalogFromHexes(hexes));
     setSelectedStyleId(styleId);
-    assignFromHexes(hexes);
+    // Curated seeds and typed colors list the brand color first.
+    assignFromHexes(hexes, { ordered: true });
     setGeneratedPalette(null);
     setError(null);
   }

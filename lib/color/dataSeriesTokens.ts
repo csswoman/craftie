@@ -259,30 +259,49 @@ export function sourceDataSeries(
     ? [0.58, 0.73, 0.88, 0.43]
     : [0.62, 0.47, 0.32, 0.77];
   const picked: SemanticToken[] = [];
+  const tryAdd = (source: FitnessColor, lightness: number): boolean => {
+    const candidateHex = oklchChannelsToHex(lightness, source.chroma, source.hue);
+    const candidate = toOklch(candidateHex);
+
+    if (contrastRatio(candidateHex, backgroundHex) < DATA_SERIES_MIN_CONTRAST) {
+      return false;
+    }
+
+    const separated = picked.every((entry) => {
+      const previous = toOklch(entry.hex);
+      const hueSeparated = hueDistance(candidate?.h ?? source.hue, previous?.h ?? source.hue) >= 25;
+      const lightnessSeparated = Math.abs((candidate?.l ?? lightness) - (previous?.l ?? 0)) >= 0.15;
+
+      return (hueSeparated || lightnessSeparated) &&
+        remainsDistinctWithColorVisionDeficiency(candidateHex, entry.hex);
+    });
+
+    if (!separated || picked.some((entry) => entry.hex === candidateHex)) {
+      return false;
+    }
+
+    picked.push(seriesToken(candidateHex, 'derived', { originalHex: source.hex }));
+    return true;
+  };
+
+  // First give every source hue one series, then fill with lightness
+  // variants; otherwise the most chromatic source could take every slot with
+  // shades of itself while other source hues go unused.
+  for (const source of expressive) {
+    for (const lightness of [source.lightness, ...lightnessTargets]) {
+      if (tryAdd(source, lightness)) {
+        break;
+      }
+    }
+
+    if (picked.length === 6) {
+      return picked;
+    }
+  }
 
   for (const source of expressive) {
     for (const lightness of [source.lightness, ...lightnessTargets]) {
-      const candidateHex = oklchChannelsToHex(lightness, source.chroma, source.hue);
-      const candidate = toOklch(candidateHex);
-
-      if (contrastRatio(candidateHex, backgroundHex) < DATA_SERIES_MIN_CONTRAST) {
-        continue;
-      }
-
-      const separated = picked.every((entry) => {
-        const previous = toOklch(entry.hex);
-        const hueSeparated = hueDistance(candidate?.h ?? source.hue, previous?.h ?? source.hue) >= 25;
-        const lightnessSeparated = Math.abs((candidate?.l ?? lightness) - (previous?.l ?? 0)) >= 0.15;
-
-        return (hueSeparated || lightnessSeparated) &&
-          remainsDistinctWithColorVisionDeficiency(candidateHex, entry.hex);
-      });
-
-      if (!separated || picked.some((entry) => entry.hex === candidateHex)) {
-        continue;
-      }
-
-      picked.push(seriesToken(candidateHex, 'derived', { originalHex: source.hex }));
+      tryAdd(source, lightness);
 
       if (picked.length === 6) {
         return picked;

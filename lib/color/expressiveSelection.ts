@@ -33,6 +33,10 @@ const ACCENT_MIN_HUE_DISTANCE = 36;
 const AREA_WEIGHT = 0.5;
 const ACCENT_HUE_CONTRAST_WEIGHT = 0.3;
 const ACCENT_LIGHTNESS_MAX = 0.88;
+/** Same floor the UI uses to treat an expressive color as assigned. */
+const RANKED_CHROMA_MIN = 0.055;
+const RANKED_MIN_HUE_DISTANCE = 12;
+const RANKED_MIN_LIGHTNESS_DISTANCE = 0.08;
 /** Candidates at or below this chroma count as neutral for fitness scoring. */
 const NEUTRAL_CANDIDATE_CHROMA_MAX = 0.055;
 
@@ -71,17 +75,33 @@ function mainCandidates<T extends FitnessColor>(pool: T[]): T[] {
   return eligible.filter((candidate) => candidate.prominence >= largest * MAIN_ROLE_AREA_SHARE_MIN);
 }
 
+function isNearDuplicate(candidate: FitnessColor, picked: FitnessColor[]): boolean {
+  return picked.some(
+    (other) =>
+      hueDistance(candidate.hue, other.hue) < RANKED_MIN_HUE_DISTANCE &&
+      Math.abs(candidate.lightness - other.lightness) < RANKED_MIN_LIGHTNESS_DISTANCE,
+  );
+}
+
 function selectRanked(pool: ExpressiveSourceColor[]): ExpressiveSelection {
-  // Only ranked colors take roles: an empty ranked slot stays a gap instead of
-  // silently promoting an unranked color.
+  // Only ranked colors take roles, in order. Muted colors (near-black inks,
+  // pale tints) stay out: they read as neutrals, not brand color. A color
+  // almost identical to an earlier pick is skipped instead of duplicated.
   const ordered = pool
-    .filter((candidate) => candidate.rank !== undefined)
+    .filter((candidate) => candidate.rank !== undefined && candidate.chroma >= RANKED_CHROMA_MIN)
     .sort((left, right) => left.rank! - right.rank! || right.prominence - left.prominence);
+  const picked: ExpressiveSourceColor[] = [];
+
+  for (const candidate of ordered) {
+    if (!isNearDuplicate(candidate, picked)) {
+      picked.push(candidate);
+    }
+  }
 
   return {
-    primary: ordered[0] ?? null,
-    secondary: ordered[1] ?? null,
-    accent: ordered[2] ?? null,
+    primary: picked[0] ?? null,
+    secondary: picked[1] ?? null,
+    accent: picked[2] ?? null,
   };
 }
 
