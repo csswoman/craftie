@@ -77,16 +77,19 @@ export function randomUnlockedRolePalette(
     hue: hueFor(role),
     fondoHex: nextHex.fondo,
     superficieHex: nextHex.superficie,
-    textoHex: nextHex.texto,
+    // An unlocked texto is regenerated after the surfaces and adapts to them;
+    // anchoring surfaces to the outgoing texto would drag them to mid-gray.
+    textoHex: locked.has('texto') ? nextHex.texto : undefined,
   });
 
-  for (const role of ['primario', 'secundario', 'acento', 'borde'] as const) {
+  for (const role of CHROMATIC_ROLES) {
     if (!locked.has(role)) {
       nextHex[role] = randomRoleColor(role, context(role), random);
     }
   }
 
-  for (const role of ['fondo', 'superficie'] as const) {
+  // Foundations in layer order: superficie builds on fondo, borde on superficie.
+  for (const role of ['fondo', 'superficie', 'borde'] as const) {
     if (!locked.has(role)) {
       nextHex[role] = randomRoleColor(role, context(role), random);
     }

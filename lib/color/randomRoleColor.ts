@@ -1,6 +1,7 @@
 import {
   adjustLightnessForContrast,
   contrastRatio,
+  hexToOklchChannels,
   maxOklchChromaForSrgb,
   oklchChannelsToHex,
 } from '../utils/colorMath';
@@ -29,26 +30,40 @@ type RoleRange = {
 
 const ROLE_RANGES: Record<ThemeId, Record<PaletteRoleId, RoleRange>> = {
   light: {
-    fondo: { lMin: 0.92, lMax: 0.98, cMin: 0, cMax: 0.03 },
-    superficie: { lMin: 0.88, lMax: 0.96, cMin: 0, cMax: 0.04 },
-    texto: { lMin: 0.18, lMax: 0.42, cMin: 0, cMax: 0.05 },
+    fondo: { lMin: 0.965, lMax: 0.99, cMin: 0, cMax: 0.012 },
+    superficie: { lMin: 0.93, lMax: 0.96, cMin: 0, cMax: 0.016 },
+    texto: { lMin: 0.18, lMax: 0.3, cMin: 0, cMax: 0.025 },
     'texto-secundario': { lMin: 0.45, lMax: 0.45, cMin: 0, cMax: 0.03 },
     primario: { lMin: 0.42, lMax: 0.68, cMin: 0.08, cMax: 0.2 },
     secundario: { lMin: 0.4, lMax: 0.7, cMin: 0.06, cMax: 0.18 },
     acento: { lMin: 0.45, lMax: 0.72, cMin: 0.1, cMax: 0.22 },
-    borde: { lMin: 0.55, lMax: 0.78, cMin: 0, cMax: 0.04 },
+    borde: { lMin: 0.84, lMax: 0.89, cMin: 0, cMax: 0.02 },
   },
   dark: {
-    fondo: { lMin: 0.12, lMax: 0.2, cMin: 0, cMax: 0.03 },
-    superficie: { lMin: 0.16, lMax: 0.26, cMin: 0, cMax: 0.04 },
-    texto: { lMin: 0.88, lMax: 0.96, cMin: 0, cMax: 0.05 },
+    fondo: { lMin: 0.15, lMax: 0.2, cMin: 0, cMax: 0.02 },
+    superficie: { lMin: 0.18, lMax: 0.24, cMin: 0, cMax: 0.024 },
+    texto: { lMin: 0.9, lMax: 0.96, cMin: 0, cMax: 0.02 },
     'texto-secundario': { lMin: 0.72, lMax: 0.72, cMin: 0, cMax: 0.03 },
     primario: { lMin: 0.58, lMax: 0.78, cMin: 0.08, cMax: 0.2 },
     secundario: { lMin: 0.56, lMax: 0.8, cMin: 0.06, cMax: 0.18 },
     acento: { lMin: 0.58, lMax: 0.82, cMin: 0.1, cMax: 0.22 },
-    borde: { lMin: 0.28, lMax: 0.42, cMin: 0, cMax: 0.04 },
+    borde: { lMin: 0.3, lMax: 0.37, cMin: 0, cMax: 0.025 },
   },
 };
+
+/**
+ * Foundations are layers of one neutral: superficie sits a small lightness
+ * step from fondo and borde a larger step from superficie, both on fondo's
+ * hue with at most a trace more chroma. Sampling them independently gave
+ * tinted cards on gray pages and borders as dark as mid-gray.
+ */
+const LAYER_STEPS: Record<ThemeId, { superficie: [number, number]; borde: [number, number] }> = {
+  // Light: cards a touch darker than the page, borders clearly but softly darker.
+  light: { superficie: [-0.045, -0.025], borde: [-0.11, -0.075] },
+  dark: { superficie: [0.035, 0.06], borde: [0.11, 0.16] },
+};
+const LAYER_EXTRA_CHROMA = 0.006;
+const LAYER_CHROMA_MAX = 0.025;
 
 function lerp(min: number, max: number, t: number): number {
   return min + (max - min) * t;
@@ -68,6 +83,44 @@ function sampleInRange(
   return { l, c, h };
 }
 
+function layeredNeutral(
+  baseHex: string,
+  step: [number, number],
+  random: () => number,
+): string | null {
+  const base = hexToOklchChannels(baseHex);
+
+  if (!Number.isFinite(base.l)) {
+    return null;
+  }
+
+  const lightness = Math.min(0.995, Math.max(0.05, base.l + lerp(step[0], step[1], random())));
+  const chroma = Math.min(LAYER_CHROMA_MAX, base.c + LAYER_EXTRA_CHROMA * random());
+
+  return oklchChannelsToHex(lightness, chroma, base.h || 0);
+}
+
+function sampleRole(
+  role: PaletteRoleId,
+  context: RandomRoleColorContext,
+  random: () => number,
+): string {
+  const theme = context.theme ?? 'light';
+  const layered =
+    role === 'superficie' && context.fondoHex
+      ? layeredNeutral(context.fondoHex, LAYER_STEPS[theme].superficie, random)
+      : role === 'borde' && context.superficieHex
+        ? layeredNeutral(context.superficieHex, LAYER_STEPS[theme].borde, random)
+        : null;
+
+  if (layered) {
+    return layered;
+  }
+
+  const sample = sampleInRange(ROLE_RANGES[theme][role], random, context.hue);
+  return oklchChannelsToHex(sample.l, sample.c, sample.h);
+}
+
 function ensureTextAa(hex: string, backgrounds: string[]): string {
   let next = hex;
 
@@ -84,17 +137,16 @@ function ensureBackgroundAa(hex: string, textHex: string): string {
 
 /**
  * Builds a random OKLCH color suited to a palette role and theme band.
- * When contrast context is provided, texto / fondo / superficie are nudged to AA
- * with the paired roles.
+ * superficie and borde are layered on the given fondo / superficie when
+ * known. When contrast context is provided, texto / fondo / superficie are
+ * nudged to AA with the paired roles.
  */
 export function randomRoleColor(
   role: PaletteRoleId,
   context: RandomRoleColorContext = {},
   random: () => number = Math.random,
 ): string {
-  const theme = context.theme ?? 'light';
-  const sample = sampleInRange(ROLE_RANGES[theme][role], random, context.hue);
-  let hex = normalizeHex(oklchChannelsToHex(sample.l, sample.c, sample.h));
+  let hex = normalizeHex(sampleRole(role, context, random));
 
   if (role === 'texto') {
     const backgrounds = [context.fondoHex, context.superficieHex].filter(
