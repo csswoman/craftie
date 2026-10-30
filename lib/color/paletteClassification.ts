@@ -13,6 +13,10 @@ export type PaletteClassification = {
 };
 
 const toOklch = converter('oklch');
+/** Same floor the UI uses for an automatically assigned expressive color. */
+const MEANINGFUL_CHROMA_MIN = 0.055;
+/** Area share a chromatic source needs to keep the palette out of `neutral`. */
+const MEANINGFUL_CHROMATIC_SHARE_MIN = 0.04;
 
 function normalizedWeights(colors: ExtractedColor[]): Array<{ l: number; c: number; weight: number }> {
   const channels = colors.flatMap((color) => {
@@ -48,9 +52,15 @@ export function classifyPalette(colors: ExtractedColor[]): PaletteClassification
     0,
   );
 
+  // A single chromatic color with visible area (a red product on a white
+  // backdrop) is enough character for accents and data colors, however much
+  // neutral surrounds it.
+  const hasMeaningfulChromatic = weighted.some(
+    (color) => color.c >= MEANINGFUL_CHROMA_MIN && color.weight >= MEANINGFUL_CHROMATIC_SHARE_MIN,
+  );
   let type: PaletteType;
 
-  if (neutralWeight >= 0.65 || averageChroma < 0.03) {
+  if (!hasMeaningfulChromatic && (neutralWeight >= 0.65 || averageChroma < 0.03)) {
     type = 'neutral';
   } else if (averageLightness > 0.8 && averageChroma <= 0.12 && lightnessRange < 0.25) {
     type = 'pastel';
