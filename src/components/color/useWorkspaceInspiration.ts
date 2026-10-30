@@ -5,10 +5,8 @@ import type { Dispatch, SetStateAction } from 'react';
 import type { GeneratedPalette } from '@lib/color/formulas';
 import type { ExtractedColor } from '@lib/color/imageExtractor';
 import type { ImagePaletteBuildResult } from '@lib/color/imagePalette';
-import {
-  buildCuratedSourceCatalog,
-  type SelectableColor,
-} from '@lib/color/selectableColors';
+import type { SelectableColor } from '@lib/color/selectableColors';
+import { buildSourceCatalogFromHexes } from '@lib/color/sourceCatalog';
 import type { DesignStyle } from '@lib/styles/presets';
 
 export function useWorkspaceInspiration({
@@ -38,7 +36,7 @@ export function useWorkspaceInspiration({
 }) {
   function applyCuratedInspiration(hexes: string[], styleId: string | null) {
     setCatalogSource('curated');
-    setPaletteCatalog(buildCuratedSourceCatalog(hexes));
+    setPaletteCatalog(buildSourceCatalogFromHexes(hexes));
     setSelectedStyleId(styleId);
     assignFromHexes(hexes);
     setGeneratedPalette(null);

@@ -12,6 +12,7 @@ import {
   validateRolePalette,
 } from '@lib/color/rolePalette';
 import type { SelectableColor } from '@lib/color/selectableColors';
+import { buildSourceCatalogFromHexes } from '@lib/color/sourceCatalog';
 import { DESIGN_STYLES } from '@lib/styles/presets';
 import { FONT_PAIRS, getRecommendedPairings, type FontPair } from '@lib/typography/pairings';
 import {
@@ -65,9 +66,10 @@ import type { LocalProject } from '@lib/studio/projectModel';
 
 export function useSelectColorsWorkspaceController() {
   const [generatedPalette, setGeneratedPalette] = useState<GeneratedPalette | null>(null);
-  const [paletteCatalog, setPaletteCatalog] = useState<SelectableColor[]>([]);
+  const [storedPaletteCatalog, setPaletteCatalog] = useState<SelectableColor[]>([]);
   const {
     rolePalette,
+    seeds,
     exportRolePalette,
     exportStatusTokenOverrides,
     tokenOverridesByTheme,
@@ -82,6 +84,15 @@ export function useSelectColorsWorkspaceController() {
     setSnapshotExtras,
     restoredExtras,
   } = useRolePalette();
+  // A palette restored from the example, autosave, a share link or a project has no
+  // stored catalog; derive the source colors from the palette's own seed colors so the
+  // Colores panel is never empty while a palette exists.
+  const paletteCatalog = useMemo(
+    () => storedPaletteCatalog.length > 0 || !seeds
+      ? storedPaletteCatalog
+      : buildSourceCatalogFromHexes((seeds.extracted ?? []).map((color) => color.hex)),
+    [seeds, storedPaletteCatalog],
+  );
   const { activeView, selectView } = useCanvasView();
   const [catalogSource, setCatalogSource] = useState<'none' | 'curated' | 'image'>('none');
   const [onboardingHintVisible, setOnboardingHintVisible] = useState(false);

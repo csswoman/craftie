@@ -16,6 +16,9 @@ All notable changes to Craftie are documented here. The format follows [Keep a C
 - `check:component-size` now also covers `src/context`.
 - `/select-colors` redirect is now permanent.
 
+### Fixed
+- The Colores panel was empty after starting from a custom HEX, and for the example, autosaved or shared palettes. Source colors are now built from any valid HEX.
+
 ### Removed
 - Unused `ntcjs` dependency and the tracked copy of its package in `package/`.
 - Locally generated tooling reports (`.superpowers/`) from version control.

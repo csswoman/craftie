@@ -59,4 +59,17 @@ test.describe('workspace', () => {
     await expect(page.getByRole('menu', { name: 'Opciones de exportación' })).toBeVisible();
     await expect(page.getByText('CSS variables')).toBeVisible();
   });
+
+  test('lists the source colors in the Colores panel', async ({ page }) => {
+    await expect(page.locator('#tools-panel-colors')).toContainText('#1F6F54');
+  });
+
+  test('keeps the Colores panel populated when starting from a custom HEX', async ({ page }) => {
+    await page.getByRole('button', { name: 'Volver al inicio' }).click();
+    await page.getByRole('button', { name: 'Empezar de nuevo' }).click();
+    await page.getByLabel('Partir de un color (HEX)').fill('#3A5BA0');
+    await page.getByRole('button', { name: 'Crear paleta' }).click();
+
+    await expect(page.locator('#tools-panel-colors')).toContainText('#3A5BA0');
+  });
 });
