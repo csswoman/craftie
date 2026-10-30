@@ -50,7 +50,7 @@ function pickTintedNeutral(candidates: NeutralTintCandidate[]): NeutralTintCandi
   return tinted[0] ?? null;
 }
 
-function chromaticHue(chromatic: NeutralTintCandidate[]): number {
+function chromaticHue(chromatic: NeutralTintCandidate[], preferredHue?: number): number {
   const total = chromatic.reduce((sum, candidate) => sum + candidate.prominence, 0) || 1;
   const vector = chromatic.reduce(
     (sum, candidate) => {
@@ -68,6 +68,10 @@ function chromaticHue(chromatic: NeutralTintCandidate[]): number {
     return ((Math.atan2(vector.y, vector.x) * 180) / Math.PI + 360) % 360;
   }
 
+  if (preferredHue !== undefined) {
+    return preferredHue;
+  }
+
   const dominant = [...chromatic].sort((left, right) => right.prominence - left.prominence)[0];
 
   return dominant?.hue ?? 0;
@@ -79,11 +83,14 @@ function chromaticHue(chromatic: NeutralTintCandidate[]): number {
  *    its own hue. Ramp chroma stays fixed because ramp lightness is calibrated
  *    for AA at that chroma.
  * 2. Chromatic sources that agree on a hue family use their weighted mean hue.
- * 3. Chromatic sources with opposing hues use the dominant source hue instead of
- *    an in-between hue.
+ * 3. Chromatic sources with opposing hues use `preferredHue` (the chosen
+ *    primary) or else the dominant source hue, never an in-between hue.
  * 4. Achromatic sources stay pure gray.
  */
-export function resolveNeutralTint(candidates: NeutralTintCandidate[]): NeutralTint {
+export function resolveNeutralTint(
+  candidates: NeutralTintCandidate[],
+  preferredHue?: number,
+): NeutralTint {
   const tintedNeutral = pickTintedNeutral(candidates);
 
   if (tintedNeutral) {
@@ -96,5 +103,5 @@ export function resolveNeutralTint(candidates: NeutralTintCandidate[]): NeutralT
     return { hue: 0, chromaScale: 0, achromatic: true };
   }
 
-  return { hue: chromaticHue(chromatic), chromaScale: 1, achromatic: false };
+  return { hue: chromaticHue(chromatic, preferredHue), chromaScale: 1, achromatic: false };
 }

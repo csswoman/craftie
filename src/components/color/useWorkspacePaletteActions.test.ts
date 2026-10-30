@@ -83,6 +83,7 @@ describe('useWorkspacePaletteActions', () => {
     expect(options.setPaletteCatalog).toHaveBeenCalled();
     expect(options.assignFromHexes).toHaveBeenCalledWith(
       expect.arrayContaining(['#123456']),
+      { ordered: true },
     );
     expect(options.setRightPanelCollapsed).not.toHaveBeenCalled();
     expect(options.setError).toHaveBeenCalledWith(null);

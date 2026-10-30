@@ -163,13 +163,22 @@ export function assignRolesFromExtracted(
   return projectSemanticTokensToRolePalette(deriveSemanticTokens({ extracted, theme, paletteType }));
 }
 
-export function assignRolesFromHexes(hexes: string[]): RolePalette {
-  const extracted: ExtractedColor[] = hexes.map((hex, index) => ({
+export type HexSourceOptions = {
+  /** The user chose this order: first chromatic color becomes primary, and so on. */
+  ordered?: boolean;
+};
+
+/** Source colors for a list of HEX values, highest priority first. */
+export function extractedFromHexes(hexes: string[], options: HexSourceOptions = {}): ExtractedColor[] {
+  return hexes.map((hex, index) => ({
     hex,
     prominence: 1 - index * 0.05,
+    ...(options.ordered ? { rank: index } : {}),
   }));
+}
 
-  return assignRolesFromExtracted(extracted);
+export function assignRolesFromHexes(hexes: string[], options: HexSourceOptions = {}): RolePalette {
+  return assignRolesFromExtracted(extractedFromHexes(hexes, options));
 }
 
 export function mergeRolePalettePreservingLocks(

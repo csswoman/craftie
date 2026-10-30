@@ -6,6 +6,13 @@ import { deriveMutedTextHex } from './mutedText';
 import { classifyPalette, type PaletteType } from './paletteClassification';
 import { deriveOnTokenHexForFill } from './pairedOnToken';
 import { remainsDistinctWithColorVisionDeficiency } from './colorVision';
+import {
+  EXPRESSIVE_SOURCE_CHROMA_MIN,
+  hueDistance,
+  selectExpressiveRoles,
+  type ExpressiveSelection,
+  type ExpressiveSourceColor,
+} from './expressiveSelection';
 import { resolveNeutralTint, type NeutralTint } from './neutralTint';
 import { brandScore, type FitnessColor } from './roleFitness';
 import {
@@ -165,7 +172,7 @@ const EXPRESSIVE_SYNTHESIS = {
   complementaryAccentOffset: 180,
 };
 
-function toCandidate(color: ExtractedColor): FitnessColor {
+function toCandidate(color: ExtractedColor): ExpressiveSourceColor {
   const hex = normalizeHex(color.hex);
   const oklch = toOklch(hex);
   const chroma = oklch?.c ?? 0;
@@ -177,27 +184,32 @@ function toCandidate(color: ExtractedColor): FitnessColor {
     chroma,
     hue: oklch?.h ?? 0,
     isNeutral: chroma <= EXPRESSIVE_CHROMA_MIN,
+    ...(color.rank === undefined ? {} : { rank: color.rank }),
   };
 }
 
-function uniqueCandidates(extracted: ExtractedColor[]): FitnessColor[] {
-  const byHex = new Map<string, FitnessColor>();
+function uniqueCandidates(extracted: ExtractedColor[]): ExpressiveSourceColor[] {
+  const byHex = new Map<string, ExpressiveSourceColor>();
 
   for (const color of extracted) {
     const candidate = toCandidate(color);
     const existing = byHex.get(candidate.hex);
 
-    if (!existing || candidate.prominence > existing.prominence) {
+    if (!existing) {
       byHex.set(candidate.hex, candidate);
+      continue;
     }
+
+    const rank = Math.min(
+      existing.rank ?? Number.POSITIVE_INFINITY,
+      candidate.rank ?? Number.POSITIVE_INFINITY,
+    );
+    const kept = candidate.prominence > existing.prominence ? candidate : existing;
+
+    byHex.set(candidate.hex, Number.isFinite(rank) ? { ...kept, rank } : kept);
   }
 
   return [...byHex.values()];
-}
-
-function hueDistance(left: number, right: number): number {
-  const diff = Math.abs(left - right) % 360;
-  return diff > 180 ? 360 - diff : diff;
 }
 
 function mixHue(baseHue: number, targetHue: number, targetWeight: number): number {
@@ -687,13 +699,15 @@ function materializeSeries(
  * colors remain unchanged on small expressive roles; legacy synthesis is used
  * only when a caller explicitly requests a synthesis strategy.
  */
-function deriveBaseSemanticTokens(input: SemanticTokenDerivationInput): SemanticTokens {
+function deriveBaseSemanticTokens(
+  input: SemanticTokenDerivationInput,
+  candidates: ExpressiveSourceColor[],
+  tint: NeutralTint,
+): SemanticTokens {
   const theme = input.theme ?? 'light';
   const overrides = input.overrides ?? {};
   const strategy = input.synthesisStrategy ?? EXPRESSIVE_SYNTHESIS.synthesisStrategy;
   const vibrancy = normalizeVibrancy(input.vibrancy);
-  const candidates = uniqueCandidates(input.extracted);
-  const tint = resolveNeutralTint(candidates);
   const { hue } = tint;
   const rampNeutral = ([lightness, chroma]: readonly [number, number]): string =>
     neutralHex(lightness, chroma * tint.chromaScale, hue);
@@ -912,12 +926,42 @@ function deriveBaseSemanticTokens(input: SemanticTokenDerivationInput): Semantic
   };
 }
 
-function routedExpressiveCandidates(candidates: FitnessColor[]): FitnessColor[] {
+const ACCENT_GAP_MESSAGE = 'Esta imagen no tiene un color fuente adecuado para acento.';
+const SECONDARY_GAP_MESSAGE = 'Las fuentes no ofrecen un segundo color distinto del primario.';
+
+/**
+ * Placeholder for an empty expressive role: a harmonic variant of primary so
+ * previews stay varied while the role is still reported as a gap.
+ */
+function harmonicSuggestion(
+  primaryHex: string,
+  hueOffset: number,
+  theme: 'light' | 'dark',
+): string {
+  const primary = toOklch(primaryHex);
+  const primaryLightness = primary?.l ?? 0.5;
+  const primaryChroma = primary?.c ?? 0;
+  const primaryHue = primary?.h ?? 0;
+
+  if (primaryChroma < EXPRESSIVE_CHROMA_MIN) {
+    // Gray primaries get a tonal step instead of an invented hue.
+    const lightness = theme === 'dark' ? primaryLightness - 0.14 : primaryLightness + 0.14;
+    return oklchChannelsToHex(Math.min(0.9, Math.max(0.2, lightness)), primaryChroma, primaryHue);
+  }
+
+  const chroma = Math.min(0.16, Math.max(0.08, primaryChroma));
+  const lightness = theme === 'dark' ? 0.72 : 0.56;
+
+  return oklchChannelsToHex(lightness, chroma, (primaryHue + hueOffset + 360) % 360);
+}
+
+/** Expressive sources for data series, most chromatic first. */
+function dataSeriesSources(candidates: FitnessColor[]): FitnessColor[] {
   const maximumProminence = Math.max(...candidates.map((candidate) => candidate.prominence), 0);
   const areaFloor = maximumProminence * 0.12;
 
   return candidates
-    .filter((candidate) => candidate.chroma >= 0.03 && candidate.prominence >= areaFloor)
+    .filter((candidate) => candidate.chroma >= EXPRESSIVE_SOURCE_CHROMA_MIN && candidate.prominence >= areaFloor)
     .sort((left, right) => right.chroma - left.chroma || right.prominence - left.prominence);
 }
 
@@ -977,36 +1021,28 @@ function sourceDataSeries(
 
 function applyAreaAwareStrategy(
   base: SemanticTokens,
-  candidates: FitnessColor[],
+  selection: ExpressiveSelection,
+  expressive: FitnessColor[],
   theme: 'light' | 'dark',
   overrides: SemanticTokenOverrides,
 ): SemanticTokens {
-  const expressive = routedExpressiveCandidates(candidates);
   const primary = applyOverride(
     'primary',
-    token(expressive[0]?.hex ?? base.primary.hex, expressive[0] ? 'extracted' : 'derived'),
+    selection.primary ? token(selection.primary.hex, 'extracted') : base.primary,
     overrides,
   );
   const secondary = applyOverride(
     'secondary',
-    token(expressive[1]?.hex ?? base.secondary.hex, expressive[1] ? 'extracted' : 'derived'),
+    selection.secondary
+      ? token(selection.secondary.hex, 'extracted')
+      : token(harmonicSuggestion(primary.hex, 34, theme), 'derived', { gap: SECONDARY_GAP_MESSAGE }),
     overrides,
   );
-  const accentCandidate = expressive
-    .filter((candidate) =>
-      candidate.hex !== primary.hex &&
-      candidate.hex !== secondary.hex &&
-      candidate.lightness >= (theme === 'dark' ? 0.28 : 0.35) &&
-      candidate.lightness <= 0.88,
-    )
-    .sort((left, right) => left.prominence - right.prominence || right.chroma - left.chroma)[0];
   const accent = applyOverride(
     'accent',
-    accentCandidate
-      ? token(accentCandidate.hex, 'extracted')
-      : token(secondary.hex, 'derived', {
-        gap: 'Esta imagen no tiene un color fuente adecuado para acento.',
-      }),
+    selection.accent
+      ? token(selection.accent.hex, 'extracted')
+      : token(harmonicSuggestion(primary.hex, 180, theme), 'derived', { gap: ACCENT_GAP_MESSAGE }),
     overrides,
   );
   const onPrimary = applyOverride('on-primary', derivedPair(primary), overrides);
@@ -1043,7 +1079,13 @@ function applyAreaAwareStrategy(
 /** Derives an area-aware UI palette; source colors stay on small expressive roles. */
 export function deriveSemanticTokens(input: SemanticTokenDerivationInput): SemanticTokens {
   const paletteType = input.paletteType ?? classifyPalette(input.extracted).type;
-  const base = deriveBaseSemanticTokens(input);
+  const theme = input.theme ?? 'light';
+  const candidates = uniqueCandidates(input.extracted);
+  const selection = selectExpressiveRoles(candidates, theme);
+  // Opposing source hues fall back to the selected primary hue so neutrals and
+  // brand color belong to the same family.
+  const tint = resolveNeutralTint(candidates, selection.primary?.hue);
+  const base = deriveBaseSemanticTokens(input, candidates, tint);
 
   if (paletteType === 'neutral' && !input.overrides?.accent && !input.synthesisStrategy) {
     const dataGap = token(base.primary.hex, 'derived', {
@@ -1071,8 +1113,9 @@ export function deriveSemanticTokens(input: SemanticTokenDerivationInput): Seman
   if (!input.synthesisStrategy) {
     return applyAreaAwareStrategy(
       base,
-      uniqueCandidates(input.extracted),
-      input.theme ?? 'light',
+      selection,
+      dataSeriesSources(candidates),
+      theme,
       input.overrides ?? {},
     );
   }

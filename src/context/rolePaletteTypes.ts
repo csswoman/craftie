@@ -1,6 +1,7 @@
 import type { ExtractedColor } from '@lib/color/imageExtractor';
 import type { PaletteType } from '@lib/color/paletteClassification';
 import type {
+  HexSourceOptions,
   PaletteRoleId,
   PaletteSeeds,
   RolePalette,
@@ -75,7 +76,8 @@ export type RolePaletteContextValue = {
   renameRole: (role: PaletteRoleId, name: string) => boolean;
   toggleLock: (role: PaletteRoleId) => void;
   clearRolePalette: () => void;
-  assignFromHexes: (hexes: string[]) => void;
+  /** `ordered` keeps the given order for primary, secondary and accent. */
+  assignFromHexes: (hexes: string[], options?: HexSourceOptions) => void;
   /** Current serializable workspace snapshot (for share links). */
   getShareSnapshot: () => WorkspaceSnapshot;
   /** Restore a serializable snapshot at runtime (reopening a saved project). */

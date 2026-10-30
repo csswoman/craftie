@@ -26,9 +26,14 @@ function isAccentAssigned(tokens: SemanticTokens): boolean {
   return fitness.asAccent.ok || fitness.asFill.ok;
 }
 
-function bestAccentCandidate(tokens: SemanticTokens, candidates: Array<{ hex: string; prominence?: number }>): SemanticToken | null {
+function bestAccentCandidate(
+  tokens: SemanticTokens,
+  candidates: Array<{ hex: string; prominence?: number }>,
+  taken: ReadonlySet<string>,
+): SemanticToken | null {
   const ranked = candidates.flatMap((candidate) => {
     const hex = normalizeHex(candidate.hex);
+    if (taken.has(hex)) return [];
     const fitness = evaluateColorFitness(hex, {
       backgroundHex: tokens.background.hex,
       lightOnColorBaseHex: tokens['surface-elevated'].hex,
@@ -44,6 +49,20 @@ function bestAccentCandidate(tokens: SemanticTokens, candidates: Array<{ hex: st
 
 function gapToken(hex: string, message: string): SemanticToken {
   return { hex, source: 'derived', gap: message };
+}
+
+/**
+ * Keeps the derived suggestion as gap placeholder when it differs from the
+ * colors already shown, so previews do not repeat one color in every role.
+ */
+function placeholderHex(
+  token: SemanticToken,
+  fallbackHex: string,
+  shown: string[],
+  primaryAssigned: boolean,
+): string {
+  const hex = normalizeHex(token.hex);
+  return primaryAssigned && token.source === 'derived' && !shown.includes(hex) ? hex : fallbackHex;
 }
 
 /**
@@ -68,13 +87,29 @@ export function resolveUiExpressiveGaps(
   const secondaryAssigned = isAssigned(tokens.secondary);
   const secondary = secondaryAssigned
     ? tokens.secondary
-    : gapToken(primary.hex, 'La imagen no ofrece un candidato fuente válido para secundario.');
+    : gapToken(
+        placeholderHex(tokens.secondary, primary.hex, [normalizeHex(primary.hex)], primaryAssigned),
+        'La imagen no ofrece un candidato fuente válido para secundario.',
+      );
+  const taken = new Set(
+    [primaryAssigned ? primary : null, secondaryAssigned ? secondary : null]
+      .filter((entry): entry is SemanticToken => entry !== null)
+      .map((entry) => normalizeHex(entry.hex)),
+  );
   const automaticAccent = isAccentAssigned(tokens)
     ? tokens.accent
-    : bestAccentCandidate(tokens, accentCandidates);
+    : bestAccentCandidate(tokens, accentCandidates, taken);
   const accent = automaticAccent
     ? automaticAccent
-    : gapToken(primary.hex, 'La imagen no ofrece un candidato fuente con suficiente carácter para acento.');
+    : gapToken(
+        placeholderHex(
+          tokens.accent,
+          primary.hex,
+          [normalizeHex(primary.hex), normalizeHex(secondary.hex)],
+          primaryAssigned,
+        ),
+        'La imagen no ofrece un candidato fuente con suficiente carácter para acento.',
+      );
 
   return {
     ...tokens,

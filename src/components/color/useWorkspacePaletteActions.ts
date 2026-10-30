@@ -8,6 +8,7 @@ import { isGeneratedPaletteRole } from '@lib/color/paletteDisplay';
 import { addColorToPalette, renamePaletteColor } from '@lib/color/paletteOrder';
 import {
   isPaletteRoleId,
+  type HexSourceOptions,
   type PaletteRoleId,
   type RolePalette,
 } from '@lib/color/rolePalette';
@@ -25,7 +26,7 @@ export function useWorkspacePaletteActions({
   setGeneratedPalette,
   setPaletteCatalog,
 }: {
-  assignFromHexes: (hexes: string[]) => void;
+  assignFromHexes: (hexes: string[], options?: HexSourceOptions) => void;
   generatedPalette: GeneratedPalette | null;
   paletteCatalog: SelectableColor[];
   replaceRole: (role: PaletteRoleId, hex: string) => void;
@@ -77,9 +78,13 @@ export function useWorkspacePaletteActions({
     setPaletteCatalog(result.catalog);
 
     if (rolePalette) {
-      assignFromHexes([...Object.values(rolePalette).map((slot) => slot.hex), hex]);
+      // Keep assigned roles in place; the new color fills the first open role.
+      const assigned = Object.values(rolePalette)
+        .filter((slot) => !slot.gap)
+        .map((slot) => slot.hex);
+      assignFromHexes([...assigned, hex], { ordered: true });
     } else {
-      assignFromHexes([hex]);
+      assignFromHexes([hex], { ordered: true });
     }
 
     setError(null);

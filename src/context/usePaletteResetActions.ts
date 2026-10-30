@@ -6,6 +6,8 @@ import type { ExtractedColor } from '@lib/color/imageExtractor';
 import type { PaletteType } from '@lib/color/paletteClassification';
 import {
   assignRolesFromHexes,
+  extractedFromHexes,
+  type HexSourceOptions,
   PALETTE_ROLE_ORDER,
   rolePaletteAsSemanticOverrides,
   type PaletteRoleId,
@@ -101,13 +103,10 @@ export function usePaletteResetActions(
   }, [resetEditable, resetTransient, setActiveRole, setExtractedColors, setPaletteRevision]);
 
   const assignFromHexes = useCallback(
-    (hexes: string[]) => {
+    (hexes: string[], options?: HexSourceOptions) => {
       setPaletteRevision((revision) => revision + 1);
-      const extracted = hexes.map((hex, index) => ({
-        hex,
-        prominence: 1 - index * 0.05,
-      }));
-      const assigned = assignRolesFromHexes(hexes);
+      const extracted = extractedFromHexes(hexes, options);
+      const assigned = assignRolesFromHexes(hexes, options);
 
       setExtractedColors(extracted);
       resetEditable({

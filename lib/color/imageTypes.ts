@@ -1,6 +1,11 @@
 export type ExtractedColor = {
   hex: string;
   prominence: number;
+  /**
+   * Explicit priority (0 = first). Set for colors whose order the user chose;
+   * expressive roles then follow this order instead of image scoring.
+   */
+  rank?: number;
 };
 
 export type ImageExtractionOptions = {
