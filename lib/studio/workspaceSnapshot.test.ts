@@ -143,6 +143,21 @@ describe('optional typography and canvas view', () => {
     expect(deserializeWorkspace(serializeWorkspace(snapshot))).toEqual(snapshot);
   });
 
+  it('round-trips per-role overrides and sanitizes untrusted ones', () => {
+    const withRoles = {
+      ...minimalSnapshot(),
+      typography: { ...typography, typeRoles: { label: { weight: 600, size: 14 } } },
+    };
+    expect(deserializeWorkspace(serializeWorkspace(withRoles))).toEqual(withRoles);
+
+    const hostile = JSON.stringify({
+      version: 1,
+      ...minimalSnapshot(),
+      typography: { ...typography, typeRoles: { label: { weight: 5000 }, evil: { size: 1 } } },
+    });
+    expect(deserializeWorkspace(hostile)?.typography?.typeRoles).toEqual({ label: { weight: 900 } });
+  });
+
   it('still loads snapshots written before typography existed', () => {
     const result = deserializeWorkspace(serializeWorkspace(minimalSnapshot()));
     expect(result?.typography).toBeUndefined();

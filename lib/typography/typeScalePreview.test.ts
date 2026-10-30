@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { contrastRatio, hexToOklchChannels } from '../utils/colorMath';
 
 import {
+  buildSpecimenLevels,
+  buildTypeScalePalette,
   buildTypeScaleRowTone,
   typeScaleIndexProgress,
   typeScaleRowPaddingY,
@@ -85,5 +87,42 @@ describe('buildTypeScaleRowTone', () => {
     expect(contrastRatio(bottom.ink, bottom.background)).toBeGreaterThanOrEqual(4.5);
     expect(contrastRatio(top.muted, top.background)).toBeGreaterThanOrEqual(4.5);
     expect(contrastRatio(bottom.muted, bottom.background)).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe('buildTypeScalePalette', () => {
+  it('keeps ink and muted text readable on the page background', () => {
+    for (const [fondo, texto] of [['#ffffff', '#222222'], ['#10141a', '#e8e8e8'], ['#f4efe6', '#8a8a8a']] as const) {
+      const palette = buildTypeScalePalette({ fondo, texto, borde: '#cccccc' });
+      expect(palette.background).toBe(fondo);
+      expect(contrastRatio(palette.ink, fondo)).toBeGreaterThanOrEqual(7);
+      expect(contrastRatio(palette.muted, fondo)).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+});
+
+describe('buildSpecimenLevels', () => {
+  const input = {
+    base: 16,
+    ratio: 1.25,
+    largerSteps: 1,
+    smallerSteps: 1,
+    overrides: { h1: 40, body: null },
+    headingWeight: 700,
+    bodyWeight: 400,
+    spacing: { headingLineHeight: 1.2, headingLetterSpacing: -0.02, bodyLineHeight: 1.5, bodyLetterSpacing: 0 },
+  };
+
+  it('applies overrides, weights and spacing per role', () => {
+    const levels = buildSpecimenLevels(input);
+    const byId = Object.fromEntries(levels.map((level) => [level.id, level]));
+    expect(byId.h1).toMatchObject({ size: 40, weight: 700, lineHeight: 1.2, letterSpacing: -0.02 });
+    expect(byId.body).toMatchObject({ size: 16, weight: 400, lineHeight: 1.5, isHeading: false });
+  });
+
+  it('includes the extra larger and smaller steps', () => {
+    const ids = buildSpecimenLevels(input).map((level) => level.id);
+    expect(ids[0]).toBe('display-2');
+    expect(ids.at(-1)).toBe('micro-1');
   });
 });

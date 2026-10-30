@@ -15,6 +15,8 @@ import {
   type TypeScaleBase,
   type TypeScaleRatio,
 } from '../typography/typeScale';
+import { parseTypeLevelOverrides, type TypeLevelOverrides } from '../typography/typeLevels';
+import { parseTypeRoleOverrides, type TypeRoleOverrides } from '../typography/typeRoles';
 import type { AppliedTypography } from '../typography/typeState';
 import { CANVAS_VIEWS, type CanvasViewId } from '../color/canvasViews';
 
@@ -26,6 +28,10 @@ export type SnapshotTypography = {
   applied: AppliedTypography;
   base: TypeScaleBase;
   ratio: TypeScaleRatio;
+  /** Per-role weight / size / leading / tracking overrides. Optional for older snapshots. */
+  typeRoles?: TypeRoleOverrides;
+  /** Per-level weight / leading / tracking overrides of the scale. */
+  typeLevels?: TypeLevelOverrides;
 };
 
 /**
@@ -160,6 +166,9 @@ function parseTypography(value: unknown): SnapshotTypography | undefined {
     return undefined;
   }
 
+  const typeRoles = parseTypeRoleOverrides(value.typeRoles);
+  const typeLevels = parseTypeLevelOverrides(value.typeLevels);
+
   return {
     applied: {
       catalogPairId: applied.catalogPairId as string | null,
@@ -172,6 +181,8 @@ function parseTypography(value: unknown): SnapshotTypography | undefined {
     },
     base: value.base as TypeScaleBase,
     ratio: value.ratio as TypeScaleRatio,
+    ...(Object.keys(typeRoles).length > 0 ? { typeRoles } : {}),
+    ...(Object.keys(typeLevels).length > 0 ? { typeLevels } : {}),
   };
 }
 

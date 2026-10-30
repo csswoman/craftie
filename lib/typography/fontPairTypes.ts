@@ -14,6 +14,8 @@ export type FontMeta = {
   bestFor: 'heading' | 'body' | 'both';
   /** UI weight for specimens / applied readout; defaults 700 heading / 400 body */
   defaultWeight?: number;
+  /** Additional weights to request from Google Fonts (per-role weight overrides). */
+  extraWeights?: readonly number[];
 };
 
 export type FontPair = {

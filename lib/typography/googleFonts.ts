@@ -43,10 +43,12 @@ function collectFamilies(pairs: FontPair[]): Map<string, Set<number>> {
     const headingWeights = [
       ...HEADING_WEIGHTS,
       pair.heading.defaultWeight ?? 700,
+      ...(pair.heading.extraWeights ?? []),
     ];
     const bodyWeights = [
       ...BODY_WEIGHTS,
       pair.body.defaultWeight ?? 400,
+      ...(pair.body.extraWeights ?? []),
     ];
     addWeights(families, pair.heading.family, headingWeights);
     addWeights(families, pair.body.family, bodyWeights);
