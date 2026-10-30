@@ -27,4 +27,6 @@ export type FontPair = {
   mood: string[];
   character: string[];
   wcagNote?: string;
+  /** 1 = most used. Present only on widely used pairs; drives ordering and the "popular" badge. */
+  popularRank?: number;
 };

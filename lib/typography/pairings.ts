@@ -81,6 +81,12 @@ export function getRecommendedPairings(mood: string[], limit = 3): FontPair[] {
         return right.score - left.score;
       }
 
+      const leftRank = left.pair.popularRank ?? Number.POSITIVE_INFINITY;
+      const rightRank = right.pair.popularRank ?? Number.POSITIVE_INFINITY;
+      if (leftRank !== rightRank) {
+        return leftRank - rightRank;
+      }
+
       return left.pair.id.localeCompare(right.pair.id, 'es');
     })
     .slice(0, limit)

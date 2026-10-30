@@ -7,8 +7,11 @@ import { MONO_SANS_PAIRS } from './monoSans';
 import { FRIENDLY_PAIRS } from './friendly';
 import { ACCESSIBLE_PAIRS } from './accessible';
 import { SINGLE_FAMILY_PAIRS } from './singleFamily';
+import { POPULAR_PAIRS } from './popular';
+import { curatePairs } from './curation';
 
-export const CURATED_FONT_PAIRS: FontPair[] = [
+export const CURATED_FONT_PAIRS: FontPair[] = curatePairs([
+  ...POPULAR_PAIRS,
   ...LEGACY_FONT_PAIRS,
   ...SANS_SANS_PAIRS,
   ...SANS_SERIF_PAIRS,
@@ -17,4 +20,4 @@ export const CURATED_FONT_PAIRS: FontPair[] = [
   ...FRIENDLY_PAIRS,
   ...ACCESSIBLE_PAIRS,
   ...SINGLE_FAMILY_PAIRS,
-];
+]);

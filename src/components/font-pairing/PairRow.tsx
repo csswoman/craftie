@@ -1,5 +1,7 @@
 'use client';
 
+import { Star } from 'lucide-react';
+
 import type { FontPair } from '@lib/typography/pairings';
 import { buildFontFamilyStack } from '@lib/typography/googleFonts';
 import { specimenForPair } from '@lib/typography/pairSpecimen';

@@ -143,6 +143,15 @@ describe('pairings', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  it('lists popular pairs first, ordered by rank, with unique ranks', () => {
+    const ranked = FONT_PAIRS.filter((pair) => pair.popularRank !== undefined);
+    expect(ranked.length).toBeGreaterThanOrEqual(15);
+    expect(FONT_PAIRS.slice(0, ranked.length)).toEqual(ranked);
+    const ranks = ranked.map((pair) => pair.popularRank!);
+    expect(ranks).toEqual([...ranks].sort((a, b) => a - b));
+    expect(new Set(ranks).size).toBe(ranks.length);
+  });
+
   describe('getPairingsForStyle', () => {
     it('returns all pairs when mood input is empty', () => {
       withMockPairs((pairs) => {

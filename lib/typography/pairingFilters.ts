@@ -2,6 +2,7 @@ import type { FontPair } from './fontPairTypes';
 
 export const PAIRING_CATEGORY_FILTERS = [
   { label: 'Todas', value: 'all' },
+  { label: 'Populares', value: 'popular' },
   { label: 'Editorial', value: 'editorial' },
   { label: 'Técnico', value: 'technical' },
   { label: 'Cálido', value: 'warm' },
@@ -44,7 +45,9 @@ export function filterFontPairs(
   { category, query }: FilterFontPairsInput,
 ): FontPair[] {
   return pairs.filter((pair) => {
-    const categoryOk = category === 'all' || pair.character.includes(category);
+    const categoryOk =
+      category === 'all' ||
+      (category === 'popular' ? pair.popularRank !== undefined : pair.character.includes(category));
     return categoryOk && matchesQuery(pair, query);
   });
 }

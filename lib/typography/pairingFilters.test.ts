@@ -57,9 +57,10 @@ const fixtures: FontPair[] = [
 ];
 
 describe('PAIRING_CATEGORY_FILTERS', () => {
-  it('exposes all + four stable UI categories', () => {
+  it('exposes all + popular + four stable UI categories', () => {
     expect(PAIRING_CATEGORY_FILTERS.map((f) => f.value)).toEqual([
       'all',
+      'popular',
       'editorial',
       'technical',
       'warm',
@@ -76,6 +77,12 @@ describe('filterFontPairs', () => {
   it('filters by character category', () => {
     const result = filterFontPairs(fixtures, { category: 'editorial', query: '' });
     expect(result.map((p) => p.id)).toEqual(['editorial-lora']);
+  });
+
+  it('filters popular pairs by popularRank', () => {
+    const ranked = [{ ...fixtures[0]!, popularRank: 1 }, fixtures[1]!, fixtures[2]!];
+    const result = filterFontPairs(ranked, { category: 'popular', query: '' });
+    expect(result.map((p) => p.id)).toEqual([fixtures[0]!.id]);
   });
 
   it('filters by displayName case-insensitively', () => {
@@ -101,10 +108,11 @@ describe('filterFontPairs', () => {
 });
 
 describe('suggestFontPairs', () => {
-  it('with empty query returns the four named categories (not all)', () => {
+  it('with empty query returns the named categories (not all)', () => {
     const suggestions = suggestFontPairs(fixtures, '', 8);
     expect(suggestions.every((s) => s.type === 'category')).toBe(true);
     expect(suggestions.map((s) => s.value)).toEqual([
+      'popular',
       'editorial',
       'technical',
       'warm',
