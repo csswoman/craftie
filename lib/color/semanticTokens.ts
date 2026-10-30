@@ -10,6 +10,7 @@ import {
   EXPRESSIVE_SOURCE_CHROMA_MIN,
   hueDistance,
   selectExpressiveRoles,
+  toExpressiveSource,
   type ExpressiveSelection,
   type ExpressiveSourceColor,
 } from './expressiveSelection';
@@ -172,27 +173,11 @@ const EXPRESSIVE_SYNTHESIS = {
   complementaryAccentOffset: 180,
 };
 
-function toCandidate(color: ExtractedColor): ExpressiveSourceColor {
-  const hex = normalizeHex(color.hex);
-  const oklch = toOklch(hex);
-  const chroma = oklch?.c ?? 0;
-
-  return {
-    hex,
-    prominence: color.prominence,
-    lightness: oklch?.l ?? 0,
-    chroma,
-    hue: oklch?.h ?? 0,
-    isNeutral: chroma <= EXPRESSIVE_CHROMA_MIN,
-    ...(color.rank === undefined ? {} : { rank: color.rank }),
-  };
-}
-
 function uniqueCandidates(extracted: ExtractedColor[]): ExpressiveSourceColor[] {
   const byHex = new Map<string, ExpressiveSourceColor>();
 
   for (const color of extracted) {
-    const candidate = toCandidate(color);
+    const candidate = toExpressiveSource(color);
     const existing = byHex.get(candidate.hex);
 
     if (!existing) {

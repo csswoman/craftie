@@ -261,6 +261,7 @@ export function useSelectColorsWorkspaceController() {
       const extracted = await extractPaletteColorsFromImage(file, regenerateIndex);
       const palette = buildImagePalette(extracted, {
         paletteType: requestedPaletteType ?? undefined,
+        variant: regenerateIndex,
       });
       setImagePaletteType(palette.classification.type);
       handleImagePaletteExtracted(palette);

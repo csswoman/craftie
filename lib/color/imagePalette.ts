@@ -3,6 +3,7 @@ import {
   classifyColorToGroup,
   DEFAULT_COLOR_GROUP_THRESHOLDS,
 } from './colorGroupClassification';
+import { applyImagePaletteVariant } from './imagePaletteVariant';
 import { namePalette } from './naming';
 import { normalizeHex } from './normalizeHex';
 import { assignRolesFromExtracted, type RolePalette } from './rolePalette';
@@ -102,24 +103,31 @@ export function buildSelectableColorsFromExtracted(extracted: ExtractedColor[]):
   }));
 }
 
+type ImagePaletteOptions = {
+  paletteType?: PaletteType;
+  /** Role combination to use; 0 is automatic, regenerate increments it. */
+  variant?: number;
+};
+
 export function buildImagePalette(extracted: ExtractedColor[]): UiPaletteBuildResult;
 export function buildImagePalette(
   extracted: ExtractedColor[],
-  options: { mode: 'paint'; paletteType?: PaletteType },
+  options: ImagePaletteOptions & { mode: 'paint' },
 ): PaintPaletteBuildResult;
 export function buildImagePalette(
   extracted: ExtractedColor[],
-  options: { mode?: 'ui'; paletteType?: PaletteType },
+  options: ImagePaletteOptions & { mode?: 'ui' },
 ): UiPaletteBuildResult;
 export function buildImagePalette(
   extracted: ExtractedColor[],
-  options: { mode: ImageExtractionMode; paletteType?: PaletteType },
+  options: ImagePaletteOptions & { mode: ImageExtractionMode },
 ): ImagePaletteBuildResult;
 export function buildImagePalette(
-  extracted: ExtractedColor[],
-  options: { mode?: ImageExtractionMode; paletteType?: PaletteType } = {},
+  sourceColors: ExtractedColor[],
+  options: ImagePaletteOptions & { mode?: ImageExtractionMode } = {},
 ): ImagePaletteBuildResult {
   const mode = options.mode ?? 'ui';
+  const extracted = applyImagePaletteVariant(sourceColors, options.variant ?? 0);
   const catalog = buildSelectableColorsFromExtracted(extracted);
   const detected = classifyPalette(extracted);
   const classification = options.paletteType ? { ...detected, type: options.paletteType } : detected;
