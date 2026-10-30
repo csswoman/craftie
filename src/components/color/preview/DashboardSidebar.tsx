@@ -7,7 +7,13 @@ import { DASHBOARD_NAV, getWeeklyRhythmNote } from './dashboardPreviewData';
 import { PreviewIcon } from './previewIcons';
 import { readableInk } from './previewColor';
 import { LiveDot, ProgressBar } from './previewPrimitives';
-import { captionStyle, headingStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import {
+  brandStyle,
+  captionStyle,
+  headingStyle,
+  type PreviewFonts,
+  ROLE_WEIGHT,
+} from './previewTypography';
 
 type DashboardSidebarProps = {
   colors: ResolvedLayoutColors;
@@ -43,7 +49,7 @@ export function DashboardSidebar({
             className="relative grid h-9 w-9 shrink-0 place-items-center rounded-xl transition-transform duration-200 ease-out hover:rotate-[-2deg] motion-reduce:transition-none motion-reduce:hover:rotate-0"
             style={{ backgroundColor: primaryFill, color: onPrimaryFill }}
           >
-            <span className="text-sm font-medium" aria-label="Craftie, perro diseñador">C</span>
+            <span className="text-sm" style={{ fontFamily: 'var(--font-heading)', fontWeight: 'var(--weight-heading)' }} aria-label="Craftie, perro diseñador">C</span>
             <PreviewIcon
               name="sparkles"
               size={10}
@@ -51,7 +57,7 @@ export function DashboardSidebar({
             />
           </PreviewSlotTarget>
           <div className="min-w-0">
-            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="truncate" style={titleStyle(fonts)}>
+            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="truncate" style={brandStyle(fonts)}>
               Craftie
             </PreviewSlotTarget>
             <LiveDot
@@ -74,7 +80,7 @@ export function DashboardSidebar({
               style={{
                 backgroundColor: index === 0 ? colors.surfaceElevated : 'transparent',
                 color: index === 0 ? activeInk : colors.text,
-                fontWeight: index === 0 ? 500 : 400,
+                fontWeight: index === 0 ? ROLE_WEIGHT.button : ROLE_WEIGHT.label,
               }}
             >
               <PreviewIcon name={item.icon} size={15} />
@@ -86,7 +92,7 @@ export function DashboardSidebar({
         <PreviewSlotTarget
           slot="surface"
           onEditSlot={onEditSlot}
-          className="mt-auto rounded-xl border p-4"
+          className="mt-auto preview-surface rounded-xl border p-4"
           style={{ backgroundColor: colors.surface, borderColor: colors.border }}
         >
           <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={captionStyle(fonts, colors.mutedText)}>

@@ -6,6 +6,7 @@ import { adjustLightnessForContrast, contrastRatio, mix, readableOn } from '@lib
 
 import { PreviewIcon, type PreviewIconName } from './previewIcons';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
+import { ROLE_WEIGHT } from './previewTypography';
 
 /** Soft, honest tint of a palette color — keeps the source slot recognizable. */
 export function tint(hex: string, percent: number): string {
@@ -35,7 +36,7 @@ export function Avatar({
     <PreviewSlotTarget
       slot={slot}
       onEditSlot={onEditSlot}
-      className="grid shrink-0 place-items-center rounded-full font-semibold"
+      className="grid shrink-0 place-items-center rounded-full"
       style={{
         width: size,
         height: size,
@@ -67,8 +68,8 @@ export function Tag({
     <PreviewSlotTarget
       slot={slot}
       onEditSlot={onEditSlot}
-      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold"
-      style={{ backgroundColor, color: foregroundColor }}
+      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.6875rem]"
+      style={{ backgroundColor, color: foregroundColor, fontWeight: ROLE_WEIGHT.button }}
     >
       {icon ? <PreviewIcon name={icon} size={11} strokeWidth={2.25} /> : null}
       {label}
@@ -87,8 +88,8 @@ export function StatDelta({
     <PreviewSlotTarget
       slot={slot}
       onEditSlot={onEditSlot}
-      className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full px-1.5 py-0.5 text-[0.6875rem] font-semibold tabular-nums"
-      style={{ backgroundColor: tint(color, 15), color }}
+      className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full px-1.5 py-0.5 text-[0.6875rem] tabular-nums"
+      style={{ backgroundColor: tint(color, 15), color, fontWeight: ROLE_WEIGHT.button }}
     >
       <PreviewIcon name={direction === 'up' ? 'arrowUp' : 'arrowDown'} size={11} strokeWidth={2.5} />
       {value}
@@ -118,8 +119,8 @@ export function LiveDot({
 
   return (
     <span
-      className="inline-flex items-center gap-1.5 text-[0.6875rem] font-medium"
-      style={{ color: surfaceHex ? readableOn(color, surfaceHex) : color }}
+      className="inline-flex items-center gap-1.5 text-[0.6875rem]"
+      style={{ color: surfaceHex ? readableOn(color, surfaceHex) : color, fontWeight: ROLE_WEIGHT.label }}
     >
       {dot}
       {label}
@@ -171,7 +172,7 @@ export function SegmentedControl({
             style={{
               backgroundColor: active ? activeColor : 'transparent',
               color: active ? activeText : mutedText,
-              fontWeight: active ? 500 : 400,
+              fontWeight: active ? ROLE_WEIGHT.button : ROLE_WEIGHT.label,
             }}
           >
             {option}

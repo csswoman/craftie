@@ -5,7 +5,12 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { ANALYTICS_DAY_STATS, ANALYTICS_TOP_ACTIVITIES } from './analyticsPreviewData';
 import { StatDelta, tint } from './previewPrimitives';
-import { captionStyle, headingStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import {
+  captionStyle,
+  headingStyle,
+  type PreviewFonts,
+  titleStyle,
+} from './previewTypography';
 
 export function AnalyticsAsidePanels({
   colors,
@@ -21,13 +26,13 @@ export function AnalyticsAsidePanels({
       <PreviewSlotTarget
         slot="surfaceElevated"
         onEditSlot={onEditSlot}
-        className="rounded-xl border p-5"
+        className="preview-surface rounded-xl border p-5 @min-[800px]/analytics:p-6"
         style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
       >
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
           Estado de ánimo
         </PreviewSlotTarget>
-        <div className="mt-4 grid gap-4 @min-[480px]/analyticsaside:grid-cols-3 @min-[800px]/analytics:grid-cols-1">
+        <div className="mt-5 grid gap-4 @min-[480px]/analyticsaside:grid-cols-3 @min-[800px]/analytics:grid-cols-1">
           {ANALYTICS_DAY_STATS.map((item) => (
             <div key={item.label} className="flex items-center justify-between gap-2">
               <div className="min-w-0">
@@ -38,7 +43,7 @@ export function AnalyticsAsidePanels({
                   slot="text"
                   onEditSlot={onEditSlot}
                   className="mt-1 block tabular-nums"
-                  style={{ ...titleStyle(fonts), fontSize: 'var(--size-h3)' }}
+                  style={{ ...headingStyle(fonts) }}
                 >
                   {item.value}
                 </PreviewSlotTarget>
@@ -58,13 +63,13 @@ export function AnalyticsAsidePanels({
       <PreviewSlotTarget
         slot="surface"
         onEditSlot={onEditSlot}
-        className="rounded-xl border p-5"
+        className="preview-surface rounded-xl border p-5 @min-[800px]/analytics:p-6"
         style={{ backgroundColor: colors.surface, borderColor: colors.border }}
       >
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
           Sitios favoritos
         </PreviewSlotTarget>
-        <div className="mt-4 space-y-4">
+        <div className="mt-5 space-y-4">
           {ANALYTICS_TOP_ACTIVITIES.map((place, index) => (
             <div key={place.label} className="preview-list-in" style={{ animationDelay: `${index * 45}ms` }}>
               <div className="mb-2 flex items-center gap-3">

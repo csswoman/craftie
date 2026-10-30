@@ -26,7 +26,7 @@ export function AnalyticsTreatPanel({
     <PreviewSlotTarget
       slot="surfaceElevated"
       onEditSlot={onEditSlot}
-      className="preview-rise rounded-xl border p-5 @min-[800px]/analytics:p-6"
+      className="preview-rise preview-surface rounded-xl border p-5 @min-[800px]/analytics:p-6"
       style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
     >
       <div className="flex items-center justify-between gap-3">
@@ -36,7 +36,7 @@ export function AnalyticsTreatPanel({
         <StatDelta value="12%" direction="up" color={colors.success} slot="success" onEditSlot={onEditSlot} />
       </div>
 
-      <div className="mt-3 grid gap-4 @min-[720px]/analytics:grid-cols-[minmax(0,0.95fr)_minmax(0,1.15fr)]">
+      <div className="mt-5 grid gap-5 @min-[720px]/analytics:grid-cols-[minmax(0,0.95fr)_minmax(0,1.15fr)]">
         <div className="min-w-0">
           <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="block tabular-nums" style={displayStyle(fonts)}>
             1,254
@@ -81,7 +81,7 @@ export function AnalyticsTreatPanel({
             ))}
           </div>
 
-          <div className="mt-3 space-y-2">
+          <div className="mt-4 space-y-2.5">
             {ANALYTICS_TREAT_BREAKDOWN.map((item) => (
               <div key={item.label} className="flex items-center gap-2.5">
                 <PreviewSlotTarget

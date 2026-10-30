@@ -31,7 +31,7 @@ export function AnalyticsChatPanel({
     <PreviewSlotTarget
       slot="surface"
       onEditSlot={onEditSlot}
-      className="rounded-xl border p-5 @min-[800px]/analytics:p-6"
+      className="preview-surface rounded-xl border p-5 @min-[800px]/analytics:p-6"
       style={{ backgroundColor: colors.surface, borderColor: colors.border }}
     >
       <div className="flex items-start justify-between gap-3">
@@ -39,8 +39,8 @@ export function AnalyticsChatPanel({
           <PreviewSlotTarget
             slot="accent"
             onEditSlot={onEditSlot}
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full font-medium"
-            style={{ backgroundColor: craftieFill, color: onCraftie }}
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full"
+            style={{ backgroundColor: craftieFill, color: onCraftie, fontFamily: 'var(--font-heading)', fontWeight: 'var(--weight-heading)' }}
           >
             {ANALYTICS_CHAT.initials}
           </PreviewSlotTarget>
@@ -64,7 +64,7 @@ export function AnalyticsChatPanel({
         </span>
       </div>
 
-      <div className="mt-4 space-y-3" aria-live="polite">
+      <div className="mt-5 space-y-3" aria-live="polite">
         {ANALYTICS_CHAT.messages.map((message) =>
           message.incoming ? (
             <MessageBubble

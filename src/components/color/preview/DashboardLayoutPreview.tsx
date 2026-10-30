@@ -20,7 +20,14 @@ import {
 } from './dashboardPreviewData';
 import { vividFill } from './previewColor';
 import { SegmentedControl } from './previewPrimitives';
-import { bodyStyle, DEFAULT_PREVIEW_FONTS, displayStyle, labelStyle, previewRootTypeStyle, type PreviewFonts } from './previewTypography';
+import {
+  bodyStyle,
+  buttonStyle,
+  DEFAULT_PREVIEW_FONTS,
+  displayStyle,
+  type PreviewFonts,
+  previewRootTypeStyle,
+} from './previewTypography';
 
 export const DASHBOARD_VISUAL_SLOTS = [
   'appBackground',
@@ -44,7 +51,7 @@ export const DASHBOARD_VISUAL_SLOTS = [
   'data4',
 ] as const;
 
-export const DASHBOARD_CONTAINER_CLASS = '@container/dashboard';
+export const DASHBOARD_CONTAINER_CLASS = 'preview-root @container/dashboard';
 
 export function DashboardLayoutPreview({ colors, fonts = DEFAULT_PREVIEW_FONTS, onEditSlot }: {
   colors: ResolvedLayoutColors;
@@ -108,18 +115,18 @@ export function DashboardLayoutPreview({ colors, fonts = DEFAULT_PREVIEW_FONTS, 
                 slot="primaryAction"
                 onEditSlot={onEditSlot}
                 className="rounded-lg px-4 py-2.5 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgb(0_0_0/0.12)] active:translate-y-0 active:shadow-none motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-                style={{ ...labelStyle(fonts), fontWeight: 600, backgroundColor: primaryFill, color: onPrimaryFill }}
+                style={{ ...buttonStyle(fonts), backgroundColor: primaryFill, color: onPrimaryFill }}
               >
                 Nuevo proyecto
               </PreviewSlotTarget>
             </div>
           </header>
 
-          <section className="mt-8 grid min-w-0 gap-6 @min-[800px]/dashboard:grid-cols-[minmax(0,1.7fr)_minmax(16rem,0.9fr)] @min-[800px]/dashboard:gap-6 @min-[900px]/dashboard:gap-7">
+          <section className="mt-8 grid min-w-0 gap-6 @min-[800px]/dashboard:grid-cols-[minmax(0,1.7fr)_minmax(16rem,0.9fr)]">
             <div className="@container/dashmain flex min-w-0 flex-col gap-6">
-              <section className="grid grid-cols-2 gap-3 @min-[400px]/dashmain:grid-cols-4 @min-[400px]/dashmain:gap-4">
+              <section className="grid grid-cols-2 gap-3 @min-[560px]/dashmain:grid-cols-4 @min-[560px]/dashmain:gap-4">
                 <div
-                  className="preview-rise col-span-2 @min-[400px]/dashmain:col-span-1"
+                  className="preview-rise"
                   style={{ animationDelay: previewStaggerDelay(1) }}
                 >
                   <DashboardMetricCard

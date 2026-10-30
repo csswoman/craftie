@@ -19,14 +19,17 @@ import { onVividFill, vividFill } from './previewColor';
 import { tint } from './previewPrimitives';
 import {
   bodyStyle,
+  brandStyle,
+  buttonStyle,
   captionStyle,
   DEFAULT_PREVIEW_FONTS,
   displayStyle,
   headingStyle,
   labelStyle,
-  previewRootTypeStyle,
-  titleStyle,
   type PreviewFonts,
+  previewRootTypeStyle,
+  ROLE_WEIGHT,
+  titleStyle,
 } from './previewTypography';
 
 export const MOBILE_VISUAL_SLOTS = [
@@ -74,7 +77,7 @@ export function MobileLayoutPreview({
       <PreviewSlotTarget
         slot="appBackground"
         onEditSlot={onEditSlot}
-        className="flex min-h-[38rem] w-full max-w-[22rem] flex-col overflow-hidden rounded-[2rem] border"
+        className="flex min-h-[38rem] w-full max-w-[22rem] flex-col overflow-hidden rounded-[2.25rem] border-2 shadow-[0_28px_48px_-28px_rgb(0_0_0/0.45)]"
         style={{
           backgroundColor: colors.appBackground,
           borderColor: colors.border,
@@ -82,8 +85,26 @@ export function MobileLayoutPreview({
           ...previewRootTypeStyle(),
         }}
       >
+        <div
+          className="flex items-center justify-between px-6 pt-3 tabular-nums"
+          style={captionStyle(fonts, colors.mutedText)}
+          aria-hidden="true"
+        >
+          <span style={{ color: colors.text }}>9:41</span>
+          <span className="flex items-center gap-1.5">
+            <span className="flex items-end gap-0.5">
+              {[4, 6, 8, 10].map((h) => (
+                <span key={h} className="w-[3px] rounded-[1px]" style={{ height: h, backgroundColor: colors.mutedText }} />
+              ))}
+            </span>
+            <span className="relative h-2.5 w-5 rounded-[3px] border" style={{ borderColor: colors.mutedText }}>
+              <span className="absolute inset-[1.5px] right-[4px] rounded-[1px]" style={{ backgroundColor: colors.mutedText }} />
+            </span>
+          </span>
+        </div>
+
         <header
-          className="preview-rise flex items-center justify-between px-5 pb-3 pt-6"
+          className="preview-rise flex items-center justify-between px-5 pb-4 pt-5"
           style={{ animationDelay: previewStaggerDelay(0) }}
         >
           <div className="min-w-0">
@@ -97,14 +118,14 @@ export function MobileLayoutPreview({
           <PreviewSlotTarget
             slot="surfaceElevated"
             onEditSlot={onEditSlot}
-            className="grid size-10 shrink-0 place-items-center rounded-full border"
+            className="grid size-11 shrink-0 place-items-center rounded-full border"
             style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border, color: colors.mutedText }}
           >
             <PreviewIcon name="bell" size={18} />
           </PreviewSlotTarget>
         </header>
 
-        <div className="flex-1 space-y-4 overflow-hidden px-5">
+        <div className="flex-1 space-y-5 overflow-hidden px-5">
           <section
             className="preview-rise grid grid-cols-2 gap-3"
             style={{ animationDelay: previewStaggerDelay(1) }}
@@ -114,7 +135,7 @@ export function MobileLayoutPreview({
                 key={item.label}
                 slot="surface"
                 onEditSlot={onEditSlot}
-                className="rounded-2xl border p-3"
+                className="rounded-2xl border p-3.5"
                 style={{ backgroundColor: colors.surface, borderColor: colors.border }}
               >
                 <PreviewSlotTarget slot={item.slot} onEditSlot={onEditSlot} className="size-2 rounded-full" style={{ backgroundColor: swatchHex(item.slot) }} />
@@ -134,7 +155,7 @@ export function MobileLayoutPreview({
             className="preview-rise rounded-2xl border p-4"
             style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border, animationDelay: previewStaggerDelay(2) }}
           >
-            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={titleStyle(fonts)}>
+            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={brandStyle(fonts)}>
               {pinned!.name}
             </PreviewSlotTarget>
             <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-0.5 block" style={captionStyle(fonts, colors.mutedText)}>
@@ -155,13 +176,13 @@ export function MobileLayoutPreview({
               slot="primaryAction"
               onEditSlot={onEditSlot}
               className="mt-4 block rounded-xl py-2.5 text-center"
-              style={{ ...labelStyle(fonts), fontWeight: 600, backgroundColor: primaryFill, color: onPrimary }}
+              style={{ ...buttonStyle(fonts), backgroundColor: primaryFill, color: onPrimary }}
             >
               Exportar guía
             </PreviewSlotTarget>
           </PreviewSlotTarget>
 
-          <section className="preview-rise space-y-2" style={{ animationDelay: previewStaggerDelay(3) }}>
+          <section className="preview-rise space-y-2.5" style={{ animationDelay: previewStaggerDelay(3) }}>
             {rest.map((palette) => (
               <PreviewSlotTarget
                 key={palette.name}
@@ -196,7 +217,7 @@ export function MobileLayoutPreview({
         <PreviewSlotTarget
           slot="chrome"
           onEditSlot={onEditSlot}
-          className="mt-4 flex items-center justify-around border-t px-4 py-3"
+          className="mt-4 flex items-center justify-around border-t px-4 pb-1 pt-2"
           style={{ backgroundColor: colors.chrome, borderColor: colors.divider }}
         >
           {MOBILE_TABS.map((tab) => {
@@ -210,15 +231,18 @@ export function MobileLayoutPreview({
                   event.stopPropagation();
                   setActiveTab(tab.label);
                 }}
-                className="flex flex-col items-center gap-1 rounded-lg px-3 py-1"
+                className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-lg px-3 py-1"
                 style={{ color: active ? colors.text : colors.mutedText }}
               >
                 <PreviewIcon name={tab.icon} size={18} style={{ color: active ? primaryFill : colors.mutedText }} />
-                <span style={{ ...captionStyle(fonts), fontWeight: active ? 600 : 400 }}>{tab.label}</span>
+                <span style={{ ...captionStyle(fonts), fontWeight: active ? ROLE_WEIGHT.button : ROLE_WEIGHT.caption }}>{tab.label}</span>
               </button>
             );
           })}
         </PreviewSlotTarget>
+        <div className="flex justify-center pb-2" style={{ backgroundColor: colors.chrome }} aria-hidden="true">
+          <span className="h-1 w-24 rounded-full" style={{ backgroundColor: colors.mutedText, opacity: 0.5 }} />
+        </div>
       </PreviewSlotTarget>
     </div>
   );

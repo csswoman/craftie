@@ -53,7 +53,7 @@ export function RadialMetric({
           }
         />
       </svg>
-      <span className="absolute text-[0.625rem] font-bold tabular-nums">{value}%</span>
+      <span className="absolute text-[0.625rem] tabular-nums">{value}%</span>
     </PreviewSlotTarget>
   );
 }

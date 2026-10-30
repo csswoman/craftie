@@ -1,7 +1,7 @@
 import type { UiLayoutSlot } from '@lib/color/layoutModes';
 
 /** Container query context so the storefront scales against its own width. */
-export const STORE_CONTAINER_CLASS = '@container/store';
+export const STORE_CONTAINER_CLASS = 'preview-root @container/store';
 export const STORE_GUTTER_CLASS = 'px-5 @min-[720px]/store:px-8';
 
 export const STORE_NAV = ['Cerámica', 'Textil', 'Papelería'] as const;

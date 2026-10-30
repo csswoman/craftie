@@ -2,7 +2,7 @@ import type { PreviewIconName } from './previewIcons';
 import type { UiLayoutSlot } from '@lib/color/layoutModes';
 
 /** Container query context so the mobile screen scales against its own width. */
-export const MOBILE_CONTAINER_CLASS = '@container/mobile';
+export const MOBILE_CONTAINER_CLASS = 'preview-root @container/mobile';
 
 export const MOBILE_TABS: Array<{ label: string; icon: PreviewIconName }> = [
   { label: 'Hoy', icon: 'grid' },

@@ -18,14 +18,15 @@ import {
   STORE_PRODUCTS,
 } from './storePreviewData';
 import {
+  buttonStyle,
   captionStyle,
   DEFAULT_PREVIEW_FONTS,
   headingStyle,
   heroStyle,
   labelStyle,
+  type PreviewFonts,
   previewRootTypeStyle,
   titleStyle,
-  type PreviewFonts,
 } from './previewTypography';
 
 export const STORE_VISUAL_SLOTS = [
@@ -107,7 +108,7 @@ export function StoreLayoutPreview({
       <PreviewSlotTarget
         slot="success"
         onEditSlot={onEditSlot}
-        className={`flex items-center gap-2 py-2 ${STORE_GUTTER_CLASS}`}
+        className={`flex items-center gap-2 py-2.5 ${STORE_GUTTER_CLASS}`}
         style={{
           ...captionStyle(fonts),
           backgroundColor: vividFill(colors.success, colors.surface),
@@ -118,38 +119,46 @@ export function StoreLayoutPreview({
         <span role="status">{getShippingNote(cartTotal)}</span>
       </PreviewSlotTarget>
 
-      <section className={`preview-rise py-10 ${STORE_GUTTER_CLASS}`} style={{ animationDelay: previewStaggerDelay(1) }}>
+      <section className={`preview-rise py-10 ${STORE_GUTTER_CLASS} @min-[720px]/store:py-14`} style={{ animationDelay: previewStaggerDelay(1) }}>
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="max-w-[18ch]" style={heroStyle(fonts)}>
           Objetos para la mesa de cada día
         </PreviewSlotTarget>
-        <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-3 max-w-[48ch] text-pretty" style={{ ...titleStyle(fonts), fontWeight: 400, color: colors.mutedText }}>
+        <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-3 max-w-[48ch] text-pretty" style={{ ...titleStyle(fonts), color: colors.mutedText }}>
           Piezas hechas en pequeñas tiradas, con materiales que envejecen bien.
         </PreviewSlotTarget>
 
-        <div className="mt-6 flex flex-wrap gap-2" role="group" aria-label="Filtrar productos">
-          {STORE_FILTERS.map((option) => {
-            const active = option === filter;
-            return (
-              <button
-                key={option}
-                type="button"
-                aria-pressed={active}
-                onClick={() => setFilter(option)}
-                className="min-h-9 rounded-full border px-4"
-                style={{
-                  ...labelStyle(fonts),
-                  backgroundColor: active ? primaryFill : 'transparent',
-                  borderColor: active ? primaryFill : colors.border,
-                  color: active ? onVividFill(primaryFill) : colors.text,
-                }}
-              >
-                {option}
-              </button>
-            );
-          })}
+        <div
+          className="mt-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t pt-5"
+          style={{ borderColor: colors.divider }}
+        >
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar productos">
+            {STORE_FILTERS.map((option) => {
+              const active = option === filter;
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setFilter(option)}
+                  className="min-h-9 rounded-full border px-4"
+                  style={{
+                    ...buttonStyle(fonts),
+                    backgroundColor: active ? primaryFill : 'transparent',
+                    borderColor: active ? primaryFill : colors.border,
+                    color: active ? onVividFill(primaryFill) : colors.text,
+                  }}
+                >
+                  {option}
+                </button>
+              );
+            })}
+          </div>
+          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="tabular-nums" style={captionStyle(fonts, colors.mutedText)}>
+            {visible.length} {visible.length === 1 ? 'pieza' : 'piezas'}
+          </PreviewSlotTarget>
         </div>
 
-        <div className="mt-6 grid gap-4 @min-[520px]/store:grid-cols-2 @min-[900px]/store:grid-cols-4">
+        <div className="mt-6 grid gap-4 @min-[520px]/store:grid-cols-2 @min-[900px]/store:grid-cols-4 @min-[900px]/store:gap-5">
           {visible.map((product) => (
             <StoreProductCard
               key={product.name}

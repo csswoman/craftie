@@ -16,15 +16,15 @@ import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTar
 import { tint } from './previewPrimitives';
 import {
   bodyStyle,
+  brandStyle,
+  buttonStyle,
   captionStyle,
   DEFAULT_PREVIEW_FONTS,
   eyebrowStyle,
   headingStyle,
   heroStyle,
-  labelStyle,
-  previewRootTypeStyle,
-  titleStyle,
   type PreviewFonts,
+  previewRootTypeStyle,
 } from './previewTypography';
 
 export const EDITORIAL_VISUAL_SLOTS = [
@@ -89,14 +89,14 @@ export function EditorialLayoutPreview({
           slot="primaryAction"
           onEditSlot={onEditSlot}
           className="rounded-lg px-4 py-2"
-          style={{ ...labelStyle(fonts), backgroundColor: primaryFill, color: onPrimary }}
+          style={{ ...buttonStyle(fonts), backgroundColor: primaryFill, color: onPrimary }}
         >
           Suscribirse
         </PreviewSlotTarget>
       </PreviewSlotTarget>
 
       <div
-        className={`grid gap-10 py-10 ${EDITORIAL_GUTTER_CLASS} @min-[820px]/editorial:grid-cols-[minmax(0,1fr)_16rem] @min-[820px]/editorial:py-14`}
+        className={`grid gap-10 py-10 ${EDITORIAL_GUTTER_CLASS} @min-[820px]/editorial:grid-cols-[minmax(0,1fr)_17rem] @min-[820px]/editorial:gap-8 @min-[820px]/editorial:py-14`}
       >
         <article className="preview-rise min-w-0" style={{ animationDelay: previewStaggerDelay(1) }}>
           <PreviewSlotTarget slot="accent" onEditSlot={onEditSlot} className="inline-block" style={eyebrowStyle(fonts, colors.mutedText)}>
@@ -117,7 +117,7 @@ export function EditorialLayoutPreview({
           <PreviewSlotTarget
             slot="surfaceElevated"
             onEditSlot={onEditSlot}
-            className="mt-8 grid h-44 grid-cols-3 gap-2 overflow-hidden rounded-xl border p-2 @min-[560px]/editorial:h-56"
+            className="preview-surface mt-8 grid h-44 grid-cols-3 gap-2 overflow-hidden rounded-xl border p-2 @min-[560px]/editorial:h-56"
             style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
           >
             {dataByIndex.map((hex, index) => (
@@ -125,7 +125,11 @@ export function EditorialLayoutPreview({
             ))}
           </PreviewSlotTarget>
 
-          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-8 max-w-[62ch] text-pretty" style={{ ...bodyStyle(fonts), fontSize: 'calc(var(--size-body) * 1.1)' }}>
+          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-2" style={captionStyle(fonts, colors.mutedText)}>
+            Tres tonos del mismo día, tal como salieron del taller.
+          </PreviewSlotTarget>
+
+          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-8 max-w-[62ch] text-pretty first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:text-[3.2em] first-letter:leading-[0.85] first-letter:font-[var(--weight-heading)] first-letter:[font-family:var(--font-heading)]" style={{ ...bodyStyle(fonts), fontSize: 'calc(var(--size-body) * 1.1)' }}>
             {EDITORIAL_ARTICLE.lead}
           </PreviewSlotTarget>
           {EDITORIAL_ARTICLE.paragraphs.map((paragraph) => (
@@ -137,8 +141,8 @@ export function EditorialLayoutPreview({
           <PreviewSlotTarget
             slot="divider"
             onEditSlot={onEditSlot}
-            className="my-8 border-l-4 py-1 pl-5"
-            style={{ borderColor: colors.accent }}
+            className="my-10 border-y py-6"
+            style={{ borderColor: colors.divider }}
           >
             <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="max-w-[40ch] text-balance" style={headingStyle(fonts)}>
               “{EDITORIAL_ARTICLE.quote}”
@@ -160,7 +164,7 @@ export function EditorialLayoutPreview({
           </div>
         </article>
 
-        <aside className="preview-rise space-y-6" style={{ animationDelay: previewStaggerDelay(2) }} aria-label="Lecturas relacionadas">
+        <aside className="preview-rise space-y-6 @min-[820px]/editorial:border-l @min-[820px]/editorial:pl-8" style={{ animationDelay: previewStaggerDelay(2), borderColor: colors.divider }} aria-label="Lecturas relacionadas">
           <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={eyebrowStyle(fonts, colors.mutedText)}>
             Sigue leyendo
           </PreviewSlotTarget>
@@ -169,7 +173,7 @@ export function EditorialLayoutPreview({
               <li key={item.title} className="flex gap-3 border-t pt-4" style={{ borderColor: colors.divider }}>
                 <span aria-hidden="true" className="mt-1 size-3 shrink-0 rounded-full" style={{ backgroundColor: dataByIndex[index] }} />
                 <span className="min-w-0">
-                  <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={titleStyle(fonts)}>
+                  <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={brandStyle(fonts)}>
                     {item.title}
                   </PreviewSlotTarget>
                   <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={captionStyle(fonts, colors.mutedText)}>
@@ -185,7 +189,7 @@ export function EditorialLayoutPreview({
             className="rounded-xl border p-4"
             style={{ backgroundColor: colors.surface, borderColor: colors.border }}
           >
-            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={titleStyle(fonts)}>
+            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={brandStyle(fonts)}>
               Una carta al mes
             </PreviewSlotTarget>
             <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-1" style={captionStyle(fonts, colors.mutedText)}>
@@ -195,7 +199,7 @@ export function EditorialLayoutPreview({
               slot="primaryAction"
               onEditSlot={onEditSlot}
               className="mt-3 rounded-lg py-2 text-center"
-              style={{ ...labelStyle(fonts), backgroundColor: primaryFill, color: onPrimary }}
+              style={{ ...buttonStyle(fonts), backgroundColor: primaryFill, color: onPrimary }}
             >
               Quiero recibirla
             </PreviewSlotTarget>

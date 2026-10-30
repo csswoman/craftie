@@ -4,7 +4,12 @@ import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTar
 import { previewStaggerDelay } from './dashboardPreviewData';
 import { readableInk } from './previewColor';
 import { STUDIO_STEPS } from './landingPreviewData';
-import { bodyStyle, headingStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import {
+  bodyStyle,
+  brandStyle,
+  headingStyle,
+  type PreviewFonts,
+} from './previewTypography';
 
 /** Brand color as numeral ink: hue kept, lightness moved to AA on the section surface. */
 function stepAccent(colors: ResolvedLayoutColors, slot: UiLayoutSlot): string {
@@ -41,7 +46,7 @@ export function LandingFeatureGrid({
               {index + 1}
             </PreviewSlotTarget>
             <div className="flex min-w-0 flex-col gap-2">
-              <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={titleStyle(fonts)}>
+              <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={brandStyle(fonts)}>
                 {item.title}
               </PreviewSlotTarget>
               <PreviewSlotTarget

@@ -1,7 +1,7 @@
 import type { UiLayoutSlot } from '@lib/color/layoutModes';
 
 /** Container query context so the editorial page scales against its own width. */
-export const EDITORIAL_CONTAINER_CLASS = '@container/editorial';
+export const EDITORIAL_CONTAINER_CLASS = 'preview-root @container/editorial';
 export const EDITORIAL_GUTTER_CLASS = 'px-6 @min-[720px]/editorial:px-10';
 
 export const EDITORIAL_NAV = ['Ensayos', 'Entrevistas', 'Archivo'] as const;

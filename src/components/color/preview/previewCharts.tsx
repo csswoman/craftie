@@ -199,8 +199,8 @@ export function DonutChart({
         ))}
       </svg>
       <div className="absolute inset-0 grid place-content-center text-center">
-        <span className="text-[0.625rem] font-bold uppercase tracking-wide opacity-60">{centerLabel}</span>
-        <span className="text-[1.25rem] font-extrabold leading-none">{centerValue}</span>
+        <span className="text-[0.625rem] uppercase tracking-wide opacity-60">{centerLabel}</span>
+        <span className="text-[1.25rem] leading-none" style={{ fontFamily: 'var(--font-heading)', fontWeight: 'var(--weight-heading)' }}>{centerValue}</span>
       </div>
     </div>
   );
@@ -223,7 +223,7 @@ export function DataLegend({
           className={`group flex items-center justify-between gap-3 rounded-lg px-2 py-1 text-[0.75rem] transition-colors duration-200 ${interactive ? 'hover:bg-(--legend-hover)' : ''}`}
           style={{ ['--legend-hover' as string]: tint(segment.color, 12) }}
         >
-          <span className="flex min-w-0 items-center gap-2 font-bold">
+          <span className="flex min-w-0 items-center gap-2">
             <PreviewSlotTarget
               slot={segment.slot}
               onEditSlot={onEditSlot}

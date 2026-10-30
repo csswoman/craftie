@@ -67,9 +67,9 @@ export function MediaLayoutPreview({
       }}
     >
       <div className="flex min-h-[36rem] min-w-0 flex-col">
-        <div className="min-w-0 flex-1 p-4 sm:p-5 lg:p-6">
+        <div className="min-w-0 flex-1 p-4 @min-[560px]/media:p-5 @min-[900px]/media:p-6">
           <header
-            className="preview-rise mb-5 flex flex-wrap items-end justify-between gap-3"
+            className="preview-rise mb-6 flex flex-wrap items-end justify-between gap-3"
             style={{ animationDelay: previewStaggerDelay(0) }}
           >
             <div className="min-w-0">
@@ -89,7 +89,7 @@ export function MediaLayoutPreview({
             />
           </header>
 
-          <section className="grid gap-4 @min-[900px]/media:grid-cols-[minmax(0,1.25fr)_minmax(16rem,0.85fr)]">
+          <section className="grid gap-5 @min-[900px]/media:gap-6 @min-[900px]/media:grid-cols-[minmax(0,1.25fr)_minmax(16rem,0.85fr)]">
             <div className="preview-rise min-w-0" style={{ animationDelay: previewStaggerDelay(1) }}>
               <MediaNowPlaying
                 colors={colors}

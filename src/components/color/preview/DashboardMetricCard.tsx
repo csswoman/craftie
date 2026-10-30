@@ -3,7 +3,12 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { Sparkline } from './previewCharts';
 import { StatDelta } from './previewPrimitives';
-import { captionStyle, displayStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import {
+  captionStyle,
+  displayStyle,
+  headingStyle,
+  type PreviewFonts,
+} from './previewTypography';
 
 export type DashboardMetric = {
   label: string;
@@ -33,7 +38,7 @@ export function DashboardMetricCard({
     <PreviewSlotTarget
       slot="surface"
       onEditSlot={onEditSlot}
-      className={`min-w-0 overflow-hidden rounded-xl border transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgb(0_0_0/0.06)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:shadow-none ${
+      className={`preview-surface preview-lift min-w-0 overflow-hidden rounded-xl border motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${
         featured ? 'p-5' : 'p-4'
       }`}
       style={{ backgroundColor: colors.surface, borderColor: colors.border }}
@@ -53,7 +58,7 @@ export function DashboardMetricCard({
         slot="text"
         onEditSlot={onEditSlot}
         className="mt-3 tabular-nums"
-        style={featured ? displayStyle(fonts) : { ...titleStyle(fonts), fontSize: 'var(--size-h3)' }}
+        style={featured ? displayStyle(fonts) : { ...headingStyle(fonts) }}
       >
         {metric.value}
       </PreviewSlotTarget>

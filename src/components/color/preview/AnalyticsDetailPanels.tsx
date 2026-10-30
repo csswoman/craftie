@@ -27,7 +27,7 @@ export function AnalyticsDetailPanels({ colors, fonts, onEditSlot }: DetailPanel
       <PreviewSlotTarget
         slot="surfaceElevated"
         onEditSlot={onEditSlot}
-        className="preview-rise rounded-xl border p-5 @min-[800px]/analytics:p-6"
+        className="preview-rise preview-surface rounded-xl border p-5 @min-[800px]/analytics:p-6"
         style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
       >
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -65,7 +65,7 @@ export function AnalyticsDetailPanels({ colors, fonts, onEditSlot }: DetailPanel
           </div>
         </div>
 
-        <div className="mt-4 grid gap-4 @min-[720px]/analytics:grid-cols-[minmax(0,1.35fr)_minmax(13rem,0.85fr)]">
+        <div className="mt-5 grid gap-5 @min-[720px]/analytics:grid-cols-[minmax(0,1.35fr)_minmax(13rem,0.85fr)]">
           <div className="min-w-0">
             <PreviewSlotTarget slot="data1" onEditSlot={onEditSlot} className="block">
               <AreaChart
@@ -81,7 +81,7 @@ export function AnalyticsDetailPanels({ colors, fonts, onEditSlot }: DetailPanel
               {ANALYTICS_ENERGY_BY_DAY.map((day) => (
                 <div key={day.day} className="min-w-0">
                   <span
-                    className="block tabular-nums font-semibold"
+                    className="block tabular-nums"
                     style={{
                       color: day.day === peakDay.day ? colors.data1 : colors.text,
                       fontSize: '0.75rem',
@@ -155,7 +155,7 @@ export function AnalyticsDetailPanels({ colors, fonts, onEditSlot }: DetailPanel
         <PreviewSlotTarget
           slot="surface"
           onEditSlot={onEditSlot}
-          className="rounded-xl border p-5 @min-[800px]/analytics:p-6"
+          className="preview-surface rounded-xl border p-5 @min-[800px]/analytics:p-6"
           style={{ backgroundColor: colors.surface, borderColor: colors.border }}
         >
           <div className="flex items-center justify-between gap-3">

@@ -12,13 +12,13 @@ import { LANDING_GUTTER_CLASS, LANDING_NAV } from './landingPreviewData';
 import { vividFill } from './previewColor';
 import {
   bodyStyle,
+  brandStyle,
+  buttonStyle,
   captionStyle,
   DEFAULT_PREVIEW_FONTS,
   headingStyle,
-  labelStyle,
-  previewRootTypeStyle,
-  titleStyle,
   type PreviewFonts,
+  previewRootTypeStyle,
 } from './previewTypography';
 
 export const LANDING_VISUAL_SLOTS = [
@@ -43,7 +43,7 @@ export const LANDING_VISUAL_SLOTS = [
   'success',
 ] as const;
 
-export const LANDING_CONTAINER_CLASS = '@container/landing';
+export const LANDING_CONTAINER_CLASS = 'preview-root @container/landing';
 
 export function LandingLayoutPreview({
   colors,
@@ -86,11 +86,11 @@ export function LandingLayoutPreview({
             className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] transition-transform duration-200 ease-out hover:rotate-[-4deg] motion-reduce:transition-none motion-reduce:hover:rotate-0"
             style={{ backgroundColor: primaryFill, color: onPrimary }}
           >
-            <span className="text-sm font-medium" aria-label="Craftie, perro diseñador">
+            <span className="text-sm" style={{ fontFamily: 'var(--font-heading)', fontWeight: 'var(--weight-heading)' }} aria-label="Craftie, perro diseñador">
               C
             </span>
           </PreviewSlotTarget>
-          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="truncate" style={titleStyle(fonts)}>
+          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="truncate" style={brandStyle(fonts)}>
             Craftie
           </PreviewSlotTarget>
         </div>
@@ -108,8 +108,7 @@ export function LandingLayoutPreview({
           onEditSlot={onEditSlot}
           className="inline-flex min-h-11 items-center justify-self-end rounded-[10px] border px-4 transition-transform duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
           style={{
-            ...labelStyle(fonts),
-            fontWeight: 500,
+            ...buttonStyle(fonts),
             backgroundColor: 'transparent',
             borderColor: colors.border,
             color: colors.text,
@@ -124,7 +123,7 @@ export function LandingLayoutPreview({
       <PreviewSlotTarget
         slot="supportSurface"
         onEditSlot={onEditSlot}
-        className={`preview-rise border-t py-8 ${LANDING_GUTTER_CLASS} @min-[720px]/landing:py-12`}
+        className={`preview-rise border-t py-10 ${LANDING_GUTTER_CLASS} @min-[720px]/landing:py-14`}
         style={{
           backgroundColor: support,
           color: onSupport,
@@ -143,12 +142,12 @@ export function LandingLayoutPreview({
         >
           Tres pasos. El contraste se comprueba antes de exportar.
         </PreviewSlotTarget>
-        <div className="mt-8">
+        <div className="mt-8 @min-[720px]/landing:mt-10">
           <LandingFeatureGrid colors={colors} fonts={fonts} onEditSlot={onEditSlot} />
         </div>
       </PreviewSlotTarget>
 
-      <main className={`pb-8 pt-12 ${LANDING_GUTTER_CLASS} @min-[720px]/landing:pb-12 @min-[720px]/landing:pt-16`}>
+      <main className={`pb-12 pt-12 ${LANDING_GUTTER_CLASS} @min-[720px]/landing:pb-16 @min-[720px]/landing:pt-16`}>
         <section className="preview-rise" style={{ animationDelay: previewStaggerDelay(5) }}>
           <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
             Planes

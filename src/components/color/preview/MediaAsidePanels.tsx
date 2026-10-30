@@ -14,17 +14,17 @@ type MediaAsidePanelsProps = {
 
 export function MediaAsidePanels({ colors, fonts, onEditSlot }: MediaAsidePanelsProps) {
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-5">
       <PreviewSlotTarget
         slot="surfaceElevated"
         onEditSlot={onEditSlot}
-        className="rounded-[14px] border p-4"
+        className="preview-surface rounded-[14px] border p-5"
         style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
       >
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
           Ritmo del estudio
         </PreviewSlotTarget>
-        <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="mt-5 grid grid-cols-2 gap-3">
           {MEDIA_STATS.map((item) => (
             <div key={item.label} className="min-w-0">
               <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={labelStyle(fonts, colors.mutedText)}>
@@ -46,7 +46,7 @@ export function MediaAsidePanels({ colors, fonts, onEditSlot }: MediaAsidePanels
       <PreviewSlotTarget
         slot="surfaceElevated"
         onEditSlot={onEditSlot}
-        className="rounded-[14px] border p-4"
+        className="preview-surface rounded-[14px] border p-5"
         style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
       >
         <div className="flex items-start justify-between gap-3">
@@ -70,7 +70,7 @@ export function MediaAsidePanels({ colors, fonts, onEditSlot }: MediaAsidePanels
             style={{ backgroundColor: colors.brand1 }}
           />
         </div>
-        <div className="mt-4 space-y-1">
+        <div className="mt-5 space-y-1">
           {MEDIA_QUEUE.map((item, index) => {
             const swatch = [colors.brand1, colors.brand2, colors.brand3][index]!;
 

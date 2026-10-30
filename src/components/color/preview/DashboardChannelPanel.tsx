@@ -38,7 +38,7 @@ export function DashboardChannelPanel({
     <PreviewSlotTarget
       slot="surface"
       onEditSlot={onEditSlot}
-      className="rounded-xl border p-5 @min-[900px]/dashboard:p-6"
+      className="preview-surface rounded-xl border p-5 @min-[900px]/dashboard:p-6"
       style={{ backgroundColor: colors.surface, borderColor: colors.border }}
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -53,7 +53,7 @@ export function DashboardChannelPanel({
         <Tag label={statusLabel} color={colors.accent} surfaceHex={colors.surface} slot="accent" onEditSlot={onEditSlot} />
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-4 @min-[480px]/dashmain:grid-cols-4">
+      <div className="mt-5 grid grid-cols-2 gap-4 @min-[480px]/dashmain:grid-cols-4">
         {PALETTE_REVIEW_ROLES.map((role, index) => (
           <div key={role.label} className="min-w-0">
             <PreviewSlotTarget
@@ -75,7 +75,7 @@ export function DashboardChannelPanel({
                   slot="accent"
                   onEditSlot={onEditSlot}
                   className="shrink-0 whitespace-nowrap"
-                  style={{ ...captionStyle(fonts), fontWeight: 500, color: accentInk }}
+                  style={{ ...captionStyle(fonts), color: accentInk }}
                 >
                   Ajustar
                 </PreviewSlotTarget>
@@ -84,7 +84,7 @@ export function DashboardChannelPanel({
                   slot="success"
                   onEditSlot={onEditSlot}
                   className="flex shrink-0 items-center gap-1 whitespace-nowrap"
-                  style={{ ...captionStyle(fonts), fontWeight: 500, color: successInk }}
+                  style={{ ...captionStyle(fonts), color: successInk }}
                 >
                   <PreviewIcon name="check" size={11} strokeWidth={2.5} />
                   AA

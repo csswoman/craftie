@@ -36,7 +36,7 @@ export function DashboardAsidePanels({
       <PreviewSlotTarget
         slot="surfaceElevated"
         onEditSlot={onEditSlot}
-        className="rounded-xl border p-5 @min-[800px]/dashboard:p-6"
+        className="preview-surface rounded-xl border p-5 @min-[800px]/dashboard:p-6"
         style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
       >
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
@@ -74,7 +74,7 @@ export function DashboardAsidePanels({
       <PreviewSlotTarget
         slot="surface"
         onEditSlot={onEditSlot}
-        className="rounded-xl border p-5 @min-[800px]/dashboard:p-6"
+        className="preview-surface rounded-xl border p-5 @min-[800px]/dashboard:p-6"
         style={{ backgroundColor: colors.surface, borderColor: colors.border }}
       >
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>

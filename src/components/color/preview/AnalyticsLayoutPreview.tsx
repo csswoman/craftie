@@ -23,13 +23,13 @@ import { PreviewIcon } from './previewIcons';
 import { tint } from './previewPrimitives';
 import {
   bodyStyle,
+  buttonStyle,
   captionStyle,
   DEFAULT_PREVIEW_FONTS,
   displayStyle,
   headingStyle,
-  labelStyle,
-  previewRootTypeStyle,
   type PreviewFonts,
+  previewRootTypeStyle,
 } from './previewTypography';
 
 export const ANALYTICS_VISUAL_SLOTS = [
@@ -114,8 +114,7 @@ export function AnalyticsLayoutPreview({
           onEditSlot={onEditSlot}
           className="inline-flex min-h-11 items-center gap-2 rounded-[10px] border px-4"
           style={{
-            ...labelStyle(fonts),
-            fontWeight: 500,
+            ...buttonStyle(fonts),
             backgroundColor: 'transparent',
             borderColor: colors.border,
             color: colors.text,
@@ -128,9 +127,9 @@ export function AnalyticsLayoutPreview({
 
       <div className="min-h-[32rem] p-6 @min-[900px]/analytics:px-8 @min-[900px]/analytics:py-7">
         <section className="@container/analyticsmain">
-          <div className="grid grid-cols-2 gap-3 @min-[400px]/analyticsmain:grid-cols-4 @min-[400px]/analyticsmain:gap-4">
+          <div className="grid grid-cols-2 gap-3 @min-[560px]/analyticsmain:grid-cols-4 @min-[560px]/analyticsmain:gap-4">
             <div
-              className="preview-rise col-span-2 @min-[400px]/analyticsmain:col-span-1"
+              className="preview-rise"
               style={{ animationDelay: previewStaggerDelay(1) }}
             >
               <AnalyticsMetricCard colors={colors} fonts={fonts} kpi={featuredKpi} featured onEditSlot={onEditSlot} />
@@ -147,7 +146,7 @@ export function AnalyticsLayoutPreview({
           <PreviewSlotTarget
             slot="surface"
             onEditSlot={onEditSlot}
-            className="preview-rise flex h-full min-w-0 flex-col rounded-xl border p-5 @min-[800px]/analytics:p-6"
+            className="preview-rise flex h-full min-w-0 flex-col preview-surface rounded-xl border p-5 @min-[800px]/analytics:p-6"
             style={{
               backgroundColor: colors.surface,
               borderColor: colors.border,

@@ -1,6 +1,6 @@
 import type { PreviewIconName } from './previewIcons';
 
-export const ANALYTICS_CONTAINER_CLASS = '@container/analytics';
+export const ANALYTICS_CONTAINER_CLASS = 'preview-root @container/analytics';
 
 export const ANALYTICS_KPIS = [
   { label: 'Croquetas', value: '742', trend: '86', dir: 'up' as const, slot: 'data1' as const, spark: [40, 52, 48, 61, 70, 78, 86] },

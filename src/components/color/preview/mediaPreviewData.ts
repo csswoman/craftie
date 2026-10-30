@@ -31,4 +31,4 @@ export function getMediaSessionLabel(hour: number): string {
   return 'Sesión nocturna';
 }
 
-export const MEDIA_CONTAINER_CLASS = '@container/media';
+export const MEDIA_CONTAINER_CLASS = 'preview-root @container/media';

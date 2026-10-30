@@ -34,8 +34,8 @@ export function LandingHeroPalette({ colors, fonts, onEditSlot }: LandingHeroPal
             key={item.label}
             slot={item.slot}
             onEditSlot={onEditSlot}
-            className={`${PLACEMENT[index]} group relative flex min-h-0 flex-col justify-end overflow-hidden rounded-[14px] p-3 transition-transform duration-200 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0`}
-            style={{ backgroundColor: fill, color: ink }}
+            className={`${PLACEMENT[index]} preview-rise preview-lift group relative flex min-h-0 flex-col justify-end overflow-hidden rounded-[14px] p-3 motion-reduce:transition-none motion-reduce:hover:translate-y-0`}
+            style={{ backgroundColor: fill, color: ink, animationDelay: `${180 + index * 90}ms` }}
           >
             <span
               className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"

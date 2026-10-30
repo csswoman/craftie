@@ -15,7 +15,7 @@ type LandingTestimonialCardProps = {
 
 export function LandingTestimonialCard({ colors, fonts, onEditSlot }: LandingTestimonialCardProps) {
   return (
-    <blockquote className="preview-rise mt-12 max-w-[48ch]">
+    <blockquote className="preview-rise mt-14 max-w-[48ch]">
       <Tag
         label={CRAFTIE_QUOTE.badge}
         color={colors.success}

@@ -3,7 +3,11 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { ANALYTICS_DAYS, ANALYTICS_MOMENTUM, ANALYTICS_SOURCE_STATS } from './analyticsPreviewData';
 import { AreaChart } from './previewCharts';
-import { captionStyle, headingStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import {
+  captionStyle,
+  headingStyle,
+  type PreviewFonts,
+} from './previewTypography';
 
 export function AnalyticsSourceInsights({
   colors,
@@ -40,7 +44,7 @@ export function AnalyticsSourceInsights({
               slot={stat.slot}
               onEditSlot={onEditSlot}
               className="mt-1 block tabular-nums"
-              style={{ ...titleStyle(fonts), fontSize: 'var(--size-h3)', color: colors[stat.slot] }}
+              style={{ ...headingStyle(fonts), color: colors[stat.slot] }}
             >
               {stat.value}
             </PreviewSlotTarget>

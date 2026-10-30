@@ -11,8 +11,19 @@ diferenciarse, y la jerarquía tiene que leerse. El error a evitar: que todo se
 vea en negritas del mismo tamaño — ahí no se distingue ni la fuente de titulares
 de la de cuerpo, ni el orden de importancia.
 
-**Regla base:** la jerarquía se construye con **tamaño + peso + color**, no solo
-con peso. `font-bold` en todo = ninguna jerarquía.
+**Regla base:** el usuario solo elige **dos pesos**: el del titular (`--weight-heading`)
+y el del cuerpo (`--weight-body`). Los previews nunca usan otro. Prohibido
+`fontWeight: 500/600`, `font-medium`, `font-semibold`, `font-bold` y similares.
+
+La jerarquía se construye con lo que sí es libre:
+
+- **Familia:** números y marcas en la fuente de titulares; todo lo demás en cuerpo.
+- **Tamaño:** pasos de la escala (`--size-h1` … `--size-small`).
+- **Color:** `text` para lo principal, `mutedText` para lo secundario.
+- **Mayúsculas + tracking:** etiquetas pequeñas con `eyebrowStyle`.
+- **Espacio y contenedor:** proximidad, filas, superficies y fondos rellenos para el énfasis.
+
+Un botón o badge se distingue por su fondo, no por la negrita.
 
 ## El sistema de roles (fuente de verdad)
 
@@ -22,23 +33,21 @@ site para conservar los pasos responsive de cada layout.
 
 | Rol | Helper | Familia | Peso | Tracking | Uso |
 |-----|--------|---------|------|----------|-----|
-| **Display** | `displayStyle(fonts)` | heading | 600 | -0.01em | El número/título héroe de una superficie (KPI, precio, "38 launches"). Uno por card. |
-| **Hero** | `heroStyle(fonts)` | heading | 700 | -0.02em | Titular grande de landing. `text-wrap: balance` incluido. |
-| **Heading** | `headingStyle(fonts)` | heading | 600 | -0.006em | Títulos de panel/sección ("Activity", "Channel performance"). |
-| **Title** | `titleStyle(fonts)` | body | 500 | normal | Títulos chicos de card, nombres en listas, nombre de track. |
-| **Body** | `bodyStyle(fonts, color?)` | body | 400 | normal | Prosa, descripciones, ayuda, metadatos largos. |
-| **Label** | `labelStyle(fonts, color?)` | body | 500 | normal | Etiquetas de métrica, nav, timestamps. |
-| **Eyebrow** | `eyebrowStyle(fonts, color?)` | body | 500 | 0.06em + UPPERCASE | El kicker pequeño encima de un título ("Week overview", "Now playing"). |
+| **Display** | `displayStyle(fonts)` | heading | heading | -0.01em | El número/título héroe de una superficie (KPI, precio, "38 launches"). Uno por card. |
+| **Hero** | `heroStyle(fonts)` | heading | heading | -0.02em | Titular grande de landing. `text-wrap: balance` incluido. |
+| **Heading** | `headingStyle(fonts)` | heading | heading | -0.006em | Títulos de panel/sección ("Activity", "Channel performance"). |
+| **Title** | `titleStyle(fonts)` | body | body | normal | Títulos chicos de card, nombres en listas, nombre de track. |
+| **Body** | `bodyStyle(fonts, color?)` | body | body | normal | Prosa, descripciones, ayuda, metadatos largos. |
+| **Label** | `labelStyle(fonts, color?)` | body | body | normal | Etiquetas de métrica, nav, timestamps. |
+| **Eyebrow** | `eyebrowStyle(fonts, color?)` | body | body | 0.06em + UPPERCASE | El kicker pequeño encima de un título ("Week overview", "Now playing"). |
 
 ### Por qué así
 
 - **Heading font solo en display/hero/heading.** El resto va en body font. Así
   el par tipográfico se percibe: titulares con una voz, contenido con otra.
-- **El cuerpo va en peso 400.** Es lo que hace que un 600 se lea como énfasis.
-  Si el cuerpo es 600, no hay contraste.
+- **El contraste de peso viene solo de titular vs. cuerpo.** No hay pesos intermedios.
 - **Números grandes → `tabular-nums`.** KPIs, precios y stats no deben bailar.
-- **Botones/CTAs:** body font a peso 600 (`{ ...labelStyle(fonts), fontWeight: 600 }`).
-  No uses la heading font en botones.
+- **Botones/CTAs:** `labelStyle(fonts)` tal cual, con fondo relleno. Sin heading font ni peso extra.
 
 ## Letter spacing
 

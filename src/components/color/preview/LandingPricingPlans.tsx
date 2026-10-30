@@ -16,7 +16,7 @@ type LandingPricingPlansProps = {
 
 export function LandingPricingPlans({ colors, fonts, onEditSlot }: LandingPricingPlansProps) {
   return (
-    <div className="grid gap-4 @min-[720px]/landing:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)_minmax(0,1fr)] @min-[720px]/landing:items-stretch">
+    <div className="grid gap-4 @min-[720px]/landing:gap-5 @min-[720px]/landing:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)_minmax(0,1fr)] @min-[720px]/landing:items-stretch">
       {PLANS.map((plan) => {
         const featured = 'featured' in plan && plan.featured;
         const swatch = plan.slot === 'primaryAction' ? colors.primaryAction : colors[plan.slot];
@@ -29,7 +29,7 @@ export function LandingPricingPlans({ colors, fonts, onEditSlot }: LandingPricin
             slot={featured ? 'primaryAction' : plan.slot}
             onEditSlot={onEditSlot}
             className={`flex flex-col rounded-[14px] border transition-transform duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${
-              featured ? 'p-6' : 'p-4'
+              featured ? 'p-6 shadow-[0_24px_40px_-24px_rgb(0_0_0/0.4)]' : 'preview-surface p-4'
             }`}
             style={
               featured

@@ -33,7 +33,7 @@ export function AnalyticsWorkspacePanels({
       <PreviewSlotTarget
         slot="surfaceElevated"
         onEditSlot={onEditSlot}
-        className="rounded-xl border p-5 @min-[800px]/analytics:p-6"
+        className="preview-surface rounded-xl border p-5 @min-[800px]/analytics:p-6"
         style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
       >
         <div className="flex items-center justify-between gap-3">
@@ -49,7 +49,7 @@ export function AnalyticsWorkspacePanels({
             3 nuevos
           </PreviewSlotTarget>
         </div>
-        <div className="mt-4 space-y-1">
+        <div className="mt-5 space-y-1">
           {ANALYTICS_NOTIFICATIONS.map((item, index) => (
             <div
               key={item.title}
@@ -95,13 +95,13 @@ export function AnalyticsWorkspacePanels({
       <PreviewSlotTarget
         slot="surface"
         onEditSlot={onEditSlot}
-        className="rounded-xl border p-5 @min-[800px]/analytics:p-6"
+        className="preview-surface rounded-xl border p-5 @min-[800px]/analytics:p-6"
         style={{ backgroundColor: colors.surface, borderColor: colors.border }}
       >
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
           Preferencias de Craftie
         </PreviewSlotTarget>
-        <div className="mt-4 space-y-3">
+        <div className="mt-5 space-y-3.5">
           {ANALYTICS_SETTINGS.map((item) => {
             const active = enabled[item.id] ?? false;
             return (

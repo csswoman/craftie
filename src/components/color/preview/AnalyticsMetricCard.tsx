@@ -3,7 +3,12 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { Sparkline } from './previewCharts';
 import { StatDelta } from './previewPrimitives';
-import { captionStyle, displayStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import {
+  captionStyle,
+  displayStyle,
+  headingStyle,
+  type PreviewFonts,
+} from './previewTypography';
 
 export type AnalyticsKpi = {
   label: string;
@@ -35,7 +40,7 @@ export function AnalyticsMetricCard({
     <PreviewSlotTarget
       slot="surface"
       onEditSlot={onEditSlot}
-      className={`min-w-0 overflow-hidden rounded-xl border ${featured ? 'p-5' : 'p-4'}`}
+      className={`preview-surface preview-lift min-w-0 overflow-hidden rounded-xl border ${featured ? 'p-5' : 'p-4'}`}
       style={{ backgroundColor: colors.surface, borderColor: colors.border }}
     >
       <div className="flex items-start justify-between gap-3">
@@ -53,7 +58,7 @@ export function AnalyticsMetricCard({
         slot="text"
         onEditSlot={onEditSlot}
         className="mt-3 tabular-nums"
-        style={featured ? displayStyle(fonts) : { ...titleStyle(fonts), fontSize: 'var(--size-h3)' }}
+        style={featured ? displayStyle(fonts) : { ...headingStyle(fonts) }}
       >
         {kpi.value}
       </PreviewSlotTarget>

@@ -31,22 +31,23 @@ export function MediaNowPlaying({
     <PreviewSlotTarget
       slot="surface"
       onEditSlot={onEditSlot}
-      className="rounded-[14px] border p-4 sm:p-5"
+      className="preview-surface rounded-[14px] border p-5 @min-[900px]/media:p-6"
       style={{ backgroundColor: colors.surface, borderColor: colors.border }}
     >
-      <div className="grid gap-5 @min-[640px]/media:grid-cols-[11rem_minmax(0,1fr)] @min-[640px]/media:items-center">
+      <div className="grid gap-5 @min-[640px]/media:grid-cols-[11rem_minmax(0,1fr)] @min-[640px]/media:gap-7 @min-[640px]/media:items-center">
         <PreviewSlotTarget
           slot="accent"
           onEditSlot={onEditSlot}
           className="relative mx-auto aspect-square w-40 overflow-hidden rounded-[14px] border transition-transform duration-200 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0 @min-[640px]/media:mx-0 @min-[640px]/media:w-full"
           style={{
             borderColor: colors.divider,
-            backgroundImage: `radial-gradient(circle at 28% 22%, ${tint(colors.accent, 58)}, ${tint(colors.accent, 14)} 72%)`,
+            backgroundImage: `repeating-radial-gradient(circle at 50% 50%, transparent 0 14px, ${tint(colors.accent, 12)} 14px 15px), radial-gradient(circle at 28% 22%, ${tint(colors.accent, 58)}, ${tint(colors.accent, 14)} 72%)`,
+            boxShadow: '0 18px 30px -18px rgb(0 0 0 / 0.35)',
           }}
         >
           <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-3">
             <span
-              className="rounded-md px-2 py-1 text-[0.65rem] font-semibold"
+              className="rounded-md px-2 py-1 text-[0.65rem]"
               style={{ backgroundColor: tint(onPrimary, 18), color: onPrimary }}
             >
               {playing ? 'En vivo' : 'En pausa'}
@@ -80,13 +81,13 @@ export function MediaNowPlaying({
           <PreviewSlotTarget
             slot="mutedText"
             onEditSlot={onEditSlot}
-            className="mt-2 max-w-[46ch] text-pretty"
+            className="mt-3 max-w-[46ch] text-pretty"
             style={bodyStyle(fonts, colors.mutedText)}
           >
             {MEDIA_NOW_PLAYING.body}
           </PreviewSlotTarget>
 
-          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          <div className="mt-4 flex flex-wrap items-center gap-1.5">
             {MEDIA_MOODS.map((mood) => (
               <Tag
                 key={mood.label}
@@ -99,7 +100,7 @@ export function MediaNowPlaying({
             ))}
           </div>
 
-          <div className="mt-5 flex items-center gap-3 tabular-nums" style={{ ...labelStyle(fonts), color: colors.mutedText }}>
+          <div className="mt-6 flex items-center gap-3 tabular-nums" style={{ ...labelStyle(fonts), color: colors.mutedText }}>
             <span>{MEDIA_NOW_PLAYING.elapsed}</span>
             <div className="flex-1">
               <ProgressBar
@@ -113,7 +114,7 @@ export function MediaNowPlaying({
             <span>{MEDIA_NOW_PLAYING.duration}</span>
           </div>
 
-          <div className="mt-4 flex items-center gap-3">
+          <div className="mt-5 flex items-center gap-3">
             <PreviewSlotTarget
               slot="surfaceElevated"
               onEditSlot={onEditSlot}

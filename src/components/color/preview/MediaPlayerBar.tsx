@@ -31,7 +31,7 @@ export function MediaPlayerBar({
     <PreviewSlotTarget
       slot="chrome"
       onEditSlot={onEditSlot}
-      className="preview-rise border-t px-3 py-2.5 sm:px-4"
+      className="preview-rise border-t px-4 py-3 @min-[560px]/media:px-5"
       style={{
         backgroundColor: colors.chrome,
         borderColor: colors.divider,

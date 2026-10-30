@@ -7,7 +7,13 @@ import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTar
 import { previewStaggerDelay } from './dashboardPreviewData';
 import { HERO_COPY, LANDING_GUTTER_CLASS } from './landingPreviewData';
 import { vividFill } from './previewColor';
-import { bodyStyle, captionStyle, heroStyle, labelStyle, type PreviewFonts } from './previewTypography';
+import {
+  bodyStyle,
+  buttonStyle,
+  captionStyle,
+  heroStyle,
+  type PreviewFonts,
+} from './previewTypography';
 
 type LandingHeroProps = {
   colors: ResolvedLayoutColors;
@@ -66,7 +72,7 @@ export function LandingHero({ colors, fonts, onEditSlot }: LandingHeroProps) {
               slot="primaryAction"
               onEditSlot={onEditSlot}
               className="inline-flex min-h-11 items-center rounded-[10px] px-4 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgb(0_0_0/0.12)] active:translate-y-0 active:shadow-none motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:shadow-none"
-              style={{ ...labelStyle(fonts), fontWeight: 600, backgroundColor: primaryFill, color: onPrimary }}
+              style={{ ...buttonStyle(fonts), backgroundColor: primaryFill, color: onPrimary }}
             >
               {HERO_COPY.primaryCta}
             </PreviewSlotTarget>
@@ -75,8 +81,7 @@ export function LandingHero({ colors, fonts, onEditSlot }: LandingHeroProps) {
               onEditSlot={onEditSlot}
               className="inline-flex min-h-11 items-center rounded-[10px] border bg-transparent px-4 transition-colors duration-150 hover:bg-[color-mix(in_srgb,currentColor_12%,transparent)]"
               style={{
-                ...labelStyle(fonts),
-                fontWeight: 500,
+                ...buttonStyle(fonts),
                 borderColor: onHero,
                 color: onHero,
               }}
