@@ -100,7 +100,7 @@ src/
     style-guide/               Style guide view
     theme/                     Theme provider and toggle
     ui/                        Minimal shared UI primitives
-  context/                     Shared role-palette state
+  context/                     Role-palette provider and its focused hooks (history, persistence, actions)
   lib/browser/                 Browser-dependent adapters
 
 lib/
@@ -121,7 +121,7 @@ Business logic lives in `lib/` and remains independent from React. Adapters that
 
 ## Development
 
-Requirements: Node.js compatible with Next.js 16 and pnpm.
+Requirements: Node.js 24 (see `.nvmrc`) and pnpm (version pinned in `package.json`). See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
 ```bash
 pnpm install
@@ -136,6 +136,7 @@ pnpm start                 # Start the production build
 pnpm lint                  # Run ESLint
 pnpm typecheck             # Check TypeScript types
 pnpm test                  # Run Vitest tests
+pnpm test:coverage         # Run tests with coverage thresholds for lib/
 pnpm test:watch            # Run Vitest in watch mode
 pnpm check:component-size  # Check the 250-line component limit
 pnpm verify                # Run all checks above
@@ -149,4 +150,4 @@ Craftie is in active development. The color engine, role selection and editing, 
 
 The project's rules, curated styles, recommendations, and original data are maintained independently. Content, tables, datasets, or text protected by third parties must not be copied from products, books, or websites.
 
-This project is distributed under the MIT license.
+This project is distributed under the MIT license. See [LICENSE](LICENSE). Changes are tracked in [CHANGELOG.md](CHANGELOG.md).
