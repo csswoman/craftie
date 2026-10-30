@@ -6,6 +6,7 @@ import { deriveMutedTextHex } from './mutedText';
 import { classifyPalette, type PaletteType } from './paletteClassification';
 import { deriveOnTokenHexForFill } from './pairedOnToken';
 import { remainsDistinctWithColorVisionDeficiency } from './colorVision';
+import { resolveNeutralTint, type NeutralTint } from './neutralTint';
 import { brandScore, type FitnessColor } from './roleFitness';
 import {
   deriveTonalScale,
@@ -100,7 +101,6 @@ const toOklch = converter('oklch');
 const AA_RATIO = 4.5;
 export const MIN_BG_SURFACE_LIGHTNESS_DELTA = 0.035;
 const EXPRESSIVE_CHROMA_MIN = 0.055;
-const ACHROMATIC_CHROMA_MAX = 0.01;
 type NeutralRamp = {
   background: readonly [number, number];
   surface: readonly [number, number];
@@ -205,34 +205,17 @@ function mixHue(baseHue: number, targetHue: number, targetWeight: number): numbe
   return (baseHue + delta * targetWeight + 360) % 360;
 }
 
-function dominantHue(candidates: FitnessColor[]): { hue: number; achromatic: boolean } {
-  const chromatic = candidates.filter((candidate) => candidate.chroma > ACHROMATIC_CHROMA_MAX);
-
-  if (chromatic.length === 0) {
-    return { hue: 0, achromatic: false };
-  }
-
-  const vector = chromatic.reduce(
-    (total, candidate) => {
-      const radians = (candidate.hue * Math.PI) / 180;
-      return {
-        x: total.x + Math.cos(radians) * candidate.prominence,
-        y: total.y + Math.sin(radians) * candidate.prominence,
-      };
-    },
-    { x: 0, y: 0 },
-  );
-  const hue = (Math.atan2(vector.y, vector.x) * 180) / Math.PI;
-
-  return { hue: (hue + 360) % 360, achromatic: false };
-}
-
 function neutralHex(
   lightness: number,
   chroma: number,
   hue: number,
 ): string {
   let best = oklchChannelsToHex(lightness, chroma, hue);
+
+  if (chroma === 0) {
+    return best;
+  }
+
   let bestDistance = hueDistance(toOklch(best)?.h ?? hue, hue);
 
   // Near-white gamut clipping and 8-bit HEX quantization can rotate very low
@@ -329,9 +312,21 @@ function expressiveCandidates(candidates: FitnessColor[]): FitnessColor[] {
     .sort((left, right) => brandScore(right) - brandScore(left));
 }
 
-function synthesizeExpressive(hue: number, offset: number, theme: 'light' | 'dark'): string {
+function synthesizeExpressive(
+  tint: NeutralTint,
+  offset: number,
+  theme: 'light' | 'dark',
+): string {
+  if (tint.achromatic) {
+    // Achromatic sources get graphite fills instead of an invented hue; the
+    // offset still separates primary from secondary/accent by lightness.
+    const step = offset === 0 ? 0 : 0.14;
+    const lightness = theme === 'dark' ? 0.82 - step : 0.32 + step;
+    return oklchChannelsToHex(lightness, 0, 0);
+  }
+
   const lightness = theme === 'dark' ? 0.72 : 0.42;
-  return oklchChannelsToHex(lightness, 0.13, (hue + offset + 360) % 360);
+  return oklchChannelsToHex(lightness, 0.13, (tint.hue + offset + 360) % 360);
 }
 
 function synthesisOffsets(strategy: ExpressiveSynthesisStrategy): {
@@ -400,7 +395,7 @@ function pickExpressive(
 function pickState(
   pool: FitnessColor[],
   stateHue: number,
-  dominant: number,
+  tint: NeutralTint,
   surfaceHex: string,
   theme: 'light' | 'dark',
 ): SemanticToken {
@@ -412,7 +407,7 @@ function pickState(
     return adjustExpressiveForSurface(picked.hex, surfaceHex);
   }
 
-  const tintedStateHue = mixHue(stateHue, dominant, 0.18);
+  const tintedStateHue = tint.achromatic ? stateHue : mixHue(stateHue, tint.hue, 0.18);
   const synthesized = oklchChannelsToHex(theme === 'dark' ? 0.72 : 0.43, 0.12, tintedStateHue);
 
   return token(adjustLightnessForContrast(synthesized, surfaceHex, AA_RATIO), 'derived');
@@ -598,10 +593,10 @@ function chooseSeriesLightness(
     const channels = toOklch(hex);
     const resolved = channels
       ? oklchChannelsToHex(
-          channels.l ?? lightness,
-          Math.min(DATA_SERIES_CHROMA_CAP, Math.max(channels.c ?? 0, chromaFloor)),
-          channels.h ?? identityHue,
-        )
+        channels.l ?? lightness,
+        Math.min(DATA_SERIES_CHROMA_CAP, Math.max(channels.c ?? 0, chromaFloor)),
+        channels.h ?? identityHue,
+      )
       : hex;
     const resolvedChroma = toOklch(resolved)?.c ?? 0;
 
@@ -698,74 +693,77 @@ function deriveBaseSemanticTokens(input: SemanticTokenDerivationInput): Semantic
   const strategy = input.synthesisStrategy ?? EXPRESSIVE_SYNTHESIS.synthesisStrategy;
   const vibrancy = normalizeVibrancy(input.vibrancy);
   const candidates = uniqueCandidates(input.extracted);
-  const { hue } = dominantHue(candidates);
+  const tint = resolveNeutralTint(candidates);
+  const { hue } = tint;
+  const rampNeutral = ([lightness, chroma]: readonly [number, number]): string =>
+    neutralHex(lightness, chroma * tint.chromaScale, hue);
   const ramp = theme === 'dark' ? DARK_NEUTRAL : LIGHT_NEUTRAL;
   const inverseRamp = theme === 'dark' ? LIGHT_NEUTRAL : DARK_NEUTRAL;
   const offsets = synthesisOffsets(strategy);
 
   const background = applyOverride(
     'background',
-    token(neutralHex(ramp.background[0], ramp.background[1], hue), 'derived'),
+    token(rampNeutral(ramp.background), 'derived'),
     overrides,
   );
   const surface = applyOverride(
     'surface',
-    token(neutralHex(ramp.surface[0], ramp.surface[1], hue), 'derived'),
+    token(rampNeutral(ramp.surface), 'derived'),
     overrides,
   );
   const surfaceElevated = applyOverride(
     'surface-elevated',
-    token(neutralHex(ramp.elevated[0], ramp.elevated[1], hue), 'derived'),
+    token(rampNeutral(ramp.elevated), 'derived'),
     overrides,
   );
   const backgroundInverse = applyOverride(
     'background-inverse',
-    token(neutralHex(inverseRamp.background[0], inverseRamp.background[1], hue), 'derived'),
+    token(rampNeutral(inverseRamp.background), 'derived'),
     overrides,
   );
   const surfaceInverse = applyOverride(
     'surface-inverse',
-    token(neutralHex(inverseRamp.surface[0], inverseRamp.surface[1], hue), 'derived'),
+    token(rampNeutral(inverseRamp.surface), 'derived'),
     overrides,
   );
   const surfaceInverseElevated = applyOverride(
     'surface-inverse-elevated',
-    token(neutralHex(inverseRamp.elevated[0], inverseRamp.elevated[1], hue), 'derived'),
+    token(rampNeutral(inverseRamp.elevated), 'derived'),
     overrides,
   );
   const onBackground = applyOverride(
     'on-background',
-    token(neutralHex(ramp.text[0], ramp.text[1], hue), 'derived'),
+    token(rampNeutral(ramp.text), 'derived'),
     overrides,
   );
   const onSurface = applyOverride(
     'on-surface',
-    token(neutralHex(ramp.text[0], ramp.text[1], hue), 'derived'),
+    token(rampNeutral(ramp.text), 'derived'),
     overrides,
   );
   const onSurfaceMuted = applyOverride(
     'on-surface-muted',
-    token(neutralHex(ramp.textMuted[0], ramp.textMuted[1], hue), 'derived'),
+    token(rampNeutral(ramp.textMuted), 'derived'),
     overrides,
   );
   const onBackgroundInverse = applyOverride(
     'on-background-inverse',
-    token(neutralHex(inverseRamp.text[0], inverseRamp.text[1], hue), 'derived'),
+    token(rampNeutral(inverseRamp.text), 'derived'),
     overrides,
   );
   const onSurfaceInverse = applyOverride(
     'on-surface-inverse',
-    token(neutralHex(inverseRamp.text[0], inverseRamp.text[1], hue), 'derived'),
+    token(rampNeutral(inverseRamp.text), 'derived'),
     overrides,
   );
   const border = applyOverride(
     'border',
-    token(neutralHex(ramp.border[0], ramp.border[1], hue), 'derived'),
+    token(rampNeutral(ramp.border), 'derived'),
     overrides,
   );
   const divider = applyOverride(
     'divider',
-    token(neutralHex(ramp.divider[0], ramp.divider[1], hue), 'derived'),
+    token(rampNeutral(ramp.divider), 'derived'),
     overrides,
   );
   const separatedSurfaceHex = ensureSurfaceLightnessSeparation(
@@ -785,24 +783,24 @@ function deriveBaseSemanticTokens(input: SemanticTokenDerivationInput): Semantic
   );
   const separatedOnSurfaceMuted =
     onSurfaceMuted.source === 'override' ||
-    contrastRatio(onSurfaceMuted.hex, separatedSurface.hex) >= AA_RATIO
+      contrastRatio(onSurfaceMuted.hex, separatedSurface.hex) >= AA_RATIO
       ? onSurfaceMuted
       : token(
-          adjustLightnessForContrast(
-            onSurfaceMuted.hex,
-            separatedSurface.hex,
-            AA_RATIO,
-          ),
-          'corrected',
-          { originalHex: onSurfaceMuted.hex },
-        );
+        adjustLightnessForContrast(
+          onSurfaceMuted.hex,
+          separatedSurface.hex,
+          AA_RATIO,
+        ),
+        'corrected',
+        { originalHex: onSurfaceMuted.hex },
+      );
 
   const pool = expressiveCandidates(candidates);
   const used = new Set<string>();
   const primary = expressiveTokenWithVibrancy(
     applyOverride(
       'primary',
-      pickExpressive(pool, used, separatedSurface.hex, synthesizeExpressive(hue, 0, theme)),
+      pickExpressive(pool, used, separatedSurface.hex, synthesizeExpressive(tint, 0, theme)),
       overrides,
     ),
     vibrancy,
@@ -810,7 +808,7 @@ function deriveBaseSemanticTokens(input: SemanticTokenDerivationInput): Semantic
   const secondary = expressiveTokenWithVibrancy(
     applyOverride(
       'secondary',
-      pickExpressive(pool, used, separatedSurface.hex, synthesizeExpressive(hue, offsets.secondary, theme), 24),
+      pickExpressive(pool, used, separatedSurface.hex, synthesizeExpressive(tint, offsets.secondary, theme), 24),
       overrides,
     ),
     vibrancy,
@@ -818,24 +816,24 @@ function deriveBaseSemanticTokens(input: SemanticTokenDerivationInput): Semantic
   const accent = expressiveTokenWithVibrancy(
     applyOverride(
       'accent',
-      pickExpressive(pool, used, separatedSurface.hex, synthesizeExpressive(hue, offsets.accent, theme), 36),
+      pickExpressive(pool, used, separatedSurface.hex, synthesizeExpressive(tint, offsets.accent, theme), 36),
       overrides,
     ),
     vibrancy,
   );
   const success = applyOverride(
     'success',
-    pickState(pool, STANDARD_STATE_HUES.success, hue, separatedSurface.hex, theme),
+    pickState(pool, STANDARD_STATE_HUES.success, tint, separatedSurface.hex, theme),
     overrides,
   );
   const warning = applyOverride(
     'warning',
-    pickState(pool, STANDARD_STATE_HUES.warning, hue, separatedSurface.hex, theme),
+    pickState(pool, STANDARD_STATE_HUES.warning, tint, separatedSurface.hex, theme),
     overrides,
   );
   const error = applyOverride(
     'error',
-    pickState(pool, STANDARD_STATE_HUES.error, hue, separatedSurface.hex, theme),
+    pickState(pool, STANDARD_STATE_HUES.error, tint, separatedSurface.hex, theme),
     overrides,
   );
   const seriesIdentities = buildDataSeriesIdentities(
@@ -1007,8 +1005,8 @@ function applyAreaAwareStrategy(
     accentCandidate
       ? token(accentCandidate.hex, 'extracted')
       : token(secondary.hex, 'derived', {
-          gap: 'Esta imagen no tiene un color fuente adecuado para acento.',
-        }),
+        gap: 'Esta imagen no tiene un color fuente adecuado para acento.',
+      }),
     overrides,
   );
   const onPrimary = applyOverride('on-primary', derivedPair(primary), overrides);

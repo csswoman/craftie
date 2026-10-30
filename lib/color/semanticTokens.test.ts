@@ -31,18 +31,6 @@ function tokenChroma(hex: string): number {
   return toOklch(hex)?.c ?? 0;
 }
 
-function weightedHue(colors: Array<{ hex: string; prominence: number }>): number {
-  const vector = colors.reduce((total, color) => {
-    const radians = (tokenHue(color.hex) * Math.PI) / 180;
-    return {
-      x: total.x + Math.cos(radians) * color.prominence,
-      y: total.y + Math.sin(radians) * color.prominence,
-    };
-  }, { x: 0, y: 0 });
-
-  return ((Math.atan2(vector.y, vector.x) * 180) / Math.PI + 360) % 360;
-}
-
 const STRUCTURAL_NEUTRAL_TOKENS = [
   'background',
   'surface',
@@ -82,7 +70,7 @@ function derivedWithStrategy(strategy: ExpressiveSynthesisStrategy) {
 }
 
 describe('deriveSemanticTokens', () => {
-  it('builds a complete synthetic neutral ramp from the weighted image hue', () => {
+  it('tints the neutral ramp with the dominant hue when source hues disagree', () => {
     const extracted = [
       { hex: '#B6E4E6', prominence: 0.4 },
       { hex: '#EDC3DB', prominence: 0.3 },
@@ -90,7 +78,9 @@ describe('deriveSemanticTokens', () => {
       { hex: '#89DFE7', prominence: 0.1 },
     ];
     const tokens = deriveSemanticTokens({ extracted, paletteType: 'pastel' });
-    const hue = weightedHue(extracted);
+    // Teal, pink and lavender point in different directions; their average is
+    // a blue nobody picked, so the most prominent source hue wins.
+    const hue = tokenHue('#B6E4E6');
 
     expect(tokenLightness(tokens.background.hex)).toBeCloseTo(0.98, 1);
     expect(tokenLightness(tokens.surface.hex)).toBeCloseTo(0.96, 1);
@@ -156,7 +146,7 @@ describe('deriveSemanticTokens', () => {
     expect(hueDistance(tokenHue(tokens.surface.hex), dominantHue)).toBeLessThanOrEqual(3);
   });
 
-  it('keeps a chroma trace even when the image is achromatic', () => {
+  it('keeps achromatic images gray instead of inventing a hue', () => {
     const tokens = deriveSemanticTokens({
       extracted: [
         { hex: '#EFEFEF', prominence: 0.6 },
@@ -164,9 +154,13 @@ describe('deriveSemanticTokens', () => {
       ],
     });
 
-    expect(toOklch(tokens.background.hex)?.c ?? 0).toBeGreaterThan(0);
+    for (const name of [...STRUCTURAL_NEUTRAL_TOKENS, 'primary', 'secondary'] as const) {
+      expect(tokenChroma(tokens[name].hex), name).toBeLessThan(0.002);
+    }
     expect(tokens.background.hex).not.toBe('#FFFFFF');
+    expect(contrastRatio(tokens.primary.hex, tokens.surface.hex)).toBeGreaterThanOrEqual(4.5);
   });
+
 
   it('filters low-chroma extracted colors out of expressive roles before assignment', () => {
     const tokens = deriveSemanticTokens({
