@@ -359,34 +359,17 @@ function adjustExpressiveForSurface(hex: string, surfaceHex: string): SemanticTo
   });
 }
 
-function pickExpressive(
-  pool: FitnessColor[],
-  used: Set<string>,
+/** Selected source color adjusted for AA on surface, or the synthesized fallback. */
+function expressiveFromSelection(
+  selected: FitnessColor | null,
   surfaceHex: string,
   fallbackHex: string,
-  minHueDistance = 0,
 ): SemanticToken {
-  const picked = pool.find((candidate) => {
-    if (used.has(candidate.hex)) {
-      return false;
-    }
-
-    if (minHueDistance === 0) {
-      return true;
-    }
-
-    return [...used].every((hex) => {
-      const usedOklch = toOklch(hex);
-      return hueDistance(candidate.hue, usedOklch?.h ?? candidate.hue) >= minHueDistance;
-    });
-  });
-
-  if (!picked) {
+  if (!selected) {
     return token(adjustLightnessForContrast(fallbackHex, surfaceHex, AA_RATIO), 'derived');
   }
 
-  used.add(picked.hex);
-  return adjustExpressiveForSurface(picked.hex, surfaceHex);
+  return adjustExpressiveForSurface(selected.hex, surfaceHex);
 }
 
 function pickState(
@@ -688,6 +671,7 @@ function deriveBaseSemanticTokens(
   input: SemanticTokenDerivationInput,
   candidates: ExpressiveSourceColor[],
   tint: NeutralTint,
+  selection: ExpressiveSelection,
 ): SemanticTokens {
   const theme = input.theme ?? 'light';
   const overrides = input.overrides ?? {};
@@ -795,11 +779,10 @@ function deriveBaseSemanticTokens(
       );
 
   const pool = expressiveCandidates(candidates);
-  const used = new Set<string>();
   const primary = expressiveTokenWithVibrancy(
     applyOverride(
       'primary',
-      pickExpressive(pool, used, separatedSurface.hex, synthesizeExpressive(tint, 0, theme)),
+      expressiveFromSelection(selection.primary, separatedSurface.hex, synthesizeExpressive(tint, 0, theme)),
       overrides,
     ),
     vibrancy,
@@ -807,7 +790,11 @@ function deriveBaseSemanticTokens(
   const secondary = expressiveTokenWithVibrancy(
     applyOverride(
       'secondary',
-      pickExpressive(pool, used, separatedSurface.hex, synthesizeExpressive(tint, offsets.secondary, theme), 24),
+      expressiveFromSelection(
+        selection.secondary,
+        separatedSurface.hex,
+        synthesizeExpressive(tint, offsets.secondary, theme),
+      ),
       overrides,
     ),
     vibrancy,
@@ -815,7 +802,11 @@ function deriveBaseSemanticTokens(
   const accent = expressiveTokenWithVibrancy(
     applyOverride(
       'accent',
-      pickExpressive(pool, used, separatedSurface.hex, synthesizeExpressive(tint, offsets.accent, theme), 36),
+      expressiveFromSelection(
+        selection.accent,
+        separatedSurface.hex,
+        synthesizeExpressive(tint, offsets.accent, theme),
+      ),
       overrides,
     ),
     vibrancy,
@@ -1070,7 +1061,7 @@ export function deriveSemanticTokens(input: SemanticTokenDerivationInput): Seman
   // Opposing source hues fall back to the selected primary hue so neutrals and
   // brand color belong to the same family.
   const tint = resolveNeutralTint(candidates, selection.primary?.hue);
-  const base = deriveBaseSemanticTokens(input, candidates, tint);
+  const base = deriveBaseSemanticTokens(input, candidates, tint, selection);
 
   if (paletteType === 'neutral' && !input.overrides?.accent && !input.synthesisStrategy) {
     const dataGap = token(base.primary.hex, 'derived', {
