@@ -17,10 +17,24 @@ const nunito = Nunito({
   display: 'swap',
 });
 
+const description =
+  'Generate color palettes, validate WCAG accessibility, and explore font pairings.';
+
 export const metadata: Metadata = {
-  title: 'Craftie',
-  description:
-    'Generate color palettes, validate WCAG accessibility, and explore font pairings.',
+  title: { default: 'Craftie', template: '%s | Craftie' },
+  description,
+  applicationName: 'Craftie',
+  openGraph: {
+    type: 'website',
+    siteName: 'Craftie',
+    title: 'Craftie',
+    description,
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Craftie',
+    description,
+  },
 };
 
 export const viewport = {
