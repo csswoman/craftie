@@ -9,12 +9,14 @@ import { resolveActiveFontPair } from '@lib/typography/activePairing';
 import { buildFontFamilyStack } from '@lib/typography/googleFonts';
 import type { FontPair } from '@lib/typography/pairings';
 import type { AppliedTypography } from '@lib/typography/typeState';
-import { type TypeScaleBase, type TypeScaleRatio } from '@lib/typography/typeScale';
+import { buildTypeScaleLevels, type TypeScaleBase, type TypeScaleRatio } from '@lib/typography/typeScale';
+import { withRoleWeights } from '@lib/typography/typeRoles';
 import type { SizeOverrides } from '@/components/font-pairing/FineTuneSizes';
 import type { TypographySpacing } from '@/components/font-pairing/SpacingControls';
 import { familyStackFromApplied } from '@lib/typography/typeState';
 
 import { useRolePalette } from '@/context/RolePaletteContext';
+import { useTypeRoles } from '@/context/TypeRolesContext';
 import { loadGoogleFonts } from '@/lib/browser/googleFonts';
 import { TypeScalePreview } from '@/components/color/TypeScalePreview';
 
@@ -62,9 +64,23 @@ export function CanvasSystemView({
   const headingWeight = appliedTypography?.headingWeight ?? activePairing.heading.defaultWeight ?? 700;
   const bodyWeight = appliedTypography?.bodyWeight ?? activePairing.body.defaultWeight ?? 400;
 
+  const { weights: roleWeights, levelOverrides } = useTypeRoles();
+  const loadablePairing = useMemo(() => {
+    const weights = { heading: [...roleWeights.heading], body: [...roleWeights.body] };
+
+    for (const level of buildTypeScaleLevels(base, ratio, largerSteps, smallerSteps)) {
+      const weight = levelOverrides[level.id]?.weight;
+      if (weight !== undefined) {
+        weights[level.role].push(weight);
+      }
+    }
+
+    return withRoleWeights(activePairing, weights);
+  }, [activePairing, roleWeights, levelOverrides, base, ratio, largerSteps, smallerSteps]);
+
   useEffect(() => {
-    loadGoogleFonts([activePairing]);
-  }, [activePairing]);
+    loadGoogleFonts([loadablePairing]);
+  }, [loadablePairing]);
 
   if (!rolePalette) return null;
 
@@ -82,7 +98,7 @@ export function CanvasSystemView({
 
   return (
     <div className="canvas-dots min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
-      <div className="mx-auto max-w-4xl space-y-4">
+      <div className={`mx-auto space-y-4 ${view === 'type-scale' ? 'max-w-6xl' : 'max-w-4xl'}`}>
         {view === 'type-scale' ? (
           <TypeScalePreview
             base={base} ratio={ratio} headingFamily={headingFont} bodyFamily={bodyFont}
