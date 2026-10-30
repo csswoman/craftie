@@ -16,6 +16,8 @@ export type RandomRoleColorContext = {
   textoHex?: string;
   /** Active theme band for sampling. Defaults to light. */
   theme?: ThemeId;
+  /** OKLCH hue to use instead of a random one (harmony-driven palettes). */
+  hue?: number;
 };
 
 type RoleRange = {
@@ -52,9 +54,13 @@ function lerp(min: number, max: number, t: number): number {
   return min + (max - min) * t;
 }
 
-function sampleInRange(range: RoleRange, random: () => number): { l: number; c: number; h: number } {
+function sampleInRange(
+  range: RoleRange,
+  random: () => number,
+  hue?: number,
+): { l: number; c: number; h: number } {
   const l = lerp(range.lMin, range.lMax, random());
-  const h = random() * 360;
+  const h = hue === undefined ? random() * 360 : ((hue % 360) + 360) % 360;
   const chromaCap = Math.max(0, maxOklchChromaForSrgb(l, h));
   const cMax = Math.min(range.cMax, chromaCap);
   const cMin = Math.min(range.cMin, cMax);
@@ -87,7 +93,7 @@ export function randomRoleColor(
   random: () => number = Math.random,
 ): string {
   const theme = context.theme ?? 'light';
-  const sample = sampleInRange(ROLE_RANGES[theme][role], random);
+  const sample = sampleInRange(ROLE_RANGES[theme][role], random, context.hue);
   let hex = normalizeHex(oklchChannelsToHex(sample.l, sample.c, sample.h));
 
   if (role === 'texto') {
