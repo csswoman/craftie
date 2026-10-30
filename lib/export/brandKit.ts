@@ -2,6 +2,7 @@ import type { GeneratedPalette } from '../color/formulas';
 import type { PaletteSeeds, RolePalette } from '../color/rolePalette';
 import type { SemanticTokenOverrides } from '../color/semanticTokens';
 import type { FontPair } from '../typography/pairings';
+import type { ResolvedTypeRole, TypeRoleId } from '../typography/typeRoles';
 import type { ThemesConfig } from '../color/themePalette';
 
 import { buildExportTokenSet } from './exportTokenSet';
@@ -32,6 +33,7 @@ export function buildBrandKit(
       light: SemanticTokenOverrides;
       dark: SemanticTokenOverrides;
     };
+    typeRoles?: Record<TypeRoleId, ResolvedTypeRole> | null;
   },
 ): BrandKitPayload {
   const exportedAt = new Date().toISOString();
@@ -43,6 +45,7 @@ export function buildBrandKit(
         rolePalette,
         tokenOverridesByTheme: themeInput.tokenOverridesByTheme,
         pairing,
+        typeRoles: themeInput.typeRoles,
         name: kitName,
         exportedAt,
       }),

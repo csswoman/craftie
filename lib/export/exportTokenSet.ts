@@ -4,6 +4,7 @@ import type { RolePalette } from '../color/rolePalette';
 import type { SemanticTokenName, SemanticTokenOverrides } from '../color/semanticTokens';
 import { PALETTE_ROLE_ORDER } from '../color/roleTypes';
 import type { FontPair } from '../typography/pairings';
+import { TYPE_ROLE_IDS, type ResolvedTypeRole, type TypeRoleId } from '../typography/typeRoles';
 import { NEUTRAL_SCALE_STEPS, type NeutralScale } from '../color/neutralScale';
 
 export const CORE_EXPORT_TOKENS = ['primary', 'background', 'on-background'] as const;
@@ -21,6 +22,18 @@ export type ExportTypographyRole = {
   size?: string;
 };
 
+export type ExportTypeRole = {
+  /** Which family of the pair the role uses. */
+  family: 'heading' | 'body';
+  weight: number;
+  /** Pixels. */
+  size: number;
+  lineHeight: number;
+  /** Em. */
+  letterSpacing: number;
+  uppercase: boolean;
+};
+
 export type ExportTokenSet = {
   name: string;
   exportedAt: string;
@@ -28,6 +41,7 @@ export type ExportTokenSet = {
   typography?: {
     heading?: ExportTypographyRole;
     body?: ExportTypographyRole;
+    roles?: Partial<Record<TypeRoleId, ExportTypeRole>>;
   };
   meta: {
     included: string[];
@@ -42,6 +56,8 @@ export type BuildExportTokenSetInput = {
     dark: SemanticTokenOverrides;
   };
   pairing: FontPair | null;
+  /** Resolved type roles (weight, size, leading, tracking) to export next to the pairing. */
+  typeRoles?: Record<TypeRoleId, ResolvedTypeRole> | null;
   /** UI neutral scale, exported as neutral-0 … neutral-1000 for both themes. */
   neutralScale?: NeutralScale | null;
   name?: string;
@@ -112,6 +128,25 @@ export function buildExportTokenSet(input: BuildExportTokenSetInput): ExportToke
           : {}),
       },
     };
+
+    if (input.typeRoles) {
+      typography.roles = Object.fromEntries(
+        TYPE_ROLE_IDS.map((id) => {
+          const role = input.typeRoles![id];
+          return [
+            id,
+            {
+              family: role.family,
+              weight: role.weight,
+              size: role.size,
+              lineHeight: role.lineHeight,
+              letterSpacing: role.letterSpacing,
+              uppercase: role.uppercase,
+            },
+          ];
+        }),
+      );
+    }
   }
 
   const included = Object.keys(colors).sort();

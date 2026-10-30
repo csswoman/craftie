@@ -5,7 +5,7 @@ import { tokenNameForPaletteRole } from '../color/semanticRoleProjection';
 import type { SemanticTokenOverrides } from '../color/semanticTokens';
 import { PALETTE_ROLE_ORDER } from '../color/roleTypes';
 
-import { buildExportTokenSet, type ExportTokenSet } from './exportTokenSet';
+import { buildExportTokenSet, type ExportTokenSet, type ExportTypeRole } from './exportTokenSet';
 import { toCss } from './serializeExportTokens';
 
 export type DesignMdInput = {
@@ -62,6 +62,30 @@ export function generateDesignMd(input: ExportTokenSet | DesignMdInput): string 
     ...tokens.map((token) => `- \`--color-${token}\` — token semántico \`${token}\`.`),
     '- Activa el tema oscuro con `data-theme="dark"` en `<html>` o un contenedor raíz.',
   ];
+  const roleEntries = Object.entries(set.typography?.roles ?? {}) as Array<[string, ExportTypeRole]>;
+  const typographyYaml =
+    roleEntries.length > 0
+      ? roleEntries
+          .map(([id, role]) =>
+            [
+              `  ${id}:`,
+              `    fontFamily: "${role.family === 'heading' ? heading : body}"`,
+              `    fontSize: "${Number((role.size / 16).toFixed(4))}rem"`,
+              `    fontWeight: ${role.weight}`,
+              `    lineHeight: ${role.lineHeight}`,
+              `    letterSpacing: "${role.letterSpacing}em"`,
+            ].join('\n'),
+          )
+          .join('\n') + '\n'
+      : `  display:\n    fontFamily: "${heading}"\n  body:\n    fontFamily: "${body}"\n`;
+  const roleTableLines = roleEntries.map(
+    ([id, role]) =>
+      `| ${id} | ${role.family === 'heading' ? heading : body} | ${role.weight} | ${role.size}px | ${role.lineHeight} | ${role.letterSpacing}em |`,
+  );
+  const roleTable =
+    roleTableLines.length > 0
+      ? `\n| Rol | Familia | Peso | Tamaño | Interlineado | Tracking |\n| --- | --- | --- | --- | --- | --- |\n${roleTableLines.join('\n')}\n`
+      : '';
   const darkYaml =
     yamlDarkLines.length > 0 ? `  dark:\n${yamlDarkLines.join('\n')}\n` : '';
 
@@ -72,11 +96,7 @@ colors:
   light:
 ${yamlColorLines.join('\n') || '    {}'}
 ${darkYaml}typography:
-  display:
-    fontFamily: "${heading}"
-  body:
-    fontFamily: "${body}"
----
+${typographyYaml}---
 
 # Design System: ${set.name}
 
@@ -98,7 +118,7 @@ ${referenceLines.join('\n')}
 
 - **Display / Headline:** ${heading}
 - **Body:** ${body}
-
+${roleTable}
 ## Uso
 
 ${usageLines.join('\n')}

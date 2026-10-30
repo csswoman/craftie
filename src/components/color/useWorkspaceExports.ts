@@ -13,6 +13,7 @@ import {
 import { generateDesignMd } from '@lib/export/generateDesignMd';
 import { toCss, toTokensStudio, toW3cJson } from '@lib/export/serializeExportTokens';
 import type { FontPair } from '@lib/typography/pairings';
+import type { ResolvedTypeRole, TypeRoleId } from '@lib/typography/typeRoles';
 import { encodeShareSnapshot } from '@lib/studio/shareLink';
 import type { WorkspaceSnapshot } from '@lib/studio/workspaceSnapshot';
 import { downloadTextFile } from '@/lib/browser/download';
@@ -28,6 +29,7 @@ export function useWorkspaceExports({
   tokenOverridesByTheme,
   exportStatusTokenOverrides = {},
   selectedPairing,
+  typeRoles = null,
   getShareSnapshot,
   setError,
   setStatusMessage,
@@ -42,6 +44,8 @@ export function useWorkspaceExports({
   /** Confirmed status colors (success/warning/error) merged into the light slot for export. */
   exportStatusTokenOverrides?: SemanticTokenOverrides;
   selectedPairing: FontPair | null;
+  /** Resolved type roles exported with the pairing. */
+  typeRoles?: Record<TypeRoleId, ResolvedTypeRole> | null;
   /** Builds the current serializable workspace snapshot for the share link. */
   getShareSnapshot: () => WorkspaceSnapshot;
   setError: (error: string | null) => void;
@@ -58,6 +62,7 @@ export function useWorkspaceExports({
     neutralScale,
     tokenOverridesByTheme: exportOverridesByTheme,
     pairing: selectedPairing,
+    typeRoles,
     name: kitName,
   });
   const canExport = canExportTokenSet(tokenSet);
@@ -139,6 +144,7 @@ export function useWorkspaceExports({
     const palette = generatePaletteFromRolePalette(rolePalette);
     const kit = buildBrandKit(palette, rolePalette, selectedPairing, kitName, {
       tokenOverridesByTheme: exportOverridesByTheme,
+      typeRoles,
     });
     download(
       'brand-kit.json',

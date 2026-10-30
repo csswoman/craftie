@@ -1,4 +1,13 @@
-import type { ExportTokenSet } from './exportTokenSet';
+import type { ExportTokenSet, ExportTypeRole } from './exportTokenSet';
+
+function typeRoleEntries(set: ExportTokenSet): Array<[string, ExportTypeRole]> {
+  return Object.entries(set.typography?.roles ?? {}) as Array<[string, ExportTypeRole]>;
+}
+
+function remSize(px: number): string {
+  return `${Number((px / 16).toFixed(4))}rem`;
+}
+
 
 function cssTokenName(token: string): string {
   return `--color-${token}`;
@@ -27,6 +36,13 @@ export function toCss(set: ExportTokenSet): string {
   }
   if (set.typography?.body?.family) {
     lightLines.push(`  --font-body: ${quoteFont(set.typography.body.family)};`);
+  }
+  for (const [id, role] of typeRoleEntries(set)) {
+    lightLines.push(`  --type-${id}-family: var(--font-${role.family});`);
+    lightLines.push(`  --type-${id}-weight: ${role.weight};`);
+    lightLines.push(`  --type-${id}-size: ${remSize(role.size)};`);
+    lightLines.push(`  --type-${id}-line-height: ${role.lineHeight};`);
+    lightLines.push(`  --type-${id}-letter-spacing: ${role.letterSpacing}em;`);
   }
 
   const blocks: string[] = [];
@@ -69,6 +85,24 @@ export function toW3cJson(set: ExportTokenSet): string {
     if (Object.keys(fontFamily).length > 0) {
       payload.fontFamily = fontFamily;
     }
+    const roles = typeRoleEntries(set);
+    if (roles.length > 0) {
+      payload.typography = Object.fromEntries(
+        roles.map(([id, role]) => [
+          id,
+          {
+            $type: 'typography',
+            $value: {
+              fontFamily: `{fontFamily.${role.family}}`,
+              fontWeight: role.weight,
+              fontSize: `${role.size}px`,
+              lineHeight: role.lineHeight,
+              letterSpacing: `${role.letterSpacing}em`,
+            },
+          },
+        ]),
+      );
+    }
   }
 
   return `${JSON.stringify(payload, null, 2)}\n`;
@@ -106,6 +140,26 @@ export function toTokensStudio(set: ExportTokenSet): string {
       };
     }
     light.fontFamilies = fontFamilies;
+  }
+
+  const roles = typeRoleEntries(set);
+  if (roles.length > 0) {
+    light.typography = Object.fromEntries(
+      roles.map(([id, role]) => [
+        id,
+        {
+          type: 'typography',
+          value: {
+            fontFamily: `{fontFamilies.${role.family}}`,
+            fontWeight: String(role.weight),
+            fontSize: String(role.size),
+            lineHeight: String(role.lineHeight),
+            letterSpacing: `${role.letterSpacing}em`,
+            textCase: role.uppercase ? 'uppercase' : 'none',
+          },
+        },
+      ]),
+    );
   }
 
   const tokenSetOrder = ['light'];
