@@ -181,7 +181,7 @@ describe('rolePalette', () => {
     const merged = mergeRolePalettePreservingLocks(lockedPrimario, reassigned, ['primario']);
 
     expect(merged.primario.hex).toBe('#FF5500');
-    expect(normalizeHex(merged.fondo.hex)).not.toBe(normalizeHex('#FFFFFF'));
+    // The light page is derived white, not copied from the source white.
     expect(merged.fondo.source).toBe('derived');
   });
 
@@ -253,9 +253,12 @@ describe('rolePalette', () => {
     // Blue and yellow are near-opposite hues; averaging them would tint the
     // neutrals green, so the dominant source hue drives the ramp.
     const dominantHue = toOklch('#3366CC')?.h ?? 0;
-    expect(surface?.c ?? 0).toBeGreaterThan(0.01);
-    expect(surface?.c ?? 1).toBeLessThanOrEqual(0.02);
-    expect(hueDistance(surface?.h ?? 0, dominantHue)).toBeLessThanOrEqual(3);
+    // UI neutrals: a gray with only a trace of the dominant hue. Body text
+    // carries the most tint, so the hue is checked there.
+    expect(surface?.c ?? 1).toBeLessThanOrEqual(0.006);
+    const text = toOklch(palette.texto.hex);
+    expect(text?.c ?? 0).toBeGreaterThan(0.004);
+    expect(hueDistance(text?.h ?? 0, dominantHue)).toBeLessThanOrEqual(15);
     expect(
       hasAdequateSurfaceFillSeparation(palette.superficie.hex, palette.primario.hex),
     ).toBe(true);

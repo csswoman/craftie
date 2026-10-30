@@ -80,7 +80,7 @@ describe('imagePalette', () => {  it('classifies colors into light, bold, and da
     expect(result.rolePalette.fondo.hex).not.toBe('#B6E4E6');
     expect(result.rolePalette.fondo.source).toBe('derived');
     expect(toOklch(result.rolePalette.fondo.hex)?.l ?? 0).toBeGreaterThan(0.96);
-    expect(toOklch(result.rolePalette.fondo.hex)?.c ?? 0).toBeGreaterThan(0);
+    expect(toOklch(result.rolePalette.fondo.hex)?.c ?? 1).toBeLessThan(0.006);
     expect(result.rolePalette.primario.source).toBe('extracted');
     expect(result.rolePalette.acento.hex).not.toBe('#8A7151');
     expect(contrastRatio(result.rolePalette.texto.hex, result.rolePalette.fondo.hex)).toBeGreaterThanOrEqual(4.5);

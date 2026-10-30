@@ -70,7 +70,7 @@ function derivedWithStrategy(strategy: ExpressiveSynthesisStrategy) {
 }
 
 describe('deriveSemanticTokens', () => {
-  it('tints the neutral ramp with the dominant hue when source hues disagree', () => {
+  it('builds UI neutrals: white page, gray layers and near-black text', () => {
     const extracted = [
       { hex: '#B6E4E6', prominence: 0.4 },
       { hex: '#EDC3DB', prominence: 0.3 },
@@ -78,40 +78,37 @@ describe('deriveSemanticTokens', () => {
       { hex: '#89DFE7', prominence: 0.1 },
     ];
     const tokens = deriveSemanticTokens({ extracted, paletteType: 'pastel' });
-    // Teal, pink and lavender point in different directions; their average is
-    // a blue nobody picked, so the most prominent source hue wins.
-    const hue = tokenHue('#B6E4E6');
 
-    expect(tokenLightness(tokens.background.hex)).toBeCloseTo(0.98, 1);
-    expect(tokenLightness(tokens.surface.hex)).toBeCloseTo(0.96, 1);
-    expect(tokenLightness(tokens['surface-elevated'].hex)).toBeCloseTo(0.94, 1);
-    expect(tokenLightness(tokens.border.hex)).toBeCloseTo(0.88, 1);
-    expect(tokenLightness(tokens['on-background'].hex)).toBeCloseTo(0.25, 1);
-    expect(tokenLightness(tokens['on-surface-muted'].hex)).toBeCloseTo(0.53, 1);
-    expect(tokenChroma(tokens.background.hex)).toBeGreaterThan(0);
+    expect(tokens.background.hex).toBe('#FFFFFF');
+    expect(tokenLightness(tokens.surface.hex)).toBeCloseTo(0.965, 1);
+    expect(tokenLightness(tokens.border.hex)).toBeCloseTo(0.87, 1);
+    expect(tokenLightness(tokens['on-background'].hex)).toBeCloseTo(0.205, 1);
+    expect(tokenLightness(tokens['on-surface-muted'].hex)).toBeCloseTo(0.52, 1);
 
     for (const name of STRUCTURAL_NEUTRAL_TOKENS) {
-      expect(hueDistance(tokenHue(tokens[name].hex), hue), name).toBeLessThanOrEqual(3);
-      expect(tokenChroma(tokens[name].hex), name).toBeGreaterThan(0);
-      expect(tokens[name].hex, name).not.toBe('#FFFFFF');
-      expect(tokens[name].hex, name).not.toBe('#000000');
+      // A trace of hue at most: foundations must read as white, gray, black.
+      expect(tokenChroma(tokens[name].hex), name).toBeLessThanOrEqual(0.014);
     }
+
+    // Teal, pink and lavender disagree; the trace follows the dominant hue.
+    expect(hueDistance(tokenHue(tokens['on-background'].hex), tokenHue('#B6E4E6'))).toBeLessThanOrEqual(15);
 
     const sources = extracted.map((color) => color.hex);
     expect(sources).toContain(tokens.primary.hex);
     expect(sources).toContain(tokens.accent.hex);
   });
 
-  it('uses the specified tinted neutral ramp for dark UI', () => {
+  it('uses the UI neutral scale for dark UI', () => {
     const tokens = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, theme: 'dark' });
 
     expect(tokenLightness(tokens.background.hex)).toBeCloseTo(0.15, 1);
-    expect(tokenLightness(tokens.surface.hex)).toBeCloseTo(0.19, 1);
-    expect(tokenLightness(tokens['surface-elevated'].hex)).toBeCloseTo(0.23, 1);
-    expect(tokenLightness(tokens.border.hex)).toBeCloseTo(0.32, 1);
-    expect(tokenLightness(tokens['on-background'].hex)).toBeCloseTo(0.92, 1);
-    expect(tokenLightness(tokens['on-surface-muted'].hex)).toBeCloseTo(0.7, 1);
+    expect(tokenLightness(tokens.surface.hex)).toBeCloseTo(0.205, 1);
+    expect(tokenLightness(tokens['surface-elevated'].hex)).toBeCloseTo(0.27, 1);
+    expect(tokenLightness(tokens.border.hex)).toBeCloseTo(0.37, 1);
+    expect(tokenLightness(tokens['on-background'].hex)).toBeCloseTo(0.965, 1);
+    expect(tokenLightness(tokens['on-surface-muted'].hex)).toBeCloseTo(0.71, 1);
   });
+
   it('always derives structural neutrals instead of taking extracted colors directly', () => {
     const tokens = deriveSemanticTokens({
       extracted: [
@@ -126,11 +123,10 @@ describe('deriveSemanticTokens', () => {
     expect(tokens.surface.source).toBe('derived');
     expect(tokens.border.source).toBe('derived');
     expect(tokens.background.hex).not.toBe('#F7F7F5');
-    expect(toOklch(tokens.background.hex)?.c ?? 1).toBeGreaterThan(0.004);
-    expect(toOklch(tokens.background.hex)?.c ?? 1).toBeLessThanOrEqual(0.02);
+    expect(toOklch(tokens.surface.hex)?.c ?? 1).toBeLessThanOrEqual(0.006);
   });
 
-  it('derives subtly tinted neutral chrome from the dominant image hue by default', () => {
+  it('gives neutral chrome a trace of the dominant image hue by default', () => {
     const tokens = deriveSemanticTokens({
       extracted: [
         { hex: '#F7F7F5', prominence: 0.5 },
@@ -139,11 +135,11 @@ describe('deriveSemanticTokens', () => {
       ],
     });
 
-    const dominantHue = tokenHue('#3366CC');
+    const text = toOklch(tokens['on-background'].hex);
 
-    expect(toOklch(tokens.background.hex)?.c ?? 0).toBeGreaterThan(0.004);
-    expect(hueDistance(tokenHue(tokens.background.hex), dominantHue)).toBeLessThanOrEqual(3);
-    expect(hueDistance(tokenHue(tokens.surface.hex), dominantHue)).toBeLessThanOrEqual(3);
+    expect(text?.c ?? 0).toBeGreaterThan(0.004);
+    expect(text?.c ?? 1).toBeLessThanOrEqual(0.014);
+    expect(hueDistance(text?.h ?? 0, tokenHue('#3366CC'))).toBeLessThanOrEqual(15);
   });
 
   it('keeps achromatic images gray instead of inventing a hue', () => {
@@ -157,7 +153,6 @@ describe('deriveSemanticTokens', () => {
     for (const name of [...STRUCTURAL_NEUTRAL_TOKENS, 'primary', 'secondary'] as const) {
       expect(tokenChroma(tokens[name].hex), name).toBeLessThan(0.002);
     }
-    expect(tokens.background.hex).not.toBe('#FFFFFF');
     expect(contrastRatio(tokens.primary.hex, tokens.surface.hex)).toBeGreaterThanOrEqual(4.5);
   });
 
@@ -215,7 +210,8 @@ describe('deriveSemanticTokens', () => {
       ],
     });
 
-    expect(toOklch(tokens['background-inverse'].hex)?.l ?? 1).toBeGreaterThanOrEqual(0.15);
+    // Step 950 (L 0.15) after HEX rounding.
+    expect(toOklch(tokens['background-inverse'].hex)?.l ?? 1).toBeGreaterThanOrEqual(0.145);
     expect(toOklch(tokens['background-inverse'].hex)?.l ?? 1).toBeLessThanOrEqual(0.25);
     expect(contrastRatio(tokens['on-background-inverse'].hex, tokens['background-inverse'].hex)).toBeGreaterThanOrEqual(4.5);
     expect(contrastRatio(tokens['on-surface-inverse'].hex, tokens['surface-inverse'].hex)).toBeGreaterThanOrEqual(4.5);
@@ -363,14 +359,16 @@ describe('deriveSemanticTokens', () => {
     }
   });
 
-  it('does not allow neutralStyle to remove the image tint', () => {
+  it('renders pure grays when neutralStyle is pure', () => {
     for (const theme of ['light', 'dark'] as const) {
       const pure = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, theme, neutralStyle: 'pure' });
       const tinted = deriveSemanticTokens({ extracted: EXPRESSIVE_SAMPLE, theme, neutralStyle: 'tinted' });
 
-      expect(pure.background.hex).toBe(tinted.background.hex);
-      expect(tokenChroma(pure.background.hex)).toBeGreaterThan(0);
-      expect(pure.background.hex).not.toBe(theme === 'light' ? '#FFFFFF' : '#000000');
+      for (const name of STRUCTURAL_NEUTRAL_TOKENS) {
+        expect(tokenChroma(pure[name].hex), name).toBeLessThan(0.002);
+      }
+      expect(tokenChroma(tinted['on-background'].hex)).toBeGreaterThan(tokenChroma(pure['on-background'].hex));
+      expect(pure.primary.hex).toBe(tinted.primary.hex);
     }
   });
 

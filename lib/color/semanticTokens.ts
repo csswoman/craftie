@@ -19,6 +19,13 @@ import {
   type ExpressiveSelection,
   type ExpressiveSourceColor,
 } from './expressiveSelection';
+import {
+  deriveNeutralScale,
+  NEUTRAL_SCALE_CHROMA,
+  NEUTRAL_SCALE_LIGHTNESS,
+  type NeutralScale,
+  type NeutralScaleStep,
+} from './neutralScale';
 import { resolveNeutralTint, type NeutralTint } from './neutralTint';
 import { brandScore, type FitnessColor } from './roleFitness';
 import {
@@ -124,25 +131,35 @@ type NeutralRamp = {
   text: readonly [number, number];
 };
 
+function scaleStep(step: NeutralScaleStep): readonly [number, number] {
+  return [NEUTRAL_SCALE_LIGHTNESS[step], NEUTRAL_SCALE_CHROMA[step]];
+}
+
+/**
+ * Structural neutrals follow the UI neutral scale: a white page, light gray
+ * cards and dividers, gray borders and near-black text (and the mirror in
+ * dark mode). The brand hue is only a trace, so foundations read as white,
+ * gray and black like real product UIs.
+ */
 const LIGHT_NEUTRAL: NeutralRamp = {
-  background: [0.98, 0.008],
-  surface: [0.96, 0.012],
-  elevated: [0.94, 0.016],
-  border: [0.88, 0.02],
-  divider: [0.92, 0.018],
-  // 0.53 is the nearest AA-safe realization of the 0.55 design target on
-  // the 0.96 surface after sRGB/HEX round-trip.
-  textMuted: [0.53, 0.03],
-  text: [0.25, 0.03],
+  background: scaleStep(0),
+  surface: scaleStep(100),
+  elevated: [0.945, NEUTRAL_SCALE_CHROMA[200]],
+  border: scaleStep(300),
+  divider: scaleStep(200),
+  // Between steps 500 and 600: the lightest gray that still passes AA as
+  // body text on the step-100 surface after sRGB/HEX round-trip.
+  textMuted: [0.52, NEUTRAL_SCALE_CHROMA[500]],
+  text: scaleStep(900),
 };
 const DARK_NEUTRAL: NeutralRamp = {
-  background: [0.15, 0.02],
-  surface: [0.19, 0.024],
-  elevated: [0.23, 0.028],
-  border: [0.32, 0.03],
-  divider: [0.27, 0.03],
-  textMuted: [0.7, 0.03],
-  text: [0.92, 0.02],
+  background: scaleStep(950),
+  surface: scaleStep(900),
+  elevated: scaleStep(800),
+  border: scaleStep(700),
+  divider: [0.3, NEUTRAL_SCALE_CHROMA[800]],
+  textMuted: scaleStep(400),
+  text: scaleStep(100),
 };
 export const DEFAULT_NEUTRAL_STYLE: NeutralStyle = 'tinted';
 const STANDARD_STATE_HUES = {
@@ -469,8 +486,9 @@ function deriveBaseSemanticTokens(
   const strategy = input.synthesisStrategy ?? EXPRESSIVE_SYNTHESIS.synthesisStrategy;
   const vibrancy = normalizeVibrancy(input.vibrancy);
   const { hue } = tint;
+  const neutralChromaScale = input.neutralStyle === 'pure' ? 0 : tint.chromaScale;
   const rampNeutral = ([lightness, chroma]: readonly [number, number]): string =>
-    neutralHex(lightness, chroma * tint.chromaScale, hue);
+    neutralHex(lightness, chroma * neutralChromaScale, hue);
   const ramp = theme === 'dark' ? DARK_NEUTRAL : LIGHT_NEUTRAL;
   const inverseRamp = theme === 'dark' ? LIGHT_NEUTRAL : DARK_NEUTRAL;
   const offsets = synthesisOffsets(strategy);
@@ -781,6 +799,24 @@ function applyAreaAwareStrategy(
     'data-6': applyOverride('data-6', dataToken(5), overrides),
     ...tonalTokens,
   };
+}
+
+/**
+ * The white-to-black UI neutral scale for these sources, with the same tint
+ * as the structural tokens (or pure gray for neutralStyle 'pure').
+ */
+export function deriveNeutralScaleForSources(
+  extracted: ExtractedColor[],
+  neutralStyle: NeutralStyle = DEFAULT_NEUTRAL_STYLE,
+): NeutralScale {
+  const candidates = uniqueCandidates(extracted);
+  const selection = selectExpressiveRoles(candidates);
+  const tint = resolveNeutralTint(candidates, selection.primary?.hue);
+
+  return deriveNeutralScale({
+    hue: tint.hue,
+    chromaScale: neutralStyle === 'pure' ? 0 : tint.chromaScale,
+  });
 }
 
 /** Derives an area-aware UI palette; source colors stay on small expressive roles. */

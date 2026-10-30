@@ -30,9 +30,9 @@ type RoleRange = {
 
 const ROLE_RANGES: Record<ThemeId, Record<PaletteRoleId, RoleRange>> = {
   light: {
-    fondo: { lMin: 0.965, lMax: 0.99, cMin: 0, cMax: 0.012 },
+    fondo: { lMin: 0.985, lMax: 1, cMin: 0, cMax: 0.003 },
     superficie: { lMin: 0.93, lMax: 0.96, cMin: 0, cMax: 0.016 },
-    texto: { lMin: 0.18, lMax: 0.3, cMin: 0, cMax: 0.025 },
+    texto: { lMin: 0.17, lMax: 0.26, cMin: 0, cMax: 0.012 },
     'texto-secundario': { lMin: 0.45, lMax: 0.45, cMin: 0, cMax: 0.03 },
     primario: { lMin: 0.42, lMax: 0.68, cMin: 0.08, cMax: 0.2 },
     secundario: { lMin: 0.4, lMax: 0.7, cMin: 0.06, cMax: 0.18 },
@@ -40,9 +40,9 @@ const ROLE_RANGES: Record<ThemeId, Record<PaletteRoleId, RoleRange>> = {
     borde: { lMin: 0.84, lMax: 0.89, cMin: 0, cMax: 0.02 },
   },
   dark: {
-    fondo: { lMin: 0.15, lMax: 0.2, cMin: 0, cMax: 0.02 },
+    fondo: { lMin: 0.14, lMax: 0.19, cMin: 0, cMax: 0.008 },
     superficie: { lMin: 0.18, lMax: 0.24, cMin: 0, cMax: 0.024 },
-    texto: { lMin: 0.9, lMax: 0.96, cMin: 0, cMax: 0.02 },
+    texto: { lMin: 0.93, lMax: 0.98, cMin: 0, cMax: 0.006 },
     'texto-secundario': { lMin: 0.72, lMax: 0.72, cMin: 0, cMax: 0.03 },
     primario: { lMin: 0.58, lMax: 0.78, cMin: 0.08, cMax: 0.2 },
     secundario: { lMin: 0.56, lMax: 0.8, cMin: 0.06, cMax: 0.18 },
@@ -62,8 +62,9 @@ const LAYER_STEPS: Record<ThemeId, { superficie: [number, number]; borde: [numbe
   light: { superficie: [-0.045, -0.025], borde: [-0.11, -0.075] },
   dark: { superficie: [0.035, 0.06], borde: [0.11, 0.16] },
 };
-const LAYER_EXTRA_CHROMA = 0.006;
-const LAYER_CHROMA_MAX = 0.025;
+const LAYER_EXTRA_CHROMA = 0.003;
+/** Same ceiling as the UI neutral scale: foundations stay white, gray, black. */
+const LAYER_CHROMA_MAX = 0.01;
 
 function lerp(min: number, max: number, t: number): number {
   return min + (max - min) * t;
