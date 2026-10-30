@@ -9,7 +9,7 @@ import {
   fitsBorderOn,
   fitsSurfaceOn,
   passesTextOn,
-} from './roleSourceAssignment';
+} from './roleFitChecks';
 import {
   DERIVED_ROLES,
   type ColorSource,
