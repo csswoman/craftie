@@ -11,7 +11,10 @@ const AUTO_EXPRESSIVE_CHROMA_MIN = 0.055;
 
 function isAssigned(token: SemanticToken): boolean {
   if (token.source === 'override') return true;
-  return token.source === 'extracted' && (toOklch(token.hex)?.c ?? 0) >= AUTO_EXPRESSIVE_CHROMA_MIN;
+  // 'corrected' is a source color with lightness nudged for contrast; it is
+  // still the user's or image's color, not an invented one.
+  const fromSource = token.source === 'extracted' || token.source === 'corrected';
+  return fromSource && (toOklch(token.hex)?.c ?? 0) >= AUTO_EXPRESSIVE_CHROMA_MIN;
 }
 
 function isAccentAssigned(tokens: SemanticTokens): boolean {
@@ -81,20 +84,22 @@ export function resolveUiExpressiveGaps(
   const primary = primaryAssigned
     ? tokens.primary
     : gapToken(
-        validFallback?.hex ?? tokens['on-background'].hex,
-        'La imagen no ofrece un candidato fuente con suficiente carácter para primario.',
-      );
+      validFallback?.hex ?? tokens['on-background'].hex,
+      'La imagen no ofrece un candidato fuente con suficiente carácter para primario.',
+    );
   const secondaryAssigned = isAssigned(tokens.secondary);
   const secondary = secondaryAssigned
     ? tokens.secondary
     : gapToken(
-        placeholderHex(tokens.secondary, primary.hex, [normalizeHex(primary.hex)], primaryAssigned),
-        'La imagen no ofrece un candidato fuente válido para secundario.',
-      );
+      placeholderHex(tokens.secondary, primary.hex, [normalizeHex(primary.hex)], primaryAssigned),
+      'La imagen no ofrece un candidato fuente válido para secundario.',
+    );
   const taken = new Set(
     [primaryAssigned ? primary : null, secondaryAssigned ? secondary : null]
       .filter((entry): entry is SemanticToken => entry !== null)
-      .map((entry) => normalizeHex(entry.hex)),
+      // A contrast-corrected role still "uses" its source color.
+      .flatMap((entry) => [entry.hex, entry.originalHex].filter((hex): hex is string => Boolean(hex)))
+      .map((hex) => normalizeHex(hex)),
   );
   const automaticAccent = isAccentAssigned(tokens)
     ? tokens.accent
@@ -102,14 +107,14 @@ export function resolveUiExpressiveGaps(
   const accent = automaticAccent
     ? automaticAccent
     : gapToken(
-        placeholderHex(
-          tokens.accent,
-          primary.hex,
-          [normalizeHex(primary.hex), normalizeHex(secondary.hex)],
-          primaryAssigned,
-        ),
-        'La imagen no ofrece un candidato fuente con suficiente carácter para acento.',
-      );
+      placeholderHex(
+        tokens.accent,
+        primary.hex,
+        [normalizeHex(primary.hex), normalizeHex(secondary.hex)],
+        primaryAssigned,
+      ),
+      'La imagen no ofrece un candidato fuente con suficiente carácter para acento.',
+    );
 
   return {
     ...tokens,

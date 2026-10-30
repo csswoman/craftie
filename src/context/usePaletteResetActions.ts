@@ -109,6 +109,9 @@ export function usePaletteResetActions(
       const assigned = assignRolesFromHexes(hexes, options);
 
       setExtractedColors(extracted);
+      // A palette type detected for a previous image must not leak into
+      // chosen colors; let classification run on the new sources.
+      setPaletteType(undefined);
       resetEditable({
         roleNames: Object.fromEntries(
           Object.values(assigned).map((slot) => [slot.role, slot.name]),
@@ -116,7 +119,7 @@ export function usePaletteResetActions(
       });
       resetTransient();
     },
-    [resetEditable, resetTransient, setExtractedColors, setPaletteRevision],
+    [resetEditable, resetTransient, setExtractedColors, setPaletteRevision, setPaletteType],
   );
 
   return useMemo(
