@@ -8,7 +8,11 @@ import {
 } from '@lib/color/imageExtractor';
 
 const PALETTE_MAX_COUNT = 12;
-const MAX_CANVAS_DIMENSION = 256;
+/**
+ * Smoothed downscale target. Averaging pixels removes JPEG noise, and every
+ * remaining pixel is sampled, so the image is read whole instead of on a grid.
+ */
+const MAX_CANVAS_DIMENSION = 128;
 
 function getDrawDimensions(width: number, height: number): { width: number; height: number } {
   const largestSide = Math.max(width, height);
@@ -44,11 +48,10 @@ function loadImageElement(file: File): Promise<HTMLImageElement> {
   });
 }
 
-function rasterizeImage(image: HTMLImageElement): RasterData {
-  const dimensions = getDrawDimensions(image.naturalWidth, image.naturalHeight);
+function createContext(width: number, height: number): CanvasRenderingContext2D {
   const canvas = document.createElement('canvas');
-  canvas.width = dimensions.width;
-  canvas.height = dimensions.height;
+  canvas.width = width;
+  canvas.height = height;
 
   const context = canvas.getContext('2d', { willReadFrequently: true });
 
@@ -56,8 +59,29 @@ function rasterizeImage(image: HTMLImageElement): RasterData {
     throw new Error('Unable to create canvas rendering context.');
   }
 
-  context.imageSmoothingEnabled = false;
-  context.drawImage(image, 0, 0, dimensions.width, dimensions.height);
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = 'high';
+  return context;
+}
+
+function rasterizeImage(image: HTMLImageElement): RasterData {
+  const dimensions = getDrawDimensions(image.naturalWidth, image.naturalHeight);
+  let source: CanvasImageSource = image;
+  let width = image.naturalWidth;
+  let height = image.naturalHeight;
+
+  // Halve in steps: one large bilinear downscale skips pixels and aliases in
+  // some browsers; successive halvings average every pixel.
+  while (width / 2 >= dimensions.width * 2 && height / 2 >= 1) {
+    width = Math.max(1, Math.round(width / 2));
+    height = Math.max(1, Math.round(height / 2));
+    const step = createContext(width, height);
+    step.drawImage(source, 0, 0, width, height);
+    source = step.canvas;
+  }
+
+  const context = createContext(dimensions.width, dimensions.height);
+  context.drawImage(source, 0, 0, dimensions.width, dimensions.height);
   const imageData = context.getImageData(0, 0, dimensions.width, dimensions.height);
 
   return {
@@ -85,22 +109,19 @@ export async function extractColorsFromImage(
 
 /**
  * Extracts a broader set of dominant colors for the visual palette builder.
- * Pass a higher regenerateIndex to sample the image differently and surface alternate colors.
+ * A higher regenerateIndex reseeds clustering; role variety on regenerate
+ * comes from the palette variant, not from sampling noise.
  */
 export async function extractPaletteColorsFromImage(
   file: File,
   regenerateIndex = 0,
   mode: 'paint' | 'ui' = 'ui',
 ): Promise<ExtractedColor[]> {
-  const sampleSteps = [6, 8, 10, 12, 14];
-  const sampleStep = sampleSteps[regenerateIndex % sampleSteps.length]!;
-
   return extractColorsFromImage(file, {
     count: PALETTE_EXTRACTION_COUNT,
     maxCount: PALETTE_MAX_COUNT,
-    sampleStep,
-    sampleOffset: regenerateIndex % sampleStep,
-    centroidSeed: regenerateIndex * 3,
+    sampleStep: 1,
+    centroidSeed: regenerateIndex,
     publication: mode === 'paint' ? 'medoid' : 'centroid',
   });
 }

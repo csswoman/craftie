@@ -34,16 +34,23 @@ export type RgbSample = {
   r: number;
   g: number;
   b: number;
+  /** Pixel count represented by this sample. Defaults to 1. */
+  weight?: number;
 };
 
 export type LabSample = {
   rgb: RgbSample;
+  /** OKLab channels [L, a, b]. */
   lab: [number, number, number];
+  /** Pixel count represented by this sample. Defaults to 1. */
+  weight?: number;
 };
 
 export type ColorCluster = {
   centroid: [number, number, number];
   members: LabSample[];
+  /** Total pixel weight of the members. */
+  weight: number;
 };
 
 export const PALETTE_EXTRACTION_COUNT = 10;
