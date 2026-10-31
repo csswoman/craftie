@@ -177,7 +177,7 @@ function SelectColorsWorkspaceContent() {
 
   if (!hasInspirationSource) {
     return (
-      <div className="canvas-dots flex h-dvh flex-col overflow-hidden">
+      <div className="flex h-dvh flex-col overflow-hidden bg-bg">
         {sharedChrome}
 
         <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto p-4 sm:p-6 lg:p-8">
@@ -202,51 +202,51 @@ function SelectColorsWorkspaceContent() {
 
   return (
     <TypeRolesContext.Provider value={workspace.typeRoles}>
-    <div className="canvas-dots flex min-h-dvh flex-col lg:h-dvh lg:min-h-0 lg:overflow-hidden">
-      {sharedChrome}
+      <div className="flex min-h-dvh flex-col bg-bg lg:h-dvh lg:min-h-0 lg:overflow-hidden">
+        {sharedChrome}
 
-      {workspace.onboardingHintVisible ? (
-        <OnboardingHint onDismiss={workspace.dismissOnboardingHint} />
-      ) : null}
+        {workspace.onboardingHintVisible ? (
+          <OnboardingHint onDismiss={workspace.dismissOnboardingHint} />
+        ) : null}
 
-      <StudioCanvas
-        sidebar={
-          <SelectColorsWorkspaceSidebar
-            {...toolSectionsInput}
-            activeTab={activeTab}
-            onActiveTabChange={handleToolsTabChange}
-          />
-        }
-        sidebarHeaderExtra={<ToolsTabToggle activeTab={activeTab} onActiveTabChange={handleToolsTabChange} />}
-        mobileToolsDock={<StudioToolsMobileDock sections={mobileToolSections} />}
-        main={
-          <SelectColorsWorkspaceMain
-            isImageExtracting={workspace.isImageExtracting}
-            isImageRegenerating={workspace.isImageRegenerating}
-            recommendedPairings={workspace.recommendedPairings}
-            selectedPairing={workspace.selectedPairing}
-            appliedTypography={workspace.appliedTypography}
-            hoveredPairing={workspace.hoveredPairing}
-            isTypePreviewing={workspace.isTypePreviewing}
-            typeScaleBase={workspace.typeScaleBase}
-            typeScaleRatio={workspace.typeScaleRatio}
-            typeScaleOverrides={workspace.typeScaleOverrides}
-            typographySpacing={workspace.typographySpacing}
-            largerTypeScaleSteps={workspace.largerTypeScaleSteps}
-            smallerTypeScaleSteps={workspace.smallerTypeScaleSteps}
-            onAddColorByHex={workspace.handleAddColorByHex}
-            paletteCatalog={workspace.paletteCatalog}
-            imagePreviewUrl={workspace.imagePreviewUrl}
-            imageFileName={workspace.imageFileName}
-            imageFingerprint={workspace.imageFingerprint}
-            onImageFileSelected={workspace.handleImageFileSelected}
-            onImageRegenerate={workspace.handleImageRegenerate}
-          />
-        }
-      />
+        <StudioCanvas
+          sidebar={
+            <SelectColorsWorkspaceSidebar
+              {...toolSectionsInput}
+              activeTab={activeTab}
+              onActiveTabChange={handleToolsTabChange}
+            />
+          }
+          sidebarHeaderExtra={<ToolsTabToggle activeTab={activeTab} onActiveTabChange={handleToolsTabChange} />}
+          mobileToolsDock={<StudioToolsMobileDock sections={mobileToolSections} />}
+          main={
+            <SelectColorsWorkspaceMain
+              isImageExtracting={workspace.isImageExtracting}
+              isImageRegenerating={workspace.isImageRegenerating}
+              recommendedPairings={workspace.recommendedPairings}
+              selectedPairing={workspace.selectedPairing}
+              appliedTypography={workspace.appliedTypography}
+              hoveredPairing={workspace.hoveredPairing}
+              isTypePreviewing={workspace.isTypePreviewing}
+              typeScaleBase={workspace.typeScaleBase}
+              typeScaleRatio={workspace.typeScaleRatio}
+              typeScaleOverrides={workspace.typeScaleOverrides}
+              typographySpacing={workspace.typographySpacing}
+              largerTypeScaleSteps={workspace.largerTypeScaleSteps}
+              smallerTypeScaleSteps={workspace.smallerTypeScaleSteps}
+              onAddColorByHex={workspace.handleAddColorByHex}
+              paletteCatalog={workspace.paletteCatalog}
+              imagePreviewUrl={workspace.imagePreviewUrl}
+              imageFileName={workspace.imageFileName}
+              imageFingerprint={workspace.imageFingerprint}
+              onImageFileSelected={workspace.handleImageFileSelected}
+              onImageRegenerate={workspace.handleImageRegenerate}
+            />
+          }
+        />
 
-      {inspirationModal}
-    </div>
+        {inspirationModal}
+      </div>
     </TypeRolesContext.Provider>
   );
 }

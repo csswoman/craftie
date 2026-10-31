@@ -46,7 +46,7 @@ export function StudioCanvasToolsSidebar({
       }
       style={collapsed ? undefined : ({ width: STUDIO_TOOLS_SIDEBAR_WIDTH } satisfies CSSProperties)}
     >
-      <div className="panel-float flex h-full min-h-0 flex-col overflow-hidden">
+      <div className="flex h-full min-h-0 flex-col overflow-hidden border-r border-border bg-bg">
         {collapsed ? (
           <PanelCollapseRail
             ref={toggleRef}

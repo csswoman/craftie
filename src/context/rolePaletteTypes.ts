@@ -32,6 +32,8 @@ export type RolePaletteContextValue = {
   getColorForUsage: (intent: UsageIntent) => UsageColor | null;
   /** Role palette locked to the `light` theme, independent of `activeTheme`, for stable export. */
   exportRolePalette: RolePalette | null;
+  /** Role palette of the theme that is not active, used to validate both themes at once. */
+  counterpartRolePalette: RolePalette | null;
   /** White-to-black UI neutral scale with the palette's tint. */
   neutralScale: NeutralScale | null;
   /** Confirmed status colors projected to semantic token overrides (success/warning/error). */

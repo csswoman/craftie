@@ -203,6 +203,40 @@ export function useDerivedPalette({
     tokenOverridesByTheme,
   ]);
 
+  // Role palette of the theme that is not being edited, so contrast can be checked on both.
+  const counterpartRolePalette = useMemo(() => {
+    if (extractedColors.length === 0) {
+      return null;
+    }
+
+    const otherTheme = activeTheme === 'light' ? 'dark' : 'light';
+    const tokens = applyClearedDataTokens(
+      resolveUiExpressiveGaps(
+        deriveSemanticTokens({
+          extracted: extractedColors,
+          overrides: tokenOverridesByTheme[otherTheme] ?? {},
+          theme: otherTheme,
+          neutralStyle,
+          vibrancy: savedVibrancy,
+          paletteType,
+        }),
+        extractedColors,
+      ),
+      clearedSemanticTokens,
+    );
+
+    return projectSemanticTokensToRolePalette(tokens, roleNames);
+  }, [
+    activeTheme,
+    clearedSemanticTokens,
+    extractedColors,
+    neutralStyle,
+    paletteType,
+    roleNames,
+    savedVibrancy,
+    tokenOverridesByTheme,
+  ]);
+
   const neutralScale = useMemo(
     () => (extractedColors.length === 0 ? null : deriveNeutralScaleForSources(extractedColors, neutralStyle)),
     [extractedColors, neutralStyle],
@@ -239,6 +273,7 @@ export function useDerivedPalette({
       rolePalette,
       getColorForUsage: getColorForUsageBound,
       exportRolePalette,
+      counterpartRolePalette,
       exportStatusTokenOverrides,
       neutralScale,
       semanticTokens,
@@ -253,6 +288,7 @@ export function useDerivedPalette({
       rolePalette,
       getColorForUsageBound,
       exportRolePalette,
+      counterpartRolePalette,
       exportStatusTokenOverrides,
       semanticTokens,
       previewRolePalette,

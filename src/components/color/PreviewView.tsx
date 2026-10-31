@@ -44,7 +44,7 @@ import {
   type SemanticTokenPopoverAnchor,
 } from '@/components/color/SemanticTokenColorPopover';
 import { loadGoogleFonts } from '@/lib/browser/googleFonts';
-import { PreviewEditModeToggle, type PreviewEditMode } from '@/components/color/PreviewEditModeToggle';
+import type { PreviewEditMode } from '@/components/color/PreviewEditModeToggle';
 import { TypeRolePopover, type TypeRolePopoverAnchor } from '@/components/color/TypeRolePopover';
 import { useTypeRoles } from '@/context/TypeRolesContext';
 
@@ -58,6 +58,8 @@ export type PreviewViewProps = {
   onEditRole?: (role: PaletteRoleId, element: HTMLElement) => void;
   activeMode: UiLayoutModeId;
   activeFamily: PreviewFamilyId;
+  /** What a click on the mockup edits; the toggle lives in the canvas toolbar. */
+  editMode?: PreviewEditMode;
 };
 
 export const PREVIEW_LAYOUT_WIDTH_CLASS = 'max-w-[1300px]';
@@ -71,7 +73,7 @@ export function PreviewView({
   typeScaleRatio = 1.25,
   activeMode,
   activeFamily,
-  onEditRole,
+  editMode = 'locked',
 }: PreviewViewProps) {
   const {
     rolePalette,
@@ -84,7 +86,6 @@ export function PreviewView({
   } = useRolePalette();
   const [tokenPopover, setTokenPopover] = useState<SemanticTokenPopoverAnchor | null>(null);
   const [rolePopover, setRolePopover] = useState<TypeRolePopoverAnchor | null>(null);
-  const [editMode, setEditMode] = useState<PreviewEditMode>('color');
   const typeRoles = useTypeRoles();
 
   const liveRolePalette = previewRolePalette ?? rolePalette;
@@ -195,11 +196,11 @@ export function PreviewView({
 
   return (
     <div
-      className="canvas-dots relative min-h-0 flex-1 overflow-y-auto motion-reduce:transition-none"
+      className="relative min-h-0 flex-1 overflow-y-auto bg-surface motion-reduce:transition-none"
       style={{ ...typeTokenStyle, ...statusTokenStyle }}
     >
       <div
-        className="pointer-events-none sticky top-3 z-20 flex justify-center px-4"
+        className="pointer-events-none sticky top-3 z-20 flex h-0 justify-center overflow-visible px-4"
         aria-hidden={!isTypePreviewing}
       >
         <p
@@ -209,11 +210,6 @@ export function PreviewView({
           ● Vista previa — clic para aplicar
         </p>
       </div>
-      {family.id !== 'illustration' ? (
-        <div className="pointer-events-none sticky top-14 z-20 flex justify-end px-4 sm:px-8">
-          <PreviewEditModeToggle value={editMode} onChange={setEditMode} />
-        </div>
-      ) : null}
       <div
         data-edit-mode={editMode}
         onClickCapture={handleTextEditClick}
@@ -232,7 +228,7 @@ export function PreviewView({
             mode={activeMode}
             colors={colors}
             fonts={fonts}
-            onEditSlot={handleEditSlot}
+            onEditSlot={editMode === 'color' ? handleEditSlot : undefined}
           />
         )}
       </div>

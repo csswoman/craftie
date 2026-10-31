@@ -11,7 +11,18 @@ import {
   RoleOklchSliders,
 } from './RoleColorEditorControls';
 import { useRoleColorEditor } from './useRoleColorEditor';
+import { ContrastFailureAdvice } from './ContrastFailureAdvice';
+import type { ContrastFixSide } from '@lib/color/contrastAdvice';
 import { hexToOklchChannels } from '@lib/utils/colorMath';
+
+/** Which side of its contrast pair each role controls; derived roles have none. */
+const EDITABLE_SIDE: Partial<Record<PaletteRoleId, ContrastFixSide>> = {
+  texto: 'foreground',
+  'texto-secundario': 'foreground',
+  borde: 'foreground',
+  fondo: 'background',
+  superficie: 'background',
+};
 
 export type RoleColorEditorProps = {
   role: PaletteRoleId;
@@ -120,6 +131,13 @@ export function RoleColorEditor({
       {showContrast ? <RoleContrastBadge contrast={contrast} /> : null}
       {showContrast && contrast.status === 'fail' ? (
         <div className="space-y-2">
+          <ContrastFailureAdvice
+            foregroundHex={contrast.foregroundHex}
+            backgroundHex={contrast.backgroundHex}
+            editableSide={EDITABLE_SIDE[role]}
+            disabled={locked}
+            onApply={handleHexCommit}
+          />
           {safeColor && !locked ? (
             <button
               type="button"

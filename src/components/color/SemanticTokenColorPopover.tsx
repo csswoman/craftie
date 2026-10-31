@@ -12,6 +12,10 @@ import { computePopoverPosition } from '@/lib/browser/computePopoverPosition';
 import { useDialogAccessibility } from '@/lib/browser/useDialogAccessibility';
 import { SemanticTokenColorEditor } from './SemanticTokenColorEditor';
 
+const POPOVER_WIDTH = 320;
+const POPOVER_HEIGHT = 500;
+const VIEWPORT_GAP = 8;
+
 export type SemanticTokenPopoverAnchor = {
   tokenName: SemanticTokenName;
   rect: DOMRect;
@@ -50,7 +54,7 @@ export function SemanticTokenColorPopover({
       return;
     }
 
-    setPosition(computePopoverPosition(anchor.rect));
+    setPosition(computePopoverPosition(anchor.rect, POPOVER_WIDTH, POPOVER_HEIGHT));
   }, [anchor]);
 
   useEffect(() => {
@@ -87,12 +91,16 @@ export function SemanticTokenColorPopover({
         role="dialog"
         aria-modal="true"
         aria-labelledby="semantic-token-popover-title"
-        className="z-modal fixed max-h-[min(420px,calc(100vh-16px))] w-72 overflow-y-auto rounded-lg border border-border bg-surface p-3 shadow-(--shadow-float)"
-        style={{ top: position.top, left: position.left }}
+        className="z-modal fixed flex w-80 flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-(--shadow-float)"
+        style={{
+          top: position.top,
+          left: position.left,
+          maxHeight: `calc(100vh - ${position.top}px - ${VIEWPORT_GAP}px)`,
+        }}
         onClick={(event) => event.stopPropagation()}
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <header className="mb-3 flex items-start justify-between gap-2">
+        <header className="flex shrink-0 items-start justify-between gap-2 border-b border-border px-4 py-3">
           <div className="min-w-0">
             <p id="semantic-token-popover-title" className="text-chrome-label font-semibold text-ink">
               {SEMANTIC_TOKEN_LABELS[anchor.tokenName]}
@@ -104,18 +112,20 @@ export function SemanticTokenColorPopover({
             data-popover-close
             onClick={onClose}
             aria-label="Cerrar"
-            className="flex size-11 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+            className="-mr-2 -mt-1 flex size-11 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           >
             <span aria-hidden="true" className="text-lg leading-none">
               ×
             </span>
           </button>
         </header>
-        <SemanticTokenColorEditor
-          tokenName={anchor.tokenName}
-          idPrefix={`semantic-popover-${anchor.tokenName}`}
-          showSwatch
-        />
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4">
+          <SemanticTokenColorEditor
+            tokenName={anchor.tokenName}
+            idPrefix={`semantic-popover-${anchor.tokenName}`}
+            showSwatch
+          />
+        </div>
       </div>
     </>,
     document.body,

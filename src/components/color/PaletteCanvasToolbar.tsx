@@ -6,6 +6,7 @@ import { CanvasViewSelector } from './CanvasViewSelector';
 import { PaletteHistoryControls } from './PaletteHistoryControls';
 import { PaletteImageBlock } from './PaletteImageBlock';
 import { PaletteRandomizeButton } from './PaletteRandomizeButton';
+import { PreviewEditModeToggle, type PreviewEditMode } from './PreviewEditModeToggle';
 
 export function PaletteCanvasToolbar({
   activeView,
@@ -16,11 +17,16 @@ export function PaletteCanvasToolbar({
   imageFileName,
   imageFingerprint,
   isUpdating,
+  previewEditMode,
+  onPreviewEditModeChange,
   onToggleAccents,
   onSelectView,
   onImageFileSelected,
   onImageRegenerate,
 }: {
+  /** Set only on mockup views: shows the "what a click edits" toggle. */
+  previewEditMode?: PreviewEditMode;
+  onPreviewEditModeChange?: (mode: PreviewEditMode) => void;
   activeView: CanvasViewId;
   showAccents: boolean;
   editable: boolean;
@@ -58,16 +64,18 @@ export function PaletteCanvasToolbar({
         </>
       ) : null}
       <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+        {previewEditMode && onPreviewEditModeChange ? (
+          <PreviewEditModeToggle value={previewEditMode} onChange={onPreviewEditModeChange} />
+        ) : null}
         {showAccentsToggle ? (
           <button
             type="button"
             aria-pressed={accentsActive}
             onClick={onToggleAccents}
-            className={`inline-flex h-11 shrink-0 items-center rounded-lg border px-3 text-chrome-label font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
-              accentsActive
-                ? 'border-[var(--chrome-green)] bg-[var(--chrome-green-soft)] text-[var(--chrome-green)]'
-                : 'border-line bg-transparent text-ink hover:bg-surface-raised'
-            }`}
+            className={`inline-flex h-11 shrink-0 items-center rounded-lg border px-3 text-chrome-label font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${accentsActive
+              ? 'border-[var(--chrome-green)] bg-[var(--chrome-green-soft)] text-[var(--chrome-green)]'
+              : 'border-line bg-transparent text-ink hover:bg-surface-raised'
+              }`}
           >
             {accentsActive ? 'Ver roles' : 'Ver acentos'}
           </button>

@@ -63,8 +63,8 @@ export function WorkspaceHeader({
   );
 
   return (
-    <header className="relative z-sticky shrink-0 px-2 pt-2 xl:px-4 xl:pt-4">
-      <div className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-border bg-bg px-4 py-2.5 xl:px-4">
+    <header className="relative z-sticky shrink-0 border-b border-border bg-bg">
+      <div className="flex min-h-14 items-center justify-between gap-3 px-4 py-2 xl:px-5">
         <button
           type="button"
           onClick={onCraftieHome}

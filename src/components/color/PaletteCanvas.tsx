@@ -18,9 +18,11 @@ import { ColorDetailsDrawer } from '@/components/color-engine/ColorDetailsDrawer
 import { useCanvasView } from '@/context/CanvasViewContext';
 import { useRolePalette } from '@/context/RolePaletteContext';
 import { PaletteView } from './PaletteView';
+import type { PreviewEditMode } from './PreviewEditModeToggle';
 import { PreviewView } from './PreviewView';
 import { EmptyCanvas, PaletteCanvasSkeleton } from './PaletteCanvasEmptyStates';
-import { PaletteCanvasNotices } from './PaletteCanvasNotices';
+import { PaletteCanvasNotices, type ThemeContrastReport } from './PaletteCanvasNotices';
+import type { ThemeId } from '@lib/color/themePalette';
 import { PaletteCanvasToolbar } from './PaletteCanvasToolbar';
 import { CanvasSystemView } from './CanvasSystemView';
 import { PaintPaletteCanvas } from './PaintPaletteCanvas';
@@ -76,6 +78,9 @@ export function PaletteCanvas({
   const {
     rolePalette,
     previewRolePalette,
+    counterpartRolePalette,
+    activeTheme,
+    setActiveTheme,
     lockedRoles,
     replaceRole,
     replaceSemanticToken,
@@ -83,6 +88,8 @@ export function PaletteCanvas({
   const { activeView, activeMode, selectView } = useCanvasView();
 
   const [showAccents, setShowAccents] = useState(false);
+  const [previewEditMode, setPreviewEditMode] = useState<PreviewEditMode>('locked');
+  const isMockupView = !['paint', 'colors', 'style-guide', 'type-scale', 'illustration'].includes(activeView);
   const [selectedColorHex, setSelectedColorHex] = useState<string | null>(null);
   const [selectedAccentSlot, setSelectedAccentSlot] = useState<number | null>(null);
   const liveRolePalette = previewRolePalette ?? rolePalette;
@@ -103,8 +110,25 @@ export function PaletteCanvas({
     return paletteCatalog;
   }, [liveRolePalette, paletteCatalog]);
 
-  const contrastFailure = liveRolePalette ? hasRolePaletteContrastFailure(liveRolePalette) : false;
-  const contrastWarnings = liveRolePalette ? getRolePaletteContrastWarnings(liveRolePalette) : [];
+  const contrastReports = useMemo<ThemeContrastReport[]>(() => {
+    const reports: ThemeContrastReport[] = [];
+    const entries: Array<[ThemeId, typeof liveRolePalette]> = [
+      [activeTheme, liveRolePalette],
+      [activeTheme === 'light' ? 'dark' : 'light', counterpartRolePalette],
+    ];
+
+    for (const [theme, palette] of entries) {
+      if (palette) {
+        reports.push({
+          theme,
+          failure: hasRolePaletteContrastFailure(palette),
+          warnings: getRolePaletteContrastWarnings(palette),
+        });
+      }
+    }
+
+    return reports;
+  }, [activeTheme, counterpartRolePalette, liveRolePalette]);
   const lockedSet = useMemo(() => new Set(lockedRoles), [lockedRoles]);
   const canReplace = editable && rolePalette !== null;
   const hasPalette = columns.length > 0 && liveRolePalette !== null;
@@ -153,6 +177,8 @@ export function PaletteCanvas({
           imageFileName={imageFileName}
           imageFingerprint={imageFingerprint}
           isUpdating={isUpdating}
+          previewEditMode={isMockupView ? previewEditMode : undefined}
+          onPreviewEditModeChange={setPreviewEditMode}
           onToggleAccents={() => setShowAccents((visible) => !visible)}
           onSelectView={selectView}
           onImageFileSelected={onImageFileSelected}
@@ -162,7 +188,11 @@ export function PaletteCanvas({
 
       <div className="relative flex min-h-0 flex-1 flex-col">
         {hasPalette ? (
-          <PaletteCanvasNotices contrastFailure={contrastFailure} warnings={contrastWarnings} />
+          <PaletteCanvasNotices
+            activeTheme={activeTheme}
+            reports={contrastReports}
+            onSwitchTheme={setActiveTheme}
+          />
         ) : null}
         {isLoading && !hasPalette ? (
           <PaletteCanvasSkeleton />
@@ -175,9 +205,8 @@ export function PaletteCanvas({
               role="tabpanel"
               aria-label="Vista activa del lienzo"
               tabIndex={0}
-              className={`relative flex min-h-0 flex-1 flex-col transition-opacity duration-150 motion-reduce:transition-none ${
-                isUpdating ? 'opacity-60' : 'opacity-100'
-              }`}
+              className={`relative flex min-h-0 flex-1 flex-col transition-opacity duration-150 motion-reduce:transition-none ${isUpdating ? 'opacity-60' : 'opacity-100'
+                }`}
             >
               {activeView === 'paint' ? (
                 <PaintPaletteCanvas colors={paintColors} />
@@ -211,6 +240,7 @@ export function PaletteCanvas({
                   typeScaleRatio={typeScaleRatio}
                   activeMode={activeMode}
                   activeFamily={activeView === 'illustration' ? 'illustration' : 'ui'}
+                  editMode={previewEditMode}
                 />
               )}
             </div>

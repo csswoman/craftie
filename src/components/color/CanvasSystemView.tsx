@@ -97,7 +97,7 @@ export function CanvasSystemView({
   const paletteMutedStyle = { color: rolePalette.texto.hex, opacity: 0.7 };
 
   return (
-    <div className="canvas-dots min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+    <div className="min-h-0 flex-1 overflow-y-auto bg-surface p-4 sm:p-6">
       <div className={`mx-auto space-y-4 ${view === 'type-scale' ? 'max-w-6xl' : 'max-w-4xl'}`}>
         {view === 'type-scale' ? (
           <TypeScalePreview

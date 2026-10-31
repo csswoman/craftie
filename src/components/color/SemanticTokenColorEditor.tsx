@@ -20,6 +20,7 @@ import {
   RoleHexInput,
   RoleOklchSliders,
 } from './RoleColorEditorControls';
+import { ContrastFailureAdvice } from './ContrastFailureAdvice';
 
 export function SemanticTokenColorEditor({
   tokenName,
@@ -108,6 +109,12 @@ export function SemanticTokenColorEditor({
       />
 
       {contrast ? <RoleContrastBadge contrast={contrast} /> : null}
+      {contrast?.status === 'fail' ? (
+        <ContrastFailureAdvice
+          foregroundHex={contrast.foregroundHex}
+          backgroundHex={contrast.backgroundHex}
+        />
+      ) : null}
     </div>
   );
 }

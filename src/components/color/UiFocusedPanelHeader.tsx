@@ -21,7 +21,7 @@ export function UiFocusedPanelHeader({
           <ChevronLeft aria-hidden="true" size={22} strokeWidth={2.25} absoluteStrokeWidth />
         </button>
         <div className="min-w-0 pt-2">
-          <h2 className="font-display text-[1.125rem] font-semibold leading-tight text-ink">{title}</h2>
+          <h2 className="font-sans text-[1.125rem] font-semibold leading-tight text-ink">{title}</h2>
           <p className="mt-1 text-tools-meta-scale leading-relaxed text-muted">{subtitle}</p>
         </div>
       </div>

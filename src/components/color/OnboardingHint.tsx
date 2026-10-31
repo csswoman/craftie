@@ -16,12 +16,12 @@ export function OnboardingHint({ onDismiss }: OnboardingHintProps) {
   return (
     <section
       aria-label="Bienvenida a Craftie"
-      className="relative mx-4 mt-3 shrink-0 rounded-xl border border-border bg-bg px-3 py-3 lg:mx-7 lg:mt-4 lg:px-4"
+      className="relative shrink-0 border-b border-border bg-surface px-4 py-2.5 xl:px-5"
     >
       <button
         type="button"
         onClick={onDismiss}
-        className="absolute right-2 top-2 flex size-9 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+        className="absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
         aria-label="Ocultar bienvenida"
         title="Ocultar"
       >

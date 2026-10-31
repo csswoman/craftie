@@ -152,12 +152,14 @@ export function UiCompactColorPanel({
     );
   }
 
+  // The guide action follows the content and sticks to the bottom only once the
+  // list overflows, so a short panel has no empty gap above the button.
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div ref={scrollRef} className="scrollbar-chrome min-h-0 flex-1 overflow-y-auto">
         {sections}
+        {createGuide}
       </div>
-      {createGuide}
     </div>
   );
 }
@@ -184,7 +186,7 @@ function PanelSection({
   const titleRow = (
     <>
       <Icon aria-hidden="true" size={18} strokeWidth={2} className="shrink-0 text-muted" />
-      <h2 className="truncate font-display text-tools-section-label font-semibold text-ink">{title}</h2>
+      <h2 className="truncate font-sans text-tools-section-label font-semibold text-ink">{title}</h2>
     </>
   );
 

@@ -95,11 +95,10 @@ export function RoleLockToggle({ locked, onToggle }: { locked: boolean; onToggle
       aria-pressed={locked}
       aria-label={locked ? 'Desbloquear rol' : 'Bloquear rol'}
       title={locked ? 'Desbloquear' : 'Bloquear'}
-      className={`flex size-11 shrink-0 items-center justify-center rounded-xl border transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/20 ${
-        locked
+      className={`flex size-11 shrink-0 items-center justify-center rounded-xl border transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/20 ${locked
           ? 'border-primary/40 bg-primary/10 text-primary'
           : 'border-border bg-bg text-muted hover:bg-surface-raised hover:text-ink'
-      }`}
+        }`}
     >
       <LockIcon locked={locked} />
     </button>
@@ -115,13 +114,12 @@ export function RoleContrastBadge({ contrast }: { contrast: ActiveRoleContrastIn
 
   return (
     <div
-      className={`rounded-2xl border px-4 py-3 ${
-        passes
+      className={`rounded-2xl border px-4 py-3 ${passes
           ? 'border-pass/30 bg-pass/10'
           : fails
             ? 'border-fail/30 bg-fail/10'
             : 'border-border bg-surface-raised'
-      }`}
+        }`}
       role="status"
       aria-live="polite"
     >
@@ -130,9 +128,8 @@ export function RoleContrastBadge({ contrast }: { contrast: ActiveRoleContrastIn
           Contraste
         </p>
         <span
-          className={`rounded-full px-2.5 py-0.5 font-mono text-chrome-label font-semibold tabular-nums ${
-            passes ? 'text-pass' : fails ? 'text-fail' : 'text-muted'
-          }`}
+          className={`rounded-full px-2.5 py-0.5 font-mono text-chrome-label font-semibold tabular-nums ${passes ? 'text-pass' : fails ? 'text-fail' : 'text-muted'
+            }`}
         >
           {contrast.ratio.toFixed(2)}:1
         </span>
@@ -157,11 +154,10 @@ export function RoleContrastBadge({ contrast }: { contrast: ActiveRoleContrastIn
           />
         </div>
         <span
-          className={`text-chrome-caption font-semibold ${
-            passes ? 'text-pass' : fails ? 'text-fail' : 'text-muted'
-          }`}
+          className={`text-chrome-caption font-semibold ${passes ? 'text-pass' : fails ? 'text-fail' : 'text-muted'
+            }`}
         >
-          {contrast.level === 'fail' ? 'No cumple AA' : `WCAG ${contrast.level}`}
+          {contrast.level === 'fail' ? '✕ No cumple AA (mínimo 4.5:1)' : `✓ WCAG ${contrast.level}`}
           {contrast.passesAaa ? ' · AAA' : ''}
         </span>
       </div>

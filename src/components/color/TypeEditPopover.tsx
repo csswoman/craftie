@@ -6,6 +6,10 @@ import { createPortal } from 'react-dom';
 import { computePopoverPosition } from '@/lib/browser/computePopoverPosition';
 import { useDialogAccessibility } from '@/lib/browser/useDialogAccessibility';
 
+const POPOVER_WIDTH = 320;
+const POPOVER_HEIGHT = 520;
+const VIEWPORT_GAP = 8;
+
 /** Floating panel anchored to an element, shared by the role and level editors. */
 export function TypeEditPopover({
   rect,
@@ -43,7 +47,7 @@ export function TypeEditPopover({
       setPosition(null);
       return;
     }
-    setPosition(computePopoverPosition(rect));
+    setPosition(computePopoverPosition(rect, POPOVER_WIDTH, POPOVER_HEIGHT));
   }, [rect]);
 
   useEffect(() => {
@@ -66,12 +70,16 @@ export function TypeEditPopover({
         role="dialog"
         aria-modal="true"
         aria-labelledby="type-edit-popover-title"
-        className="z-modal fixed max-h-[min(520px,calc(100vh-16px))] w-72 overflow-y-auto rounded-lg border border-border bg-surface p-3 shadow-(--shadow-float)"
-        style={{ top: position.top, left: position.left }}
+        className="z-modal fixed flex w-80 flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-(--shadow-float)"
+        style={{
+          top: position.top,
+          left: position.left,
+          maxHeight: `calc(100vh - ${position.top}px - ${VIEWPORT_GAP}px)`,
+        }}
         onClick={(event) => event.stopPropagation()}
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <header className="mb-3 flex items-start justify-between gap-2">
+        <header className="flex shrink-0 items-start justify-between gap-2 border-b border-border px-4 py-3">
           <div className="min-w-0">
             <p id="type-edit-popover-title" className="text-chrome-label font-semibold text-ink">
               {title}
@@ -83,12 +91,12 @@ export function TypeEditPopover({
             data-popover-close
             onClick={onClose}
             aria-label="Cerrar"
-            className="flex size-11 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+            className="-mr-2 -mt-1 flex size-11 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           >
             <span aria-hidden="true" className="text-lg leading-none">×</span>
           </button>
         </header>
-        {children}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4">{children}</div>
       </div>
     </>,
     document.body,
