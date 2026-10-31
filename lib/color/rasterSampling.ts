@@ -5,6 +5,8 @@ import type { RasterData, RgbSample } from './imageTypes';
 const NEAR_WHITE_L = 0.95;
 const NEAR_BLACK_L = 0.05;
 const NEUTRAL_DOMINANCE_THRESHOLD = 0.4;
+/** Near-white/black with at least this chroma (cream, ink blue) is color identity, not noise. */
+const TINTED_NEUTRAL_CHROMA_MIN = 0.015;
 /** Pixels below half opacity are antialiased edges, not image color. */
 const ALPHA_MIN = 128;
 /** Bits kept per channel when grouping pixels; 5 bits = 32 levels. */
@@ -67,7 +69,7 @@ export function quantizeSamples(samples: RgbSample[]): RgbSample[] {
   }));
 }
 
-function getOklchLightness(rgb: RgbSample): number {
+function getOklchLightnessAndChroma(rgb: RgbSample): { lightness: number; chroma: number } {
   const oklch = toOklch({
     mode: 'rgb',
     r: rgb.r / 255,
@@ -76,10 +78,10 @@ function getOklchLightness(rgb: RgbSample): number {
   });
 
   if (!oklch || oklch.mode !== 'oklch') {
-    return 0;
+    return { lightness: 0, chroma: 0 };
   }
 
-  return oklch.l;
+  return { lightness: oklch.l, chroma: oklch.c ?? 0 };
 }
 
 /**
@@ -92,12 +94,13 @@ export function filterNeutralSamples(samples: RgbSample[]): RgbSample[] {
   }
 
   const classified = samples.map((sample) => {
-    const lightness = getOklchLightness(sample);
+    const { lightness, chroma } = getOklchLightnessAndChroma(sample);
+    const tinted = chroma >= TINTED_NEUTRAL_CHROMA_MIN;
     return {
       sample,
       weight: sample.weight ?? 1,
-      white: lightness > NEAR_WHITE_L,
-      black: lightness < NEAR_BLACK_L,
+      white: lightness > NEAR_WHITE_L && !tinted,
+      black: lightness < NEAR_BLACK_L && !tinted,
     };
   });
   const total = classified.reduce((sum, entry) => sum + entry.weight, 0) || 1;

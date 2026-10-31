@@ -91,6 +91,21 @@ describe('filterNeutralSamples', () => {
     expect(filtered.length).toBeGreaterThan(2);
   });
 
+  it('keeps tinted near-whites such as cream while dropping pure white', () => {
+    const samples = [
+      { r: 255, g: 255, b: 255 },
+      { r: 250, g: 245, b: 230 },
+      { r: 200, g: 40, b: 40 },
+      { r: 30, g: 120, b: 200 },
+      { r: 240, g: 180, b: 20 },
+    ];
+
+    const filtered = filterNeutralSamples(samples);
+
+    expect(filtered.some((sample) => sample.r === 255 && sample.b === 255)).toBe(false);
+    expect(filtered.some((sample) => sample.r === 250 && sample.b === 230)).toBe(true);
+  });
+
   it('keeps near-white samples when they dominate the image', () => {
     const samples = Array.from({ length: 10 }, () => ({ r: 255, g: 255, b: 255 }));
 
@@ -136,6 +151,24 @@ describe('extractColorsFromRaster', () => {
     expect(colors.some((color) => color.hex.startsWith('#23') || color.hex.startsWith('#22'))).toBe(
       true,
     );
+  });
+
+  it('keeps a distinct dark shade of a main hue over a near-twin shade', () => {
+    const bands: [number, number, number][] = [
+      [200, 60, 60],
+      [215, 80, 75],
+      [40, 150, 80],
+      [90, 20, 20],
+    ];
+    const raster = createRaster(100, 10, (x) => {
+      const [r, g, b] = x < 35 ? bands[0]! : x < 65 ? bands[1]! : x < 92 ? bands[2]! : bands[3]!;
+      return [r, g, b, 255];
+    });
+
+    const colors = extractColorsFromRaster(raster, { count: 3, sampleStep: 1 });
+
+    expect(colors.some((color) => color.hex === '#5A1414')).toBe(true);
+    expect(colors.some((color) => color.hex.startsWith('#28'))).toBe(true);
   });
 
   it('ignores fully transparent pixels', () => {

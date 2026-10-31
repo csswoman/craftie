@@ -15,6 +15,7 @@ import {
 import { validateImageFile } from './imageValidation';
 import { filterNeutralSamples, quantizeSamples, samplePixels } from './rasterSampling';
 import { normalizeHex } from './normalizeHex';
+import { reserveToneVariants } from './toneCoverage';
 
 export {
   PALETTE_EXTRACTION_COUNT,
@@ -155,6 +156,8 @@ function selectPublished(clusters: ColorCluster[], totalWeight: number, count: n
     selected.push(vivid);
     reserved += 1;
   }
+
+  reserveToneVariants(selected, pool.filter((cluster) => !selected.includes(cluster)));
 
   return selected;
 }
