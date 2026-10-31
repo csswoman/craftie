@@ -63,14 +63,13 @@ export function DashboardLayoutPreview({ colors, fonts = DEFAULT_PREVIEW_FONTS, 
   const primaryFill = vividFill(colors.primaryAction, colors.surface);
   const onPrimaryFill = colors.primaryActionText;
   const activity = buildDashboardActivity(colors);
-  const [featuredMetric, ...secondaryMetrics] = DASHBOARD_METRICS;
 
   return (
     <PreviewSlotTarget
       slot="appBackground"
       onEditSlot={onEditSlot}
-      className={`${DASHBOARD_CONTAINER_CLASS} min-w-0 w-full overflow-hidden rounded-xl border`}
-      style={{ backgroundColor: colors.appBackground, borderColor: colors.border, color: colors.text, ...previewRootTypeStyle() }}
+      className={`${DASHBOARD_CONTAINER_CLASS} min-w-0 w-full overflow-hidden`}
+      style={{ backgroundColor: colors.appBackground, color: colors.text, ...previewRootTypeStyle() }}
     >
       <div className="flex min-h-[36rem] min-w-0">
         <DashboardSidebar
@@ -122,33 +121,22 @@ export function DashboardLayoutPreview({ colors, fonts = DEFAULT_PREVIEW_FONTS, 
             </div>
           </header>
 
-          <section className="mt-8 grid min-w-0 gap-6 @min-[800px]/dashboard:grid-cols-[minmax(0,1.7fr)_minmax(16rem,0.9fr)]">
-            <div className="@container/dashmain flex min-w-0 flex-col gap-6">
-              <section className="grid grid-cols-2 gap-3 @min-[560px]/dashmain:grid-cols-4 @min-[560px]/dashmain:gap-4">
-                <div
-                  className="preview-rise"
-                  style={{ animationDelay: previewStaggerDelay(1) }}
-                >
-                  <DashboardMetricCard
-                    colors={colors}
-                    fonts={fonts}
-                    metric={featuredMetric}
-                    featured
-                    onEditSlot={onEditSlot}
-                  />
-                </div>
-                {secondaryMetrics.map((metric, index) => (
-                  <div
-                    key={metric.label}
-                    className="preview-rise"
-                    style={{ animationDelay: previewStaggerDelay(index + 2) }}
-                  >
-                    <DashboardMetricCard colors={colors} fonts={fonts} metric={metric} onEditSlot={onEditSlot} />
-                  </div>
-                ))}
-              </section>
+          <div className="@container/dashkpi mt-8">
+            <PreviewSlotTarget
+              slot="divider"
+              onEditSlot={onEditSlot}
+              className="preview-rise grid grid-cols-2 gap-px overflow-hidden rounded-xl border @min-[640px]/dashkpi:grid-cols-4"
+              style={{ backgroundColor: colors.divider, borderColor: colors.border, animationDelay: previewStaggerDelay(1) }}
+            >
+              {DASHBOARD_METRICS.map((metric) => (
+                <DashboardMetricCard key={metric.label} colors={colors} fonts={fonts} metric={metric} onEditSlot={onEditSlot} />
+              ))}
+            </PreviewSlotTarget>
+          </div>
 
-              <div className="preview-rise" style={{ animationDelay: previewStaggerDelay(5) }}>
+          <section className="mt-6 grid min-w-0 gap-6 @min-[800px]/dashboard:grid-cols-[minmax(0,1.7fr)_minmax(16rem,0.9fr)]">
+            <div className="@container/dashmain flex min-w-0 flex-col gap-6">
+              <div className="preview-rise h-full" style={{ animationDelay: previewStaggerDelay(5) }}>
                 <DashboardChannelPanel
                   colors={colors}
                   fonts={fonts}
@@ -158,7 +146,7 @@ export function DashboardLayoutPreview({ colors, fonts = DEFAULT_PREVIEW_FONTS, 
               </div>
             </div>
 
-            <div className="preview-rise" style={{ animationDelay: previewStaggerDelay(6) }}>
+            <div className="preview-rise flex min-w-0" style={{ animationDelay: previewStaggerDelay(6) }}>
               <DashboardAsidePanels
                 colors={colors}
                 fonts={fonts}

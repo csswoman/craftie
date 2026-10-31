@@ -3,20 +3,21 @@
 import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
 import { LandingFeatureGrid } from './LandingFeatureGrid';
+import { PreviewSiteFooter } from './PreviewSiteFooter';
 import { LandingHero } from './LandingHero';
 import { LandingPricingPlans } from './LandingPricingPlans';
 import { LandingTestimonialCard } from './LandingTestimonialCard';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { previewStaggerDelay } from './dashboardPreviewData';
-import { LANDING_GUTTER_CLASS, LANDING_NAV } from './landingPreviewData';
+import { LANDING_FOOTER_LINKS, LANDING_GUTTER_CLASS, LANDING_NAV } from './landingPreviewData';
 import { vividFill } from './previewColor';
 import {
   bodyStyle,
   brandStyle,
   buttonStyle,
-  captionStyle,
   DEFAULT_PREVIEW_FONTS,
   headingStyle,
+  labelStyle,
   type PreviewFonts,
   previewRootTypeStyle,
 } from './previewTypography';
@@ -63,10 +64,9 @@ export function LandingLayoutPreview({
     <PreviewSlotTarget
       slot="appBackground"
       onEditSlot={onEditSlot}
-      className={`${LANDING_CONTAINER_CLASS} min-w-0 w-full overflow-hidden rounded-xl border`}
+      className={`${LANDING_CONTAINER_CLASS} min-w-0 w-full overflow-hidden`}
       style={{
         backgroundColor: colors.appBackground,
-        borderColor: colors.border,
         color: colors.text,
         ...previewRootTypeStyle(),
       }}
@@ -97,7 +97,7 @@ export function LandingLayoutPreview({
 
         <nav className="hidden items-center gap-6 justify-self-center @min-[560px]/landing:flex" aria-label="Secciones">
           {LANDING_NAV.map((item) => (
-            <span key={item} style={captionStyle(fonts, colors.mutedText)}>
+            <span key={item} style={labelStyle(fonts, colors.mutedText)}>
               {item}
             </span>
           ))}
@@ -164,9 +164,18 @@ export function LandingLayoutPreview({
             <LandingPricingPlans colors={colors} fonts={fonts} onEditSlot={onEditSlot} />
           </div>
         </section>
-
-        <LandingTestimonialCard colors={colors} fonts={fonts} onEditSlot={onEditSlot} />
       </main>
+
+      <LandingTestimonialCard colors={colors} fonts={fonts} onEditSlot={onEditSlot} />
+      <PreviewSiteFooter
+        colors={colors}
+        fonts={fonts}
+        brand="Craftie"
+        legal="© 2026 Estudio Craftie"
+        links={LANDING_FOOTER_LINKS}
+        gutterClass={LANDING_GUTTER_CLASS}
+        onEditSlot={onEditSlot}
+      />
     </PreviewSlotTarget>
   );
 }

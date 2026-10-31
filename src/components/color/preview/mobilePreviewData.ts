@@ -20,10 +20,15 @@ export const MOBILE_PALETTES: Array<{
   note: string;
   swatches: readonly UiLayoutSlot[];
 }> = [
-  { name: 'Terracota en seco', note: 'Lista para exportar', swatches: ['brand1', 'brand2', 'brand3'] },
-  { name: 'Salvia tranquila', note: 'Contraste pendiente de revisar', swatches: ['brand2', 'brand4', 'brand5'] },
-  { name: 'Ocre de taller', note: 'Boceto reciente', swatches: ['brand3', 'brand1', 'brand6'] },
-];
+    { name: 'Terracota en seco', note: 'Lista para exportar', swatches: ['brand1', 'brand2', 'brand3'] },
+    { name: 'Salvia tranquila', note: 'Contraste pendiente de revisar', swatches: ['brand2', 'brand4', 'brand5'] },
+    { name: 'Ocre de taller', note: 'Boceto reciente', swatches: ['brand3', 'brand1', 'brand6'] },
+  ];
+
+/** Role names for the pinned palette's three colors, in swatch order. */
+export const MOBILE_DETAIL_ROLES = ['Principal', 'Apoyo', 'Acento'] as const;
+
+export const MOBILE_LIBRARY_FILTERS = ['Todas', 'Listas', 'Borradores'] as const;
 
 /** Status copy for the pinned palette card, chosen by remaining review items. */
 export function getMobileReviewNote(pending: number): string {

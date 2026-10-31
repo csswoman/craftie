@@ -3,7 +3,7 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { HERO_COPY, STUDIO_TRAIL } from './landingPreviewData';
 import { onVividFill } from './previewColor';
-import { captionStyle, type PreviewFonts } from './previewTypography';
+import { captionStyle, labelStyle, type PreviewFonts } from './previewTypography';
 
 type LandingHeroPaletteProps = {
   colors: ResolvedLayoutColors;
@@ -18,7 +18,7 @@ const PLACEMENT = [
   'col-span-2 row-span-1',
 ] as const;
 
-/** Asymmetric palette board for the hero: each swatch names its role and shows its hex. */
+/** Asymmetric palette board for the hero: each swatch names its step; no hex, it is a page, not the tool. */
 export function LandingHeroPalette({ colors, fonts, onEditSlot }: LandingHeroPaletteProps) {
   const onHero = colors.onHero ?? colors.primaryActionText;
 
@@ -40,11 +40,8 @@ export function LandingHeroPalette({ colors, fonts, onEditSlot }: LandingHeroPal
               className={`${PLACEMENT[index]} preview-rise preview-lift flex min-h-0 flex-col justify-end rounded-[14px] p-3 shadow-[0_14px_24px_-16px_rgb(0_0_0/0.5)] motion-reduce:transition-none motion-reduce:hover:translate-y-0`}
               style={{ backgroundColor: fill, color: ink, animationDelay: `${180 + index * 90}ms` }}
             >
-              <span className="truncate" style={captionStyle(fonts)}>
+              <span className="truncate" style={labelStyle(fonts)}>
                 {item.label}
-              </span>
-              <span className="truncate uppercase tabular-nums" style={captionStyle(fonts)}>
-                {fill}
               </span>
             </PreviewSlotTarget>
           );

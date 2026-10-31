@@ -4,9 +4,8 @@ import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTar
 import { Sparkline } from './previewCharts';
 import { StatDelta } from './previewPrimitives';
 import {
-  captionStyle,
   displayStyle,
-  headingStyle,
+  labelStyle,
   type PreviewFonts,
 } from './previewTypography';
 
@@ -19,17 +18,16 @@ export type DashboardMetric = {
   spark: readonly number[];
 };
 
+/** One cell of the KPI strip: hairlines between cells come from the strip, not from per-card borders. */
 export function DashboardMetricCard({
   colors,
   fonts,
   metric,
-  featured = false,
   onEditSlot,
 }: {
   colors: ResolvedLayoutColors;
   fonts: PreviewFonts;
   metric: DashboardMetric;
-  featured?: boolean;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
   const trendColor = colors[metric.trendSlot] ?? colors.text;
@@ -38,32 +36,30 @@ export function DashboardMetricCard({
     <PreviewSlotTarget
       slot="surface"
       onEditSlot={onEditSlot}
-      className={`preview-surface preview-lift min-w-0 overflow-hidden rounded-xl border motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${
-        featured ? 'p-5' : 'p-4'
-      }`}
-      style={{ backgroundColor: colors.surface, borderColor: colors.border }}
+      className="flex min-w-0 flex-col p-5"
+      style={{ backgroundColor: colors.surface }}
     >
-      <div className="flex items-start justify-between gap-3">
+      <PreviewSlotTarget
+        slot="mutedText"
+        onEditSlot={onEditSlot}
+        className="min-w-0 truncate"
+        style={labelStyle(fonts, colors.mutedText)}
+      >
+        {metric.label}
+      </PreviewSlotTarget>
+      <div className="mt-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
         <PreviewSlotTarget
-          slot="mutedText"
+          slot="text"
           onEditSlot={onEditSlot}
-          className="min-w-0 text-pretty"
-          style={captionStyle(fonts, colors.mutedText)}
+          className="tabular-nums"
+          style={{ ...displayStyle(fonts), lineHeight: 1.1 }}
         >
-          {metric.label}
+          {metric.value}
         </PreviewSlotTarget>
         <StatDelta value={metric.trend} direction={metric.dir} color={trendColor} slot={metric.trendSlot} surfaceHex={colors.surface} onEditSlot={onEditSlot} />
       </div>
-      <PreviewSlotTarget
-        slot="text"
-        onEditSlot={onEditSlot}
-        className="mt-3 tabular-nums"
-        style={featured ? displayStyle(fonts) : { ...headingStyle(fonts) }}
-      >
-        {metric.value}
-      </PreviewSlotTarget>
-      <div className={featured ? 'mt-4' : 'mt-3'}>
-        <Sparkline values={metric.spark} color={trendColor} surfaceHex={colors.surface} height={featured ? 32 : 22} />
+      <div className="mt-auto pt-4">
+        <Sparkline values={metric.spark} color={trendColor} surfaceHex={colors.surface} height={28} />
       </div>
     </PreviewSlotTarget>
   );

@@ -10,6 +10,20 @@ export const MEDIA_MOODS = [
   { label: 'Secado', slot: 'brand3' as const },
 ] as const;
 
+/** Tracks after the queue, so the list reads as a full session. */
+export const MEDIA_MORE_TRACKS = [
+  { track: 'Luz de taller', time: '2:56', artist: 'Lupo' },
+  { track: 'Tinta lenta', time: '5:10', artist: 'Estudio Nube' },
+] as const;
+
+export const MEDIA_NAV = [
+  { label: 'Inicio', icon: 'grid' as const },
+  { label: 'Buscar', icon: 'search' as const },
+  { label: 'Biblioteca', icon: 'layers' as const },
+] as const;
+
+export const MEDIA_PLAYLISTS = ['Mezclas de taller', 'Foco profundo', 'Secado lento', 'Guardadas'] as const;
+
 export const MEDIA_STATS = [
   { label: 'En cola', value: '12' },
   { label: 'Guardadas', value: '28' },

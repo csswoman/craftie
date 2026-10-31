@@ -40,10 +40,34 @@ export const STUDIO_STEPS: Array<{
   ];
 
 export const PLANS = [
-  { name: 'Boceto', price: '$0', tagline: 'Paletas para proyectos personales', slot: 'brand2' as const },
-  { name: 'Estudio', price: '$18', tagline: 'Guía de marca, contraste y tipografía', slot: 'primaryAction' as const, featured: true },
-  { name: 'Atelier', price: '$42', tagline: 'Varias marcas, todo el equipo', slot: 'brand3' as const },
+  {
+    name: 'Boceto',
+    price: '$0',
+    tagline: 'Paletas para proyectos personales',
+    features: ['3 paletas guardadas', 'Contraste AA', 'Exportar CSS'],
+    cta: 'Empezar gratis',
+    slot: 'brand2' as const,
+  },
+  {
+    name: 'Estudio',
+    price: '$18',
+    tagline: 'Guía de marca, contraste y tipografía',
+    features: ['Paletas ilimitadas', 'Contraste AA y AAA', 'Pares tipográficos', 'Guía de marca en PDF'],
+    cta: 'Probar 14 días',
+    slot: 'primaryAction' as const,
+    featured: true,
+  },
+  {
+    name: 'Atelier',
+    price: '$42',
+    tagline: 'Varias marcas, todo el equipo',
+    features: ['Todo lo de Estudio', 'Hasta 10 marcas', 'Espacio de equipo'],
+    cta: 'Hablar con el estudio',
+    slot: 'brand3' as const,
+  },
 ] as const;
+
+export const LANDING_FOOTER_LINKS = ['Guías', 'Precios', 'Privacidad', 'Contacto'] as const;
 
 export const CRAFTIE_QUOTE = {
   author: 'Lucía Ríos',

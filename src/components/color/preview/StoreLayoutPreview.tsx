@@ -9,12 +9,14 @@ import { previewStaggerDelay } from './dashboardPreviewData';
 import { PreviewIcon } from './previewIcons';
 import { buttonPairOn, paletteTint } from './previewButtons';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
+import { PreviewSiteFooter } from './PreviewSiteFooter';
 import { StoreHeroArt } from './StoreHeroArt';
 import { StoreProductCard } from './StoreProductCard';
 import {
   getShippingNote,
   STORE_CONTAINER_CLASS,
   STORE_FILTERS,
+  STORE_FOOTER_LINKS,
   STORE_GUTTER_CLASS,
   STORE_NAV,
   STORE_PRODUCTS,
@@ -81,10 +83,9 @@ export function StoreLayoutPreview({
     <PreviewSlotTarget
       slot="appBackground"
       onEditSlot={onEditSlot}
-      className={`${STORE_CONTAINER_CLASS} min-w-0 w-full overflow-hidden rounded-xl border`}
+      className={`${STORE_CONTAINER_CLASS} min-w-0 w-full overflow-hidden`}
       style={{
         backgroundColor: colors.appBackground,
-        borderColor: colors.border,
         color: colors.text,
         ...previewRootTypeStyle(),
       }}
@@ -100,7 +101,7 @@ export function StoreLayoutPreview({
         </PreviewSlotTarget>
         <nav className="hidden items-center gap-6 @min-[560px]/store:flex" aria-label="Categorías">
           {STORE_NAV.map((item) => (
-            <span key={item} style={captionStyle(fonts, colors.mutedText)}>
+            <span key={item} style={labelStyle(fonts, colors.mutedText)}>
               {item}
             </span>
           ))}
@@ -128,11 +129,12 @@ export function StoreLayoutPreview({
       </PreviewSlotTarget>
 
       <section className={`preview-rise py-8 ${STORE_GUTTER_CLASS} @min-[720px]/store:py-12`} style={{ animationDelay: previewStaggerDelay(1) }}>
+        {/* The art column has no bottom/right padding so the plinth runs off the hero's edges. */}
         <div
-          className="grid items-center gap-6 overflow-hidden rounded-2xl p-6 @min-[720px]/store:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] @min-[720px]/store:gap-10 @min-[720px]/store:p-10"
+          className="grid gap-6 overflow-hidden rounded-2xl pl-6 pt-6 @min-[720px]/store:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] @min-[720px]/store:gap-8 @min-[720px]/store:pl-10 @min-[720px]/store:pt-10"
           style={{ backgroundColor: heroWash, color: heroInk }}
         >
-          <div className="min-w-0">
+          <div className="min-w-0 self-center pb-2 pr-6 @min-[720px]/store:pb-10 @min-[720px]/store:pr-0">
             <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="max-w-[16ch]" style={{ ...heroStyle(fonts), color: heroInk }}>
               Objetos para la mesa de cada día
             </PreviewSlotTarget>
@@ -148,12 +150,21 @@ export function StoreLayoutPreview({
               Ver novedades
             </PreviewSlotTarget>
           </div>
-          <StoreHeroArt colors={colors} wash={heroWash} onEditSlot={onEditSlot} />
+          <div className="ml-auto w-full min-w-0 max-w-[26rem] self-end @min-[720px]/store:max-w-none">
+            <StoreHeroArt colors={colors} wash={heroWash} ink={heroInk} onEditSlot={onEditSlot} />
+          </div>
         </div>
 
-        <div
-          className="mt-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-3"
-        >
+        <div className="mt-12 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
+            Recién salido del horno
+          </PreviewSlotTarget>
+          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="tabular-nums" style={labelStyle(fonts, colors.mutedText)}>
+            {visible.length} {visible.length === 1 ? 'pieza' : 'piezas'}
+          </PreviewSlotTarget>
+        </div>
+
+        <div className="mt-4">
           <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar productos">
             {STORE_FILTERS.map((option) => {
               const active = option === filter;
@@ -176,9 +187,6 @@ export function StoreLayoutPreview({
               );
             })}
           </div>
-          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="tabular-nums" style={captionStyle(fonts, colors.mutedText)}>
-            {visible.length} {visible.length === 1 ? 'pieza' : 'piezas'}
-          </PreviewSlotTarget>
         </div>
 
         <div className="mt-6 grid gap-4 @min-[520px]/store:grid-cols-2 @min-[900px]/store:grid-cols-4 @min-[900px]/store:gap-5">
@@ -203,6 +211,16 @@ export function StoreLayoutPreview({
           ))}
         </div>
       </section>
+
+      <PreviewSiteFooter
+        colors={colors}
+        fonts={fonts}
+        brand="Casa Barro"
+        legal="© 2026 Casa Barro"
+        links={STORE_FOOTER_LINKS}
+        gutterClass={STORE_GUTTER_CLASS}
+        onEditSlot={onEditSlot}
+      />
     </PreviewSlotTarget>
   );
 }

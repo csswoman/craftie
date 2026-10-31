@@ -7,7 +7,7 @@ import { LandingHeroPalette } from './LandingHeroPalette';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { previewStaggerDelay } from './dashboardPreviewData';
 import { HERO_COPY, LANDING_GUTTER_CLASS } from './landingPreviewData';
-import { heroButtonPair, paletteTint } from './previewButtons';
+import { heroButtonPair } from './previewButtons';
 import { bodyStyle, buttonStyle, heroStyle, type PreviewFonts } from './previewTypography';
 
 type LandingHeroProps = {
@@ -28,11 +28,6 @@ export function LandingHero({ colors, fonts, onEditSlot }: LandingHeroProps) {
       className={`preview-rise relative overflow-hidden py-12 ${LANDING_GUTTER_CLASS} @min-[720px]/landing:py-16`}
       style={{ backgroundColor: hero, color: onHero, animationDelay: previewStaggerDelay(1) }}
     >
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute -bottom-24 -right-16 size-72 rounded-full @min-[720px]/landing:size-96"
-        style={{ backgroundColor: paletteTint(onHero, hero, 0.1) }}
-      />
       <div className="relative grid gap-10 @min-[720px]/landing:grid-cols-[minmax(0,1.1fr)_minmax(14rem,0.9fr)] @min-[720px]/landing:items-center @min-[720px]/landing:gap-12">
         <div className="min-w-0">
           <PreviewSlotTarget slot="onHero" onEditSlot={onEditSlot} className="max-w-[14ch]" style={heroStyle(fonts)}>

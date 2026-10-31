@@ -32,7 +32,7 @@ export function DashboardAsidePanels({
   const paletteNote = getPaletteProgressNote(paletteProgress);
 
   return (
-    <aside className="flex min-w-0 flex-col gap-6">
+    <aside className="flex w-full min-w-0 flex-col gap-6">
       <PreviewSlotTarget
         slot="surfaceElevated"
         onEditSlot={onEditSlot}
@@ -74,7 +74,7 @@ export function DashboardAsidePanels({
       <PreviewSlotTarget
         slot="surface"
         onEditSlot={onEditSlot}
-        className="preview-surface rounded-xl border p-5 @min-[800px]/dashboard:p-6"
+        className="preview-surface flex-1 rounded-xl border p-5 @min-[800px]/dashboard:p-6"
         style={{ backgroundColor: colors.surface, borderColor: colors.border }}
       >
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>

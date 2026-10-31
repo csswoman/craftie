@@ -4,10 +4,10 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 import { readableOn } from '@lib/utils/colorMath';
 
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
-import { CRAFTIE_QUOTE } from './landingPreviewData';
+import { CRAFTIE_QUOTE, LANDING_GUTTER_CLASS } from './landingPreviewData';
 import { paletteTint } from './previewButtons';
 import { Avatar, Tag } from './previewPrimitives';
-import { bodyStyle, captionStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import { captionStyle, headingStyle, titleStyle, type PreviewFonts } from './previewTypography';
 
 type LandingTestimonialCardProps = {
   colors: ResolvedLayoutColors;
@@ -15,7 +15,7 @@ type LandingTestimonialCardProps = {
   onEditSlot?: PreviewSlotEditHandler;
 };
 
-/** The quote sits on a wash of the accent, so the page ends in color instead of white space. */
+/** Full-bleed band on a wash of the accent: the page ends in color, without a card inside the page. */
 export function LandingTestimonialCard({ colors, fonts, onEditSlot }: LandingTestimonialCardProps) {
   const wash = paletteTint(colors.accent, colors.appBackground, 0.14);
   const ink = readableOn(colors.text, wash);
@@ -25,10 +25,10 @@ export function LandingTestimonialCard({ colors, fonts, onEditSlot }: LandingTes
     <PreviewSlotTarget
       slot="accent"
       onEditSlot={onEditSlot}
-      className="preview-rise mt-14 rounded-[18px] p-6 @min-[720px]/landing:p-9"
+      className={`preview-rise py-12 ${LANDING_GUTTER_CLASS} @min-[720px]/landing:py-16`}
       style={{ backgroundColor: wash, color: ink }}
     >
-      <blockquote className="m-0 max-w-[48ch]">
+      <blockquote className="m-0 mx-auto flex max-w-[52ch] flex-col items-center text-center">
         <Tag
           label={CRAFTIE_QUOTE.badge}
           color={colors.success}
@@ -40,13 +40,13 @@ export function LandingTestimonialCard({ colors, fonts, onEditSlot }: LandingTes
         <PreviewSlotTarget
           slot="text"
           onEditSlot={onEditSlot}
-          className="mt-4 text-pretty"
-          style={{ ...bodyStyle(fonts, ink), fontSize: '1.0625em', lineHeight: 1.55 }}
+          className="mt-5 text-balance"
+          style={{ ...headingStyle(fonts), color: ink, lineHeight: 1.3 }}
         >
           &ldquo;{CRAFTIE_QUOTE.text}&rdquo;
         </PreviewSlotTarget>
 
-        <footer className="mt-5 flex items-center gap-3">
+        <footer className="mt-6 flex items-center gap-3 text-left">
           <Avatar
             initials={CRAFTIE_QUOTE.initials}
             color={colors.primaryAction}

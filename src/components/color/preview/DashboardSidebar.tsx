@@ -11,6 +11,7 @@ import {
   brandStyle,
   captionStyle,
   headingStyle,
+  labelStyle,
   type PreviewFonts,
   ROLE_WEIGHT,
 } from './previewTypography';
@@ -70,7 +71,7 @@ export function DashboardSidebar({
           </div>
         </div>
 
-        <nav className="space-y-1" style={captionStyle(fonts)}>
+        <nav className="space-y-1" style={labelStyle(fonts)}>
           {DASHBOARD_NAV.map((item, index) => (
             <PreviewSlotTarget
               key={item.label}
@@ -90,10 +91,10 @@ export function DashboardSidebar({
         </nav>
 
         <PreviewSlotTarget
-          slot="surface"
+          slot="divider"
           onEditSlot={onEditSlot}
-          className="mt-auto preview-surface rounded-xl border p-4"
-          style={{ backgroundColor: colors.surface, borderColor: colors.border }}
+          className="border-t px-3 pt-6"
+          style={{ borderColor: colors.divider }}
         >
           <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={captionStyle(fonts, colors.mutedText)}>
             Esta semana

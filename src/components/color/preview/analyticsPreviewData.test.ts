@@ -1,14 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  ANALYTICS_CHAT,
   ANALYTICS_CONTAINER_CLASS,
-  ANALYTICS_ENERGY_INSIGHTS,
+  ANALYTICS_CONTRAST_ROWS,
+  ANALYTICS_DELIVERY_TYPES,
   ANALYTICS_GOALS,
   ANALYTICS_KPIS,
-  ANALYTICS_RECENT_TREATS,
-  ANALYTICS_SETTINGS,
-  ANALYTICS_TREAT_BREAKDOWN,
+  ANALYTICS_WEEKLY_DELIVERIES,
+  deliveryWeekTotal,
   getAnalyticsGreeting,
 } from './analyticsPreviewData';
 
@@ -35,38 +34,17 @@ describe('Craftie analytics content', () => {
     ]);
   });
 
-  it('breaks down deliveries by type', () => {
-    expect(ANALYTICS_TREAT_BREAKDOWN.map((item) => item.label)).toEqual([
-      'Guías',
-      'Paletas',
-      'Tokens',
-    ]);
+  it('stacks weekly deliveries by type, one series color each', () => {
+    expect(ANALYTICS_DELIVERY_TYPES.map((type) => type.label)).toEqual(['Guías', 'Paletas', 'Tokens']);
+    expect(new Set(ANALYTICS_DELIVERY_TYPES.map((type) => type.slot)).size).toBe(3);
+    expect(ANALYTICS_WEEKLY_DELIVERIES).toHaveLength(12);
+    expect(deliveryWeekTotal({ week: 'S1', guides: 1, palettes: 2, tokens: 3 })).toBe(6);
   });
 
-  it('fills weekly activity with peak and comparison insights', () => {
-    expect(ANALYTICS_ENERGY_INSIGHTS.map((item) => item.label)).toEqual([
-      'Pico',
-      'Media',
-      'Vs anterior',
-    ]);
-  });
-
-  it('lists recent deliveries', () => {
-    expect(ANALYTICS_RECENT_TREATS.map((item) => item.title)).toEqual([
-      'Guía Terracota entregada',
-      'Paleta Salvia aprobada',
-      'Pareja tipográfica elegida',
-    ]);
-  });
-
-  it('opens a review thread with a reviewer', () => {
-    expect(ANALYTICS_CHAT.name).toBe('Lucía Ríos');
-    expect(ANALYTICS_CHAT.messages.some((message) => message.incoming)).toBe(true);
-  });
-
-  it('keeps settings ids unique', () => {
-    const ids = ANALYTICS_SETTINGS.map((item) => item.id);
-    expect(new Set(ids).size).toBe(ids.length);
+  it('never reports more passing contrast pairs than exist', () => {
+    for (const row of ANALYTICS_CONTRAST_ROWS) {
+      expect(row.passing).toBeLessThanOrEqual(row.total);
+    }
   });
 
   it('greets the studio by time of day', () => {

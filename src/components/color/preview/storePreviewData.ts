@@ -6,6 +6,7 @@ export const STORE_GUTTER_CLASS = 'px-5 @min-[720px]/store:px-8';
 
 export const STORE_NAV = ['Cerámica', 'Textil', 'Papelería'] as const;
 export const STORE_FILTERS = ['Todo', 'Nuevo', 'Edición limitada'] as const;
+export const STORE_FOOTER_LINKS = ['Envíos', 'Devoluciones', 'Taller', 'Contacto'] as const;
 
 export type StoreProduct = {
   name: string;

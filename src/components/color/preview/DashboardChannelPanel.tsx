@@ -38,7 +38,7 @@ export function DashboardChannelPanel({
     <PreviewSlotTarget
       slot="surface"
       onEditSlot={onEditSlot}
-      className="preview-surface rounded-xl border p-5 @min-[900px]/dashboard:p-6"
+      className="preview-surface flex h-full flex-col rounded-xl border p-5 @min-[900px]/dashboard:p-6"
       style={{ backgroundColor: colors.surface, borderColor: colors.border }}
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -53,7 +53,7 @@ export function DashboardChannelPanel({
         <Tag label={statusLabel} color={colors.accent} surfaceHex={colors.surface} slot="accent" onEditSlot={onEditSlot} />
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-4 @min-[480px]/dashmain:grid-cols-4">
+      <div className="mb-6 mt-5 grid grid-cols-2 gap-4 @min-[480px]/dashmain:grid-cols-4">
         {PALETTE_REVIEW_ROLES.map((role, index) => (
           <div key={role.label} className="min-w-0">
             <PreviewSlotTarget
@@ -98,7 +98,7 @@ export function DashboardChannelPanel({
       <PreviewSlotTarget
         slot="divider"
         onEditSlot={onEditSlot}
-        className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t pt-5"
+        className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t pt-5"
         style={{ borderColor: colors.divider }}
       >
         <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={captionStyle(fonts, colors.mutedText)}>

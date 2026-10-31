@@ -50,6 +50,7 @@ export function StoreProductCard({
         <StoreProductArt
           colors={colors}
           shape={STORE_SHAPES[index % STORE_SHAPES.length]!}
+          slot={product.slot}
           swatchHex={swatchHex}
           onEditSlot={onEditSlot}
           className="aspect-[4/3] w-full"
