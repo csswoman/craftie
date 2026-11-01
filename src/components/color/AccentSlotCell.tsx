@@ -5,6 +5,7 @@ import { pickReadableTextColor, prefersLightSelectionRing } from '@lib/color/rea
 import { PaletteSlotOverflowMenu } from './PaletteSlotOverflowMenu';
 import { PaletteToolbarIconButton } from './PaletteToolbarIconButton';
 import { CopyIcon, InfoIcon, RandomColorIcon } from './paletteToolbarIcons';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type AccentSlotCellProps = {
   label: string;
@@ -33,6 +34,8 @@ export function AccentSlotCell({
   onVary,
   onCopyHex,
 }: AccentSlotCellProps) {
+  const tx = useTx();
+  const t = useT();
   const assigned = hex !== null;
   const fill = hex ?? 'var(--color-surface-raised)';
   const textColor = assigned ? pickReadableTextColor(hex) : 'var(--color-muted)';
@@ -44,7 +47,7 @@ export function AccentSlotCell({
       <div className="pointer-events-auto flex items-center gap-1.5">
         {editable ? (
           <PaletteToolbarIconButton
-            label={`Variar ${label}`}
+            label={t('ui.AccentSlotCell.variar', { label: tx(label) })}
             lightChrome={lightChrome}
             onClick={onVary}
           >
@@ -54,14 +57,14 @@ export function AccentSlotCell({
         {assigned ? (
           <>
             <PaletteToolbarIconButton
-              label="Copiar HEX"
+              label={t('ui.AccentSlotCell.copiar-hex')}
               lightChrome={lightChrome}
               onClick={onCopyHex}
             >
               <CopyIcon />
             </PaletteToolbarIconButton>
             <PaletteToolbarIconButton
-              label="Ver info del color"
+              label={t('ui.AccentSlotCell.ver-info-del-color')}
               lightChrome={lightChrome}
               onClick={() => onOpenDetails(hex)}
             >
@@ -82,7 +85,7 @@ export function AccentSlotCell({
           { id: 'copy', label: 'Copiar HEX', onSelect: onCopyHex },
           {
             id: 'info',
-            label: 'Info del color',
+            label: tx('Info del color'),
             onSelect: () => onOpenDetails(hex),
           },
         ]
@@ -113,9 +116,9 @@ export function AccentSlotCell({
           aria-label={
             assigned
               ? mobileExpanded
-                ? `${label}: ${name}, ${hex}. Tocar para copiar HEX`
+                ? t('ui.AccentSlotCell.tocar-para-copiar-hex', { label: tx(label), name: tx(name), hex })
                 : `${label}: ${name}, ${hex}`
-              : `${label}: sin asignar`
+              : t('ui.AccentSlotCell.sin-asignar', { label: tx(label) })
           }
           onClick={() => {
             onSelect();
@@ -130,7 +133,7 @@ export function AccentSlotCell({
           }`}
         >
           <span
-            className={`block max-w-full truncate font-medium tracking-normal opacity-90 ${
+            className={`block max-w-full truncate font-medium tracking-normal ${
               expanded
                 ? mobileExpanded
                   ? 'text-[0.8125rem] leading-snug'
@@ -138,16 +141,16 @@ export function AccentSlotCell({
                 : 'px-0.5 text-chrome-caption'
             }`}
           >
-            {label}
+            {tx(label)}
           </span>
           {expanded ? (
             mobileExpanded ? (
               <div className="min-w-0">
                 <p className="mt-0.5 min-w-0 truncate text-[1.1875rem] font-semibold leading-snug">
-                  {assigned ? name : 'Sin asignar'}
+                  {assigned ? name : t('ui.AccentSlotCell.sin-asignar-2')}
                 </p>
                 {assigned ? (
-                  <p className="mt-0.5 font-mono text-[0.875rem] font-semibold tracking-normal opacity-90">
+                  <p className="mt-0.5 font-mono text-[0.875rem] font-semibold tracking-normal">
                     {hex.toUpperCase()}
                   </p>
                 ) : null}
@@ -155,10 +158,10 @@ export function AccentSlotCell({
             ) : (
               <>
                 <p className="mt-0.5 max-w-full truncate text-[1.375rem] font-semibold leading-tight">
-                  {assigned ? name : 'Sin asignar'}
+                  {assigned ? name : t('ui.AccentSlotCell.sin-asignar-2')}
                 </p>
                 {assigned ? (
-                  <p className="font-mono text-[0.875rem] font-semibold tracking-normal opacity-90">
+                  <p className="font-mono text-[0.875rem] font-semibold tracking-normal">
                     {hex.toUpperCase()}
                   </p>
                 ) : null}
@@ -169,7 +172,7 @@ export function AccentSlotCell({
 
         {mobileExpanded && overflowItems.length > 0 ? (
           <PaletteSlotOverflowMenu
-            label={`Más acciones de ${label}`}
+            label={t('ui.AccentSlotCell.mas-acciones-de', { label: tx(label) })}
             lightChrome={lightChrome}
             items={overflowItems}
           />

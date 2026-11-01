@@ -6,6 +6,7 @@ import {
 } from '@lib/color/contrast';
 
 import { Button } from '@/components/ui/Button';
+import { useT, useTx } from '@/context/I18nContext';
 
 interface ContrastSuggestionPanelProps {
   showSuggestion: boolean;
@@ -30,6 +31,8 @@ export function ContrastSuggestionPanel({
   onApply,
   className = 'mt-3',
 }: ContrastSuggestionPanelProps) {
+  const tx = useTx();
+  const t = useT();
   if (!showSuggestion) {
     return (
       <div className={className}>
@@ -38,18 +41,14 @@ export function ContrastSuggestionPanel({
           variant="ghost"
           className="h-auto min-h-11 px-0 py-1 text-chrome-label font-semibold text-primary hover:bg-transparent"
           onClick={onSuggest}
-        >
-          Sugerir variante accesible
-        </Button>
+        >{t('ui.ContrastSuggestionPanel.sugerir-variante-accesible')}</Button>
       </div>
     );
   }
 
   if (suggestion === null) {
     return (
-      <p className={`${className} text-chrome-caption text-muted`}>
-        No se encontró una variante accesible ajustando solo la luminosidad.
-      </p>
+      <p className={`${className} text-chrome-caption text-muted`}>{t('ui.ContrastSuggestionPanel.no-se-encontro-una-variante')}</p>
     );
   }
 
@@ -65,8 +64,7 @@ export function ContrastSuggestionPanel({
           <p className="font-mono text-chrome-label font-semibold tabular-nums text-ink">
             {suggestion.hex}
           </p>
-          <p className="text-chrome-caption text-muted">
-            Nuevo ratio {suggestion.ratio.toFixed(2)}:1 · {levelLabel(suggestion.normalText)}
+          <p className="text-chrome-caption text-muted">{t('ui.ContrastSuggestionPanel.nuevo-ratio-1', { value: suggestion.ratio.toFixed(2), value2: tx(levelLabel(suggestion.normalText)) })}
           </p>
         </div>
       </div>
@@ -75,7 +73,7 @@ export function ContrastSuggestionPanel({
         className="rounded-md px-2.5 py-2 text-chrome-label leading-relaxed"
         style={{ color: suggestion.hex, backgroundColor: backgroundHex }}
       >
-        {CONTRAST_SAMPLE_TEXT}
+        {tx(CONTRAST_SAMPLE_TEXT)}
       </p>
 
       <div className="flex flex-wrap gap-2">
@@ -85,9 +83,7 @@ export function ContrastSuggestionPanel({
             variant="primary"
             className="min-h-11 px-3 text-chrome-caption"
             onClick={() => onApply(suggestion.hex)}
-          >
-            Aplicar a la paleta
-          </Button>
+          >{t('ui.ContrastSuggestionPanel.aplicar-a-la-paleta')}</Button>
         ) : null}
         <Button
           type="button"
@@ -95,7 +91,7 @@ export function ContrastSuggestionPanel({
           className="min-h-11 border border-border px-3 text-chrome-caption"
           onClick={onCopy}
         >
-          {copied ? 'Copiado' : 'Copiar HEX'}
+          {copied ? t('ui.ContrastSuggestionPanel.copiado') : t('ui.ContrastSuggestionPanel.copiar-hex')}
         </Button>
       </div>
     </div>

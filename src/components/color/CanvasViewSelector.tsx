@@ -8,6 +8,7 @@ import { getCanvasViewMeta, type CanvasViewId } from '@lib/color/canvasViews';
 
 import { CanvasViewPickerList } from './CanvasViewPickerList';
 import { ViewThumbnail } from './ViewThumbnail';
+import { useTx } from '@/context/I18nContext';
 
 const MENU_WIDTH = 290;
 const MENU_GAP = 6;
@@ -22,6 +23,7 @@ export function CanvasViewSelector({
   palette: string[];
   onSelect: (id: CanvasViewId) => void;
 }) {
+  const tx = useTx();
   const [open, setOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState<{
     top: number;
@@ -128,7 +130,7 @@ export function CanvasViewSelector({
         className="inline-flex min-h-10 max-w-full items-center gap-2.5 rounded-lg border border-border bg-bg px-2.5 py-1.5 text-chrome-label font-semibold text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
       >
         <ViewThumbnail id={activeId} palette={palette} />
-        <span className="max-w-[9rem] truncate">{active.name}</span>
+        <span className="max-w-[9rem] truncate">{tx(active.name)}</span>
         <ChevronDown
           className={`size-4 shrink-0 text-muted transition-transform motion-reduce:transition-none ${open ? 'rotate-180' : ''}`}
           aria-hidden="true"

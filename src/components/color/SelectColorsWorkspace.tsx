@@ -20,12 +20,14 @@ import {
 } from '@/components/color/SelectColorsWorkspaceSidebar';
 import { StudioToolsMobileDock } from '@/components/color/StudioToolsMobileDock';
 import { useSelectColorsWorkspaceController } from '@/components/color/useSelectColorsWorkspaceController';
+import { workspaceExportProps } from '@/components/color/workspaceExportProps';
 import { StyleGallery } from '@/components/color-engine/StyleGallery';
 import { StudioCanvas } from '@/components/layout/StudioCanvas';
 import { WorkspaceHeader } from '@/components/layout/WorkspaceHeader';
 import { CanvasViewProvider, useCanvasView } from '@/context/CanvasViewContext';
 import { RolePaletteProvider } from '@/context/RolePaletteContext';
 import { TypeRolesContext } from '@/context/TypeRolesContext';
+import { useTx } from '@/context/I18nContext';
 
 export function SelectColorsWorkspace() {
   return (
@@ -38,6 +40,7 @@ export function SelectColorsWorkspace() {
 }
 
 function SelectColorsWorkspaceContent() {
+  const tx = useTx();
   const workspace = useSelectColorsWorkspaceController();
   const hasInspirationSource = workspace.catalogSource !== 'none';
   const projects = useLocalProjects(workspace.getShareSnapshot, hasInspirationSource);
@@ -125,23 +128,15 @@ function SelectColorsWorkspaceContent() {
   const sharedChrome = (
     <>
       <div aria-live="polite" aria-atomic="true" className="sr-only">
-        {workspace.statusMessage}
+        {tx(workspace.statusMessage)}
       </div>
 
       <WorkspaceHeader
-        canExport={workspace.canExport}
         projectName={projects.currentProject?.name ?? null}
         saveStatus={projects.saveStatus}
         onCraftieHome={workspace.requestCraftieHome}
         onOpenMyProjects={() => setMyProjectsOpen(true)}
-        onExportCss={workspace.handleExportCss}
-        onCopyCss={workspace.handleCopyCss}
-        onExportTokensJson={workspace.handleExportTokensJson}
-        onExportFigmaTokens={workspace.handleExportFigmaTokens}
-        onExportDesignMd={workspace.handleExportDesignMd}
-        onExportBrandKit={workspace.handleExportBrandKit}
-        onExportImage={workspace.handleExportImage}
-        onCopyShareLink={workspace.handleCopyShareLink}
+        {...workspaceExportProps(workspace)}
       />
 
       {workspace.error ? (
@@ -149,7 +144,7 @@ function SelectColorsWorkspaceContent() {
           role="alert"
           className="mx-4 mt-0 border-b border-fail/20 bg-fail/5 px-3 py-2 text-chrome-label font-medium text-fail lg:mx-5"
         >
-          {workspace.error}
+          {tx(workspace.error)}
         </p>
       ) : null}
 

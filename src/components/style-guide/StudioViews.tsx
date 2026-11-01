@@ -19,6 +19,7 @@ import {
   UiGridMock,
   WebsiteMock,
 } from '@/components/style-guide/StudioLayoutMocks';
+import { useT, useTx } from '@/context/I18nContext';
 
 const SCALE_STEPS = [
   { label: 'Display', size: 'clamp(2rem, 4vw, 3rem)', weight: 600 },
@@ -34,8 +35,10 @@ export type TypeScaleViewProps = {
 };
 
 export function TypeScaleView({ palette, pairing }: TypeScaleViewProps) {
+  const tx = useTx();
+  const t = useT();
   if (!pairing) {
-    return <StudioPlaceholder message="Elige un par tipográfico en el panel izquierdo para ver la escala." />;
+    return <StudioPlaceholder message={t('ui.StudioViews.elige-un-par-tipografico-en')} />;
   }
 
   const heading = buildFontFamilyStack(pairing.heading);
@@ -54,7 +57,7 @@ export function TypeScaleView({ palette, pairing }: TypeScaleViewProps) {
               className="border-b border-border/50 pb-6 last:border-b-0"
               style={{ color: palette.onSurface }}
             >
-              <p className="text-[0.8125rem] font-semibold text-muted">{step.label}</p>
+              <p className="text-[0.8125rem] font-semibold text-muted">{tx(step.label)}</p>
               <p
                 className="mt-2 leading-tight"
                 style={{
@@ -64,7 +67,7 @@ export function TypeScaleView({ palette, pairing }: TypeScaleViewProps) {
                   color: isDisplay ? palette.primary : palette.onSurface,
                 }}
               >
-                {isDisplay ? pairing.heading.family : 'Texto de cuerpo legible en múltiples líneas.'}
+                {isDisplay ? pairing.heading.family : t('ui.StudioViews.texto-de-cuerpo-legible-en')}
               </p>
             </li>
           );
@@ -79,6 +82,8 @@ export type ColorsViewProps = {
 };
 
 export function ColorsView({ palette }: ColorsViewProps) {
+  const tx = useTx();
+  const t = useT();
   const [selectedColorHex, setSelectedColorHex] = useState<string | null>(null);
   const columns = useMemo(() => buildGeneratedPaletteColumns(palette), [palette]);
 
@@ -97,15 +102,15 @@ export function ColorsView({ palette }: ColorsViewProps) {
                 <div className="h-16 w-full" style={{ backgroundColor: column.hex }} aria-hidden="true" />
                 <div className="grid gap-1 px-4 py-3 sm:grid-cols-[140px_1fr]">
                   <div>
-                    <p className="text-[0.9375rem] font-semibold text-ink">{column.name}</p>
+                    <p className="text-[0.9375rem] font-semibold text-ink">{tx(column.name)}</p>
                     {column.roleLabel ? (
-                      <p className="mt-0.5 text-[0.75rem] font-medium text-muted">{column.roleLabel}</p>
+                      <p className="mt-0.5 text-[0.75rem] font-medium text-muted">{tx(column.roleLabel)}</p>
                     ) : null}
                   </div>
                   <div className="font-mono text-[0.75rem] text-muted">
                     <p>{formats.hex}</p>
-                    <p>RGB {formats.rgb}</p>
-                    <p>CMYK {formats.cmyk}</p>
+                    <p>{t('ui.StudioViews.rgb', { rgb: formats.rgb })}</p>
+                    <p>{t('ui.StudioViews.cmyk', { cmyk: formats.cmyk })}</p>
                   </div>
                 </div>
               </button>
@@ -130,6 +135,7 @@ export type LayoutPreviewProps = {
 };
 
 export function LayoutPreview({ layout, palette, pairing }: LayoutPreviewProps) {
+  const tx = useTx();
   const heading = pairing ? buildFontFamilyStack(pairing.heading) : 'var(--font-display)';
   const body = pairing ? buildFontFamilyStack(pairing.body) : 'var(--font-body)';
 
@@ -142,14 +148,14 @@ export function LayoutPreview({ layout, palette, pairing }: LayoutPreviewProps) 
         className="w-full max-w-4xl overflow-hidden rounded-xl border border-border bg-bg"
         style={{ backgroundColor: palette.surface }}
       >
-        {layout === 'website' && <WebsiteMock palette={palette} heading={heading} body={body} />}
-        {layout === 'ui-grid' && <UiGridMock palette={palette} heading={heading} body={body} />}
-        {layout === 'slides' && <SlidesMock palette={palette} heading={heading} body={body} />}
-        {layout === 'social' && <SocialMock palette={palette} heading={heading} body={body} />}
-        {layout === 'newsletter' && <NewsletterMock palette={palette} heading={heading} body={body} />}
-        {layout === 'resume' && <ResumeMock palette={palette} heading={heading} body={body} />}
+        {layout === 'website' && <WebsiteMock palette={palette} heading={tx(heading)} body={body} />}
+        {layout === 'ui-grid' && <UiGridMock palette={palette} heading={tx(heading)} body={body} />}
+        {layout === 'slides' && <SlidesMock palette={palette} heading={tx(heading)} body={body} />}
+        {layout === 'social' && <SocialMock palette={palette} heading={tx(heading)} body={body} />}
+        {layout === 'newsletter' && <NewsletterMock palette={palette} heading={tx(heading)} body={body} />}
+        {layout === 'resume' && <ResumeMock palette={palette} heading={tx(heading)} body={body} />}
         {layout === 'business-card' && (
-          <BusinessCardMock palette={palette} heading={heading} body={body} />
+          <BusinessCardMock palette={palette} heading={tx(heading)} body={body} />
         )}
       </div>
     </div>
@@ -157,9 +163,10 @@ export function LayoutPreview({ layout, palette, pairing }: LayoutPreviewProps) 
 }
 
 function StudioPlaceholder({ message }: { message: string }) {
+  const tx = useTx();
   return (
     <div className="flex min-h-[320px] flex-1 items-center justify-center px-6 text-center">
-      <p className="max-w-sm text-[0.9375rem] leading-relaxed text-muted">{message}</p>
+      <p className="max-w-sm text-[0.9375rem] leading-relaxed text-muted">{tx(message)}</p>
     </div>
   );
 }

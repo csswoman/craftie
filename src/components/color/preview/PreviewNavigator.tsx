@@ -4,6 +4,7 @@ import type { UiLayoutModeId } from '@lib/color/layoutModes';
 import { getPreviewFamily, type PreviewFamilyId } from '@lib/color/previewFamilies';
 
 import { PreviewItemIcon } from './previewNavigatorIcons';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type PreviewNavigatorProps = {
   activeFamily: PreviewFamilyId;
@@ -18,13 +19,15 @@ export function PreviewNavigator({
   onSelectUi,
   onSelectIllustration,
 }: PreviewNavigatorProps) {
+  const tx = useTx();
+  const t = useT();
   const uiFamily = getPreviewFamily('ui');
   const illustrationFamily = getPreviewFamily('illustration');
   const illustrationSelectable =
     illustrationFamily.id === 'illustration' && illustrationFamily.styles.length > 0;
 
   return (
-    <nav aria-label="Elegir maqueta" className="w-full">
+    <nav aria-label={t('ui.PreviewNavigator.elegir-maqueta')} className="w-full">
       <ul className="scrollbar-none flex gap-2 overflow-x-auto pb-1">
         {uiFamily.modes.map((mode) => {
           const selected = activeFamily === 'ui' && activeMode === mode.id;
@@ -42,7 +45,7 @@ export function PreviewNavigator({
                 }`}
               >
                 <PreviewItemIcon kind="ui" mode={mode.id} />
-                <span className="truncate text-chrome-caption font-semibold">{mode.label}</span>
+                <span className="truncate text-chrome-caption font-semibold">{tx(mode.label)}</span>
               </button>
             </li>
           );
@@ -62,7 +65,7 @@ export function PreviewNavigator({
             >
               <PreviewItemIcon kind="illustration" />
               <span className="truncate text-chrome-caption font-semibold">
-                {illustrationFamily.label}
+                {tx(illustrationFamily.label)}
               </span>
             </button>
           </li>

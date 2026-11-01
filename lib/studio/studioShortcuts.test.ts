@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   formatShortcutKeys,
   isGenerateShortcut,
+  isRandomizePaletteShortcut,
   isShortcutsHelpShortcut,
   shouldIgnoreStudioShortcut,
 } from './studioShortcuts';
@@ -23,6 +24,15 @@ describe('studioShortcuts', () => {
     expect(isGenerateShortcut({ key: 'Enter', ctrlKey: true, metaKey: false })).toBe(true);
     expect(isGenerateShortcut({ key: 'Enter', ctrlKey: false, metaKey: true })).toBe(true);
     expect(isGenerateShortcut({ key: 'Enter', ctrlKey: false, metaKey: false })).toBe(false);
+  });
+
+  it('detects the randomize shortcut by physical key and rejects other modifiers', () => {
+    const base = { code: 'KeyR', altKey: true, ctrlKey: false, metaKey: false, shiftKey: false };
+    expect(isRandomizePaletteShortcut(base)).toBe(true);
+    expect(isRandomizePaletteShortcut({ ...base, altKey: false })).toBe(false);
+    expect(isRandomizePaletteShortcut({ ...base, ctrlKey: true })).toBe(false);
+    expect(isRandomizePaletteShortcut({ ...base, shiftKey: true })).toBe(false);
+    expect(isRandomizePaletteShortcut({ ...base, code: 'KeyE' })).toBe(false);
   });
 
   it('detects shortcuts help key outside inputs', () => {

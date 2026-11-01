@@ -5,6 +5,7 @@ import { buttonPairOn } from './previewButtons';
 import { readableInk } from './previewColor';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { buttonStyle, captionStyle, heroStyle, labelStyle, ROLE_WEIGHT, type PreviewFonts } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 /**
  * Classic magazine masthead: issue line and subscribe action, a centered
@@ -19,6 +20,8 @@ export function EditorialMasthead({
   fonts: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   const subscribe = buttonPairOn(colors, colors.chrome);
   const activeInk = readableInk(colors.accent, colors.chrome);
 
@@ -26,29 +29,25 @@ export function EditorialMasthead({
     <PreviewSlotTarget slot="chrome" onEditSlot={onEditSlot} className={`preview-rise pt-4 ${EDITORIAL_GUTTER_CLASS}`} style={{ backgroundColor: colors.chrome }}>
       <div className="flex items-center justify-between gap-4">
         <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={captionStyle(fonts, colors.mutedText)}>
-          {EDITORIAL_MASTHEAD.issue}
+          {tx(EDITORIAL_MASTHEAD.issue)}
         </PreviewSlotTarget>
         <div className="flex items-center gap-4">
-          <span className="hidden @min-[560px]/editorial:inline" style={labelStyle(fonts, colors.text)}>
-            Entrar
-          </span>
+          <span className="hidden @min-[560px]/editorial:inline" style={labelStyle(fonts, colors.text)}>{t('ui.EditorialMasthead.entrar')}</span>
           <PreviewSlotTarget
             slot="primaryAction"
             onEditSlot={onEditSlot}
             className="rounded-full px-4 py-1.5"
             style={{ ...buttonStyle(fonts), backgroundColor: subscribe.fill, color: subscribe.on }}
-          >
-            Suscribirse
-          </PreviewSlotTarget>
+          >{t('ui.EditorialMasthead.suscribirse')}</PreviewSlotTarget>
         </div>
       </div>
 
       <div className="py-6 text-center">
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={{ ...heroStyle(fonts), lineHeight: 1 }}>
-          {EDITORIAL_MASTHEAD.name}
+          {tx(EDITORIAL_MASTHEAD.name)}
         </PreviewSlotTarget>
         <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-2" style={labelStyle(fonts, colors.mutedText)}>
-          {EDITORIAL_MASTHEAD.tagline}
+          {tx(EDITORIAL_MASTHEAD.tagline)}
         </PreviewSlotTarget>
       </div>
 
@@ -61,7 +60,7 @@ export function EditorialMasthead({
         <nav
           className="flex flex-wrap justify-center gap-x-7 gap-y-1 border-b py-3"
           style={{ borderColor: colors.divider }}
-          aria-label="Secciones"
+          aria-label={t('ui.EditorialMasthead.secciones')}
         >
           {EDITORIAL_NAV.map((item, index) => (
             <span
@@ -71,7 +70,7 @@ export function EditorialMasthead({
                 fontWeight: index === 0 ? ROLE_WEIGHT.button : ROLE_WEIGHT.label,
               }}
             >
-              {item}
+              {tx(item)}
             </span>
           ))}
         </nav>

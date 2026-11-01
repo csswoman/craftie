@@ -97,3 +97,13 @@ describe('presets', () => {
     );
   });
 });
+
+describe('findStyleById', () => {
+  it('finds a curated style and ignores unknown ids', async () => {
+    const { DESIGN_STYLES, findStyleById } = await import('./presets');
+    const first = DESIGN_STYLES[0]!;
+    expect(findStyleById(first.id)).toBe(first);
+    expect(findStyleById('does-not-exist')).toBeNull();
+    expect(findStyleById(null)).toBeNull();
+  });
+});

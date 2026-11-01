@@ -9,6 +9,7 @@ import {
 } from '@lib/color/previewFamilies';
 
 import { PreviewItemIcon } from './previewNavigatorIcons';
+import { useT, useTx } from '@/context/I18nContext';
 
 type PreviewNavigatorMenuProps = {
   menuId: string;
@@ -31,6 +32,8 @@ export function PreviewNavigatorMenu({
   onSelectIllustration,
   onClose,
 }: PreviewNavigatorMenuProps) {
+  const tx = useTx();
+  const t = useT();
   const uiFamily = getPreviewFamily('ui');
   const illustrationFamily = getPreviewFamily('illustration');
   const illustrationSelectable =
@@ -44,7 +47,7 @@ export function PreviewNavigatorMenu({
       className="fixed z-dropdown w-[min(100vw-2rem,320px)] rounded-xl border border-border bg-bg p-2"
       style={{ ...menuPosition, boxShadow: 'var(--shadow-float)' }}
     >
-      <MenuSection title="Maquetas UI">
+      <MenuSection title={t('ui.PreviewNavigatorMenu.maquetas-ui')}>
         <ul className="space-y-0.5">
           {uiFamily.modes.map((mode) => {
             const selected = activeFamily === 'ui' && activeMode === mode.id;
@@ -62,9 +65,9 @@ export function PreviewNavigatorMenu({
                 >
                   <PreviewItemIcon kind="ui" mode={mode.id} />
                   <span className="min-w-0">
-                    <span className="block text-chrome-label font-semibold">{mode.label}</span>
+                    <span className="block text-chrome-label font-semibold">{tx(mode.label)}</span>
                     <span className="mt-0.5 block text-chrome-caption leading-snug text-muted">
-                      {mode.description}
+                      {tx(mode.description)}
                     </span>
                   </span>
                 </button>
@@ -75,7 +78,7 @@ export function PreviewNavigatorMenu({
       </MenuSection>
 
       {illustrationSelectable ? (
-        <MenuSection title="Ilustración">
+        <MenuSection title={t('ui.PreviewNavigatorMenu.ilustracion')}>
           <ul className="space-y-0.5">
             {illustrationFamily.styles.map((style) => {
               const selected = activeFamily === 'illustration';
@@ -93,9 +96,9 @@ export function PreviewNavigatorMenu({
                   >
                     <PreviewItemIcon kind="illustration" />
                     <span className="min-w-0">
-                      <span className="block text-chrome-label font-semibold">{style.label}</span>
+                      <span className="block text-chrome-label font-semibold">{tx(style.label)}</span>
                       <span className="mt-0.5 block text-chrome-caption leading-snug text-muted">
-                        {style.description}
+                        {tx(style.description)}
                       </span>
                     </span>
                   </button>
@@ -110,10 +113,11 @@ export function PreviewNavigatorMenu({
 }
 
 function MenuSection({ title, children }: { title: string; children: ReactNode }) {
+  const tx = useTx();
   return (
     <div className="py-1">
       <p className="px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.04em] text-muted">
-        {title}
+        {tx(title)}
       </p>
       {children}
     </div>

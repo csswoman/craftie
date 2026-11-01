@@ -4,6 +4,7 @@ import {
   type ColorUse,
 } from '@lib/color/colorFitness';
 import type { UiColorCandidate } from '@lib/color/uiColorCandidates';
+import { useT, useTx } from '@/context/I18nContext';
 
 const USES = [
   { use: 'text', label: 'Texto' },
@@ -37,6 +38,8 @@ export function ColorCandidateRow({
   variantsExpanded?: boolean;
   onToggleVariants?: () => void;
 }) {
+  const tx = useTx();
+  const t = useT();
   const visibleUses = showData ? USES : USES.slice(0, 4);
   const relevant = fitnessForUse(candidate.fitness, activeUse);
   const weakNote = relevant.ok ? null : weakFitnessNote(candidate, activeUse);
@@ -47,9 +50,9 @@ export function ColorCandidateRow({
         <div className="flex items-start gap-2">
           <span className="mt-0.5 size-7 shrink-0 rounded-md ring-1 ring-inset ring-ink/10" style={{ backgroundColor: candidate.hex }} aria-hidden="true" />
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[0.75rem] font-semibold text-ink">{variant ? `Variante · ${candidate.name}` : candidate.name}</span>
-            <span className="block truncate text-[0.625rem] text-muted">{candidate.detail}</span>
-            <span className="mt-0.5 block text-[0.625rem] font-medium text-ink">{colorFitnessRecommendation(candidate.fitness)}</span>
+            <span className="block truncate text-[0.75rem] font-semibold text-ink">{variant ? t('ui.ColorCandidateRow.variante', { name: tx(candidate.name) }) : candidate.name}</span>
+            <span className="block truncate text-[0.625rem] text-muted">{tx(candidate.detail)}</span>
+            <span className="mt-0.5 block text-[0.625rem] font-medium text-ink">{tx(colorFitnessRecommendation(candidate.fitness))}</span>
           </span>
           {variantCount > 0 && onToggleVariants ? (
             <button
@@ -58,16 +61,16 @@ export function ColorCandidateRow({
               onClick={onToggleVariants}
               className="min-h-11 shrink-0 rounded-md bg-surface-raised px-2 text-[0.625rem] font-semibold text-muted hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
             >
-              {variantsExpanded ? 'Ocultar' : `+${variantCount} variantes`}
+              {variantsExpanded ? t('ui.ColorCandidateRow.ocultar') : t('ui.ColorCandidateRow.variantes', { variantCount })}
             </button>
           ) : null}
         </div>
 
         {showData && candidate.dataSeparation ? (
-          <p className="mt-2 text-[0.625rem] text-muted">Separación mínima vs series: {formatSeparation(candidate.dataSeparation)}</p>
+          <p className="mt-2 text-[0.625rem] text-muted">{t('ui.ColorCandidateRow.separacion-minima-vs-series', { value: formatSeparation(candidate.dataSeparation) })}</p>
         ) : null}
 
-        <div role="list" className={`mt-2 grid gap-1 ${showData ? 'grid-cols-5' : 'grid-cols-4'}`} aria-label={`Perfil informativo de ${candidate.name}`}>
+        <div role="list" className={`mt-2 grid gap-1 ${showData ? 'grid-cols-5' : 'grid-cols-4'}`} aria-label={t('ui.ColorCandidateRow.perfil-informativo-de', { name: tx(candidate.name) })}>
           {visibleUses.map(({ use, label }) => {
             const result = fitnessForUse(candidate.fitness, use);
             const ratio = result.ratio === undefined ? 'decorativo' : `${result.ratio.toFixed(1)}:1`;
@@ -76,11 +79,11 @@ export function ColorCandidateRow({
               <div
                 key={use}
                 role="listitem"
-                aria-label={`${label}: ${result.ok ? 'apto' : 'no apto'}, ${ratio}${relevantCell ? ', relevante para este rol' : ''}`}
+                aria-label={`${label}: ${result.ok ? 'apto' : 'no apto'}, ${ratio}${relevantCell ? tx(', relevante para este rol') : ''}`}
                 className={`min-w-0 rounded-md px-1 py-1.5 text-center text-[0.5625rem] leading-tight ${relevantCell ? 'bg-[var(--chrome-green-soft)] font-semibold text-[var(--chrome-green)] ring-1 ring-inset ring-[var(--chrome-green)]/25' : 'bg-surface-raised text-muted opacity-70'}`}
               >
-                <span className="block" aria-hidden="true">{result.ok ? '✓' : '✕'} {label}</span>
-                <span className="mt-0.5 block font-mono tabular-nums">{ratio}</span>
+                <span className="block" aria-hidden="true">{tx(result.ok ? '✓' : '✕')} {tx(label)}</span>
+                <span className="mt-0.5 block font-mono tabular-nums">{tx(ratio)}</span>
               </div>
             );
           })}
@@ -91,8 +94,8 @@ export function ColorCandidateRow({
           onClick={() => onSelect(candidate)}
           className="mt-2 min-h-11 w-full rounded-md bg-[var(--chrome-green)] px-3 py-1.5 text-tools-meta font-semibold text-white transition-colors hover:brightness-95 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
         >
-          <span className="block">{actionLabel}</span>
-          {weakNote ? <span className="mt-0.5 block text-[0.5625rem] font-medium text-white/90">{weakNote}</span> : null}
+          <span className="block">{tx(actionLabel)}</span>
+          {weakNote ? <span className="mt-0.5 block text-[0.5625rem] font-medium text-white/90">{tx(weakNote)}</span> : null}
         </button>
       </div>
     </li>

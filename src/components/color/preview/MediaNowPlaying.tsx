@@ -10,6 +10,7 @@ import { paletteTint } from './previewButtons';
 import { PreviewIcon } from './previewIcons';
 import { Tag } from './previewPrimitives';
 import { bodyStyle, heroStyle, labelStyle, type PreviewFonts } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 type MediaNowPlayingProps = {
   colors: ResolvedLayoutColors;
@@ -37,6 +38,8 @@ export function MediaNowPlaying({
   onTogglePlay,
   onEditSlot,
 }: MediaNowPlayingProps) {
+  const tx = useTx();
+  const t = useT();
   const wash = paletteTint(colors.accent, colors.appBackground, 0.22);
   const ink = readableOn(colors.text, wash);
   const muted = readableOn(colors.mutedText, wash);
@@ -58,16 +61,16 @@ export function MediaNowPlaying({
 
         <div className="min-w-0">
           <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={labelStyle(fonts, muted)}>
-            {session}
+            {tx(session)}
           </PreviewSlotTarget>
           <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1" style={{ ...heroStyle(fonts), color: ink }}>
-            {MEDIA_NOW_PLAYING.title}
+            {tx(MEDIA_NOW_PLAYING.title)}
           </PreviewSlotTarget>
           <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-2" style={labelStyle(fonts, muted)}>
-            {MEDIA_NOW_PLAYING.artist} · {meta}
+            {tx(MEDIA_NOW_PLAYING.artist)} · {tx(meta)}
           </PreviewSlotTarget>
           <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-3 max-w-[52ch] text-pretty" style={bodyStyle(fonts, muted)}>
-            {MEDIA_NOW_PLAYING.body}
+            {tx(MEDIA_NOW_PLAYING.body)}
           </PreviewSlotTarget>
         </div>
       </div>
@@ -75,7 +78,7 @@ export function MediaNowPlaying({
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <button
           type="button"
-          aria-label={playing ? 'Pausar' : 'Reproducir'}
+          aria-label={playing ? t('ui.MediaNowPlaying.pausar') : t('ui.MediaNowPlaying.reproducir')}
           onClick={(event) => {
             event.stopPropagation();
             onTogglePlay();
@@ -95,7 +98,7 @@ export function MediaNowPlaying({
         </span>
         <div className="ml-auto flex flex-wrap gap-1.5">
           {MEDIA_MOODS.map((mood) => (
-            <Tag key={mood.label} label={mood.label} color={colors[mood.slot]} surfaceHex={colors.appBackground} slot={mood.slot} onEditSlot={onEditSlot} />
+            <Tag key={mood.label} label={tx(mood.label)} color={colors[mood.slot]} surfaceHex={colors.appBackground} slot={mood.slot} onEditSlot={onEditSlot} />
           ))}
         </div>
       </div>

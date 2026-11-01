@@ -122,6 +122,22 @@ describe('useWorkspaceExports', () => {
     expect(json.light.color.primary).toBeDefined();
   });
 
+  it('downloads Tailwind v4 and shadcn/ui themes', () => {
+    const { exports } = useSetup();
+    exports.handleExportTailwind();
+    expect(downloadTextFile).toHaveBeenLastCalledWith(
+      'craftie-tailwind.css',
+      expect.stringContaining('@theme {'),
+      'text/css;charset=utf-8',
+    );
+    exports.handleExportShadcn();
+    expect(downloadTextFile).toHaveBeenLastCalledWith(
+      'craftie-shadcn.css',
+      expect.stringContaining('--primary:'),
+      'text/css;charset=utf-8',
+    );
+  });
+
   it('blocks export when rolePalette is null', () => {
     const { exports } = useSetup({ rolePalette: null });
 

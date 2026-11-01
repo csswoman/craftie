@@ -15,12 +15,15 @@ import {
   STUDIO_TOOL_FOCUS_EVENT,
   type StudioToolSectionFocusId,
 } from '@/lib/browser/studioToolFocus';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type StudioToolsMobileDockProps = {
   sections: StudioToolSection[];
 };
 
 export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) {
+  const tx = useTx();
+  const t = useT();
   const canvasView = useCanvasViewOptional();
   const rolePalette = useRolePaletteOptional();
   const [activeSectionId, setActiveSectionId] = useState<StudioToolSectionId | null>(null);
@@ -38,7 +41,7 @@ export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) 
     if (!canvasView || !hasPalette) return sections;
     const viewSection: StudioToolSection = {
       id: 'view',
-      label: 'Vista',
+      label: 'Vista', // translated where rendered
       content: null,
     };
     return [...sections, viewSection];
@@ -93,16 +96,16 @@ export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) 
   // Image sheet is short; the dock tab already names the section.
   const showSheetTitle = activeSection !== null && activeSection.id !== 'image';
   const sheetTitle =
-    activeSection?.id === 'view' ? 'Vistas del lienzo' : (activeSection?.label ?? '');
+    activeSection?.id === 'view' ? tx('Vistas del lienzo') : (activeSection?.label ?? '');
   const sheetLabel =
-    activeSection?.id === 'view' ? 'Vistas del lienzo' : (activeSection?.label ?? 'Herramientas');
+    activeSection?.id === 'view' ? tx('Vistas del lienzo') : (activeSection?.label ?? 'Herramientas');
 
   return (
     <>
       {sheetOpen ? (
         <button
           type="button"
-          aria-label="Cerrar herramientas"
+          aria-label={t('ui.StudioToolsMobileDock.cerrar-herramientas')}
           className="z-modal-backdrop fixed inset-0 bg-forest-darker/45 backdrop-blur-[2px] transition-[opacity,backdrop-filter] motion-reduce:backdrop-blur-none motion-reduce:transition-none lg:hidden"
           onClick={closeSheet}
         />
@@ -117,7 +120,7 @@ export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) 
             ref={sheetRef}
             role="dialog"
             aria-modal="true"
-            aria-label={sheetLabel}
+            aria-label={tx(sheetLabel)}
             className="flex max-h-[min(58vh,28rem)] min-h-0 flex-col overflow-hidden rounded-t-2xl border border-b-0 border-border bg-bg shadow-[0_-8px_32px_rgb(15_43_30/18%)] motion-reduce:transition-none"
           >
             <div
@@ -129,13 +132,13 @@ export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) 
             >
               {showSheetTitle ? (
                 <p className="min-w-0 truncate text-tools-section font-semibold text-ink">
-                  {sheetTitle}
+                  {tx(sheetTitle)}
                 </p>
               ) : null}
               <button
                 type="button"
                 data-tools-sheet-close=""
-                aria-label="Cerrar panel"
+                aria-label={t('ui.StudioToolsMobileDock.cerrar-panel')}
                 onClick={closeSheet}
                 className="flex size-11 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
               >
@@ -161,7 +164,7 @@ export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) 
         ) : null}
 
         <nav
-          aria-label="Herramientas del estudio"
+          aria-label={t('ui.StudioToolsMobileDock.herramientas-del-estudio')}
           className="border-t border-border bg-bg"
         >
           <div className="flex items-stretch gap-1 px-2 py-2">
@@ -169,7 +172,7 @@ export function StudioToolsMobileDock({ sections }: StudioToolsMobileDockProps) 
               <DockTab
                 key={section.id}
                 sectionId={section.id}
-                label={section.label}
+                label={tx(section.label)}
                 active={activeSectionId === section.id}
                 onPress={() => handleSectionPress(section.id)}
               />
@@ -192,11 +195,12 @@ function DockTab({
   active: boolean;
   onPress: () => void;
 }) {
+  const tx = useTx();
   return (
     <button
       type="button"
       aria-pressed={active}
-      aria-label={label}
+      aria-label={tx(label)}
       onClick={onPress}
       className={`flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg px-1 py-1.5 transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
         active
@@ -205,7 +209,7 @@ function DockTab({
       }`}
     >
       <StudioToolDockIcon id={sectionId} />
-      <span className="truncate text-[0.6875rem] font-semibold leading-tight">{label}</span>
+      <span className="truncate text-[0.6875rem] font-semibold leading-tight">{tx(label)}</span>
     </button>
   );
 }

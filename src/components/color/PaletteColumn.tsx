@@ -7,6 +7,7 @@ import { ContrastBadge } from '@/components/color-engine/ContrastBadge';
 
 import { PaletteColumnToolbar } from './PaletteColumnToolbar';
 import { PaletteShadesOverlay } from './PaletteShadesOverlay';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type PaletteColumnProps = {
   column: PaletteColumnDisplay;
@@ -43,6 +44,8 @@ export function PaletteColumn({
   onSelectColor,
   onApplyShade,
 }: PaletteColumnProps) {
+  const tx = useTx();
+  const t = useT();
   const textColor = pickReadableTextColor(column.hex);
   const lightChrome = prefersLightSelectionRing(column.hex);
   const canApplyShade = editable && !locked;
@@ -52,7 +55,7 @@ export function PaletteColumn({
 
   return (
     <article
-      aria-label={columnLabel}
+      aria-label={tx(columnLabel)}
       className="group/column relative flex w-full flex-col items-center justify-end px-3 pb-4 pt-8"
       style={{ backgroundColor: column.hex, color: textColor }}
     >
@@ -88,7 +91,7 @@ export function PaletteColumn({
         <span
           className="absolute right-3 top-3 z-10 size-2 rounded-full bg-white/80"
           aria-hidden="true"
-          title="Color bloqueado"
+          title={t('ui.PaletteColumn.color-bloqueado')}
         />
       ) : null}
 
@@ -104,7 +107,7 @@ export function PaletteColumn({
                 status={badge.status}
                 target="AA"
                 compact
-                contextLabel={badge.label}
+                contextLabel={tx(badge.label)}
               />
             ))}
         </div>
@@ -114,17 +117,17 @@ export function PaletteColumn({
         <button
           type="button"
           onClick={() => onSelectColor(column.hex)}
-          aria-label={`Seleccionar ${column.name}`}
+          aria-label={t('ui.PaletteColumn.seleccionar', { name: tx(column.name) })}
           className="mt-auto w-full space-y-0.5 rounded-md text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
         >
           <p className="font-mono text-[clamp(0.875rem,2vw,1.25rem)] font-semibold tracking-[0.06em]">
             {column.hex.replace('#', '').toUpperCase()}
           </p>
-          <p className="max-w-full truncate px-1 text-[clamp(0.75rem,1.6vw,0.9375rem)] font-medium tracking-[0.01em] opacity-90">
-            {column.name}
+          <p className="max-w-full truncate px-1 text-[clamp(0.75rem,1.6vw,0.9375rem)] font-medium tracking-[0.01em]">
+            {tx(column.name)}
           </p>
           {column.roleLabel ? (
-            <p className="text-chrome-caption font-medium opacity-75">{column.roleLabel}</p>
+            <p className="text-chrome-caption font-medium opacity-75">{tx(column.roleLabel)}</p>
           ) : null}
         </button>
       ) : null}

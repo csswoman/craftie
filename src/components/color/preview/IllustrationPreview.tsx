@@ -5,6 +5,7 @@ import {
 } from '@lib/color/illustrationComposer';
 import type { IllustrationPaletteInput } from '@lib/color/previewFamilies';
 import type { SemanticTokens } from '@lib/color/semanticTokens';
+import { useT } from '@/context/I18nContext';
 
 export type IllustrationPreviewProps = {
   tokens: SemanticTokens;
@@ -19,6 +20,7 @@ export function IllustrationPreview({
   seed,
   onRegenerate,
 }: IllustrationPreviewProps) {
+  const t = useT();
   const composition = composeIllustration(DEFAULT_ILLUSTRATION_STYLE_ID, {
     seed,
     tokens,
@@ -29,11 +31,8 @@ export function IllustrationPreview({
     <section className="overflow-hidden rounded-xl border bg-bg" style={{ borderColor: 'var(--color-border)' }}>
       <div className="flex items-center justify-between gap-3 border-b px-4 py-3" style={{ borderColor: 'var(--color-border)' }}>
         <div>
-          <h3 className="font-body text-[0.875rem] font-bold tracking-normal text-ink">
-            Estudio de color
-          </h3>
-          <p className="mt-0.5 text-[0.6875rem] font-semibold text-ink-muted">
-            Póster, tipografía y muestras · variante {composition.variant + 1}
+          <h3 className="font-body text-[0.875rem] font-bold tracking-normal text-ink">{t('ui.IllustrationPreview.estudio-de-color')}</h3>
+          <p className="mt-0.5 text-[0.6875rem] font-semibold text-ink-muted">{t('ui.IllustrationPreview.poster-tipografia-y-muestras-variante', { value: composition.variant + 1 })}
           </p>
         </div>
         <button
@@ -41,9 +40,7 @@ export function IllustrationPreview({
           onClick={onRegenerate}
           className="rounded-md border px-3 py-2 text-[0.75rem] font-bold text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           style={{ borderColor: 'var(--color-border)' }}
-        >
-          Otra composición
-        </button>
+        >{t('ui.IllustrationPreview.otra-composicion')}</button>
       </div>
       <div className="p-3 sm:p-4">
         <ColorStudio composition={composition} />
@@ -53,10 +50,11 @@ export function IllustrationPreview({
 }
 
 function ColorStudio({ composition: c }: { composition: IllustrationComposition }) {
+  const t = useT();
   return (
     <svg
       role="img"
-      aria-label="Mesa de estudio con un póster tipográfico y muestras de la paleta actual"
+      aria-label={t('ui.IllustrationPreview.mesa-de-estudio-con-un')}
       viewBox={`0 0 ${c.width} ${c.height}`}
       className="aspect-[3/2] w-full overflow-hidden rounded-lg"
       style={{ backgroundColor: c.background.hex }}
@@ -81,13 +79,12 @@ function DeskGuides({ color }: { color: string }) {
 }
 
 function Poster({ composition: c }: { composition: IllustrationComposition }) {
+  const t = useT();
   return (
     <g transform={`rotate(${c.posterRotation} 198 230)`} aria-hidden="true">
       <rect x="42" y="28" width="332" height="404" rx="12" fill={c.paper.hex} stroke={c.border.hex} strokeWidth="2" />
       <rect x="66" y="53" width="56" height="7" rx="3.5" fill={c.featured[1].hex} />
-      <text x="66" y="88" fill={c.ink.hex} fontFamily="system-ui, sans-serif" fontSize="13" fontWeight="700" letterSpacing="1.2">
-        COLOR STUDY
-      </text>
+      <text x="66" y="88" fill={c.ink.hex} fontFamily="system-ui, sans-serif" fontSize="13" fontWeight="700" letterSpacing="1.2">{t('ui.IllustrationPreview.color-study')}</text>
       <text x="66" y="169" fill={c.ink.hex} fontFamily="Georgia, serif" fontSize="86" fontWeight="700" letterSpacing="-4">
         Aa
       </text>
@@ -96,9 +93,7 @@ function Poster({ composition: c }: { composition: IllustrationComposition }) {
       <circle cx="307" cy="268" r="23" fill={c.featured[2].hex} />
       <rect x="285" y="305" width="44" height="6" rx="3" fill={c.ink.hex} opacity="0.82" />
       <rect x="66" y="373" width="280" height="2" fill={c.divider.hex} />
-      <text x="66" y="399" fill={c.mutedInk.hex} fontFamily="system-ui, sans-serif" fontSize="11" fontWeight="650" letterSpacing="0.8">
-        PRIMARY · SECONDARY · ACCENT
-      </text>
+      <text x="66" y="399" fill={c.mutedInk.hex} fontFamily="system-ui, sans-serif" fontSize="11" fontWeight="650" letterSpacing="0.8">{t('ui.IllustrationPreview.primary-secondary-accent')}</text>
     </g>
   );
 }

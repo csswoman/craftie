@@ -4,6 +4,7 @@ import type { UiLayoutSlot } from '@lib/color/layoutModes';
 
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { tint } from './previewPrimitives';
+import { useT } from '@/context/I18nContext';
 
 type DataDisplayProps = {
   value: number;
@@ -59,10 +60,11 @@ export function RadialMetric({
 }
 
 export function SegmentMeter({ value, color, slot, onEditSlot }: DataDisplayProps) {
+  const t = useT();
   const filled = Math.round(value / 10);
 
   return (
-    <div className="grid grid-cols-10 gap-1" role="img" aria-label={`${value}% complete`}>
+    <div className="grid grid-cols-10 gap-1" role="img" aria-label={t('ui.previewDataDisplays.complete', { value })}>
       {Array.from({ length: 10 }).map((_, index) => {
         const active = index < filled;
 

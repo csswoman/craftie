@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { ChevronLeft } from 'lucide-react';
+import { useT, useTx } from '@/context/I18nContext';
 
 export function UiSourceDestinationList({
   label,
@@ -12,6 +13,8 @@ export function UiSourceDestinationList({
   onBack: () => void;
   children: ReactNode;
 }) {
+  const tx = useTx();
+  const t = useT();
   return (
     <div>
       <button
@@ -19,10 +22,8 @@ export function UiSourceDestinationList({
         onClick={onBack}
         className="mb-1.5 inline-flex min-h-9 items-center gap-1 rounded-md px-1.5 text-tools-body-sm font-semibold text-forest transition-colors hover:bg-line-soft focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25"
       >
-        <ChevronLeft aria-hidden="true" size={16} strokeWidth={2.25} />
-        Volver
-      </button>
-      <ul className="space-y-0.5" aria-label={label}>
+        <ChevronLeft aria-hidden="true" size={16} strokeWidth={2.25} />{t('ui.UiSourceDestinationList.volver')}</button>
+      <ul className="space-y-0.5" aria-label={tx(label)}>
         {children}
       </ul>
     </div>
@@ -40,6 +41,8 @@ export function UiSourceDestinationButton({
   disabled?: boolean;
   onClick: () => void;
 }) {
+  const tx = useTx();
+  const t = useT();
   return (
     <li>
       <button
@@ -58,10 +61,10 @@ export function UiSourceDestinationButton({
           aria-hidden="true"
         />
         <span className="min-w-0 flex-1 truncate text-tools-body-sm font-medium text-ink">
-          {label}
+          {tx(label)}
         </span>
         {!currentHex ? (
-          <span className="text-tools-micro font-medium text-muted">Vacío</span>
+          <span className="text-tools-micro font-medium text-muted">{t('ui.UiSourceDestinationList.vacio')}</span>
         ) : null}
       </button>
     </li>

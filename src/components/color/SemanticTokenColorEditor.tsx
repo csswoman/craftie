@@ -21,6 +21,7 @@ import {
   RoleOklchSliders,
 } from './RoleColorEditorControls';
 import { ContrastFailureAdvice } from './ContrastFailureAdvice';
+import { useTx } from '@/context/I18nContext';
 
 export function SemanticTokenColorEditor({
   tokenName,
@@ -31,6 +32,7 @@ export function SemanticTokenColorEditor({
   idPrefix?: string;
   showSwatch?: boolean;
 }) {
+  const tx = useTx();
   const { semanticTokens, replaceSemanticToken } = useRolePalette();
   const token = semanticTokens?.[tokenName] ?? null;
 
@@ -89,7 +91,7 @@ export function SemanticTokenColorEditor({
         ) : null}
         <div className="min-w-0 flex-1">
           <p className="mb-2 truncate text-[0.75rem] font-semibold text-muted">
-            {SEMANTIC_TOKEN_LABELS[tokenName]}
+            {tx(SEMANTIC_TOKEN_LABELS[tokenName])}
           </p>
           <RoleHexInput
             hex={token.hex}

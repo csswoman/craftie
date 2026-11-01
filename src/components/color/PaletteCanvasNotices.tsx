@@ -1,6 +1,7 @@
 import { AlertTriangle } from 'lucide-react';
 
 import type { ThemeId } from '@lib/color/themePalette';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type ThemeContrastReport = {
   theme: ThemeId;
@@ -22,6 +23,8 @@ export function PaletteCanvasNotices({
   reports: ThemeContrastReport[];
   onSwitchTheme?: (theme: ThemeId) => void;
 }) {
+  const tx = useTx();
+  const t = useT();
   const failing = reports.filter((report) => report.failure);
 
   if (failing.length === 0) {
@@ -42,10 +45,8 @@ export function PaletteCanvasNotices({
         <div className="flex items-start gap-2">
           <AlertTriangle size={16} className="mt-0.5 shrink-0 text-fail" aria-hidden="true" />
           <div className="min-w-0">
-            <p className="text-[0.8125rem] font-semibold text-ink">{title}</p>
-            <p className="mt-0.5 text-[0.75rem] leading-snug text-muted">
-              Toca el rol marcado para ver una variante accesible, o ajusta su luminosidad en OKLCH.
-            </p>
+            <p className="text-[0.8125rem] font-semibold text-ink">{tx(title)}</p>
+            <p className="mt-0.5 text-[0.75rem] leading-snug text-muted">{t('ui.PaletteCanvasNotices.toca-el-rol-marcado-para')}</p>
           </div>
         </div>
 
@@ -53,17 +54,15 @@ export function PaletteCanvasNotices({
           <section key={report.theme} className="mt-2.5 border-t border-border pt-2.5">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-[0.75rem] font-semibold text-ink">
-                {THEME_LABEL[report.theme]}
-                {report.theme === activeTheme ? ' · en edición' : ''}
+                {tx(THEME_LABEL[report.theme])}
+                {report.theme === activeTheme ? t('ui.PaletteCanvasNotices.en-edicion') : ''}
               </h3>
               {report.theme !== activeTheme && onSwitchTheme ? (
                 <button
                   type="button"
                   onClick={() => onSwitchTheme(report.theme)}
                   className="min-h-8 rounded-md border border-border bg-surface px-2.5 text-[0.75rem] font-semibold text-ink hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-                >
-                  Ir a este tema
-                </button>
+                >{t('ui.PaletteCanvasNotices.ir-a-este-tema')}</button>
               ) : null}
             </div>
             <ul className="mt-1.5 space-y-1">
@@ -73,7 +72,7 @@ export function PaletteCanvasNotices({
                   className="flex gap-1.5 text-[0.75rem] font-medium leading-snug text-ink"
                 >
                   <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-fail" aria-hidden="true" />
-                  <span>{warning}</span>
+                  <span>{tx(warning)}</span>
                 </li>
               ))}
             </ul>

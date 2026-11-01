@@ -11,6 +11,7 @@ import type { SemanticTokenName } from '@lib/color/semanticTokens';
 import { computePopoverPosition } from '@/lib/browser/computePopoverPosition';
 import { useDialogAccessibility } from '@/lib/browser/useDialogAccessibility';
 import { SemanticTokenColorEditor } from './SemanticTokenColorEditor';
+import { useT, useTx } from '@/context/I18nContext';
 
 const POPOVER_WIDTH = 320;
 const POPOVER_HEIGHT = 500;
@@ -28,6 +29,8 @@ export function SemanticTokenColorPopover({
   anchor: SemanticTokenPopoverAnchor | null;
   onClose: () => void;
 }) {
+  const tx = useTx();
+  const t = useT();
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
   const [mounted, setMounted] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -103,15 +106,15 @@ export function SemanticTokenColorPopover({
         <header className="flex shrink-0 items-start justify-between gap-2 border-b border-border px-4 py-3">
           <div className="min-w-0">
             <p id="semantic-token-popover-title" className="text-chrome-label font-semibold text-ink">
-              {SEMANTIC_TOKEN_LABELS[anchor.tokenName]}
+              {tx(SEMANTIC_TOKEN_LABELS[anchor.tokenName])}
             </p>
-            <p className="text-chrome-caption text-muted">Editar token semántico</p>
+            <p className="text-chrome-caption text-muted">{t('ui.SemanticTokenColorPopover.editar-token-semantico')}</p>
           </div>
           <button
             type="button"
             data-popover-close
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={t('ui.SemanticTokenColorPopover.cerrar')}
             className="-mr-2 -mt-1 flex size-11 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           >
             <span aria-hidden="true" className="text-lg leading-none">

@@ -53,3 +53,10 @@ export function formatInspirationCountLabel(visibleCount: number, totalCount: nu
 
   return `${visibleCount} de ${totalCount} estilos · toca cualquiera para cargar`;
 }
+
+export function findStyleById(id: string | null): DesignStyle | null {
+  if (id === null) {
+    return null;
+  }
+  return DESIGN_STYLES.find((style) => style.id === id) ?? null;
+}

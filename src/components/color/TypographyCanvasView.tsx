@@ -9,6 +9,7 @@ import type { FontPair } from '@lib/typography/pairings';
 import { PairingList } from '@/components/font-pairing/PairingList';
 import { useRolePalette } from '@/context/RolePaletteContext';
 import { loadGoogleFonts } from '@/lib/browser/googleFonts';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type TypographyCanvasViewProps = {
   fontPairings: FontPair[];
@@ -30,6 +31,8 @@ export function TypographyCanvasView({
   selectedPairing,
   onSelectPairing,
 }: TypographyCanvasViewProps) {
+  const tx = useTx();
+  const t = useT();
   const { rolePalette } = useRolePalette();
   const activePairing = resolveActiveFontPair(selectedPairing, recommendedPairings);
 
@@ -59,20 +62,18 @@ export function TypographyCanvasView({
         <section className="rounded-xl border border-border bg-surface p-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h2 className="text-chrome-title">Par tipográfico</h2>
-              <p className="prose-measure mt-1 text-chrome-label leading-relaxed text-muted">
-                Biblioteca curada aplicada al sistema de fuentes de la paleta actual.
-              </p>
+              <h2 className="text-chrome-title">{t('ui.TypographyCanvasView.par-tipografico')}</h2>
+              <p className="prose-measure mt-1 text-chrome-label leading-relaxed text-muted">{t('ui.TypographyCanvasView.biblioteca-curada-aplicada-al-sistema')}</p>
             </div>
           </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <FontSpecCard
-              label="Titular"
+              label={t('ui.TypographyCanvasView.titular')}
               family={activePairing.heading.family}
               fontFamily={headingFont}
             />
-            <FontSpecCard label="Cuerpo" family={activePairing.body.family} fontFamily={bodyFont} />
+            <FontSpecCard label={t('ui.TypographyCanvasView.cuerpo')} family={activePairing.body.family} fontFamily={bodyFont} />
           </div>
 
           <div className="mt-5">
@@ -85,14 +86,14 @@ export function TypographyCanvasView({
         </section>
 
         <section className="rounded-xl border border-border bg-surface p-5">
-          <h2 className="text-chrome-title">Escala tipográfica</h2>
+          <h2 className="text-chrome-title">{t('ui.TypographyCanvasView.escala-tipografica')}</h2>
           <div className="mt-4 divide-y divide-border">
             {TYPE_SCALE.map((item) => (
               <div
                 key={item.label}
                 className="grid grid-cols-[5rem_minmax(0,1fr)_7rem] items-center gap-3 py-3"
               >
-                <span className="text-chrome-label font-semibold text-muted">{item.label}</span>
+                <span className="text-chrome-label font-semibold text-muted">{tx(item.label)}</span>
                 <span
                   className="truncate text-ink"
                   style={{
@@ -101,11 +102,9 @@ export function TypographyCanvasView({
                     fontWeight: item.weight,
                     lineHeight: 1.15,
                   }}
-                >
-                  Aa Diseño claro
-                </span>
+                >{t('ui.TypographyCanvasView.aa-diseno-claro')}</span>
                 <span className="text-right font-mono text-[0.75rem] text-muted">
-                  {item.size} / {item.rem}
+                  {tx(item.size)} / {tx(item.rem)}
                 </span>
               </div>
             ))}
@@ -123,23 +122,15 @@ export function TypographyCanvasView({
             <p
               className="text-chrome-label font-semibold"
               style={{ color: primary, fontFamily: bodyFont }}
-            >
-              Legibilidad en contexto
-            </p>
+            >{t('ui.TypographyCanvasView.legibilidad-en-contexto')}</p>
             <h2
               className="mt-2 max-w-3xl text-[2rem] font-bold leading-tight"
               style={{ fontFamily: headingFont }}
-            >
-              Una guía de marca debe leerse bien antes de verse bonita.
-            </h2>
+            >{t('ui.TypographyCanvasView.una-guia-de-marca-debe')}</h2>
             <p
               className="mt-4 max-w-[68ch] text-[1rem] leading-7"
               style={{ fontFamily: bodyFont }}
-            >
-              Este bloque usa el color de fondo, superficie y texto actuales para evaluar lectura
-              real en dos o tres líneas. Sirve para comprobar ritmo, contraste y comodidad antes de
-              exportar la guía.
-            </p>
+            >{t('ui.TypographyCanvasView.este-bloque-usa-el-color')}</p>
           </div>
         </section>
       </div>
@@ -156,13 +147,14 @@ function FontSpecCard({
   family: string;
   fontFamily: string;
 }) {
+  const tx = useTx();
   return (
     <div className="rounded-lg border border-border bg-bg p-3">
-      <p className="text-[0.75rem] font-semibold text-muted">{label}</p>
+      <p className="text-[0.75rem] font-semibold text-muted">{tx(label)}</p>
       <p className="mt-2 text-[2.75rem] font-semibold leading-none text-ink" style={{ fontFamily }}>
         Aa
       </p>
-      <p className="mt-2 truncate text-chrome-label font-semibold text-ink">{family}</p>
+      <p className="mt-2 truncate text-chrome-label font-semibold text-ink">{tx(family)}</p>
     </div>
   );
 }

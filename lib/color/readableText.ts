@@ -2,6 +2,8 @@ import { contrastRatio, evaluateContrast, getContrastStatus } from './contrast';
 
 const LIGHT_TEXT = '#FFFFFF';
 const DARK_TEXT = '#1A1C1E';
+const PURE_BLACK = '#000000';
+const AA_NORMAL_TEXT = 4.5;
 
 export type ReadableTextChoice = {
   textHex: string;
@@ -20,11 +22,20 @@ export function getReadableTextChoice(backgroundHex: string): ReadableTextChoice
   const whiteContrast = contrastRatio(LIGHT_TEXT, backgroundHex);
   const darkContrast = contrastRatio(DARK_TEXT, backgroundHex);
 
-  if (whiteContrast >= darkContrast) {
-    return { textHex: LIGHT_TEXT, label: 'claro', ratio: whiteContrast };
+  const best = whiteContrast >= darkContrast
+    ? { textHex: LIGHT_TEXT, label: 'claro' as const, ratio: whiteContrast }
+    : { textHex: DARK_TEXT, label: 'oscuro' as const, ratio: darkContrast };
+
+  // Mid-tones (a copper or a teal) can sit between white and the soft near-black
+  // without reaching AA on either. Pure black is the last resort before failing.
+  if (best.ratio < AA_NORMAL_TEXT) {
+    const blackContrast = contrastRatio(PURE_BLACK, backgroundHex);
+    if (blackContrast > best.ratio) {
+      return { textHex: PURE_BLACK, label: 'oscuro', ratio: blackContrast };
+    }
   }
 
-  return { textHex: DARK_TEXT, label: 'oscuro', ratio: darkContrast };
+  return best;
 }
 
 export function getReadableTextContrastStatus(backgroundHex: string) {

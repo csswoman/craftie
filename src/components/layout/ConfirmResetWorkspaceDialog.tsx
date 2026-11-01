@@ -4,6 +4,7 @@ import { useRef } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { useDialogAccessibility } from '@/lib/browser/useDialogAccessibility';
+import { useT } from '@/context/I18nContext';
 
 export type ConfirmResetWorkspaceDialogProps = {
   open: boolean;
@@ -16,6 +17,7 @@ export function ConfirmResetWorkspaceDialog({
   onCancel,
   onConfirm,
 }: ConfirmResetWorkspaceDialogProps) {
+  const t = useT();
   const dialogRef = useRef<HTMLDivElement>(null);
 
   useDialogAccessibility({
@@ -41,12 +43,8 @@ export function ConfirmResetWorkspaceDialog({
         aria-describedby="confirm-reset-desc"
         className="relative z-10 w-full max-w-sm rounded-xl border border-border bg-surface p-4 shadow-[var(--shadow-float)]"
       >
-        <h2 id="confirm-reset-title" className="text-chrome-title text-ink">
-          ¿Empezar de nuevo?
-        </h2>
-        <p id="confirm-reset-desc" className="mt-2 text-chrome-label leading-relaxed text-muted">
-          Se perderá el progreso de esta sesión.
-        </p>
+        <h2 id="confirm-reset-title" className="text-chrome-title text-ink">{t('ui.ConfirmResetWorkspaceDialog.empezar-de-nuevo')}</h2>
+        <p id="confirm-reset-desc" className="mt-2 text-chrome-label leading-relaxed text-muted">{t('ui.ConfirmResetWorkspaceDialog.se-perdera-el-progreso-de')}</p>
         <div className="mt-5 flex flex-wrap justify-end gap-2">
           <Button
             type="button"
@@ -54,12 +52,8 @@ export function ConfirmResetWorkspaceDialog({
             data-confirm-cancel
             className="min-h-11"
             onClick={onCancel}
-          >
-            Cancelar
-          </Button>
-          <Button type="button" variant="primary" className="min-h-11" onClick={onConfirm}>
-            Empezar de nuevo
-          </Button>
+          >{t('ui.ConfirmResetWorkspaceDialog.cancelar')}</Button>
+          <Button type="button" variant="primary" className="min-h-11" onClick={onConfirm}>{t('ui.ConfirmResetWorkspaceDialog.empezar-de-nuevo-2')}</Button>
         </div>
       </div>
     </div>

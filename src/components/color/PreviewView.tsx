@@ -47,6 +47,7 @@ import { loadGoogleFonts } from '@/lib/browser/googleFonts';
 import type { PreviewEditMode } from '@/components/color/PreviewEditModeToggle';
 import { TypeRolePopover, type TypeRolePopoverAnchor } from '@/components/color/TypeRolePopover';
 import { useTypeRoles } from '@/context/TypeRolesContext';
+import { useT } from '@/context/I18nContext';
 
 export type PreviewViewProps = {
   recommendedPairings: FontPair[];
@@ -75,6 +76,7 @@ export function PreviewView({
   activeFamily,
   editMode = 'locked',
 }: PreviewViewProps) {
+  const t = useT();
   const {
     rolePalette,
     semanticTokens,
@@ -206,9 +208,7 @@ export function PreviewView({
         <p
           className={`rounded-full border border-border bg-bg/95 px-3 py-1 text-chrome-caption font-medium text-ink shadow-none backdrop-blur-sm transition-opacity ${isTypePreviewing ? 'opacity-100' : 'opacity-0'
             }`}
-        >
-          ● Vista previa — clic para aplicar
-        </p>
+        >{t('ui.PreviewView.vista-previa-clic-para-aplicar')}</p>
       </div>
       <div
         data-edit-mode={editMode}

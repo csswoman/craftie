@@ -6,6 +6,7 @@ import { readableInk } from './previewColor';
 import { PreviewIcon } from './previewIcons';
 import { Avatar } from './previewPrimitives';
 import { brandStyle, labelStyle, ROLE_WEIGHT, type PreviewFonts } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 /** Top navigation for the analytics app: wordmark, section tabs with an underline, date filter. */
 export function AnalyticsTopBar({
@@ -17,6 +18,8 @@ export function AnalyticsTopBar({
   fonts: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   const underline = readableInk(colors.primaryAction, colors.chrome, 3);
 
   return (
@@ -26,10 +29,8 @@ export function AnalyticsTopBar({
       className="flex items-center gap-8 border-b px-6 @min-[900px]/analytics:px-8"
       style={{ backgroundColor: colors.chrome, borderColor: colors.divider }}
     >
-      <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="py-4" style={brandStyle(fonts)}>
-        Craftie Métricas
-      </PreviewSlotTarget>
-      <nav className="hidden items-stretch gap-6 self-stretch @min-[640px]/analytics:flex" aria-label="Secciones">
+      <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="py-4" style={brandStyle(fonts)}>{t('ui.AnalyticsTopBar.craftie-metricas')}</PreviewSlotTarget>
+      <nav className="hidden items-stretch gap-6 self-stretch @min-[640px]/analytics:flex" aria-label={t('ui.AnalyticsTopBar.secciones')}>
         {ANALYTICS_TABS.map((tab, index) => {
           const active = index === 0;
 
@@ -43,7 +44,7 @@ export function AnalyticsTopBar({
                 borderColor: active ? underline : 'transparent',
               }}
             >
-              {tab}
+              {tx(tab)}
             </span>
           );
         })}

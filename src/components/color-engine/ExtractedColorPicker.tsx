@@ -6,6 +6,7 @@ import type { ExtractedColor } from '@lib/color/imageExtractor';
 import { MAX_SEED_COUNT } from '@lib/color/seeds';
 
 import { Button } from '@/components/ui/Button';
+import { useT } from '@/context/I18nContext';
 
 export type ExtractedColorPickerProps = {
   colors: ExtractedColor[];
@@ -17,6 +18,7 @@ function formatProminence(value: number): string {
 }
 
 export function ExtractedColorPicker({ colors, onConfirmSeeds }: ExtractedColorPickerProps) {
+  const t = useT();
   const [selectedHexes, setSelectedHexes] = useState<string[]>(() => colors.map((color) => color.hex));
 
   useEffect(() => {
@@ -47,14 +49,11 @@ export function ExtractedColorPicker({ colors, onConfirmSeeds }: ExtractedColorP
 
   return (
     <section
-      aria-label="Colores extraídos"
+      aria-label={t('ui.ExtractedColorPicker.colores-extraidos')}
       className="mt-4 rounded-md border border-border bg-bg p-4"
     >
-      <h3 className="text-[0.9375rem] font-semibold text-ink">Colores extraídos</h3>
-      <p className="mt-1 text-[0.8125rem] text-muted">
-        Elige hasta {MAX_SEED_COUNT} colores para usarlos como semillas. Todos vienen seleccionados
-        por defecto.
-      </p>
+      <h3 className="text-[0.9375rem] font-semibold text-ink">{t('ui.ExtractedColorPicker.colores-extraidos')}</h3>
+      <p className="mt-1 text-[0.8125rem] text-muted">{t('ui.ExtractedColorPicker.elige-hasta-colores-para-usarlos', { MAX_SEED_COUNT })}</p>
 
       <ul className="mt-4 flex flex-col gap-3">
         {colors.map((color) => {
@@ -83,12 +82,11 @@ export function ExtractedColorPicker({ colors, onConfirmSeeds }: ExtractedColorP
                   <span className="block font-mono text-[0.9375rem] font-semibold text-ink">
                     {color.hex}
                   </span>
-                  <span className="mt-0.5 block text-[0.8125rem] text-muted">
-                    Prominencia {formatProminence(color.prominence)}
+                  <span className="mt-0.5 block text-[0.8125rem] text-muted">{t('ui.ExtractedColorPicker.prominencia', { value: formatProminence(color.prominence) })}
                   </span>
                 </span>
                 <span className="text-[0.8125rem] font-medium text-muted">
-                  {isSelected ? 'Seleccionado' : 'Sin seleccionar'}
+                  {isSelected ? t('ui.ExtractedColorPicker.seleccionado') : t('ui.ExtractedColorPicker.sin-seleccionar')}
                 </span>
               </button>
             </li>
@@ -97,12 +95,9 @@ export function ExtractedColorPicker({ colors, onConfirmSeeds }: ExtractedColorP
       </ul>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <Button type="button" onClick={handleConfirm} disabled={selectedHexes.length === 0}>
-          Usar colores seleccionados
-        </Button>
+        <Button type="button" onClick={handleConfirm} disabled={selectedHexes.length === 0}>{t('ui.ExtractedColorPicker.usar-colores-seleccionados')}</Button>
         <p className="text-[0.8125rem] text-muted">
-          {selectedHexes.length} de {Math.min(colors.length, MAX_SEED_COUNT)} semillas
-        </p>
+          {t('ui.ExtractedColorPicker.de-semillas', { length: selectedHexes.length, value: Math.min(colors.length, MAX_SEED_COUNT) })}</p>
       </div>
     </section>
   );

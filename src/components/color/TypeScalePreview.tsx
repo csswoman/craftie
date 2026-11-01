@@ -11,6 +11,7 @@ import { TypeLevelPopover, type TypeLevelAnchor } from '@/components/color/TypeL
 import { useTypeRoles } from '@/context/TypeRolesContext';
 import { TypeScaleSpecimen } from '@/components/color/TypeScaleSpecimen';
 import { TypeScaleTable } from '@/components/color/TypeScaleTable';
+import { useT, useTx } from '@/context/I18nContext';
 
 type TypeScalePreviewProps = {
   base: TypeScaleBase;
@@ -48,6 +49,8 @@ export function TypeScalePreview({
   largerSteps,
   smallerSteps,
 }: TypeScalePreviewProps) {
+  const tx = useTx();
+  const t = useT();
   const palette = useMemo(
     () => buildTypeScalePalette({ fondo: background, texto: text, borde: border }),
     [background, text, border],
@@ -84,12 +87,8 @@ export function TypeScalePreview({
               id="type-scale-title"
               className="text-balance text-2xl"
               style={{ color: palette.ink, fontFamily: headingFamily, fontWeight: headingWeight, lineHeight: 1.1 }}
-            >
-              Escala tipográfica
-            </h2>
-            <p className="mt-2 max-w-[62ch] text-sm leading-relaxed text-pretty" style={{ color: palette.muted }}>
-              Jerarquía modular para titulares, lectura continua y detalles de interfaz. Haz clic en cualquier texto o fila para ajustar su peso, tamaño e interlineado.
-            </p>
+            >{t('ui.TypeScalePreview.escala-tipografica')}</h2>
+            <p className="mt-2 max-w-[62ch] text-sm leading-relaxed text-pretty" style={{ color: palette.muted }}>{t('ui.TypeScalePreview.jerarquia-modular-para-titulares-lectura')}</p>
           </div>
           <dl className="flex shrink-0 gap-2 text-sm">
             {[
@@ -102,18 +101,17 @@ export function TypeScalePreview({
                 className="min-w-[4.5rem] rounded-lg px-3 py-2"
                 style={{ backgroundColor: palette.chip }}
               >
-                <dt className="text-[0.6875rem] leading-none" style={{ color: palette.muted }}>{item.label}</dt>
-                <dd className="mt-1.5 font-mono tabular-nums" style={{ color: palette.ink }}>{item.value}</dd>
+                <dt className="text-[0.6875rem] leading-none" style={{ color: palette.muted }}>{tx(item.label)}</dt>
+                <dd className="mt-1.5 font-mono tabular-nums" style={{ color: palette.ink }}>{tx(item.value)}</dd>
               </div>
             ))}
           </dl>
         </div>
         <p className="mt-5 text-xs leading-relaxed" style={{ color: palette.muted }}>
-          <span style={{ color: palette.ink, fontFamily: headingFamily, fontWeight: headingWeight }}>{headingName}</span>
-          {' '}en titulares ·{' '}
-          <span style={{ color: palette.ink, fontFamily: bodyFamily, fontWeight: bodyWeight }}>{bodyName}</span>
-          {' '}en lectura
-        </p>
+          <span style={{ color: palette.ink, fontFamily: headingFamily, fontWeight: headingWeight }}>{tx(headingName)}</span>
+          {t('ui.TypeScalePreview.en-titulares')}
+          <span style={{ color: palette.ink, fontFamily: bodyFamily, fontWeight: bodyWeight }}>{tx(bodyName)}</span>
+          {t('ui.TypeScalePreview.en-lectura')}</p>
       </header>
 
       <div
@@ -132,7 +130,7 @@ export function TypeScalePreview({
         <aside
           className="border-t px-2 py-5 @min-[900px]/scale:border-l @min-[900px]/scale:border-t-0 @min-[900px]/scale:py-8"
           style={{ borderColor: palette.hairline }}
-          aria-label="Referencia de la escala"
+          aria-label={t('ui.TypeScalePreview.referencia-de-la-escala')}
         >
           <TypeScaleTable
             levels={levels}

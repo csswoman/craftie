@@ -1,8 +1,11 @@
 import { pickReadableTextColor } from '@lib/color/readableText';
 
 import type { MockupPaletteProps } from './mockupTypes';
+import { useT, useTx } from '@/context/I18nContext';
 
 export function DashboardMockup({ tokens, variant = 'preview', fonts }: MockupPaletteProps) {
+  const tx = useTx();
+  const t = useT();
   const spacious = variant === 'expanded';
   const sidebarText = pickReadableTextColor(tokens.neutralDark);
 
@@ -18,9 +21,7 @@ export function DashboardMockup({ tokens, variant = 'preview', fonts }: MockupPa
         <span
           className={`font-semibold ${spacious ? 'text-sm' : 'text-[12px]'}`}
           style={{ fontFamily: fonts.headingFamily }}
-        >
-          Panel
-        </span>
+        >{t('ui.DashboardMockup.panel')}</span>
         {['Resumen', 'Proyectos', 'Ajustes'].map((item, index) => (
           <span
             key={item}
@@ -33,7 +34,7 @@ export function DashboardMockup({ tokens, variant = 'preview', fonts }: MockupPa
                 : undefined
             }
           >
-            {item}
+            {tx(item)}
           </span>
         ))}
       </aside>
@@ -46,25 +47,21 @@ export function DashboardMockup({ tokens, variant = 'preview', fonts }: MockupPa
           <span
             className={`font-semibold ${spacious ? 'text-base' : 'text-sm'}`}
             style={{ fontFamily: fonts.headingFamily, color: tokens.primary }}
-          >
-            Resumen
-          </span>
+          >{t('ui.DashboardMockup.resumen')}</span>
           <span
             className={`rounded-full font-medium ${spacious ? 'px-2 py-0.5 text-xs' : 'px-1.5 py-0.5 text-[10px]'}`}
             style={{ backgroundColor: tokens.accent, color: pickReadableTextColor(tokens.accent) }}
-          >
-            Activo
-          </span>
+          >{t('ui.DashboardMockup.activo')}</span>
         </header>
 
         <div className={`grid grid-cols-3 ${spacious ? 'gap-3' : 'gap-1.5'}`}>
-          {['Usuarios', 'Sesiones', 'Conversión'].map((label) => (
+          {['Usuarios', 'Sesiones', tx('Conversión')].map((label) => (
             <div
               key={label}
               className={`rounded border ${spacious ? 'p-3' : 'p-1.5'}`}
               style={{ borderColor: tokens.border, backgroundColor: tokens.surface }}
             >
-              <p className={`opacity-70 ${spacious ? 'text-xs' : 'text-[10px]'}`}>{label}</p>
+              <p className={`opacity-70 ${spacious ? 'text-xs' : 'text-[10px]'}`}>{tx(label)}</p>
               <p
                 className={`font-semibold ${spacious ? 'text-lg' : 'text-sm'}`}
                 style={{ fontFamily: fonts.headingFamily, color: tokens.primary }}
@@ -82,9 +79,7 @@ export function DashboardMockup({ tokens, variant = 'preview', fonts }: MockupPa
           <p
             className={`font-medium ${spacious ? 'text-xs' : 'text-[10px]'}`}
             style={{ fontFamily: fonts.headingFamily, color: tokens.primary }}
-          >
-            Actividad semanal
-          </p>
+          >{t('ui.DashboardMockup.actividad-semanal')}</p>
           <div
             className={`mt-1 flex items-end ${spacious ? 'h-20 gap-1' : 'h-10 gap-0.5'}`}
             aria-hidden="true"
@@ -107,13 +102,11 @@ export function DashboardMockup({ tokens, variant = 'preview', fonts }: MockupPa
           className={`flex items-center justify-between rounded border ${spacious ? 'px-3 py-2' : 'px-1.5 py-1'}`}
           style={{ borderColor: tokens.border, backgroundColor: tokens.surface }}
         >
-          <span className={spacious ? 'text-xs' : 'text-[10px]'}>Proyecto Aurora</span>
+          <span className={spacious ? 'text-xs' : 'text-[10px]'}>{t('ui.DashboardMockup.proyecto-aurora')}</span>
           <span
             className={`rounded font-medium ${spacious ? 'px-2 py-0.5 text-xs' : 'px-1.5 text-[10px]'}`}
             style={{ backgroundColor: tokens.neutralLight, color: tokens.neutralDark }}
-          >
-            En curso
-          </span>
+          >{t('ui.DashboardMockup.en-curso')}</span>
         </div>
       </div>
     </div>

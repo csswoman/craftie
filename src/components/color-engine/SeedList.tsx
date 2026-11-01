@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/Button';
 
 import { ColorSeedInput } from './ColorSeedInput';
+import { useT } from '@/context/I18nContext';
 
 interface SeedListProps {
   seeds: string[];
@@ -21,15 +22,14 @@ export function SeedList({
   onAdd,
   onRemove,
 }: SeedListProps) {
+  const t = useT();
   return (
     <section
-      aria-label="Colores semilla"
+      aria-label={t('ui.SeedList.colores-semilla')}
       className="rounded-lg border border-border bg-surface p-5"
     >
-      <h2 className="text-base font-semibold text-ink">Colores semilla</h2>
-      <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">
-        Elige de 1 a 3 colores base. El motor generará roles de paleta a partir de ellos.
-      </p>
+      <h2 className="text-base font-semibold text-ink">{t('ui.SeedList.colores-semilla')}</h2>
+      <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">{t('ui.SeedList.elige-de-1-a-3')}</p>
 
       <div className="mt-4 flex flex-col gap-4">
         {seeds.map((seed, index) => (
@@ -45,9 +45,7 @@ export function SeedList({
       </div>
 
       <div className="mt-4">
-        <Button type="button" variant="ghost" onClick={onAdd} disabled={!canAdd}>
-          Añadir semilla
-        </Button>
+        <Button type="button" variant="ghost" onClick={onAdd} disabled={!canAdd}>{t('ui.SeedList.anadir-semilla')}</Button>
       </div>
     </section>
   );

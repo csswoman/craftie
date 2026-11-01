@@ -4,6 +4,7 @@ import type { Palette } from '@lib/color/contrast';
 import { CONTRAST_SAMPLE_TEXT } from '@lib/color/contrast';
 import { buildFontFamilyStack } from '@lib/typography/googleFonts';
 import type { FontPair } from '@lib/typography/pairings';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type TypographyPreviewProps = {
   palette: Palette | null;
@@ -16,21 +17,21 @@ export function TypographyPreview({
   selectedPairing,
   variant = 'default',
 }: TypographyPreviewProps) {
+  const tx = useTx();
+  const t = useT();
   const isCanvas = variant === 'canvas';
 
   if (palette === null) {
     return (
       <section
-        aria-label="Vista previa tipográfica"
+        aria-label={t('ui.TypographyPreview.vista-previa-tipografica')}
         className={`flex items-center justify-center text-center ${
           isCanvas
             ? 'min-h-[320px] flex-1 bg-surface-raised/40 px-6'
             : 'rounded-md border border-dashed border-border bg-surface px-4 py-8'
         }`}
       >
-        <p className="max-w-xs text-[0.9375rem] leading-relaxed text-muted">
-          Genera la guía de marca para ver tipografía con tus colores.
-        </p>
+        <p className="max-w-xs text-[0.9375rem] leading-relaxed text-muted">{t('ui.TypographyPreview.genera-la-guia-de-marca')}</p>
       </section>
     );
   }
@@ -38,16 +39,14 @@ export function TypographyPreview({
   if (selectedPairing === null) {
     return (
       <section
-        aria-label="Vista previa tipográfica"
+        aria-label={t('ui.TypographyPreview.vista-previa-tipografica')}
         className={`flex items-center justify-center text-center ${
           isCanvas
             ? 'min-h-[320px] flex-1 bg-surface-raised/40 px-6'
             : 'rounded-md border border-dashed border-border bg-surface px-4 py-8'
         }`}
       >
-        <p className="max-w-xs text-[0.9375rem] leading-relaxed text-muted">
-          Selecciona un par tipográfico en el panel izquierdo para ver la mini guía de marca.
-        </p>
+        <p className="max-w-xs text-[0.9375rem] leading-relaxed text-muted">{t('ui.TypographyPreview.selecciona-un-par-tipografico-en')}</p>
       </section>
     );
   }
@@ -57,16 +56,16 @@ export function TypographyPreview({
 
   return (
     <section
-      aria-label="Vista previa tipográfica"
+      aria-label={t('ui.TypographyPreview.vista-previa-tipografica')}
       className={`flex min-h-0 flex-1 flex-col overflow-hidden ${
         isCanvas ? 'bg-bg' : 'rounded-md border border-border'
       }`}
       style={{ backgroundColor: palette.surface }}
     >
       <div className="shrink-0 border-b border-border/60 px-5 py-3">
-        <p className="text-[0.8125rem] font-medium text-muted">Mini guía de marca</p>
+        <p className="text-[0.8125rem] font-medium text-muted">{t('ui.TypographyPreview.mini-guia-de-marca')}</p>
         <p className="mt-0.5 text-[0.75rem] text-muted">
-          {selectedPairing.heading.family} + {selectedPairing.body.family}
+          {tx(selectedPairing.heading.family)} + {tx(selectedPairing.body.family)}
         </p>
       </div>
 
@@ -83,9 +82,7 @@ export function TypographyPreview({
             color: palette.primary,
             fontFamily: headingFont,
           }}
-        >
-          Marca con propósito
-        </h3>
+        >{t('ui.TypographyPreview.marca-con-proposito')}</h3>
 
         <p
           className={`max-w-prose leading-relaxed ${
@@ -96,9 +93,7 @@ export function TypographyPreview({
             fontFamily: bodyFont,
           }}
         >
-          {CONTRAST_SAMPLE_TEXT} Esta vista usa los colores de tu paleta generada para evaluar
-          jerarquía, legibilidad y tono visual del par seleccionado.
-        </p>
+          {t('ui.TypographyPreview.esta-vista-usa-los-colores', { CONTRAST_SAMPLE_TEXT: tx(CONTRAST_SAMPLE_TEXT) })}</p>
 
         <div className={`flex flex-wrap gap-2 ${isCanvas ? 'mt-8' : 'pt-2'}`}>
           <span
@@ -108,9 +103,7 @@ export function TypographyPreview({
               color: palette.surface,
               fontFamily: headingFont,
             }}
-          >
-            Acción principal
-          </span>
+          >{t('ui.TypographyPreview.accion-principal')}</span>
           <span
             className="rounded-md border px-3 py-1.5 text-[0.8125rem] font-medium"
             style={{
@@ -118,9 +111,7 @@ export function TypographyPreview({
               color: palette.onSurface,
               fontFamily: bodyFont,
             }}
-          >
-            Etiqueta secundaria
-          </span>
+          >{t('ui.TypographyPreview.etiqueta-secundaria')}</span>
         </div>
       </div>
     </section>

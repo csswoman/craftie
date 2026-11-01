@@ -8,6 +8,7 @@ import {
   type ResolvedTypeRole,
   type TypeRoleField,
 } from '@lib/typography/typeRoles';
+import { useT, useTx } from '@/context/I18nContext';
 
 /** The fields the editor needs; satisfied by roles and by scale levels. */
 export type EditableType = Pick<ResolvedTypeRole, 'weight' | 'size' | 'lineHeight' | 'letterSpacing' | 'overridden'>;
@@ -33,14 +34,16 @@ type SliderRowProps = {
 };
 
 function SliderRow({ label, field, value, suffix, digits, edited, onChange }: SliderRowProps) {
+  const tx = useTx();
+  const t = useT();
   const limits = TYPE_ROLE_LIMITS[field];
 
   return (
     <label className="block">
       <span className="mb-1.5 flex items-center justify-between gap-3 text-chrome-caption text-ink">
         <span>
-          {label}
-          {edited ? <span className="ml-1.5 text-primary" aria-label="editado">•</span> : null}
+          {tx(label)}
+          {edited ? <span className="ml-1.5 text-primary" aria-label={t('ui.TypeRoleFields.editado')}>•</span> : null}
         </span>
         <input
           type="number"
@@ -64,7 +67,7 @@ function SliderRow({ label, field, value, suffix, digits, edited, onChange }: Sl
         max={limits.max}
         step={limits.step}
         value={value}
-        aria-label={label}
+        aria-label={tx(label)}
         onChange={(event) => onChange(Number(event.target.value))}
         className="h-2 w-full cursor-pointer accent-primary"
       />
@@ -73,6 +76,7 @@ function SliderRow({ label, field, value, suffix, digits, edited, onChange }: Sl
 }
 
 export function TypeRoleFields({ role, defaultWeight, onPatch, onReset }: TypeRoleFieldsProps) {
+  const t = useT();
   const anyEdited = Object.values(role.overridden).some(Boolean);
   const weights = TYPE_ROLE_WEIGHT_OPTIONS.includes(role.weight as (typeof TYPE_ROLE_WEIGHT_OPTIONS)[number])
     ? TYPE_ROLE_WEIGHT_OPTIONS
@@ -81,11 +85,9 @@ export function TypeRoleFields({ role, defaultWeight, onPatch, onReset }: TypeRo
   return (
     <div className="space-y-4">
       <div>
-        <p className="mb-1.5 text-chrome-caption text-ink">
-          Peso
-          {role.overridden.weight ? <span className="ml-1.5 text-primary" aria-label="editado">•</span> : null}
+        <p className="mb-1.5 text-chrome-caption text-ink">{t('ui.TypeRoleFields.peso')}{role.overridden.weight ? <span className="ml-1.5 text-primary" aria-label={t('ui.TypeRoleFields.editado')}>•</span> : null}
         </p>
-        <div role="group" aria-label="Peso" className="flex flex-wrap gap-1">
+        <div role="group" aria-label={t('ui.TypeRoleFields.peso')} className="flex flex-wrap gap-1">
           {weights.map((weight) => {
             const active = role.weight === weight;
             return (
@@ -93,7 +95,7 @@ export function TypeRoleFields({ role, defaultWeight, onPatch, onReset }: TypeRo
                 key={weight}
                 type="button"
                 aria-pressed={active}
-                title={weight === defaultWeight ? 'Peso del par' : undefined}
+                title={weight === defaultWeight ? t('ui.TypeRoleFields.peso-del-par') : undefined}
                 onClick={() => onPatch({ weight: weight === defaultWeight ? undefined : weight })}
                 className={`h-8 min-w-[2.5rem] rounded-md border px-2 font-mono text-xs tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
                   active ? 'border-ink bg-ink text-bg' : 'border-border bg-bg text-ink hover:bg-surface'
@@ -105,18 +107,16 @@ export function TypeRoleFields({ role, defaultWeight, onPatch, onReset }: TypeRo
           })}
         </div>
       </div>
-      <SliderRow label="Tamaño" field="size" value={role.size} suffix="px" digits={0} edited={role.overridden.size} onChange={(size) => onPatch({ size })} />
-      <SliderRow label="Interlineado" field="lineHeight" value={role.lineHeight} suffix="" digits={2} edited={role.overridden.lineHeight} onChange={(lineHeight) => onPatch({ lineHeight })} />
-      <SliderRow label="Tracking" field="letterSpacing" value={role.letterSpacing} suffix="em" digits={3} edited={role.overridden.letterSpacing} onChange={(letterSpacing) => onPatch({ letterSpacing })} />
+      <SliderRow label={t('ui.TypeRoleFields.tamano')} field="size" value={role.size} suffix="px" digits={0} edited={role.overridden.size} onChange={(size) => onPatch({ size })} />
+      <SliderRow label={t('ui.TypeRoleFields.interlineado')} field="lineHeight" value={role.lineHeight} suffix="" digits={2} edited={role.overridden.lineHeight} onChange={(lineHeight) => onPatch({ lineHeight })} />
+      <SliderRow label={t('ui.TypeRoleFields.tracking')} field="letterSpacing" value={role.letterSpacing} suffix="em" digits={3} edited={role.overridden.letterSpacing} onChange={(letterSpacing) => onPatch({ letterSpacing })} />
       <button
         type="button"
         onClick={onReset}
         disabled={!anyEdited}
         className="inline-flex min-h-8 items-center gap-1.5 rounded-md border border-border bg-bg px-2.5 text-chrome-caption text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <RotateCcw size={13} aria-hidden="true" />
-        Restablecer rol
-      </button>
+        <RotateCcw size={13} aria-hidden="true" />{t('ui.TypeRoleFields.restablecer-rol')}</button>
     </div>
   );
 }

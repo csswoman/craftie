@@ -1,4 +1,7 @@
+
 'use client';
+
+import { useTx } from '@/context/I18nContext';
 
 export function PaletteToolbarIconButton({
   label,
@@ -19,6 +22,7 @@ export function PaletteToolbarIconButton({
   showTooltip?: boolean;
   onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }) {
+  const tx = useTx();
   const chromeClasses = lightChrome
     ? {
         button: active ? 'bg-white/20' : 'hover:bg-white/10 hover:scale-105',
@@ -33,8 +37,8 @@ export function PaletteToolbarIconButton({
     <div className="group/tooltip relative">
       <button
         type="button"
-        aria-label={label}
-        title={label}
+        aria-label={tx(label)}
+        title={tx(label)}
         disabled={disabled}
         onClick={onClick}
         className={`flex items-center justify-center rounded-md text-current transition-[opacity,transform,background-color] focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-35 ${
@@ -48,7 +52,7 @@ export function PaletteToolbarIconButton({
           role="tooltip"
           className="pointer-events-none absolute left-1/2 top-[calc(100%+8px)] z-20 -translate-x-1/2 whitespace-nowrap rounded-md border border-border bg-ink px-2 py-1 text-chrome-caption font-medium text-bg opacity-0 shadow-md transition-opacity group-hover/tooltip:opacity-100 group-focus-within/tooltip:opacity-100"
         >
-          {label}
+          {tx(label)}
         </span>
       ) : null}
     </div>

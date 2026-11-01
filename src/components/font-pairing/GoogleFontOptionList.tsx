@@ -11,6 +11,7 @@ import { loadGoogleFontFamily } from '@/lib/browser/customFonts';
 
 import { GoogleFontCategoryChips } from './GoogleFontCategoryChips';
 import { GoogleFontOptionRow } from './GoogleFontOptionRow';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type GoogleFontOptionListProps = {
   listboxId: string;
@@ -45,6 +46,8 @@ export const GoogleFontOptionList = forwardRef<
   },
   ref,
 ) {
+  const tx = useTx();
+  const t = useT();
   const [readyFamilies, setReadyFamilies] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
@@ -86,18 +89,14 @@ export const GoogleFontOptionList = forwardRef<
         <GoogleFontCategoryChips value={category} onChange={onCategoryChange} />
       </div>
       {loading ? (
-        <p className="px-2.5 py-3 text-chrome-caption text-muted" role="status">
-          Cargando catálogo…
-        </p>
+        <p className="px-2.5 py-3 text-chrome-caption text-muted" role="status">{t('ui.GoogleFontOptionList.cargando-catalogo')}</p>
       ) : suggestions.length === 0 ? (
-        <p className="px-2.5 py-3 text-chrome-caption text-muted">
-          Sin coincidencias para este filtro.
-        </p>
+        <p className="px-2.5 py-3 text-chrome-caption text-muted">{t('ui.GoogleFontOptionList.sin-coincidencias-para-este-filtro')}</p>
       ) : (
         <ul
           id={`${listboxId}-options`}
           role="listbox"
-          aria-label={`Sugerencias para ${label}`}
+          aria-label={t('ui.GoogleFontOptionList.sugerencias-para', { label: tx(label) })}
           className="min-h-0 flex-1 overflow-y-auto p-1"
         >
           {suggestions.map((font, index) => (

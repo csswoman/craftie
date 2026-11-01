@@ -2,6 +2,7 @@
 
 import type { GeneratedPalette } from '@lib/color/formulas';
 import type { FontPair } from '@lib/typography/pairings';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type StudioStatusBarProps = {
   palette: GeneratedPalette | null;
@@ -23,6 +24,8 @@ export function StudioStatusBar({
   pairing,
   mobileDockOffset = false,
 }: StudioStatusBarProps) {
+  const tx = useTx();
+  const t = useT();
   if (!palette) {
     return null;
   }
@@ -37,13 +40,13 @@ export function StudioStatusBar({
     >
       <div className="pointer-events-auto flex max-w-full items-center gap-4 rounded-lg border border-border bg-bg/95 px-3 py-2 shadow-sm backdrop-blur-sm">
         <div className="hidden min-w-0 items-center gap-3 sm:flex">
-          <TypeChip label="Titular" value={pairing?.heading.family ?? 'Sin asignar'} />
+          <TypeChip label={t('ui.StudioStatusBar.titular')} value={pairing?.heading.family ?? tx('Sin asignar')} />
           <span className="text-muted" aria-hidden="true">
             ·
           </span>
-          <TypeChip label="Cuerpo" value={pairing?.body.family ?? 'Sin asignar'} />
+          <TypeChip label={t('ui.StudioStatusBar.cuerpo')} value={pairing?.body.family ?? tx('Sin asignar')} />
         </div>
-        <ul className="flex items-center gap-1.5" aria-label="Colores activos de la paleta generada">
+        <ul className="flex items-center gap-1.5" aria-label={t('ui.StudioStatusBar.colores-activos-de-la-paleta')}>
           {SWATCH_ROLES.map(({ role, label }) => {
             const hex = palette[role];
 
@@ -65,10 +68,11 @@ export function StudioStatusBar({
 }
 
 function TypeChip({ label, value }: { label: string; value: string }) {
+  const tx = useTx();
   return (
     <span className="min-w-0 truncate text-[0.75rem] text-muted">
-      <span className="sr-only">{label}: </span>
-      <span className="font-semibold text-ink">{value}</span>
+      <span className="sr-only">{tx(label)}: </span>
+      <span className="font-semibold text-ink">{tx(value)}</span>
     </span>
   );
 }

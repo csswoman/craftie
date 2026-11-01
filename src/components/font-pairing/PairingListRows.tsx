@@ -6,6 +6,7 @@ import type { FontPair } from '@lib/typography/pairings';
 
 import { loadGoogleFonts } from '@/lib/browser/googleFonts';
 import { PairRow } from './PairRow';
+import { useTx } from '@/context/I18nContext';
 
 export function PairGroup({
   heading,
@@ -26,6 +27,7 @@ export function PairGroup({
   onClearPreview?: () => void;
   variant?: 'default' | 'tools';
 }) {
+  const tx = useTx();
   if (pairings.length === 0) {
     return null;
   }
@@ -34,7 +36,7 @@ export function PairGroup({
     <div className="min-w-0">
       {heading ? (
         <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">
-          {heading}
+          {tx(heading)}
         </p>
       ) : null}
       <ul className="min-w-0 space-y-2 overflow-x-hidden">

@@ -5,6 +5,7 @@ import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTar
 import { MOBILE_LIBRARY_FILTERS, MOBILE_PALETTES } from './mobilePreviewData';
 import { buttonPairOn } from './previewButtons';
 import { buttonStyle, captionStyle, displayStyle, labelStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 /** "Paletas": search, filter chips and a two-column grid of palette tiles, plus an empty "new" tile. */
 export function MobileLibraryScreen({
@@ -16,14 +17,14 @@ export function MobileLibraryScreen({
   fonts: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   const chip = buttonPairOn(colors, colors.appBackground);
   const swatchHex = (slot: UiLayoutSlot) => colors[slot] ?? colors.accent;
 
   return (
     <div className="flex h-full flex-col px-5">
-      <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="pb-4 pt-5" style={displayStyle(fonts)}>
-        Paletas
-      </PreviewSlotTarget>
+      <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="pb-4 pt-5" style={displayStyle(fonts)}>{t('ui.MobileLibraryScreen.paletas')}</PreviewSlotTarget>
 
       <PreviewSlotTarget
         slot="surface"
@@ -32,7 +33,7 @@ export function MobileLibraryScreen({
         style={{ backgroundColor: colors.surface, borderColor: colors.border, color: colors.mutedText }}
       >
         <PreviewIcon name="search" size={16} />
-        <span style={labelStyle(fonts, colors.mutedText)}>Buscar paletas</span>
+        <span style={labelStyle(fonts, colors.mutedText)}>{t('ui.MobileLibraryScreen.buscar-paletas')}</span>
       </PreviewSlotTarget>
 
       <div className="mt-3 flex gap-2">
@@ -47,7 +48,7 @@ export function MobileLibraryScreen({
               color: index === 0 ? chip.on : colors.text,
             }}
           >
-            {filter}
+            {tx(filter)}
           </span>
         ))}
       </div>
@@ -72,11 +73,10 @@ export function MobileLibraryScreen({
             </div>
             <div className="p-2.5">
               <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="truncate" style={titleStyle(fonts)}>
-                {palette.name}
+                {tx(palette.name)}
               </PreviewSlotTarget>
               <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="truncate" style={captionStyle(fonts, colors.mutedText)}>
-                {palette.swatches.length} colores
-              </PreviewSlotTarget>
+                {t('ui.MobileLibraryScreen.colores', { length: palette.swatches.length })}</PreviewSlotTarget>
             </div>
           </PreviewSlotTarget>
         ))}
@@ -89,9 +89,7 @@ export function MobileLibraryScreen({
           <span className="flex flex-col items-center gap-1.5" style={labelStyle(fonts, colors.mutedText)}>
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden="true">
               <path d="M12 5v14M5 12h14" />
-            </svg>
-            Nueva paleta
-          </span>
+            </svg>{t('ui.MobileLibraryScreen.nueva-paleta')}</span>
         </PreviewSlotTarget>
       </div>
     </div>

@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import { StudioCanvasToolsSidebar } from '@/components/layout/StudioCanvasToolsSidebar';
 import { useStudioPanelLayout } from '@/components/layout/useStudioPanelLayout';
 import { useMinWidthQuery } from '@/lib/browser/useMinWidthQuery';
+import { useT } from '@/context/I18nContext';
 
 export type StudioCanvasProps = {
   sidebar: ReactNode;
@@ -14,6 +15,7 @@ export type StudioCanvasProps = {
 };
 
 export function StudioCanvas({ sidebar, sidebarHeaderExtra, main, mobileToolsDock }: StudioCanvasProps) {
+  const t = useT();
   // The workspace has enough room for its fixed tools column from the desktop breakpoint.
   // Below it, tools remain in the touch-first bottom sheet.
   const isWideLayout = useMinWidthQuery(1024);
@@ -32,7 +34,7 @@ export function StudioCanvas({ sidebar, sidebarHeaderExtra, main, mobileToolsDoc
         />
 
         <main
-          aria-label="Vista del estudio"
+          aria-label={t('ui.StudioCanvas.vista-del-estudio')}
           className="flex min-w-0 flex-1 flex-col lg:min-h-0"
         >
           <div className="flex min-h-[min(52vh,560px)] flex-1 flex-col overflow-visible bg-bg lg:min-h-0 lg:overflow-hidden">

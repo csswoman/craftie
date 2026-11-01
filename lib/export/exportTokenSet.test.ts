@@ -156,3 +156,21 @@ describe('buildExportTokenSet', () => {
     });
   });
 });
+
+describe('derived tokens in the export set', () => {
+  it('fills on-* pairs and dark values, and lets overrides win', async () => {
+    const { buildExportTokenSet } = await import('./exportTokenSet');
+    const set = buildExportTokenSet({
+      rolePalette: null,
+      tokenOverridesByTheme: { light: { primary: '#112233' }, dark: {} },
+      pairing: null,
+      derivedTokensByTheme: {
+        light: { primary: '#445566', 'on-primary': '#ffffff' },
+        dark: { primary: '#99aabb', 'on-primary': '#000000', background: '#101010' },
+      },
+    });
+    expect(set.colors.primary).toEqual({ light: '#112233', dark: '#99AABB' });
+    expect(set.colors['on-primary']).toEqual({ light: '#FFFFFF', dark: '#000000' });
+    expect(set.colors.background?.dark).toBe('#101010');
+  });
+});

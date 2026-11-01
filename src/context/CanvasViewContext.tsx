@@ -10,6 +10,7 @@ import {
 } from 'react';
 
 import type { CanvasViewId } from '@lib/color/canvasViews';
+import type { ColorVisionMode } from '@lib/color/colorVision';
 import type { UiLayoutModeId } from '@lib/color/layoutModes';
 
 export type PreviewActiveMode = UiLayoutModeId;
@@ -18,6 +19,9 @@ export type CanvasViewContextValue = {
   activeView: CanvasViewId;
   activeMode: PreviewActiveMode;
   selectView: (view: CanvasViewId) => void;
+  /** View-only color vision simulation; never touches palette data or exports. */
+  visionMode: ColorVisionMode;
+  setVisionMode: (mode: ColorVisionMode) => void;
 };
 
 const CanvasViewContext = createContext<CanvasViewContextValue | null>(null);
@@ -25,6 +29,7 @@ const CanvasViewContext = createContext<CanvasViewContextValue | null>(null);
 export function CanvasViewProvider({ children }: { children: ReactNode }) {
   const [activeView, setActiveView] = useState<CanvasViewId>('colors');
   const [activeMode, setActiveMode] = useState<PreviewActiveMode>('dashboard');
+  const [visionMode, setVisionMode] = useState<ColorVisionMode>('none');
 
   const selectView = useCallback((view: CanvasViewId) => {
     setActiveView(view);
@@ -44,8 +49,8 @@ export function CanvasViewProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ activeView, activeMode, selectView }),
-    [activeView, activeMode, selectView],
+    () => ({ activeView, activeMode, selectView, visionMode, setVisionMode }),
+    [activeView, activeMode, selectView, visionMode],
   );
 
   return <CanvasViewContext.Provider value={value}>{children}</CanvasViewContext.Provider>;

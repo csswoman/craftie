@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 
 import { getNamedColorShades } from '@lib/color/colorDetails';
 import { pickReadableTextColor } from '@lib/color/readableText';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type PaletteShadesOverlayProps = {
   hex: string;
@@ -18,12 +19,14 @@ export function PaletteShadesOverlay({
   onSelectShade,
   onClose,
 }: PaletteShadesOverlayProps) {
+  const tx = useTx();
+  const t = useT();
   const shades = useMemo(() => getNamedColorShades(hex, 10), [hex]);
 
   return (
     <div
       className="absolute inset-0 z-[5] flex flex-row"
-      aria-label="Shades del color"
+      aria-label={t('ui.PaletteShadesOverlay.shades-del-color')}
       onClick={(event) => event.stopPropagation()}
       onKeyDown={(event) => event.stopPropagation()}
     >
@@ -31,8 +34,8 @@ export function PaletteShadesOverlay({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Cerrar selector de shades"
-          title="Cerrar"
+          aria-label={t('ui.PaletteShadesOverlay.cerrar-selector-de-shades')}
+          title={t('ui.PaletteShadesOverlay.cerrar')}
           className="flex size-11 items-center justify-center rounded-md bg-black/45 text-white transition-colors hover:bg-black/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
         >
           <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3.5">
@@ -58,7 +61,7 @@ export function PaletteShadesOverlay({
             disabled={!canApply}
             aria-label={
               canApply
-                ? `Usar ${shade.name} (${shade.hex})`
+                ? t('ui.PaletteShadesOverlay.usar', { name: tx(shade.name), hex: shade.hex })
                 : `${shade.name} (${shade.hex})`
             }
             onClick={() => {
@@ -76,7 +79,7 @@ export function PaletteShadesOverlay({
               {shade.hex.replace('#', '').toUpperCase()}
             </span>
             <span className="mt-0.5 line-clamp-2 text-[clamp(0.5625rem,1.2vw,0.75rem)] font-medium leading-tight opacity-95">
-              {shade.name}
+              {tx(shade.name)}
             </span>
           </button>
         );

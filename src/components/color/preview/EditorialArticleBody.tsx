@@ -5,6 +5,7 @@ import { EDITORIAL_ARTICLE, EDITORIAL_GUTTER_CLASS, EDITORIAL_MOST_READ, EDITORI
 import { paletteTint } from './previewButtons';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { bodyStyle, captionStyle, displayStyle, headingStyle, heroStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 const NUMERAL_SLOTS = ['brand1', 'brand2', 'brand3', 'brand1'] as const;
 const TAG_SLOTS = ['brand1', 'brand2', 'brand3'] as const;
@@ -22,6 +23,9 @@ export function EditorialArticleBody({
   fonts: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
+  const lead = tx(EDITORIAL_ARTICLE.lead);
+  const t = useT();
   const accentInk = readableOn(colors.accent, colors.appBackground, 3);
 
   return (
@@ -34,25 +38,23 @@ export function EditorialArticleBody({
             className="float-left mr-3 mt-1"
             style={{ ...heroStyle(fonts), color: accentInk, fontSize: '4.2em', lineHeight: 0.8 }}
           >
-            {EDITORIAL_ARTICLE.lead.charAt(0)}
+            {tx(lead.charAt(0))}
           </PreviewSlotTarget>
-          {EDITORIAL_ARTICLE.lead.slice(1)}
+          {tx(lead.slice(1))}
         </PreviewSlotTarget>
         {EDITORIAL_ARTICLE.paragraphs.map((paragraph) => (
           <PreviewSlotTarget key={paragraph} slot="text" onEditSlot={onEditSlot} className="mt-5 max-w-[62ch] text-pretty" style={bodyStyle(fonts)}>
-            {paragraph}
+            {tx(paragraph)}
           </PreviewSlotTarget>
         ))}
 
         <figure className="m-0 my-10 max-w-[62ch]">
-          <PreviewSlotTarget slot="accent" onEditSlot={onEditSlot} className="leading-none" style={{ ...heroStyle(fonts), color: accentInk, fontSize: 'calc(var(--role-hero-size, var(--size-h1)) * 1.6)', lineHeight: 0.6 }} aria-hidden="true">
-            &ldquo;
-          </PreviewSlotTarget>
+          <PreviewSlotTarget slot="accent" onEditSlot={onEditSlot} className="leading-none" style={{ ...heroStyle(fonts), color: accentInk, fontSize: 'calc(var(--role-hero-size, var(--size-h1)) * 1.6)', lineHeight: 0.6 }} aria-hidden="true">{t('ui.EditorialArticleBody.ldquo')}</PreviewSlotTarget>
           <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-2 max-w-[30ch] text-balance" style={displayStyle(fonts)}>
-            {EDITORIAL_ARTICLE.quote}
+            {tx(EDITORIAL_ARTICLE.quote)}
           </PreviewSlotTarget>
           <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-3" style={captionStyle(fonts, colors.mutedText)}>
-            — {EDITORIAL_ARTICLE.byline}
+            — {tx(EDITORIAL_ARTICLE.byline)}
           </PreviewSlotTarget>
         </figure>
 
@@ -69,17 +71,15 @@ export function EditorialArticleBody({
                 className="rounded-full px-3 py-1"
                 style={{ ...captionStyle(fonts), backgroundColor: wash, color: readableOn(colors.text, wash) }}
               >
-                {tag}
+                {tx(tag)}
               </PreviewSlotTarget>
             );
           })}
         </div>
       </article>
 
-      <aside className="preview-rise min-w-0" aria-label="Lo más leído">
-        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="border-b-2 pb-3" style={{ ...headingStyle(fonts), borderColor: colors.text }}>
-          Lo más leído
-        </PreviewSlotTarget>
+      <aside className="preview-rise min-w-0" aria-label={t('ui.EditorialArticleBody.lo-mas-leido')}>
+        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="border-b-2 pb-3" style={{ ...headingStyle(fonts), borderColor: colors.text }}>{t('ui.EditorialArticleBody.lo-mas-leido')}</PreviewSlotTarget>
         <ol>
           {EDITORIAL_MOST_READ.map((title, index) => {
             const slot = NUMERAL_SLOTS[index]!;
@@ -101,7 +101,7 @@ export function EditorialArticleBody({
                   {index + 1}
                 </PreviewSlotTarget>
                 <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="min-w-0 text-balance" style={titleStyle(fonts)}>
-                  {title}
+                  {tx(title)}
                 </PreviewSlotTarget>
               </PreviewSlotTarget>
             );

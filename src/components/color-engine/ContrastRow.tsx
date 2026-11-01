@@ -14,6 +14,7 @@ import { copyHexToClipboard } from '@lib/color/paletteOrder';
 
 import { ContrastBadge } from './ContrastBadge';
 import { ContrastSuggestionPanel } from './ContrastSuggestionPanel';
+import { useT, useTx } from '@/context/I18nContext';
 
 const PAIR_LABELS: Record<ContrastResult['pairRole'], string> = {
   'on-surface/surface': 'Texto sobre superficie',
@@ -36,6 +37,8 @@ export function ContrastRow({
   compact = false,
   onApplyForeground,
 }: ContrastRowProps) {
+  const tx = useTx();
+  const t = useT();
   const status = getContrastStatus(result, target);
   const needsSuggestion = status !== 'pass';
   const [showSuggestion, setShowSuggestion] = useState(false);
@@ -91,7 +94,7 @@ export function ContrastRow({
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
               <p className="text-[0.9375rem] font-semibold leading-snug text-ink">
-                {PAIR_LABELS[result.pairRole]}
+                {tx(PAIR_LABELS[result.pairRole])}
               </p>
               <ContrastBadge
                 ratio={result.ratio}
@@ -108,7 +111,7 @@ export function ContrastRow({
                 backgroundColor: result.background.hex,
               }}
             >
-              {CONTRAST_SAMPLE_TEXT}
+              {tx(CONTRAST_SAMPLE_TEXT)}
             </p>
             {suggestionPanel}
           </div>
@@ -121,14 +124,14 @@ export function ContrastRow({
     <li className="rounded-md border border-border bg-surface p-4">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <p className="text-[0.8125rem] font-medium text-muted">{PAIR_LABELS[result.pairRole]}</p>
+          <p className="text-[0.8125rem] font-medium text-muted">{tx(PAIR_LABELS[result.pairRole])}</p>
 
           <div className="mt-3 flex items-center gap-2">
-            <Swatch color={result.foreground.hex} label="Primer plano" />
+            <Swatch color={result.foreground.hex} label={t('ui.ContrastRow.primer-plano')} />
             <span className="text-muted" aria-hidden="true">
               /
             </span>
-            <Swatch color={result.background.hex} label="Fondo" />
+            <Swatch color={result.background.hex} label={t('ui.ContrastRow.fondo')} />
           </div>
 
           <p
@@ -138,7 +141,7 @@ export function ContrastRow({
               backgroundColor: result.background.hex,
             }}
           >
-            {CONTRAST_SAMPLE_TEXT}
+            {tx(CONTRAST_SAMPLE_TEXT)}
           </p>
 
           {suggestionPanel}
@@ -164,28 +167,29 @@ function PairSwatch({
   background: string;
   compact?: boolean;
 }) {
+  const t = useT();
   if (compact) {
     return (
       <div
         className="flex shrink-0 flex-col gap-1.5"
         role="img"
-        aria-label={`Texto ${foreground}, fondo ${background}`}
+        aria-label={t('ui.ContrastRow.texto-fondo', { foreground, background })}
       >
         <div className="flex gap-1.5">
           <span
             className="size-12 rounded-lg ring-1 ring-inset ring-ink/10 dark:ring-white/15"
             style={{ backgroundColor: foreground }}
-            title="Texto"
+            title={t('ui.ContrastRow.texto')}
           />
           <span
             className="size-12 rounded-lg ring-1 ring-inset ring-ink/10 dark:ring-white/15"
             style={{ backgroundColor: background }}
-            title="Fondo"
+            title={t('ui.ContrastRow.fondo')}
           />
         </div>
         <div className="flex justify-between px-0.5 text-chrome-caption font-medium text-muted">
-          <span>Texto</span>
-          <span>Fondo</span>
+          <span>{t('ui.ContrastRow.texto')}</span>
+          <span>{t('ui.ContrastRow.fondo')}</span>
         </div>
       </div>
     );
@@ -206,6 +210,7 @@ function PairSwatch({
 }
 
 function Swatch({ color, label }: { color: string; label: string }) {
+  const tx = useTx();
   return (
     <div className="flex items-center gap-2">
       <span
@@ -213,7 +218,7 @@ function Swatch({ color, label }: { color: string; label: string }) {
         style={{ backgroundColor: color }}
         aria-hidden="true"
       />
-      <span className="text-chrome-caption font-medium text-muted">{label}</span>
+      <span className="text-chrome-caption font-medium text-muted">{tx(label)}</span>
     </div>
   );
 }

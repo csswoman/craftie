@@ -3,7 +3,9 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 
 import { ChevronDownIcon, DownloadIcon } from '@/components/layout/ExportMenuIcons';
+import { EXPORT_OPTIONS } from '@/components/layout/exportMenuOptions';
 import { ExportMenuItem } from '@/components/layout/ExportMenuItem';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type ExportMenuProps = {
   canExport: boolean;
@@ -12,58 +14,17 @@ export type ExportMenuProps = {
   onCopyCss: () => void;
   onExportTokensJson: () => void;
   onExportFigmaTokens: () => void;
+  onExportTailwind: () => void;
+  onExportShadcn: () => void;
   onExportDesignMd: () => void;
   onExportBrandKit: () => void;
   onExportImage: () => void;
   onCopyShareLink: () => void;
 };
 
-const EXPORT_OPTIONS = [
-  {
-    id: 'share-link',
-    label: 'Copiar enlace',
-    description: 'Comparte esta paleta con una URL que la restaura al abrirla.',
-  },
-  {
-    id: 'copy-css',
-    label: 'Copiar CSS',
-    description: 'Copia las variables CSS al portapapeles, sin descargar un archivo.',
-  },
-  {
-    id: 'css',
-    label: 'CSS variables',
-    description: 'Custom properties listos para pegar en tu hoja de estilos.',
-  },
-  {
-    id: 'tokens-json',
-    label: 'Design tokens (JSON)',
-    description: 'Formato W3C / Style Dictionary.',
-  },
-  {
-    id: 'figma',
-    label: 'Figma (Tokens Studio)',
-    description: 'JSON importable con el plugin Tokens Studio.',
-  },
-  {
-    id: 'design-md',
-    label: 'DESIGN.md',
-    description: 'Guía de diseño en Markdown para documentación.',
-  },
-  {
-    id: 'brand-kit',
-    label: 'Brand kit (.json)',
-    description: 'Paquete todo-en-uno con colores y tipografía.',
-  },
-  {
-    id: 'image',
-    label: 'Imagen (.png)',
-    description: 'Tarjeta con la paleta y la tipografía activa para compartir.',
-  },
-] as const;
-
 const TRIGGER_BASE =
   'inline-flex min-h-11 items-center gap-2 rounded-lg font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25';
-const TRIGGER_READY = `${TRIGGER_BASE} bg-primary px-4 py-2 text-chrome-body text-white hover:bg-primary-hover`;
+const TRIGGER_READY = `${TRIGGER_BASE} bg-primary px-4 py-2 text-chrome-body text-on-primary hover:bg-primary-hover`;
 const TRIGGER_GATED = `${TRIGGER_BASE} border border-border bg-transparent px-3 py-2 text-chrome-label text-muted disabled:cursor-not-allowed`;
 
 const NAV_KEYS = ['ArrowDown', 'ArrowUp', 'Home', 'End'];
@@ -82,11 +43,15 @@ export function ExportMenu({
   onCopyCss,
   onExportTokensJson,
   onExportFigmaTokens,
+  onExportTailwind,
+  onExportShadcn,
   onExportDesignMd,
   onExportBrandKit,
   onExportImage,
   onCopyShareLink,
 }: ExportMenuProps) {
+  const tx = useTx();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState<{ top: string; left: string } | null>(null);
   const menuId = useId();
@@ -170,6 +135,12 @@ export function ExportMenu({
       case 'figma':
         onExportFigmaTokens();
         return;
+      case 'tailwind':
+        onExportTailwind();
+        return;
+      case 'shadcn':
+        onExportShadcn();
+        return;
       case 'design-md':
         onExportDesignMd();
         return;
@@ -192,20 +163,20 @@ export function ExportMenu({
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         aria-describedby={!canExport && exportBlockedReason ? `${menuId}-blocked` : undefined}
-        title={canExport ? 'Exportar' : (exportBlockedReason ?? 'Exportar')}
+        title={canExport ? t('export.trigger') : (exportBlockedReason ?? t('export.trigger'))}
         onClick={() => {
           if (canExport) setOpen((value) => !value);
         }}
         className={canExport ? TRIGGER_READY : TRIGGER_GATED}
       >
         <DownloadIcon />
-        <span className="hidden sm:inline">Exportar</span>
+        <span className="hidden sm:inline">{t('export.trigger')}</span>
         {canExport ? <ChevronDownIcon open={open} /> : null}
       </button>
 
       {!canExport && exportBlockedReason ? (
-        <span id={`${menuId}-blocked`} className="min-w-0 truncate text-chrome-caption text-muted" title={exportBlockedReason}>
-          {exportBlockedReason}
+        <span id={`${menuId}-blocked`} className="min-w-0 truncate text-chrome-caption text-muted" title={tx(exportBlockedReason)}>
+          {tx(exportBlockedReason)}
         </span>
       ) : null}
 
@@ -214,17 +185,17 @@ export function ExportMenu({
           ref={menuRef}
           id={menuId}
           role="menu"
-          aria-label="Opciones de exportación"
-          className="fixed z-dropdown w-[min(100vw-2rem,320px)] rounded-xl border border-border bg-bg p-2"
+          aria-label={t('export.menuAria')}
+          className="fixed z-dropdown max-h-[calc(100dvh-6rem)] w-[min(100vw-2rem,320px)] overflow-y-auto rounded-xl border border-border bg-bg p-2"
           style={{ ...menuPosition, boxShadow: 'var(--shadow-float)' }}
         >
-          <ul className="space-y-0.5">
+          <ul role="none" className="space-y-0.5">
             {EXPORT_OPTIONS.map((option) => (
               <ExportMenuItem
                 key={option.id}
                 id={option.id}
-                label={option.label}
-                description={option.description}
+                label={t(option.labelKey)}
+                description={t(option.descriptionKey)}
                 onSelect={() => handleSelect(option.id)}
               />
             ))}

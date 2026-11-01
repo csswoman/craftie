@@ -3,8 +3,11 @@
 import { PALETTE_ROLE_ORDER, ROLE_LABELS } from '@lib/color/rolePalette';
 
 import { useRolePalette } from '@/context/RolePaletteContext';
+import { useT, useTx } from '@/context/I18nContext';
 
 export function RoleActiveSelector() {
+  const tx = useTx();
+  const t = useT();
   const { rolePalette, activeRole, setActiveRole } = useRolePalette();
 
   if (!rolePalette) {
@@ -13,10 +16,8 @@ export function RoleActiveSelector() {
 
   return (
     <div className="h-full overflow-y-auto px-3 py-3">
-      <h2 className="text-chrome-title">Rol activo</h2>
-      <p className="prose-measure mt-0.5 text-chrome-label leading-relaxed text-muted">
-        Sincronizado con la paleta central.
-      </p>
+      <h2 className="text-chrome-title">{t('ui.RoleActiveSelector.rol-activo')}</h2>
+      <p className="prose-measure mt-0.5 text-chrome-label leading-relaxed text-muted">{t('ui.RoleActiveSelector.sincronizado-con-la-paleta-central')}</p>
       <div className="mt-7 flex flex-col gap-2">
         {PALETTE_ROLE_ORDER.map((role) => {
           const slot = rolePalette[role];
@@ -40,10 +41,10 @@ export function RoleActiveSelector() {
               />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-chrome-body font-semibold text-ink">
-                  {ROLE_LABELS[role]}
+                  {tx(ROLE_LABELS[role])}
                 </span>
                 <span className="block truncate text-chrome-label font-medium text-muted">
-                  {slot.name}
+                  {tx(slot.name)}
                 </span>
               </span>
               <span

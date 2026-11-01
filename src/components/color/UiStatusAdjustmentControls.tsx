@@ -11,6 +11,7 @@ import {
 import { hexToOklchChannels, oklchChannelsToHex } from '@lib/utils/colorMath';
 
 import { useRolePalette } from '@/context/RolePaletteContext';
+import { useT, useTx } from '@/context/I18nContext';
 
 export function UiStatusAdjustmentControls({
   status,
@@ -31,6 +32,7 @@ export function UiStatusAdjustmentControls({
   onApply: (status: UiStatusColor) => void;
   onDraftChange?: () => void;
 }) {
+  const t = useT();
   const { setTokenEditPreview, clearTokenEditPreview } = useRolePalette();
   const currentChannels = useMemo(() => hexToOklchChannels(status.hex), [status.hex]);
   const originalChannels = useMemo(() => hexToOklchChannels(original.hex), [original.hex]);
@@ -65,15 +67,14 @@ export function UiStatusAdjustmentControls({
           aria-hidden="true"
         />
         <div className="min-w-0 flex-1">
-          <p className="text-tools-body-sm font-semibold text-ink">Ajuste con hue anclado</p>
+          <p className="text-tools-body-sm font-semibold text-ink">{t('ui.UiStatusAdjustmentControls.ajuste-con-hue-anclado')}</p>
           <p className="font-mono text-tools-meta-scale tabular-nums text-muted">
-            {preview.hex.toUpperCase()} · hue {Math.round(preview.resultHue)}°
-          </p>
+            {t('ui.UiStatusAdjustmentControls.hue', { value: preview.hex.toUpperCase(), value2: Math.round(preview.resultHue) })}</p>
         </div>
       </div>
 
       <Slider
-        label="Luminosidad"
+        label={t('ui.UiStatusAdjustmentControls.luminosidad')}
         value={lightness}
         min={0.08}
         max={0.92}
@@ -85,7 +86,7 @@ export function UiStatusAdjustmentControls({
         }}
       />
       <Slider
-        label="Chroma"
+        label={t('ui.UiStatusAdjustmentControls.chroma')}
         value={chroma}
         min={STATUS_CHROMA_FLOORS[status.role]}
         max={0.32}
@@ -99,14 +100,10 @@ export function UiStatusAdjustmentControls({
 
       <div className="flex flex-wrap gap-2 text-tools-meta-scale">
         {candidateSelected ? (
-          <p className="w-full text-primary" role="status" aria-live="polite">
-            Preview en la paleta · aplica para guardar
-          </p>
+          <p className="w-full text-primary" role="status" aria-live="polite">{t('ui.UiStatusAdjustmentControls.preview-en-la-paleta-aplica')}</p>
         ) : null}
         {applied ? (
-          <p className="w-full text-pass" role="status" aria-live="polite">
-            Color de estado aplicado.
-          </p>
+          <p className="w-full text-pass" role="status" aria-live="polite">{t('ui.UiStatusAdjustmentControls.color-de-estado-aplicado')}</p>
         ) : null}
       </div>
 
@@ -116,17 +113,13 @@ export function UiStatusAdjustmentControls({
           disabled={atOriginal}
           onClick={() => onApply(original)}
           className="min-h-11 rounded-md border border-line bg-bg px-2 text-tools-body-sm font-semibold text-ink hover:bg-line-soft disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25"
-        >
-          Revertir al original
-        </button>
+        >{t('ui.UiStatusAdjustmentControls.revertir-al-original')}</button>
         <button
           type="button"
           disabled={unchanged}
           onClick={() => onApply(preview)}
           className="min-h-11 rounded-md bg-forest px-2 text-tools-body-sm font-semibold text-white hover:bg-forest-deep disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/30"
-        >
-          Aplicar ajuste
-        </button>
+        >{t('ui.UiStatusAdjustmentControls.aplicar-ajuste')}</button>
       </div>
     </div>
   );
@@ -149,11 +142,12 @@ function Slider({
   valueLabel: string;
   onChange: (value: number) => void;
 }) {
+  const tx = useTx();
   return (
     <label className="block">
       <span className="mb-1 flex items-center justify-between gap-2 text-tools-meta-scale font-medium text-muted">
-        <span>{label}</span>
-        <span className="font-mono tabular-nums text-ink">{valueLabel}</span>
+        <span>{tx(label)}</span>
+        <span className="font-mono tabular-nums text-ink">{tx(valueLabel)}</span>
       </span>
       <input
         type="range"

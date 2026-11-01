@@ -9,6 +9,7 @@ import {
 
 import { UiColorSectionHeader } from './UiColorSectionHeader';
 import { UiStatusColorCard } from './UiStatusColorCard';
+import { useT } from '@/context/I18nContext';
 
 export function UiStatusColorsSection({
   colors,
@@ -23,24 +24,21 @@ export function UiStatusColorsSection({
   onGenerate: () => void;
   onSelect: (status: UiStatusColor) => void;
 }) {
+  const t = useT();
   const nameByHex = new Map(colors.map((color) => [normalizeHex(color.hex), color.name]));
 
   return (
     <section aria-labelledby="ui-status-title">
-      <UiColorSectionHeader title="Colores de estado" />
-      <h2 id="ui-status-title" className="sr-only">Colores de estado</h2>
+      <UiColorSectionHeader title={t('ui.UiStatusColorsSection.colores-de-estado')} />
+      <h2 id="ui-status-title" className="sr-only">{t('ui.UiStatusColorsSection.colores-de-estado')}</h2>
       {!statusColors ? (
         <div className="mt-2">
-          <p className="text-tools-meta leading-relaxed text-muted">
-            Genera estados semánticos solo si tu interfaz necesita éxito, advertencia y peligro.
-          </p>
+          <p className="text-tools-meta leading-relaxed text-muted">{t('ui.UiStatusColorsSection.genera-estados-semanticos-solo-si')}</p>
           <button
             type="button"
             onClick={onGenerate}
             className="mt-2 min-h-10 w-full rounded-md bg-[var(--chrome-green)] px-3 text-tools-meta font-semibold text-white hover:brightness-95 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-          >
-            Generar colores de estado
-          </button>
+          >{t('ui.UiStatusColorsSection.generar-colores-de-estado')}</button>
         </div>
       ) : (
         <div className="mt-2 space-y-2">

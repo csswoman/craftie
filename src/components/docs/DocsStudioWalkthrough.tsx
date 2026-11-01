@@ -3,8 +3,8 @@ import Link from 'next/link';
 const STEPS = [
   {
     title: 'Inspiración',
-    body: 'Estilo curado o imagen local (JPG/PNG/WebP).',
-    detail: 'Vacío → «Elegir estilo curado» o subir imagen.',
+    body: 'Estilo curado, imagen local (JPG/PNG/WebP) o un color HEX.',
+    detail: 'Vacío → «Explorar estilos», subir imagen o «Partir de un color».',
   },
   {
     title: 'Panel Colores',
@@ -17,9 +17,9 @@ const STEPS = [
     detail: 'Progreso «X de 7 listos» en el footer del panel.',
   },
   {
-    title: 'Revisar y exportar',
-    body: 'Maquetas, tipografía y menú Exportar del header.',
-    detail: 'Activo con primary, background y on-background.',
+    title: 'Revisar, guardar y exportar',
+    body: 'Maquetas, tipografía, Mis proyectos y menú Exportar del header.',
+    detail: 'Exportar se activa con primary, background y on-background.',
   },
 ] as const;
 
@@ -41,7 +41,7 @@ export function DocsStudioWalkthrough() {
           </div>
           <Link
             href="/"
-            className="inline-flex min-h-11 items-center rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+            className="inline-flex min-h-11 items-center rounded-lg bg-primary px-4 py-2 text-sm font-bold text-on-primary transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           >
             Abrir el estudio
           </Link>

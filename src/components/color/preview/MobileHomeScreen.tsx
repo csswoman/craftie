@@ -14,6 +14,7 @@ import {
   titleStyle,
   type PreviewFonts,
 } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 /** "Hoy": greeting, two counters, the pinned palette with its one primary action, and the rest as a list. */
 export function MobileHomeScreen({
@@ -29,6 +30,8 @@ export function MobileHomeScreen({
   onPrimary: string;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   const greeting = getMobileGreeting(new Date().getHours());
   const [pinned, ...rest] = MOBILE_PALETTES;
   const swatchHex = (slot: UiLayoutSlot) => colors[slot] ?? colors.accent;
@@ -38,11 +41,9 @@ export function MobileHomeScreen({
       <header className="flex items-center justify-between px-5 pb-4 pt-5">
         <div className="min-w-0">
           <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={labelStyle(fonts, colors.mutedText)}>
-            {greeting}
+            {tx(greeting)}
           </PreviewSlotTarget>
-          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-0.5" style={displayStyle(fonts)}>
-            Tus paletas
-          </PreviewSlotTarget>
+          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-0.5" style={displayStyle(fonts)}>{t('ui.MobileHomeScreen.tus-paletas')}</PreviewSlotTarget>
         </div>
         <PreviewSlotTarget
           slot="surfaceElevated"
@@ -65,10 +66,10 @@ export function MobileHomeScreen({
             <PreviewSlotTarget key={item.label} slot="surface" onEditSlot={onEditSlot} className="p-3.5" style={{ backgroundColor: colors.surface }}>
               <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="flex items-center gap-1.5" style={captionStyle(fonts, colors.mutedText)}>
                 <PreviewSlotTarget slot={item.slot} onEditSlot={onEditSlot} className="size-2 rounded-full" style={{ backgroundColor: swatchHex(item.slot) }} />
-                {item.label}
+                {tx(item.label)}
               </PreviewSlotTarget>
               <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1 block tabular-nums" style={headingStyle(fonts)}>
-                {item.value}
+                {tx(item.value)}
               </PreviewSlotTarget>
             </PreviewSlotTarget>
           ))}
@@ -81,10 +82,10 @@ export function MobileHomeScreen({
           style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
         >
           <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={brandStyle(fonts)}>
-            {pinned!.name}
+            {tx(pinned!.name)}
           </PreviewSlotTarget>
           <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-0.5 block" style={captionStyle(fonts, colors.mutedText)}>
-            {getMobileReviewNote(0)}
+            {tx(getMobileReviewNote(0))}
           </PreviewSlotTarget>
           <div className="mt-3 flex h-10 overflow-hidden rounded-lg">
             {pinned!.swatches.map((slot, index) => (
@@ -96,15 +97,11 @@ export function MobileHomeScreen({
             onEditSlot={onEditSlot}
             className="mt-4 block rounded-xl py-2.5 text-center"
             style={{ ...buttonStyle(fonts), backgroundColor: primaryFill, color: onPrimary }}
-          >
-            Exportar guía
-          </PreviewSlotTarget>
+          >{t('ui.MobileHomeScreen.exportar-guia')}</PreviewSlotTarget>
         </PreviewSlotTarget>
 
         <div>
-          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mb-1" style={labelStyle(fonts, colors.mutedText)}>
-            Recientes
-          </PreviewSlotTarget>
+          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mb-1" style={labelStyle(fonts, colors.mutedText)}>{t('ui.MobileHomeScreen.recientes')}</PreviewSlotTarget>
           {rest.map((palette) => (
             <PreviewSlotTarget
               key={palette.name}
@@ -120,10 +117,10 @@ export function MobileHomeScreen({
               </span>
               <span className="min-w-0 flex-1">
                 <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="block truncate" style={titleStyle(fonts)}>
-                  {palette.name}
+                  {tx(palette.name)}
                 </PreviewSlotTarget>
                 <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="block truncate" style={compactBodyStyle(fonts, colors.mutedText)}>
-                  {palette.note}
+                  {tx(palette.note)}
                 </PreviewSlotTarget>
               </span>
               <PreviewIcon name="arrowRight" size={16} style={{ color: colors.mutedText }} />

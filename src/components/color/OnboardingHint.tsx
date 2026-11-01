@@ -1,6 +1,7 @@
 'use client';
 
 import { Sparkles } from 'lucide-react';
+import { useT } from '@/context/I18nContext';
 
 export type OnboardingHintProps = {
   onDismiss: () => void;
@@ -13,17 +14,18 @@ export type OnboardingHintProps = {
  * the controller's onboarding adapter.
  */
 export function OnboardingHint({ onDismiss }: OnboardingHintProps) {
+  const t = useT();
   return (
     <section
-      aria-label="Bienvenida a Craftie"
+      aria-label={t('ui.OnboardingHint.bienvenida-a-craftie')}
       className="relative shrink-0 border-b border-border bg-surface px-4 py-2.5 xl:px-5"
     >
       <button
         type="button"
         onClick={onDismiss}
         className="absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-        aria-label="Ocultar bienvenida"
-        title="Ocultar"
+        aria-label={t('ui.OnboardingHint.ocultar-bienvenida')}
+        title={t('ui.OnboardingHint.ocultar')}
       >
         <CloseIcon />
       </button>
@@ -36,13 +38,8 @@ export function OnboardingHint({ onDismiss }: OnboardingHintProps) {
           <Sparkles className="size-4" strokeWidth={1.8} />
         </span>
         <div className="min-w-0">
-          <p className="text-chrome-label font-semibold text-ink">
-            Empezamos con una paleta de ejemplo
-          </p>
-          <p className="mt-0.5 text-chrome-caption leading-relaxed text-muted">
-            Explora el sistema de color y la tipografía de inmediato. Cuando quieras la tuya, abre
-            Inspiración para elegir un estilo o extraer colores de una imagen.
-          </p>
+          <p className="text-chrome-label font-semibold text-ink">{t('ui.OnboardingHint.empezamos-con-una-paleta-de')}</p>
+          <p className="mt-0.5 text-chrome-caption leading-relaxed text-muted">{t('ui.OnboardingHint.explora-el-sistema-de-color')}</p>
         </div>
       </div>
     </section>

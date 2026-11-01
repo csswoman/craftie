@@ -6,8 +6,11 @@ import {
   type Material,
 } from '@lib/color/paintMaterials';
 import type { SelectableColor } from '@lib/color/selectableColors';
+import { useT, useTx } from '@/context/I18nContext';
 
 export function PaintPaletteCanvas({ colors }: { colors: SelectableColor[] }) {
+  const tx = useTx();
+  const t = useT();
   const [material, setMaterial] = useState<Material>('gouache');
   const rawHexes = useMemo(() => colors.map((color) => color.hex), [colors]);
   const transformed = useMemo(
@@ -18,17 +21,11 @@ export function PaintPaletteCanvas({ colors }: { colors: SelectableColor[] }) {
   return (
     <section className="flex h-full min-h-0 flex-col bg-bg p-4 lg:p-6" aria-labelledby="paint-palette-title">
       <header className="mb-4 shrink-0">
-        <h2 id="paint-palette-title" className="font-display text-[1.375rem] font-medium text-ink">
-          Colores para pintar
-        </h2>
-        <p className="mt-1 max-w-[65ch] text-pretty font-sans text-chrome-label text-muted">
-          Muestras de tu paleta actual, vistas como pigmento. Sin roles ni corrección de contraste.
-        </p>
+        <h2 id="paint-palette-title" className="font-display text-[1.375rem] font-medium text-ink">{t('ui.PaintPaletteCanvas.colores-para-pintar')}</h2>
+        <p className="mt-1 max-w-[65ch] text-pretty font-sans text-chrome-label text-muted">{t('ui.PaintPaletteCanvas.muestras-de-tu-paleta-actual')}</p>
       </header>
       <div className="mb-5 shrink-0">
-        <h3 className="mb-2 text-tools-meta font-bold uppercase tracking-[0.06em] text-muted">
-          Material
-        </h3>
+        <h3 className="mb-2 text-tools-meta font-bold uppercase tracking-[0.06em] text-muted">{t('ui.PaintPaletteCanvas.material')}</h3>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           {Object.values(MATERIALS).map((option) => {
             const selected = material === option.id;
@@ -52,10 +49,10 @@ export function PaintPaletteCanvas({ colors }: { colors: SelectableColor[] }) {
                   ))}
                 </span>
                 <span className={`block text-chrome-label font-bold ${selected ? 'text-primary' : 'text-ink'}`}>
-                  {option.name}
+                  {tx(option.name)}
                 </span>
                 <span className="mt-0.5 block text-chrome-caption leading-snug text-muted">
-                  {option.desc}
+                  {tx(option.desc)}
                 </span>
               </button>
             );
@@ -64,11 +61,9 @@ export function PaintPaletteCanvas({ colors }: { colors: SelectableColor[] }) {
       </div>
 
       <div className="mb-2 flex shrink-0 flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <span className="text-tools-meta font-bold uppercase tracking-[0.06em] text-muted">
-          Paleta transformada
-        </span>
+        <span className="text-tools-meta font-bold uppercase tracking-[0.06em] text-muted">{t('ui.PaintPaletteCanvas.paleta-transformada')}</span>
         <span className="text-chrome-caption font-semibold text-primary">
-          {MATERIALS[material].name} · {MATERIALS[material].ruleLabel}
+          {tx(MATERIALS[material].name)} · {tx(MATERIALS[material].ruleLabel)}
         </span>
       </div>
 
@@ -85,10 +80,7 @@ export function PaintPaletteCanvas({ colors }: { colors: SelectableColor[] }) {
           </li>
         ))}
       </ul>
-      <p className="mt-4 shrink-0 text-chrome-caption leading-snug text-muted">
-        Aproximación perceptual de cómo el medio afecta el color según pigmento, opacidad y secado.
-        No sustituye el color real de la pintura física.
-      </p>
+      <p className="mt-4 shrink-0 text-chrome-caption leading-snug text-muted">{t('ui.PaintPaletteCanvas.aproximacion-perceptual-de-como-el')}</p>
     </section>
   );
 }

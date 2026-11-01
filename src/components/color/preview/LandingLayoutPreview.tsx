@@ -21,6 +21,7 @@ import {
   type PreviewFonts,
   previewRootTypeStyle,
 } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 export const LANDING_VISUAL_SLOTS = [
   'appBackground',
@@ -55,6 +56,8 @@ export function LandingLayoutPreview({
   fonts?: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   const primaryFill = vividFill(colors.primaryAction, colors.surface);
   const onPrimary = colors.primaryActionText;
   const support = colors.supportSurface ?? colors.surface;
@@ -86,19 +89,17 @@ export function LandingLayoutPreview({
             className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] transition-transform duration-200 ease-out hover:rotate-[-4deg] motion-reduce:transition-none motion-reduce:hover:rotate-0"
             style={{ backgroundColor: primaryFill, color: onPrimary }}
           >
-            <span className="text-sm" style={{ fontFamily: 'var(--font-heading)', fontWeight: 'var(--weight-heading)' }} aria-label="Craftie, perro diseñador">
+            <span className="text-sm" style={{ fontFamily: 'var(--font-heading)', fontWeight: 'var(--weight-heading)' }} aria-label={t('ui.LandingLayoutPreview.craftie-perro-disenador')}>
               C
             </span>
           </PreviewSlotTarget>
-          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="truncate" style={brandStyle(fonts)}>
-            Craftie
-          </PreviewSlotTarget>
+          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="truncate" style={brandStyle(fonts)}>{t('ui.LandingLayoutPreview.craftie')}</PreviewSlotTarget>
         </div>
 
-        <nav className="hidden items-center gap-6 justify-self-center @min-[560px]/landing:flex" aria-label="Secciones">
+        <nav className="hidden items-center gap-6 justify-self-center @min-[560px]/landing:flex" aria-label={t('ui.LandingLayoutPreview.secciones')}>
           {LANDING_NAV.map((item) => (
             <span key={item} style={labelStyle(fonts, colors.mutedText)}>
-              {item}
+              {tx(item)}
             </span>
           ))}
         </nav>
@@ -113,9 +114,7 @@ export function LandingLayoutPreview({
             borderColor: colors.border,
             color: colors.text,
           }}
-        >
-          Entrar
-        </PreviewSlotTarget>
+        >{t('ui.LandingLayoutPreview.entrar')}</PreviewSlotTarget>
       </header>
 
       <LandingHero colors={colors} fonts={fonts} onEditSlot={onEditSlot} />
@@ -131,17 +130,13 @@ export function LandingLayoutPreview({
           animationDelay: previewStaggerDelay(2),
         }}
       >
-        <PreviewSlotTarget slot="supportSurfaceText" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
-          Del color a la guía
-        </PreviewSlotTarget>
+        <PreviewSlotTarget slot="supportSurfaceText" onEditSlot={onEditSlot} style={headingStyle(fonts)}>{t('ui.LandingLayoutPreview.del-color-a-la-guia')}</PreviewSlotTarget>
         <PreviewSlotTarget
           slot="supportSurfaceText"
           onEditSlot={onEditSlot}
           className="mt-2 max-w-[52ch] text-pretty"
           style={bodyStyle(fonts)}
-        >
-          Tres pasos. El contraste se comprueba antes de exportar.
-        </PreviewSlotTarget>
+        >{t('ui.LandingLayoutPreview.tres-pasos-el-contraste-se')}</PreviewSlotTarget>
         <div className="mt-8 @min-[720px]/landing:mt-10">
           <LandingFeatureGrid colors={colors} fonts={fonts} onEditSlot={onEditSlot} />
         </div>
@@ -149,17 +144,13 @@ export function LandingLayoutPreview({
 
       <main className={`pb-12 pt-12 ${LANDING_GUTTER_CLASS} @min-[720px]/landing:pb-16 @min-[720px]/landing:pt-16`}>
         <section className="preview-rise" style={{ animationDelay: previewStaggerDelay(5) }}>
-          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
-            Planes
-          </PreviewSlotTarget>
+          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>{t('ui.LandingLayoutPreview.planes')}</PreviewSlotTarget>
           <PreviewSlotTarget
             slot="mutedText"
             onEditSlot={onEditSlot}
             className="mt-2 max-w-[48ch] text-pretty"
             style={bodyStyle(fonts, colors.mutedText)}
-          >
-            Estudio incluye guía, contraste y tipografía.
-          </PreviewSlotTarget>
+          >{t('ui.LandingLayoutPreview.estudio-incluye-guia-contraste-y')}</PreviewSlotTarget>
           <div className="mt-6">
             <LandingPricingPlans colors={colors} fonts={fonts} onEditSlot={onEditSlot} />
           </div>

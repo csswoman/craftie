@@ -8,6 +8,7 @@ import { TYPE_ROLE_DEFINITIONS, type TypeRoleId } from '@lib/typography/typeRole
 import { TypeEditPopover, TypeScopeToggle } from '@/components/color/TypeEditPopover';
 import { TypeRoleFields } from '@/components/font-pairing/TypeRoleFields';
 import { useTypeRoles } from '@/context/TypeRolesContext';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type TypeRolePopoverAnchor = {
   roleId: TypeRoleId;
@@ -24,6 +25,8 @@ export function TypeRolePopover({
   defaultWeights: { heading: number; body: number };
   onClose: () => void;
 }) {
+  const tx = useTx();
+  const t = useT();
   const { roles, warnings, patchRole, patchRoleGlobal, resetRole } = useTypeRoles();
   const [onlyThisRole, setOnlyThisRole] = useState(false);
   const roleId = anchor?.roleId ?? null;
@@ -33,13 +36,13 @@ export function TypeRolePopover({
   return (
     <TypeEditPopover
       rect={anchor?.rect ?? null}
-      title={roleId ? TYPE_ROLE_DEFINITIONS[roleId].label : ''}
-      subtitle={roleId ? `${TYPE_ROLE_DEFINITIONS[roleId].usage}. El cambio aplica a todo el rol.` : ''}
+      title={roleId ? tx(TYPE_ROLE_DEFINITIONS[roleId].label) : ''}
+      subtitle={roleId ? t('ui.TypeRolePopover.el-cambio-aplica-a-todo', { usage: tx(TYPE_ROLE_DEFINITIONS[roleId].usage) }) : ''}
       onClose={onClose}
     >
       {roleId && role ? (
         <>
-          <TypeScopeToggle checked={onlyThisRole} onChange={setOnlyThisRole} label="Solo este rol" />
+          <TypeScopeToggle checked={onlyThisRole} onChange={setOnlyThisRole} label={t('ui.TypeRolePopover.solo-este-rol')} />
           <TypeRoleFields
             role={role}
             defaultWeight={defaultWeights[role.family]}
@@ -47,11 +50,11 @@ export function TypeRolePopover({
             onReset={() => resetRole(roleId)}
           />
           {roleWarnings.length > 0 ? (
-            <ul className="mt-3 space-y-1 border-t border-border pt-3" aria-label="Avisos de legibilidad">
+            <ul className="mt-3 space-y-1 border-t border-border pt-3" aria-label={t('ui.TypeRolePopover.avisos-de-legibilidad')}>
               {roleWarnings.map((warning) => (
                 <li key={warning.code} className="flex gap-1.5 text-chrome-caption leading-snug text-fail">
                   <AlertTriangle size={13} className="mt-0.5 shrink-0" aria-hidden="true" />
-                  <span>{warning.message}</span>
+                  <span>{tx(warning.message)}</span>
                 </li>
               ))}
             </ul>

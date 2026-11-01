@@ -11,6 +11,7 @@ import { ColorDetailsDrawer } from '@/components/color-engine/ColorDetailsDrawer
 import { RolePaletteProvider, useRolePalette } from '@/context/RolePaletteContext';
 
 import { ColorGroupsPanel } from './ColorGroupsPanel';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type SelectColorsPanelProps = {
   colors: SelectableColor[];
@@ -22,6 +23,7 @@ export type SelectColorsPanelProps = {
 };
 
 function PaletteBuilderSkeleton({ message }: { message: string }) {
+  const tx = useTx();
   return (
     <div
       className="flex w-full min-w-0 flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-start"
@@ -43,7 +45,7 @@ function PaletteBuilderSkeleton({ message }: { message: string }) {
             </div>
           </div>
         ))}
-        <p className="text-[0.8125rem] text-muted">{message}</p>
+        <p className="text-[0.8125rem] text-muted">{tx(message)}</p>
       </div>
 
       <section className="rounded-lg border border-border bg-surface p-5">
@@ -62,6 +64,8 @@ function PaletteBuilderSkeleton({ message }: { message: string }) {
 }
 
 function RolePaletteGrid() {
+  const tx = useTx();
+  const t = useT();
   const { rolePalette } = useRolePalette();
   const [selectedColorHex, setSelectedColorHex] = useState<string | null>(null);
   const columns = useMemo(
@@ -74,8 +78,8 @@ function RolePaletteGrid() {
   }
 
   return (
-    <section aria-label="Paleta actual" className="rounded-lg border border-border bg-surface p-5">
-      <h2 className="text-base font-semibold text-ink">Paleta por roles</h2>
+    <section aria-label={t('ui.SelectColorsPanel.paleta-actual')} className="rounded-lg border border-border bg-surface p-5">
+      <h2 className="text-base font-semibold text-ink">{t('ui.SelectColorsPanel.paleta-por-roles')}</h2>
       <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {columns.map((column) => {
           const textColor = pickReadableTextColor(column.hex);
@@ -88,12 +92,12 @@ function RolePaletteGrid() {
                 className="flex min-h-28 w-full cursor-pointer flex-col items-center justify-center rounded-lg px-4 py-5 text-center transition-transform hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
                 style={{ backgroundColor: column.hex, color: textColor }}
               >
-                <span className="text-[0.9375rem] font-semibold tracking-[0.01em]">{column.name}</span>
+                <span className="text-[0.9375rem] font-semibold tracking-[0.01em]">{tx(column.name)}</span>
                 <span className="mt-1 font-mono text-[0.8125rem] font-semibold opacity-95">
                   {column.hex.toUpperCase()}
                 </span>
                 {column.roleLabel ? (
-                  <span className="mt-0.5 text-[0.75rem] font-medium opacity-85">{column.roleLabel}</span>
+                  <span className="mt-0.5 text-[0.75rem] font-medium opacity-85">{tx(column.roleLabel)}</span>
                 ) : null}
               </button>
             </li>
@@ -116,8 +120,9 @@ function SelectColorsPanelContent({
   loadingMessage = 'Extrayendo colores de la imagen…',
   showPalettePreview = true,
 }: Omit<SelectColorsPanelProps, 'rolePalette' | 'onRolePaletteChange'>) {
+  const tx = useTx();
   if (isLoading) {
-    return <PaletteBuilderSkeleton message={loadingMessage} />;
+    return <PaletteBuilderSkeleton message={tx(loadingMessage)} />;
   }
 
   const groupsPanel = (
@@ -172,6 +177,7 @@ export function SelectColorsPanel({
   loadingMessage = 'Extrayendo colores de la imagen…',
   showPalettePreview = true,
 }: SelectColorsPanelProps) {
+  const tx = useTx();
   return (
     <RolePaletteProvider>
       <RolePaletteSync rolePalette={rolePalette} onRolePaletteChange={onRolePaletteChange}>

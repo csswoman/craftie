@@ -13,6 +13,7 @@ import { ColorGroupsPanel } from '@/components/color-engine/ColorGroupsPanel';
 import { GenerateButton } from '@/components/color-engine/GenerateButton';
 import { CollapsibleSection } from '@/components/layout/CollapsibleSection';
 import { useRolePalette } from '@/context/RolePaletteContext';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type ColorSelectionPanelProps = {
   catalogSource: 'none' | 'curated' | 'image';
@@ -37,6 +38,8 @@ export function ColorSelectionPanel({
   onRenameColor,
   rightPanelCollapsed = false,
 }: ColorSelectionPanelProps) {
+  const tx = useTx();
+  const t = useT();
   const { rolePalette, activeRole, selectionReady } = useRolePalette();
   const [catalogOpen, setCatalogOpen] = useState(activeRole === null);
   const previousPanelCollapsed = useRef(rightPanelCollapsed);
@@ -60,7 +63,7 @@ export function ColorSelectionPanel({
       <div className="flex min-h-0 flex-1 flex-col">
         <SelectionPanelStatus extractedCount={0} />
         <div className="flex flex-1 items-center px-4 py-6">
-          <p className="text-chrome-label text-muted">Extrayendo colores de la imagen…</p>
+          <p className="text-chrome-label text-muted">{t('ui.ColorSelectionPanel.extrayendo-colores-de-la-imagen')}</p>
         </div>
       </div>
     );
@@ -71,9 +74,7 @@ export function ColorSelectionPanel({
       <div className="flex min-h-0 flex-1 flex-col">
         <SelectionPanelStatus extractedCount={0} />
         <div className="flex flex-1 items-center px-4 py-6">
-          <p className="text-chrome-label leading-relaxed text-muted">
-            Sube una imagen o elige un estilo para empezar a asignar colores a cada rol.
-          </p>
+          <p className="text-chrome-label leading-relaxed text-muted">{t('ui.ColorSelectionPanel.sube-una-imagen-o-elige')}</p>
         </div>
       </div>
     );
@@ -96,17 +97,17 @@ export function ColorSelectionPanel({
 
       <div className="min-h-0 flex-1 overflow-y-auto p-3">
         <CollapsibleSection
-          title="Colores fuente"
+          title={t('ui.ColorSelectionPanel.colores-fuente')}
           open={catalogOpen}
           onOpenChange={setCatalogOpen}
           trailing={
             <>
               {isRegenerating ? (
-                <p className="text-chrome-caption font-medium text-muted">Regenerando…</p>
+                <p className="text-chrome-caption font-medium text-muted">{t('ui.ColorSelectionPanel.regenerando')}</p>
               ) : null}
               {colors.length > 0 ? (
                 <p className="text-chrome-caption font-medium text-muted">
-                  {formatExtractedColorCount(colors.length)}
+                  {tx(formatExtractedColorCount(colors.length))}
                 </p>
               ) : null}
               <AddColorMenu onSubmit={onAddColorByHex} />
@@ -139,6 +140,8 @@ function SelectionPanelStatus({
   catalogOpen?: boolean;
   activeRole?: string | null;
 }) {
+  const tx = useTx();
+  const t = useT();
   return (
     <>
       {status ? (
@@ -149,26 +152,26 @@ function SelectionPanelStatus({
             }`}
             role="status"
           >
-            {status.message}
+            {tx(status.message)}
           </p>
           {status.suggestions.length > 0 ? (
             <ul className="space-y-0.5 px-1 text-chrome-caption text-muted">
               {status.suggestions.map((suggestion) => (
-                <li key={suggestion}>{suggestion}</li>
+                <li key={suggestion}>{tx(suggestion)}</li>
               ))}
             </ul>
           ) : null}
         </div>
       ) : extractedCount === 0 && !isRegenerating ? (
-        <p className="text-chrome-label font-semibold text-ink">Colores fuente</p>
+        <p className="text-chrome-label font-semibold text-ink">{t('ui.ColorSelectionPanel.colores-fuente')}</p>
       ) : null}
       {catalogSource === 'image' ? (
         <p className="mt-1 text-chrome-caption text-muted">
           {activeRole
             ? catalogOpen
-              ? 'Elige un color fuente para asignarlo al rol activo.'
-              : 'Abre Colores fuente para asignar un color al rol activo.'
-            : 'Elige un rol en el lienzo y luego un color fuente.'}
+              ? t('ui.ColorSelectionPanel.elige-un-color-fuente-para')
+              : t('ui.ColorSelectionPanel.abre-colores-fuente-para-asignar')
+            : t('ui.ColorSelectionPanel.elige-un-rol-en-el')}
         </p>
       ) : null}
     </>

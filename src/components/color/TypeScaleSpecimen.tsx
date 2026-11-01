@@ -3,6 +3,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 
 import type { TypeScalePalette, TypeScaleSpecimenLevel } from '@lib/typography/typeScalePreview';
+import { useT, useTx } from '@/context/I18nContext';
 
 type TypeScaleSpecimenProps = {
   levels: TypeScaleSpecimenLevel[];
@@ -41,6 +42,7 @@ function SpecimenTag({
   onActiveChange: (id: string | null) => void;
   onSelect: (id: string, rect: DOMRect) => void;
 }) {
+  const t = useT();
   return (
     <Tagname
       className={`cursor-pointer rounded-sm transition-[outline-color] duration-150 focus-visible:outline-none ${className ?? ''}`}
@@ -51,7 +53,7 @@ function SpecimenTag({
       }}
       role={Tagname === 'p' || Tagname === 'div' ? 'button' : undefined}
       tabIndex={0}
-      aria-label={`Editar nivel ${id}`}
+      aria-label={t('ui.TypeScaleSpecimen.editar-nivel', { id })}
       onMouseEnter={() => onActiveChange(id)}
       onMouseLeave={() => onActiveChange(null)}
       onFocus={() => onActiveChange(id)}
@@ -79,6 +81,8 @@ export function TypeScaleSpecimen({
   onActiveChange,
   onSelect,
 }: TypeScaleSpecimenProps) {
+  const tx = useTx();
+  const t = useT();
   const byId = new Map(levels.map((level) => [level.id, level]));
   const larger = levels.filter((level) => level.id.startsWith('display-'));
   const micro = levels.filter((level) => level.id.startsWith('micro-'));
@@ -105,63 +109,40 @@ export function TypeScaleSpecimen({
   const shared = { levelStyle, activeId, inkColor: palette.ink, onActiveChange, onSelect };
 
   return (
-    <article className="min-w-0 space-y-8 px-5 py-6 @min-[900px]/scale:px-8 @min-[900px]/scale:py-8" aria-label="Escala aplicada a una página">
+    <article className="min-w-0 space-y-8 px-5 py-6 @min-[900px]/scale:px-8 @min-[900px]/scale:py-8" aria-label={t('ui.TypeScaleSpecimen.escala-aplicada-a-una-pagina')}>
       {larger.length > 0 ? (
-        <div className="space-y-2" aria-label="Pasos extra grandes">
+        <div className="space-y-2" aria-label={t('ui.TypeScaleSpecimen.pasos-extra-grandes')}>
           {larger.map((level) => (
-            <SpecimenTag {...shared} key={level.id} id={level.id} as="div" className="truncate">
-              Hola, marca
-            </SpecimenTag>
+            <SpecimenTag {...shared} key={level.id} id={level.id} as="div" className="truncate">{t('ui.TypeScaleSpecimen.hola-marca')}</SpecimenTag>
           ))}
         </div>
       ) : null}
 
       <header>
-        <SpecimenTag {...shared} id="small" style={{ textTransform: 'uppercase', letterSpacing: '0.1em', lineHeight: 1.3, color: palette.muted }}>
-          Guía de marca · Tipografía
-        </SpecimenTag>
-        <SpecimenTag {...shared} id="display" as="h2" className="mt-3 text-balance">
-          Diseño con intención
-        </SpecimenTag>
-        <SpecimenTag {...shared} id="lead" className="mt-4 max-w-[52ch] text-pretty" style={{ color: palette.muted }}>
-          Una escala que ordena lo importante: de la portada al detalle más pequeño.
-        </SpecimenTag>
+        <SpecimenTag {...shared} id="small" style={{ textTransform: 'uppercase', letterSpacing: '0.1em', lineHeight: 1.3, color: palette.muted }}>{t('ui.TypeScaleSpecimen.guia-de-marca-tipografia')}</SpecimenTag>
+        <SpecimenTag {...shared} id="display" as="h2" className="mt-3 text-balance">{t('ui.TypeScaleSpecimen.diseno-con-intencion')}</SpecimenTag>
+        <SpecimenTag {...shared} id="lead" className="mt-4 max-w-[52ch] text-pretty" style={{ color: palette.muted }}>{t('ui.TypeScaleSpecimen.una-escala-que-ordena-lo')}</SpecimenTag>
       </header>
 
       <section>
-        <SpecimenTag {...shared} id="h1" as="h3" className="text-balance">
-          Cada nivel tiene su lugar
-        </SpecimenTag>
-        <SpecimenTag {...shared} id="body" className="mt-3 max-w-[62ch] text-pretty">
-          Los tamaños crecen con una razón constante, de modo que titulares, párrafos y notas se sienten parte del
-          mismo sistema. El ojo encuentra el orden sin esfuerzo y la lectura fluye.
-        </SpecimenTag>
+        <SpecimenTag {...shared} id="h1" as="h3" className="text-balance">{t('ui.TypeScaleSpecimen.cada-nivel-tiene-su-lugar')}</SpecimenTag>
+        <SpecimenTag {...shared} id="body" className="mt-3 max-w-[62ch] text-pretty">{t('ui.TypeScaleSpecimen.los-tamanos-crecen-con-una')}</SpecimenTag>
       </section>
 
       <section className="grid gap-x-8 gap-y-6 @min-[640px]/scale:grid-cols-2">
         <div className="min-w-0">
-          <SpecimenTag {...shared} id="h2" as="h4" className="text-balance">
-            Titulares que guían
-          </SpecimenTag>
-          <SpecimenTag {...shared} id="h3" as="h5" className="mt-2" style={{ color: palette.muted }}>
-            Subtítulos de bloque
-          </SpecimenTag>
-          <SpecimenTag {...shared} id="body" className="mt-3 text-pretty">
-            Un titular claro anuncia el tema y deja que el cuerpo haga el resto.
-          </SpecimenTag>
+          <SpecimenTag {...shared} id="h2" as="h4" className="text-balance">{t('ui.TypeScaleSpecimen.titulares-que-guian')}</SpecimenTag>
+          <SpecimenTag {...shared} id="h3" as="h5" className="mt-2" style={{ color: palette.muted }}>{t('ui.TypeScaleSpecimen.subtitulos-de-bloque')}</SpecimenTag>
+          <SpecimenTag {...shared} id="body" className="mt-3 text-pretty">{t('ui.TypeScaleSpecimen.un-titular-claro-anuncia-el')}</SpecimenTag>
         </div>
 
         <div className="min-w-0 rounded-xl p-5" style={{ backgroundColor: palette.chip }}>
-          <SpecimenTag {...shared} id="h4" as="h6">
-            Tarjeta de ejemplo
-          </SpecimenTag>
-          <SpecimenTag {...shared} id="h5" className="mt-2" style={{ color: palette.muted }}>
-            Etiquetas de grupo
-          </SpecimenTag>
+          <SpecimenTag {...shared} id="h4" as="h6">{t('ui.TypeScaleSpecimen.tarjeta-de-ejemplo')}</SpecimenTag>
+          <SpecimenTag {...shared} id="h5" className="mt-2" style={{ color: palette.muted }}>{t('ui.TypeScaleSpecimen.etiquetas-de-grupo')}</SpecimenTag>
           <ul className="mt-3 space-y-1.5">
             {['Paleta aprobada', 'Contraste AA', 'Fuentes cargadas'].map((item) => (
               <li key={item}>
-                <SpecimenTag {...shared} id="h6">{item}</SpecimenTag>
+                <SpecimenTag {...shared} id="h6">{tx(item)}</SpecimenTag>
               </li>
             ))}
           </ul>
@@ -169,13 +150,9 @@ export function TypeScaleSpecimen({
       </section>
 
       <footer className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t pt-4" style={{ borderColor: palette.hairline }}>
-        <SpecimenTag {...shared} id="small" style={{ color: palette.muted }}>
-          Actualizado hoy · 4 min de lectura
-        </SpecimenTag>
+        <SpecimenTag {...shared} id="small" style={{ color: palette.muted }}>{t('ui.TypeScaleSpecimen.actualizado-hoy-4-min-de')}</SpecimenTag>
         {micro.map((level) => (
-          <SpecimenTag {...shared} key={level.id} id={level.id} style={{ color: palette.muted }}>
-            Texto legal y créditos
-          </SpecimenTag>
+          <SpecimenTag {...shared} key={level.id} id={level.id} style={{ color: palette.muted }}>{t('ui.TypeScaleSpecimen.texto-legal-y-creditos')}</SpecimenTag>
         ))}
       </footer>
     </article>

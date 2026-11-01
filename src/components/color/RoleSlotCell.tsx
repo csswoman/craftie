@@ -10,6 +10,7 @@ import { PaletteColumnToolbar } from './PaletteColumnToolbar';
 import { PaletteShadesOverlay } from './PaletteShadesOverlay';
 import { PaletteSlotOverflowMenu } from './PaletteSlotOverflowMenu';
 import { buildRoleSlotOverflowItems } from './roleSlotOverflowItems';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type RoleSlotCellProps = {
   column: PaletteColumnDisplay;
@@ -48,6 +49,8 @@ export function RoleSlotCell({
   onSelectShade,
   onCloseShades,
 }: RoleSlotCellProps) {
+  const tx = useTx();
+  const t = useT();
   const textColor = pickReadableTextColor(column.hex);
   const lightChrome = prefersLightSelectionRing(column.hex);
   const canApplyShade = editable && !locked;
@@ -55,7 +58,7 @@ export function RoleSlotCell({
   const contrastBadges = column.contrastBadges ?? [];
   const hasContrastFail = contrastBadges.some((badge) => badge.status === 'fail');
   const contrastSummary = contrastBadges.length
-    ? ` ${contrastBadges.map((badge) => `${badge.label}: ${badge.ratio.toFixed(2)} a 1, WCAG ${badge.level}`).join('; ')}`
+    ? ` ${contrastBadges.map((badge) => t('contrast.ratioTo1', { label: tx(badge.label), ratio: badge.ratio.toFixed(2), level: badge.level })).join('; ')}`
     : '';
   const roleLabel = column.roleLabel ?? role;
   const toolbarProps = {
@@ -123,7 +126,7 @@ export function RoleSlotCell({
                   ? 'right-4 top-4'
                   : 'right-1 top-1 size-1.5'
             }`}
-            aria-label="Bloqueado"
+            aria-label={t('ui.RoleSlotCell.bloqueado')}
           />
         ) : null}
 
@@ -144,7 +147,7 @@ export function RoleSlotCell({
                 target="AA"
                 compact
                 dense={mobileExpanded}
-                contextLabel={badge.label}
+                contextLabel={tx(badge.label)}
               />
             ))}
           </div>
@@ -156,10 +159,8 @@ export function RoleSlotCell({
             aria-pressed={isActive}
             aria-label={
               mobileExpanded
-                ? `${roleLabel}: ${column.name}, ${column.hex}. Tocar para copiar HEX${
-                  contrastSummary ? `. ${contrastSummary}` : ''
-                }`
-              : `${roleLabel}: ${column.name}, ${column.hex}${
+                ? t('ui.RoleSlotCell.tocar-para-copiar-hex', { roleLabel: tx(roleLabel), name: tx(column.name), hex: column.hex, value: tx(contrastSummary ? `. ${contrastSummary}` : '') })
+              : `${tx(roleLabel)}: ${tx(column.name)}, ${column.hex}${
                     contrastSummary ? `. ${contrastSummary}` : ''
                   }`
             }
@@ -176,7 +177,7 @@ export function RoleSlotCell({
             }`}
           >
             <span
-              className={`block max-w-full truncate font-medium tracking-normal opacity-90 ${
+              className={`block max-w-full truncate font-medium tracking-normal ${
                 expanded
                   ? mobileExpanded
                     ? 'text-[0.8125rem] leading-snug'
@@ -184,25 +185,25 @@ export function RoleSlotCell({
                   : 'px-0.5 text-chrome-caption'
               }`}
             >
-              {roleLabel}
+              {tx(roleLabel)}
             </span>
             {expanded ? (
               <>
                 {mobileExpanded ? (
                   <div className="min-w-0">
                     <p className="mt-0.5 min-w-0 truncate text-[1.1875rem] font-semibold leading-snug">
-                      {column.name}
+                      {tx(column.name)}
                     </p>
-                    <p className="mt-0.5 font-mono text-[0.875rem] font-semibold tracking-normal opacity-90">
+                    <p className="mt-0.5 font-mono text-[0.875rem] font-semibold tracking-normal">
                       {column.hex.toUpperCase()}
                     </p>
                   </div>
                 ) : (
                   <>
                     <p className="mt-0.5 max-w-full truncate text-[1.375rem] font-semibold leading-tight">
-                      {column.name}
+                      {tx(column.name)}
                     </p>
-                    <p className="font-mono text-[0.875rem] font-semibold tracking-normal opacity-90">
+                    <p className="font-mono text-[0.875rem] font-semibold tracking-normal">
                       {column.hex.toUpperCase()}
                     </p>
                   </>
@@ -225,7 +226,7 @@ export function RoleSlotCell({
                         status={badge.status}
                         target="AA"
                         compact
-                        contextLabel={badge.label}
+                        contextLabel={tx(badge.label)}
                       />
                     ))}
                   </div>
@@ -237,7 +238,7 @@ export function RoleSlotCell({
 
         {!showShades && mobileExpanded ? (
           <PaletteSlotOverflowMenu
-            label={`Más acciones de ${roleLabel}`}
+            label={t('ui.RoleSlotCell.mas-acciones-de', { roleLabel: tx(roleLabel) })}
             lightChrome={lightChrome}
             items={overflowItems}
           />

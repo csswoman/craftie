@@ -4,6 +4,7 @@ import {
   PAIRING_CATEGORY_FILTERS,
   type PairingCategoryValue,
 } from '@lib/typography/pairingFilters';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type PairingFilterChipsProps = {
   value: PairingCategoryValue;
@@ -16,13 +17,15 @@ export function PairingFilterChips({
   onChange,
   isTools = false,
 }: PairingFilterChipsProps) {
+  const tx = useTx();
+  const t = useT();
   const chipClass = isTools ? 'text-tools-chip' : 'text-chrome-caption';
 
   return (
     <div
       className="flex flex-wrap gap-1"
       role="group"
-      aria-label="Filtrar pares por carácter"
+      aria-label={t('ui.PairingFilterChips.filtrar-pares-por-caracter')}
     >
       {PAIRING_CATEGORY_FILTERS.map((filter) => {
         const active = value === filter.value;
@@ -39,7 +42,7 @@ export function PairingFilterChips({
                 : 'bg-surface-raised text-muted hover:bg-border/60 hover:text-ink'
             }`}
           >
-            {filter.label}
+            {tx(filter.label)}
           </button>
         );
       })}

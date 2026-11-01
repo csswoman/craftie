@@ -7,6 +7,7 @@ import type { CustomFontRole, CustomFontSource } from '@lib/typography/customFon
 import { normalizeFontFamilyName } from '@lib/typography/customFonts';
 
 import { useDialogAccessibility } from '@/lib/browser/useDialogAccessibility';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type CustomFontSubmitInput = {
   family: string;
@@ -24,6 +25,8 @@ export function CustomFontModal({
   onClose: () => void;
   onApply: (input: CustomFontSubmitInput) => Promise<void>;
 }) {
+  const tx = useTx();
+  const t = useT();
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const [source, setSource] = useState<CustomFontSource>('local');
@@ -55,12 +58,12 @@ export function CustomFontModal({
         : normalizeFontFamilyName(family);
 
     if (nextFamily === '') {
-      setError('Indica el nombre de la familia.');
+      setError(tx('Indica el nombre de la familia.'));
       return;
     }
 
     if (source === 'local' && !file) {
-      setError('Elige un archivo de fuente.');
+      setError(tx('Elige un archivo de fuente.'));
       return;
     }
 
@@ -79,7 +82,7 @@ export function CustomFontModal({
       setError(
         applyError instanceof Error
           ? applyError.message
-          : 'No se pudo aplicar la fuente personalizada.',
+          : tx('No se pudo aplicar la fuente personalizada.'),
       );
     } finally {
       setBusy(false);
@@ -98,18 +101,14 @@ export function CustomFontModal({
       >
         <header className="flex items-start justify-between gap-3 border-b border-border/40 px-4 py-3">
           <div>
-            <h2 id={titleId} className="text-chrome-title">
-              Fuente personalizada
-            </h2>
-            <p className="prose-measure mt-0.5 text-chrome-label leading-relaxed text-muted">
-              Asigna una familia a titular o cuerpo. No crea un par del catálogo.
-            </p>
+            <h2 id={titleId} className="text-chrome-title">{t('ui.CustomFontModal.fuente-personalizada')}</h2>
+            <p className="prose-measure mt-0.5 text-chrome-label leading-relaxed text-muted">{t('ui.CustomFontModal.asigna-una-familia-a-titular')}</p>
           </div>
           <button
             type="button"
             data-modal-close
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={t('ui.CustomFontModal.cerrar')}
             className="flex size-11 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           >
             <X size={16} strokeWidth={2} absoluteStrokeWidth aria-hidden="true" />
@@ -118,20 +117,16 @@ export function CustomFontModal({
 
         <form className="space-y-4 p-4" onSubmit={handleSubmit}>
           <fieldset className="space-y-2">
-            <legend className="text-tools-meta font-semibold uppercase tracking-[0.06em] text-muted">
-              Origen
-            </legend>
+            <legend className="text-tools-meta font-semibold uppercase tracking-[0.06em] text-muted">{t('ui.CustomFontModal.origen')}</legend>
             <div className="flex gap-2">
-              <ChoiceButton active={source === 'google'} label="Google Fonts" onClick={() => setSource('google')} />
-              <ChoiceButton active={source === 'local'} label="Archivo local" onClick={() => setSource('local')} />
+              <ChoiceButton active={source === 'google'} label={t('ui.CustomFontModal.google-fonts')} onClick={() => setSource('google')} />
+              <ChoiceButton active={source === 'local'} label={t('ui.CustomFontModal.archivo-local')} onClick={() => setSource('local')} />
             </div>
           </fieldset>
 
           {source === 'local' ? (
             <div className="space-y-1.5">
-              <label htmlFor="custom-font-file" className="text-tools-meta text-muted">
-                Archivo (.woff2 / .ttf / .otf)
-              </label>
+              <label htmlFor="custom-font-file" className="text-tools-meta text-muted">{t('ui.CustomFontModal.archivo-woff2-ttf-otf')}</label>
               <input
                 id="custom-font-file"
                 type="file"
@@ -143,28 +138,24 @@ export function CustomFontModal({
           ) : null}
 
           <div className="space-y-1.5">
-            <label htmlFor="custom-font-family" className="text-tools-meta text-muted">
-              Nombre de familia
-            </label>
+            <label htmlFor="custom-font-family" className="text-tools-meta text-muted">{t('ui.CustomFontModal.nombre-de-familia')}</label>
             <input
               id="custom-font-family"
               data-custom-font-family
               type="text"
               value={family}
               onChange={(event) => setFamily(event.target.value)}
-              placeholder={source === 'google' ? 'p. ej. Cabin' : 'Opcional; usa el nombre del archivo'}
+              placeholder={source === 'google' ? t('ui.CustomFontModal.p-ej-cabin') : t('ui.CustomFontModal.opcional-usa-el-nombre-del')}
               autoComplete="off"
               className="w-full rounded-md border border-border bg-bg px-3 py-2 text-tools-body text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
             />
           </div>
 
           <fieldset className="space-y-2">
-            <legend className="text-tools-meta font-semibold uppercase tracking-[0.06em] text-muted">
-              Asignar a
-            </legend>
+            <legend className="text-tools-meta font-semibold uppercase tracking-[0.06em] text-muted">{t('ui.CustomFontModal.asignar-a')}</legend>
             <div className="flex gap-2">
-              <ChoiceButton active={role === 'heading'} label="Titular" onClick={() => setRole('heading')} />
-              <ChoiceButton active={role === 'body'} label="Cuerpo" onClick={() => setRole('body')} />
+              <ChoiceButton active={role === 'heading'} label={t('ui.CustomFontModal.titular')} onClick={() => setRole('heading')} />
+              <ChoiceButton active={role === 'body'} label={t('ui.CustomFontModal.cuerpo')} onClick={() => setRole('body')} />
             </div>
           </fieldset>
 
@@ -173,7 +164,7 @@ export function CustomFontModal({
               className="rounded-md border border-amber-500/40 bg-amber-50 px-3 py-2 text-tools-body text-amber-950 dark:bg-amber-950/20 dark:text-amber-100"
               role="alert"
             >
-              {error}
+              {tx(error)}
             </p>
           ) : null}
 
@@ -182,15 +173,13 @@ export function CustomFontModal({
               type="button"
               onClick={onClose}
               className="rounded-md px-3 py-2 text-tools-chip font-semibold text-muted hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-            >
-              Cancelar
-            </button>
+            >{t('ui.CustomFontModal.cancelar')}</button>
             <button
               type="submit"
               disabled={busy}
               className="rounded-md bg-ink px-3 py-2 text-tools-chip font-semibold text-bg transition-opacity disabled:opacity-60 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
             >
-              {busy ? 'Aplicando…' : 'Aplicar'}
+              {busy ? t('ui.CustomFontModal.aplicando') : t('ui.CustomFontModal.aplicar')}
             </button>
           </div>
         </form>
@@ -208,6 +197,7 @@ function ChoiceButton({
   label: string;
   onClick: () => void;
 }) {
+  const tx = useTx();
   return (
     <button
       type="button"
@@ -219,7 +209,7 @@ function ChoiceButton({
           : 'bg-transparent text-muted hover:bg-surface-raised hover:text-ink'
       }`}
     >
-      {label}
+      {tx(label)}
     </button>
   );
 }

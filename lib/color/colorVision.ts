@@ -1,6 +1,17 @@
 import { converter, formatHex } from 'culori';
 
-export type ColorVisionDeficiency = 'protanopia' | 'deuteranopia';
+export type ColorVisionDeficiency = 'protanopia' | 'deuteranopia' | 'tritanopia' | 'achromatopsia';
+
+/** View modes offered in the UI; `none` leaves colors untouched. */
+export type ColorVisionMode = 'none' | ColorVisionDeficiency;
+
+export const COLOR_VISION_MODES: readonly ColorVisionMode[] = [
+  'none',
+  'protanopia',
+  'deuteranopia',
+  'tritanopia',
+  'achromatopsia',
+];
 
 const toRgb = converter('rgb');
 const toOklab = converter('oklab');
@@ -16,7 +27,28 @@ const MATRICES: Record<ColorVisionDeficiency, readonly [number, number, number][
     [0.280085, 0.672501, 0.047413],
     [-0.01182, 0.04294, 0.968881],
   ],
+  // Machado et al. (2009), severity 1.0.
+  tritanopia: [
+    [1.255528, -0.076749, -0.178779],
+    [-0.078411, 0.930809, 0.147602],
+    [0.004733, 0.691367, 0.3039],
+  ],
+  // Rec. 709 luma weights on every channel.
+  achromatopsia: [
+    [0.2126, 0.7152, 0.0722],
+    [0.2126, 0.7152, 0.0722],
+    [0.2126, 0.7152, 0.0722],
+  ],
 };
+
+/** Row-major 5x4 matrix string for an SVG `feColorMatrix` (sRGB, alpha untouched). */
+export function colorVisionFilterMatrix(mode: ColorVisionMode): string | null {
+  if (mode === 'none') {
+    return null;
+  }
+  const rows = MATRICES[mode].map((row) => `${row.join(' ')} 0 0`);
+  return `${rows.join(' ')} 0 0 0 1 0`;
+}
 
 export function simulateColorVision(hex: string, deficiency: ColorVisionDeficiency): string {
   const rgb = toRgb(hex);

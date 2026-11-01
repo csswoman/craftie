@@ -15,6 +15,7 @@ import {
 } from '@lib/color/canvasViews';
 
 import { ViewThumbnail } from './ViewThumbnail';
+import { useT, useTx } from '@/context/I18nContext';
 
 const GROUPS: CanvasViewGroup[] = ['mode', 'system', 'layout', 'preview'];
 
@@ -29,6 +30,8 @@ export function CanvasViewPickerList({
   onSelect: (id: CanvasViewId) => void;
   autoFocusActive?: boolean;
 }) {
+  const tx = useTx();
+  const t = useT();
   const itemRefs = useRef<Record<CanvasViewId, HTMLButtonElement | null>>(
     {} as Record<CanvasViewId, HTMLButtonElement | null>,
   );
@@ -53,11 +56,11 @@ export function CanvasViewPickerList({
   }
 
   return (
-    <div role="menu" aria-label="Vistas del lienzo">
+    <div role="menu" aria-label={t('ui.CanvasViewPickerList.vistas-del-lienzo')}>
       {GROUPS.map((group) => (
         <div key={group} className={group === 'layout' ? 'mt-1.5' : undefined}>
           <p className="px-2.5 py-1.5 text-[0.6875rem] font-bold uppercase tracking-[0.06em] text-muted">
-            {CANVAS_VIEW_GROUP_LABEL[group]}
+            {tx(CANVAS_VIEW_GROUP_LABEL[group])}
           </p>
           {CANVAS_VIEWS.filter((view) => view.group === group).map((view) => {
             const selected = activeId === view.id;
@@ -80,10 +83,10 @@ export function CanvasViewPickerList({
                 <ViewThumbnail id={view.id} palette={palette} />
                 <span className="min-w-0 flex-1">
                   <span className="block text-chrome-label font-semibold leading-tight">
-                    {view.id === 'colors' ? 'UI' : view.name}
+                    {tx(view.id === 'colors' ? 'UI' : view.name)}
                   </span>
                   <span className="mt-0.5 block truncate text-chrome-caption text-muted">
-                    {view.description}
+                    {tx(view.description)}
                   </span>
                 </span>
                 {selected ? (

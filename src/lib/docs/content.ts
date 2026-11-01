@@ -56,21 +56,22 @@ export const DOCS_GROUPS: DocsGroup[] = [
         'Sobre Craftie',
         'Qué es Craftie',
         'Crear, probar y documentar identidad visual antes de implementarla en tu producto.',
-        'Los colores y la tipografía pueden funcionar bien por separado y producir resultados distintos cuando se aplican a una interfaz real. Craftie es una herramienta para experimentar con paletas, roles semánticos y fuentes mientras observas el resultado en componentes e interfaces de ejemplo — en un solo estudio en `/`, sin wizard ni cuenta en la nube.',
+        'Los colores y la tipografía pueden funcionar bien por separado y producir resultados distintos cuando se aplican a una interfaz real. Craftie es una herramienta para experimentar con paletas, roles semánticos y fuentes mientras observas el resultado en componentes e interfaces de ejemplo — en un solo estudio en `/`, sin wizard y sin cuenta: todo se guarda en tu navegador.',
         [
           'Roles con temas claro/oscuro y estados (Éxito, Advertencia, Peligro).',
-          'Contraste WCAG y lectura APCA al editar.',
-          'Parejas tipográficas y maquetas (Dashboard, Landing, Analytics…).',
-          'Export: CSS, tokens JSON, DESIGN.md y brand kit.',
+          'Contraste WCAG y lectura APCA, con consejos para corregir lo que falla.',
+          'Parejas tipográficas, roles de texto y 7 maquetas (Dashboard, Landing, App móvil, Editorial, Tienda…).',
+          'Export: CSS, tokens JSON, DESIGN.md, brand kit, imagen PNG y enlace compartible.',
         ],
         [
-          'Abre `/` → estilo curado o imagen.',
+          'Abre `/` → estilo curado, imagen o un HEX propio.',
           'Asigna roles en panel Colores → «Ver guía de marca».',
-          'Revisa tipografía y maquetas → Exportar.',
+          'Revisa tipografía y maquetas → guarda en Mis proyectos → Exportar.',
         ],
         [
           'Las maquetas usan contenido de ejemplo, no tu app completa.',
           'Propone valores; tú confirmas la intención de cada rol.',
+          'Los proyectos viven en este navegador: no hay sincronización entre dispositivos.',
         ],
         [
           {
@@ -90,26 +91,27 @@ export const DOCS_GROUPS: DocsGroup[] = [
           {
             heading: 'Qué puedes hacer',
             bullets: [
-              'Crear una base visual — inspiración, imagen o colores propios.',
+              'Crear una base visual — estilo curado, imagen o un HEX propio.',
               'Asignar roles semánticos — fondo, texto, superficie, acción principal, borde y estados.',
               'Trabajar en OKLCH — luminosidad, intensidad y matiz para variantes y escalas.',
-              'Revisar accesibilidad — contraste WCAG; APCA como lectura perceptual complementaria.',
-              'Probar tipografías — parejas titular/cuerpo, Google Fonts o fuentes locales en contenido real.',
-              'Afinar la escala — sobrescribe niveles individuales y ajusta interlineado/tracking por separado en titulares y cuerpo.',
-              'Previsualizar interfaces — botones, navegación, paneles y datos en maquetas del canvas.',
-              'Exportar el sistema — CSS, design tokens, JSON para Tokens Studio, DESIGN.md y brand kit.',
+              'Revisar accesibilidad — contraste WCAG, APCA complementario y consejos con la corrección sugerida.',
+              'Probar tipografías — parejas populares y curadas, Google Fonts o fuentes locales en contenido real.',
+              'Afinar la escritura — 10 roles tipográficos (Hero, Titular, Cuerpo, Botón…) con peso, tamaño, interlineado y tracking editables.',
+              'Previsualizar interfaces — 7 maquetas donde puedes hacer clic para editar el color o el texto.',
+              'Guardar y compartir — Mis proyectos, autoguardado y enlace que restaura la paleta.',
+              'Exportar el sistema — CSS, design tokens, Tokens Studio, DESIGN.md, brand kit e imagen PNG.',
             ],
           },
           {
             heading: 'Flujo recomendado',
             bullets: [
-              'Elige inspiración o introduce tus colores.',
+              'Elige inspiración, sube una imagen o escribe un HEX.',
               'Asigna los colores principales a roles semánticos.',
               'Revisa tema claro y oscuro.',
-              'Corrige problemas de contraste.',
-              'Selecciona y ajusta la tipografía.',
-              'Comprueba distintas interfaces y anchos de ventana.',
-              'Exporta o comparte el resultado.',
+              'Corrige problemas de contraste con los consejos del editor.',
+              'Selecciona y ajusta la tipografía y sus roles.',
+              'Comprueba distintas maquetas y anchos de ventana.',
+              'Guarda el proyecto, exporta o comparte el enlace.',
             ],
           },
           {
@@ -123,7 +125,7 @@ export const DOCS_GROUPS: DocsGroup[] = [
             bullets: [
               'No es un clon de Coolors ni Adobe Color.',
               'No hay plugin de Figma ni sincronización remota automática.',
-              'No persiste el kit completo entre sesiones (solo preferencias parciales en el navegador).',
+              'No hay cuentas ni nube: los proyectos se guardan solo en este navegador.',
             ],
           },
         ],
@@ -142,7 +144,8 @@ export const DOCS_GROUPS: DocsGroup[] = [
           {
             heading: '1. Inspiración',
             bullets: [
-              'Estado vacío: «Elegir estilo curado» o subir imagen (JPG/PNG/WebP, máx. 5 MB, solo local).',
+              'Estado vacío («Empieza por aquí»): «Explorar estilos», subir imagen (JPG/PNG/WebP, máx. 5 MB, solo local) o «Partir de un color (HEX)».',
+              'Si ya guardaste proyectos, la pantalla de inicio muestra «Sigue donde lo dejaste» con los últimos tres.',
               'Cambiar de estilo a imagen o viceversa desde el panel Colores.',
             ],
           },
@@ -161,10 +164,11 @@ export const DOCS_GROUPS: DocsGroup[] = [
             ],
           },
           {
-            heading: '4. Export',
+            heading: '4. Guardar y exportar',
             bullets: [
+              'El header muestra el nombre del proyecto y su estado (Borrador, Guardando…, Guardado). Clic para abrir Mis proyectos.',
               'Menú Exportar en el header cuando existen primary, background y on-background.',
-              'Si falta alguno, el botón muestra «Falta: …».',
+              'Si falta alguno, el botón queda desactivado y explica qué falta.',
             ],
           },
           {
@@ -181,7 +185,7 @@ export const DOCS_GROUPS: DocsGroup[] = [
         'Sobre Craftie',
         'Inspiración',
         'Estilo curado o imagen: las dos entradas reales.',
-        'No hay flujo «un solo color semilla» en la UI. Empiezas con un preset o una foto; Craftie carga candidatos y tú asignas roles.',
+        'Hay tres entradas: un estilo curado, una foto o un único color HEX. Craftie carga candidatos y tú asignas roles. Si no hay nada guardado, el estudio también te recibe con una paleta de ejemplo.',
         [],
         [],
         [],
@@ -191,6 +195,13 @@ export const DOCS_GROUPS: DocsGroup[] = [
             bullets: [
               'Veinte estilos curados (Bosque sereno, Neón noche, Concreto…) con filtros por vibe.',
               'Cada uno trae 3 colores semilla y etiquetas de mood para tipografía.',
+            ],
+          },
+          {
+            heading: 'Desde un color (HEX)',
+            bullets: [
+              'En «Partir de un color (HEX)» escribe un valor como #1F6F54 (hay un ejemplo con un clic).',
+              'Craftie construye los colores fuente a partir de ese HEX y tú asignas los roles.',
             ],
           },
           {
@@ -278,7 +289,7 @@ export const DOCS_GROUPS: DocsGroup[] = [
           {
             heading: 'Visión del color',
             paragraphs: [
-              'Al elegir candidatos, Craftie penaliza pares que colapsan bajo deuteranopía (tooltip educativo). No hay simulación global de toda la pantalla.',
+              'Al elegir candidatos, Craftie penaliza pares que colapsan bajo deuteranopía (tooltip educativo). Para ver el lienzo completo con otra visión, usa el selector «Visión» de la toolbar.',
             ],
           },
           {
@@ -370,6 +381,14 @@ export const DOCS_GROUPS: DocsGroup[] = [
             ],
           },
           {
+            heading: 'Consejos cuando falla',
+            bullets: [
+              'Si un par no llega a AA, el editor muestra «Faltan X puntos para AA», una barra de progreso y una muestra de texto real.',
+              'Propone correcciones en OKLCH (aclarar u oscurecer texto o fondo) con el ratio resultante.',
+              'Solo puedes aplicar la corrección del lado que estás editando; la del otro lado es una pista.',
+            ],
+          },
+          {
             heading: 'APCA',
             bullets: [
               'Lc complementario; aviso si discrepa de WCAG.',
@@ -386,10 +405,18 @@ export const DOCS_GROUPS: DocsGroup[] = [
             ],
           },
           {
+            heading: 'Simulación de visión del color',
+            bullets: [
+              'El selector «Visión» de la toolbar del lienzo aplica protanopía, deuteranopía, tritanopía o escala de grises a toda la vista activa.',
+              'Útil para detectar pares que solo se distinguen por el tono, como estados o series de datos.',
+              'Vuelve a «Normal» para ver los colores reales.',
+            ],
+          },
+          {
             heading: 'Límites',
             bullets: [
               'No audita teclado, ARIA, motion ni lectores de pantalla.',
-              'Sin simulación global CVD ni tritanopia/gris en la UI.',
+              'La simulación de visión del color es aproximada y solo cambia la vista; no modifica la paleta ni el export.',
             ],
           },
         ],
@@ -399,7 +426,7 @@ export const DOCS_GROUPS: DocsGroup[] = [
         'Sobre Craftie',
         'Tipografía',
         'Parejas, escala y fuentes propias.',
-        'Pestaña Tipografía en la barra lateral: parejas curadas, recomendadas por mood del estilo, filtros por categoría y fuente personalizada (Google o archivo local en sesión).',
+        'Pestaña Tipografía en la barra lateral: parejas populares y curadas, recomendadas por mood del estilo, filtros por categoría, roles de texto editables y fuente personalizada (Google o archivo local en sesión).',
         [],
         [],
         [],
@@ -411,13 +438,26 @@ export const DOCS_GROUPS: DocsGroup[] = [
               'Pin de titular o cuerpo al explorar el catálogo.',
               'Hover: «Vista previa — clic para aplicar».',
               'Top 3 recomendadas según mood del estilo activo.',
+              'Las parejas más usadas llevan la insignia «Popular» y salen primero.',
             ],
           },
           {
             heading: 'Escala',
             bullets: [
               'Base, ratio y peso del titular (500/600/700).',
-              'Vista «Escala tipográfica» en canvas: Display, Títulos, Entradilla, Cuerpo, Detalle.',
+              'Vista «Escala tipográfica» en canvas, presentada como una página de muestra.',
+              'Clic en un nivel para ajustar peso, interlineado y tracking solo de ese nivel.',
+            ],
+          },
+          {
+            heading: 'Roles tipográficos',
+            bullets: [
+              'Diez roles: Hero, Display, Titular, Título, Cuerpo, Etiqueta, Nota, Botón, Marca y Sobretítulo.',
+              'Cada rol parte de un paso de la escala y de la fuente de titulares o de cuerpo.',
+              'Edita peso, tamaño, interlineado y tracking desde la escala o haciendo clic en el texto de una maqueta (modo «Texto»).',
+              'Por defecto el cambio aplica a todo el rol; activa «Solo este rol» para limitarlo a uno.',
+              'Avisos de legibilidad si un ajuste deja el texto difícil de leer; hay botón para restablecer.',
+              'Los roles se incluyen en el export (CSS, tokens, DESIGN.md, brand kit).',
             ],
           },
           {
@@ -434,8 +474,8 @@ export const DOCS_GROUPS: DocsGroup[] = [
         'canvas-views',
         'Sobre Craftie',
         'Vistas del canvas',
-        'Sistema, maquetas, ilustración y Pintar.',
-        'El selector agrupa: Modo de extracción, Sistema de diseño, Maquetas y Vistas previas. Cambia de vista para encontrar conflictos que un swatch aislado no muestra.',
+        'Sistema, siete maquetas, ilustración y Pintar.',
+        'El selector agrupa: Modo de extracción (Colores, Pintar), Sistema de diseño, Maquetas y Vistas previas. Cambia de vista para encontrar conflictos que un swatch aislado no muestra.',
         [],
         [],
         [],
@@ -445,14 +485,24 @@ export const DOCS_GROUPS: DocsGroup[] = [
             bullets: [
               'Guía de estilo — muestras de color + tipografía.',
               'Escala tipográfica — jerarquía aplicada.',
+              'Escalas de tonos — rampas de 50 a 900 para Primario, Secundario y Acento; clic en un paso para ajustar luminosidad e intensidad, con su contraste sobre el fondo.',
               'Colores — roles, derivados y sistema completo.',
             ],
           },
           {
             heading: 'Maquetas',
             bullets: [
-              'Dashboard · Landing · Reproductor · Analytics (contexto oscuro).',
-              'Clic en un elemento → popover para editar el token semántico (OKLCH + contraste).',
+              'Dashboard · Landing · Reproductor · Analytics (contexto oscuro) · App móvil · Editorial · Tienda.',
+              'Cada maqueta usa marco de navegador o de teléfono y contenido de ejemplo.',
+            ],
+          },
+          {
+            heading: 'Editar desde la maqueta',
+            bullets: [
+              'El selector «Clic edita» tiene tres modos: Bloqueado, Color y Texto.',
+              'Color: clic en un elemento → popover para editar el token semántico (OKLCH + contraste, con consejos si falla).',
+              'Texto: clic en un texto → popover del rol tipográfico (peso, tamaño, interlineado, tracking).',
+              'Bloqueado: la maqueta solo se mira, sin abrir editores.',
             ],
           },
           {
@@ -466,7 +516,8 @@ export const DOCS_GROUPS: DocsGroup[] = [
             heading: 'Qué mirar',
             bullets: [
               'Jerarquía fondo/superficie, legibilidad, peso del primario.',
-              'Dashboard vs. Landing para densidad distinta.',
+              'Dashboard vs. Landing para densidad distinta; Editorial para lectura larga y Tienda para producto y precios.',
+              'App móvil para comprobar pantallas pequeñas y botones táctiles.',
             ],
           },
         ],
@@ -499,6 +550,49 @@ export const DOCS_GROUPS: DocsGroup[] = [
         ],
       ),
       page(
+        'projects',
+        'Sobre Craftie',
+        'Proyectos y enlaces',
+        'Autoguardado, Mis proyectos y enlace compartible.',
+        'Tu trabajo no se pierde al recargar. Craftie autoguarda un borrador y te deja guardar varias versiones como proyectos locales, sin cuenta.',
+        [],
+        [],
+        [],
+        [
+          {
+            heading: 'Borrador autoguardado',
+            bullets: [
+              'Los cambios se guardan solos en el navegador; al volver, el estudio restaura la paleta.',
+              'El header muestra «Borrador» hasta que lo guardas como proyecto.',
+            ],
+          },
+          {
+            heading: 'Mis proyectos',
+            bullets: [
+              'Abre el panel desde el header: guarda con nombre, renombra, duplica o elimina.',
+              'Cada proyecto guarda la paleta, la tipografía y una miniatura.',
+              'El estado del header cambia entre Guardando…, Guardado y «No se pudo guardar».',
+              'En la pantalla de inicio aparecen los tres últimos en «Sigue donde lo dejaste».',
+            ],
+          },
+          {
+            heading: 'Enlace compartible',
+            bullets: [
+              'Exportar → Copiar enlace genera una URL con la paleta en el hash.',
+              'Quien abre el enlace ve la misma paleta; no requiere cuenta ni servidor.',
+              'Un enlace dañado o demasiado largo se ignora y se abre el estudio normal.',
+            ],
+          },
+          {
+            heading: 'Límites',
+            bullets: [
+              'Los proyectos son locales: no se sincronizan entre navegadores ni dispositivos.',
+              'Borrar los datos del sitio elimina borrador y proyectos; exporta un brand kit si quieres un respaldo.',
+            ],
+          },
+        ],
+      ),
+      page(
         'export',
         'Sobre Craftie',
         'Exportar',
@@ -511,11 +605,25 @@ export const DOCS_GROUPS: DocsGroup[] = [
           {
             heading: 'Formatos',
             bullets: [
+              'Copiar enlace — URL que restaura esta paleta al abrirla.',
+              'Copiar CSS — variables al portapapeles, sin descargar archivo.',
               'CSS variables — custom properties light/dark.',
               'Design tokens (JSON) — W3C / Style Dictionary.',
               'Figma (Tokens Studio) — JSON para import manual (no es plugin).',
+              'Tailwind CSS v4 — bloque `@theme` con colores, fuentes y roles de texto; el oscuro se activa con `data-theme="dark"`.',
+              'shadcn/ui — variables `:root` y `.dark` mapeadas desde tus roles, más el puente `@theme inline`.',
               'DESIGN.md — guía Markdown para el repo.',
               'Brand kit (.json) — paleta, roles, tipografía y DESIGN.md embebido.',
+              'Imagen (.png) — tarjeta con la paleta y la tipografía activa para compartir.',
+            ],
+          },
+          {
+            heading: 'Qué incluye',
+            bullets: [
+              'Roles semánticos con su par `on-*`, escala neutra, series de datos y estados confirmados.',
+              'Las rampas 50–900 de Primario, Secundario y Acento (`primary-500`, `accent-200`…), incluidos los pasos que hayas ajustado.',
+              'Valores derivados para tema claro y oscuro, de modo que `[data-theme="dark"]` y `.dark` salen completos.',
+              'Roles tipográficos (Hero, Titular, Cuerpo…) con sus ajustes en CSS, tokens, Tokens Studio, DESIGN.md y brand kit.',
             ],
           },
           {
@@ -554,13 +662,14 @@ export const DOCS_GROUPS: DocsGroup[] = [
               'Ctrl/⌘+Enter — Ver guía de marca.',
               'Ctrl/⌘+Z — Deshacer edición de paleta.',
               'Ctrl/⌘+Shift+Z o Ctrl/⌘+Y — Rehacer.',
+              'Alt+R (⌥+R en Mac) — probar otra paleta; respeta los roles bloqueados.',
               'Esc — cerrar menús o vistas ampliadas.',
             ],
           },
           {
             heading: 'Reset',
             paragraphs: [
-              'Clic en el logo Craftie con progreso activo → «¿Empezar de nuevo?» — pierdes la sesión actual (paleta, imagen, guía).',
+              'Clic en el logo Craftie con progreso activo → diálogo de confirmación para empezar de nuevo. Se descarta el borrador actual; los proyectos ya guardados en Mis proyectos se conservan.',
             ],
           },
           {
@@ -585,18 +694,25 @@ export const DOCS_GROUPS: DocsGroup[] = [
           {
             heading: 'Qué se guarda localmente',
             bullets: [
-              'localStorage: layout del panel, id de pareja tipográfica.',
+              'localStorage: borrador autoguardado de la paleta, layout del panel, pareja tipográfica y ajustes de la sesión de trabajo.',
+              'IndexedDB: proyectos de Mis proyectos (paleta, tipografía y miniatura).',
               'sessionStorage: fuentes custom de la sesión.',
-              'No se guarda: paleta completa, imagen ni guía entre visitas.',
+              'No se guarda: la imagen original ni los archivos de fuente locales.',
+              'Todo permanece en tu navegador; limpiar los datos del sitio lo borra.',
             ],
           },
           {
             heading: 'Preguntas frecuentes',
             bullets: [
               '¿Estudio vs. docs? `/` trabaja · `/docs` documenta.',
-              '¿Color semilla solo? No en UI; usa estilo o imagen.',
+              '¿Puedo partir de un solo color? Sí: «Partir de un color (HEX)» en la pantalla de inicio.',
+              '¿Cómo comparto una paleta? Exportar → Copiar enlace.',
+              '¿Puedo instalarlo o usarlo sin conexión? Sí: el navegador ofrece instalarlo y, tras la primera visita, el estudio y las herramientas abren sin red (solo en la versión publicada).',
+              '¿Hay herramientas sueltas? Sí: `/tools/contrast-checker` (verificador de contraste), `/tools/palette-from-image` (paleta desde una imagen) y `/palettes` (galería de paletas que se abren en el estudio).',
+              '¿Hay interfaz en inglés? Sí: el botón ES/EN del header (o del menú móvil) cambia el idioma y se recuerda en este navegador. Cubre todo el estudio; esta documentación y las páginas de herramientas siguen en español por ahora.',
+              '¿Mi trabajo se pierde al cerrar la pestaña? No: se autoguarda como borrador; guárdalo como proyecto para tener varias versiones.',
               '¿Export bloqueado? Falta primary, background u on-background.',
-              '¿Escalas 50–900 en UI? El export puede derivarlas; no hay editor de rampa completa.',
+              '¿Escalas 50–900 en UI? Sí: vista «Escalas de tonos» en el selector del lienzo. Los ajustes se exportan como primary-500, accent-200…',
               '¿Plugin Figma? No; solo JSON Tokens Studio si lo importas tú.',
             ],
           },

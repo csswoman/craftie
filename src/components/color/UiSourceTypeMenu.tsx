@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { AlertCircle, BarChart3, Palette } from 'lucide-react';
+import { useT, useTx } from '@/context/I18nContext';
 
 export function UiSourceTypeMenu({
   name,
@@ -14,24 +15,26 @@ export function UiSourceTypeMenu({
   onStatus: () => void;
   onData: () => void;
 }) {
+  const tx = useTx();
+  const t = useT();
   return (
-    <ul className="space-y-1" aria-label={`Tipo de asignación para ${name}`}>
+    <ul className="space-y-1" aria-label={t('ui.UiSourceTypeMenu.tipo-de-asignacion-para', { name: tx(name) })}>
       <TypeOption
         icon={<Palette aria-hidden="true" size={18} strokeWidth={2} className="text-forest" />}
-        title="Rol de UI"
-        description="Fondo, texto, primario y demás roles del sistema"
+        title={t('ui.UiSourceTypeMenu.rol-de-ui')}
+        description={t('ui.UiSourceTypeMenu.fondo-texto-primario-y-demas')}
         onClick={onRole}
       />
       <TypeOption
         icon={<BarChart3 aria-hidden="true" size={18} strokeWidth={2} className="text-accent" />}
-        title="Serie de datos"
-        description="Al primer hueco libre de la serie"
+        title={t('ui.UiSourceTypeMenu.serie-de-datos')}
+        description={t('ui.UiSourceTypeMenu.al-primer-hueco-libre-de')}
         onClick={onData}
       />
       <TypeOption
         icon={<AlertCircle aria-hidden="true" size={18} strokeWidth={2} className="text-attention" />}
-        title="Color de estado"
-        description="Success, warning o danger"
+        title={t('ui.UiSourceTypeMenu.color-de-estado')}
+        description={t('ui.UiSourceTypeMenu.success-warning-o-danger')}
         onClick={onStatus}
       />
     </ul>
@@ -49,6 +52,7 @@ function TypeOption({
   description: string;
   onClick: () => void;
 }) {
+  const tx = useTx();
   return (
     <li>
       <button
@@ -60,8 +64,8 @@ function TypeOption({
           {icon}
         </span>
         <span className="min-w-0">
-          <span className="block text-tools-body-sm font-semibold text-ink">{title}</span>
-          <span className="block text-tools-meta-scale text-muted">{description}</span>
+          <span className="block text-tools-body-sm font-semibold text-ink">{tx(title)}</span>
+          <span className="block text-tools-meta-scale text-muted">{tx(description)}</span>
         </span>
       </button>
     </li>

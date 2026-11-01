@@ -3,6 +3,7 @@ import type { SelectableColor } from '@lib/color/selectableColors';
 import type { SemanticToken } from '@lib/color/semanticTokens';
 
 import { UiCompactSwatch } from './UiCompactSwatch';
+import { useT, useTx } from '@/context/I18nContext';
 
 export function UiCompactRoleRow({
   label,
@@ -15,6 +16,8 @@ export function UiCompactRoleRow({
   colors: SelectableColor[];
   onOpen: () => void;
 }) {
+  const tx = useTx();
+  const t = useT();
   const unassigned = Boolean(token.gap);
   const sourceHexes = new Set(colors.map((color) => normalizeHex(color.hex)));
   const fromSource = token.source === 'extracted' || sourceHexes.has(normalizeHex(token.hex));
@@ -25,7 +28,7 @@ export function UiCompactRoleRow({
       <button
         type="button"
         onClick={onOpen}
-        aria-label={`${unassigned ? 'Asignar' : 'Editar'} ${label}`}
+        aria-label={t(unassigned ? 'roleRow.assign' : 'roleRow.edit', { label: tx(label) })}
         className="group flex min-h-11 w-full items-center gap-3 rounded-md px-1.5 text-left transition-colors duration-200 hover:bg-line-soft focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25 dark:hover:bg-line-soft"
       >
         {unassigned ? (
@@ -40,15 +43,15 @@ export function UiCompactRoleRow({
           <UiCompactSwatch hex={token.hex} />
         )}
         <span className={`truncate text-tools-role font-semibold ${unassigned ? 'text-attention' : 'text-ink'}`}>
-          {label}
+          {tx(label)}
         </span>
         {!unassigned ? (
           <span className="ml-auto shrink-0 rounded-full bg-line-soft px-1.5 py-0.5 text-tools-micro font-semibold text-muted opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 dark:bg-surface-raised">
-            {origin}
+            {tx(origin)}
           </span>
         ) : <span className="ml-auto" />}
         {unassigned ? (
-          <span className="mr-1 size-1.5 shrink-0 rounded-full bg-attention" aria-label="Sin asignar" />
+          <span className="mr-1 size-1.5 shrink-0 rounded-full bg-attention" aria-label={t('ui.UiCompactRoleRow.sin-asignar')} />
         ) : (
           <span className="w-[5.25rem] shrink-0 text-right font-mono text-tools-meta-scale font-medium tabular-nums text-ink/80">
             {token.hex.toUpperCase()}

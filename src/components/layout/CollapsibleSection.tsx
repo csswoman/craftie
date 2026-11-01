@@ -1,6 +1,7 @@
 'use client';
 
 import { useId, useState, type ReactNode } from 'react';
+import { useTx } from '@/context/I18nContext';
 
 export type CollapsibleSectionProps = {
   title: string;
@@ -31,6 +32,7 @@ export function CollapsibleSection({
   collapsible = true,
   variant = 'accent',
 }: CollapsibleSectionProps) {
+  const tx = useTx();
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   const open = controlledOpen ?? internalOpen;
   const setOpen = onOpenChange ?? setInternalOpen;
@@ -52,7 +54,7 @@ export function CollapsibleSection({
 
   return (
     <section className={className}>
-      <Heading className="sr-only">{title}</Heading>
+      <Heading className="sr-only">{tx(title)}</Heading>
       <div className="flex items-center gap-[var(--chrome-space-2)]">
         {collapsible ? (
           <button
@@ -71,7 +73,7 @@ export function CollapsibleSection({
                 </span>
               ) : null}
               <span className="truncate text-tools-section font-semibold text-ink">
-                {title}
+                {tx(title)}
               </span>
             </span>
             <ChevronIcon open={open} />
@@ -87,7 +89,7 @@ export function CollapsibleSection({
                 </span>
               ) : null}
               <span className="truncate text-tools-section font-semibold text-ink">
-                {title}
+                {tx(title)}
               </span>
             </span>
           </div>

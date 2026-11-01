@@ -11,6 +11,11 @@ export const STUDIO_SHORTCUTS: StudioShortcut[] = [
     when: 'Con paleta por roles lista en fase de ajuste',
   },
   {
+    keys: 'alt+R',
+    label: 'Probar otra paleta',
+    when: 'Con una paleta cargada; respeta los roles bloqueados',
+  },
+  {
     keys: 'Esc',
     label: 'Cerrar menús y vistas ampliadas',
     when: 'Con un modal o menú abierto',
@@ -24,6 +29,13 @@ export const STUDIO_SHORTCUTS: StudioShortcut[] = [
 
 export function isGenerateShortcut(event: Pick<KeyboardEvent, 'key' | 'ctrlKey' | 'metaKey'>): boolean {
   return event.key === 'Enter' && (event.ctrlKey || event.metaKey);
+}
+
+/** Alt+R. Uses `code` because Option+R types a character on macOS. */
+export function isRandomizePaletteShortcut(
+  event: Pick<KeyboardEvent, 'code' | 'ctrlKey' | 'metaKey' | 'altKey' | 'shiftKey'>,
+): boolean {
+  return event.code === 'KeyR' && event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey;
 }
 
 export function isShortcutsHelpShortcut(
@@ -74,5 +86,11 @@ export function formatShortcutKeys(keys: string): string {
     return 'Ctrl + Enter';
   }
 
+  if (keys === 'alt+R') {
+    if (typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform)) {
+      return '⌥ + R';
+    }
+    return 'Alt + R';
+  }
   return keys;
 }

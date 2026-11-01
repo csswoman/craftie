@@ -2,6 +2,7 @@
 
 import { ChevronDown, Plus, SlidersHorizontal } from 'lucide-react';
 import { useState } from 'react';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type FineTuneLevel = {
   id: string;
@@ -26,6 +27,8 @@ export function FineTuneSizes({
   onAddLargerStep,
   onAddSmallerStep,
 }: FineTuneSizesProps) {
+  const tx = useTx();
+  const t = useT();
   const [open, setOpen] = useState(true);
 
   function handleSizeChange(levelId: string, value: string) {
@@ -45,7 +48,7 @@ export function FineTuneSizes({
       >
         <span className="flex items-center gap-2 text-chrome-label font-semibold text-ink">
           <SlidersHorizontal size={15} aria-hidden="true" />
-          <span id="fine-tune-title">Ajustar tamaños</span>
+          <span id="fine-tune-title">{t('ui.FineTuneSizes.ajustar-tamanos')}</span>
         </span>
         <ChevronDown
           size={16}
@@ -56,13 +59,11 @@ export function FineTuneSizes({
 
       {open ? (
         <div className="border-t border-border px-4 py-4">
-          <p className="max-w-prose text-chrome-caption leading-relaxed text-muted">
-            Values match the mathematical scale by default. Type to override specific levels.
-          </p>
+          <p className="max-w-prose text-chrome-caption leading-relaxed text-muted">{t('ui.FineTuneSizes.values-match-the-mathematical-scale')}</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {levels.map((level) => (
               <label key={level.id} className="flex items-center justify-between gap-3 text-chrome-label font-medium text-ink">
-                <span>{level.label}</span>
+                <span>{tx(level.label)}</span>
                 <span className="relative">
                   <input
                     type="number"
@@ -70,8 +71,8 @@ export function FineTuneSizes({
                     step="1"
                     inputMode="numeric"
                     value={overrides[level.id] ?? ''}
-                    placeholder={String(level.computedSize)}
-                    aria-label={`${level.label} en píxeles`}
+                    placeholder={tx(String(level.computedSize))}
+                    aria-label={t('ui.FineTuneSizes.en-pixeles', { label: tx(level.label) })}
                     onChange={(event) => handleSizeChange(level.id, event.target.value)}
                     className="h-9 w-20 rounded-md border border-border bg-bg px-2 pr-6 text-right font-mono text-xs tabular-nums text-ink outline-none placeholder:text-muted focus:border-primary focus:ring-[3px] focus:ring-primary/25"
                   />
@@ -82,11 +83,9 @@ export function FineTuneSizes({
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
             <button type="button" onClick={onAddLargerStep} className="inline-flex min-h-9 items-center gap-1 rounded-md border border-border bg-bg px-3 text-chrome-caption font-semibold text-ink hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25">
-              <Plus size={14} aria-hidden="true" /> Add larger step
-            </button>
+              <Plus size={14} aria-hidden="true" />{' '}{t('ui.FineTuneSizes.add-larger-step')}</button>
             <button type="button" onClick={onAddSmallerStep} className="inline-flex min-h-9 items-center gap-1 rounded-md border border-border bg-bg px-3 text-chrome-caption font-semibold text-ink hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus:ring-primary/25">
-              <Plus size={14} aria-hidden="true" /> Add smaller step
-            </button>
+              <Plus size={14} aria-hidden="true" />{' '}{t('ui.FineTuneSizes.add-smaller-step')}</button>
           </div>
         </div>
       ) : null}

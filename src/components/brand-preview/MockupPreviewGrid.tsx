@@ -14,6 +14,7 @@ import type { MockupFonts } from './mockupTypes';
 import { MockupCard } from './MockupCard';
 import { MockupModal } from './MockupModal';
 import { MockupScaledPreview } from './MockupScaledPreview';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type MockupPreviewGridProps = {
   palette: GeneratedPalette | null;
@@ -58,6 +59,8 @@ export function MockupPreviewGrid({
   pairing,
   variant = 'default',
 }: MockupPreviewGridProps) {
+  const tx = useTx();
+  const t = useT();
   const [activeMockup, setActiveMockup] = useState<MockupId | null>(null);
   const compact = variant === 'compact';
 
@@ -77,7 +80,7 @@ export function MockupPreviewGrid({
   if (!palette || !tokens) {
     return (
       <section className="rounded-md border border-dashed border-border bg-surface px-3 py-4 text-center">
-        <p className="text-[0.75rem] text-muted">Genera una paleta para ver mockups.</p>
+        <p className="text-[0.75rem] text-muted">{t('ui.MockupPreviewGrid.genera-una-paleta-para-ver')}</p>
       </section>
     );
   }
@@ -85,13 +88,11 @@ export function MockupPreviewGrid({
   const activeItem = MOCKUP_ITEMS.find((item) => item.id === activeMockup);
 
   return (
-    <section aria-label="Vistas previas de interfaz">
+    <section aria-label={t('ui.MockupPreviewGrid.vistas-previas-de-interfaz')}>
       {!compact ? (
         <div className="mb-3">
-          <h3 className="text-[0.9375rem] font-semibold text-ink">Vistas previas</h3>
-          <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">
-            Ejemplos de UI con los roles semánticos y tipografía de tu guía. Haz clic para ampliar.
-          </p>
+          <h3 className="text-[0.9375rem] font-semibold text-ink">{t('ui.MockupPreviewGrid.vistas-previas')}</h3>
+          <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">{t('ui.MockupPreviewGrid.ejemplos-de-ui-con-los')}</p>
         </div>
       ) : null}
 
@@ -102,8 +103,8 @@ export function MockupPreviewGrid({
           return (
           <li key={item.id} className={featured ? 'lg:col-span-2' : undefined}>
             <MockupCard
-              title={item.title}
-              description={compact ? undefined : item.description}
+              title={tx(item.title)}
+              description={tx(compact ? undefined : item.description)}
               featured={featured}
               compact={compact}
               expandHint="Clic para ampliar"
@@ -121,7 +122,7 @@ export function MockupPreviewGrid({
       {activeItem ? (
         <MockupModal
           open={activeMockup !== null}
-          title={activeItem.title}
+          title={tx(activeItem.title)}
           onClose={() => setActiveMockup(null)}
         >
           <activeItem.Expanded tokens={tokens} fonts={fonts} variant="expanded" />

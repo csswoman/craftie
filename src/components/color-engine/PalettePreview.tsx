@@ -12,6 +12,7 @@ import type { SelectableColor } from '@lib/color/selectableColors';
 
 import { ColorDetailsDrawer } from '@/components/color-engine/ColorDetailsDrawer';
 import { CollapsibleSection } from '@/components/layout/CollapsibleSection';
+import { useT, useTx } from '@/context/I18nContext';
 
 type SelectedPaletteColumn = {
   id: string;
@@ -31,6 +32,8 @@ export function PalettePreview({
   variant = 'default',
   onReplaceColor,
 }: PalettePreviewProps) {
+  const tx = useTx();
+  const t = useT();
   const isEmbedded = variant === 'embedded';
   const [selectedColumn, setSelectedColumn] = useState<SelectedPaletteColumn | null>(null);
   const columns = useMemo(() => {
@@ -47,9 +50,7 @@ export function PalettePreview({
 
   const content =
     palette === null ? (
-      <p className="rounded-md border border-dashed border-border bg-surface px-3 py-4 text-center text-[0.75rem] text-muted">
-        Aún no hay paleta generada.
-      </p>
+      <p className="rounded-md border border-dashed border-border bg-surface px-3 py-4 text-center text-[0.75rem] text-muted">{t('ui.PalettePreview.aun-no-hay-paleta-generada')}</p>
     ) : (
       <ul className="flex flex-col gap-1">
         {columns.map((column) => (
@@ -69,11 +70,11 @@ export function PalettePreview({
               <span className="min-w-0 flex-1">
                 <span className="flex min-w-0 items-baseline gap-1.5">
                   <span className="truncate text-[0.8125rem] font-semibold text-ink">
-                    {column.name}
+                    {tx(column.name)}
                   </span>
                   {column.roleLabel ? (
                     <span className="shrink-0 text-[0.6875rem] font-medium text-muted">
-                      {column.roleLabel}
+                      {tx(column.roleLabel)}
                     </span>
                   ) : null}
                 </span>
@@ -97,7 +98,7 @@ export function PalettePreview({
         return null;
       }
     } catch {
-      return 'Introduce un código HEX válido.';
+      return tx('Introduce un código HEX válido.');
     }
 
     const message = onReplaceColor(selectedColumn.id, newHex);
@@ -123,7 +124,7 @@ export function PalettePreview({
   if (isEmbedded) {
     return (
       <>
-        <CollapsibleSection title="Paleta generada" defaultOpen={palette !== null}>
+        <CollapsibleSection title={t('ui.PalettePreview.paleta-generada')} defaultOpen={palette !== null}>
           {content}
         </CollapsibleSection>
 
@@ -134,10 +135,10 @@ export function PalettePreview({
 
   return (
     <section
-      aria-label="Vista previa de paleta generada"
+      aria-label={t('ui.PalettePreview.vista-previa-de-paleta-generada')}
       className="rounded-lg border border-border bg-bg p-5"
     >
-      <h2 className="text-base font-semibold text-ink">Paleta generada</h2>
+      <h2 className="text-base font-semibold text-ink">{t('ui.PalettePreview.paleta-generada')}</h2>
       <div className="mt-4">{content}</div>
 
       {drawer}

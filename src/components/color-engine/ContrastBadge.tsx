@@ -1,4 +1,5 @@
 import type { ContrastStatus, ContrastTarget, WCAGLevel } from '@lib/color/contrast';
+import { useT, useTx } from '@/context/I18nContext';
 
 const STATUS_LABELS: Record<ContrastStatus, string> = {
   pass: 'Cumple',
@@ -37,6 +38,8 @@ export function ContrastBadge({
   dense = false,
   contextLabel,
 }: ContrastBadgeProps) {
+  const tx = useTx();
+  const t = useT();
   const levelLabel = level === 'fail' ? '—' : level;
 
   if (compact) {
@@ -47,11 +50,11 @@ export function ContrastBadge({
             ? 'gap-0.5 px-1 py-0 text-[0.5625rem] leading-[1.1]'
             : 'gap-1 px-2 py-0.5 text-chrome-caption'
         }`}
-        aria-label={`${contextLabel ? `${contextLabel}; ` : ''}Ratio ${ratio.toFixed(2)}; nivel ${levelLabel}; objetivo ${target}; ${STATUS_LABELS[status]}`}
+        aria-label={t('ui.ContrastBadge.ratio-nivel-objetivo', { value: tx(contextLabel ? `${contextLabel}; ` : ''), value2: ratio.toFixed(2), levelLabel: tx(levelLabel), target, value3: tx(STATUS_LABELS[status]) })}
       >
         {contextLabel ? (
           <span className={`truncate font-semibold normal-case opacity-90 ${dense ? 'max-w-[3.5rem] text-[0.5rem]' : 'max-w-[4.5rem] text-[0.5625rem]'}`}>
-            {contextLabel}
+            {tx(contextLabel)}
           </span>
         ) : null}
         <span>{ratio.toFixed(2)}:1</span>
@@ -63,13 +66,13 @@ export function ContrastBadge({
   return (
     <div
       className={`inline-flex flex-col items-end gap-0.5 rounded-md border px-3 py-2 text-right ${STATUS_CLASSES[status]}`}
-      aria-label={`Ratio ${ratio.toFixed(2)}; nivel ${levelLabel}; objetivo ${target}; ${STATUS_LABELS[status]}`}
+      aria-label={t('ui.ContrastBadge.ratio-nivel-objetivo-2', { value: ratio.toFixed(2), levelLabel: tx(levelLabel), target, value2: tx(STATUS_LABELS[status]) })}
     >
       <span className="font-mono text-chrome-body font-semibold tabular-nums">
         {ratio.toFixed(2)}:1
       </span>
       <span className="text-chrome-caption font-medium">
-        {levelLabel} · {STATUS_LABELS[status]}
+        {tx(levelLabel)} · {tx(STATUS_LABELS[status])}
       </span>
     </div>
   );

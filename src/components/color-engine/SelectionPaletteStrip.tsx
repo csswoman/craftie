@@ -5,17 +5,20 @@ import { useMemo } from 'react';
 import { buildRolePaletteColumns } from '@lib/color/paletteDisplay';
 import { pickReadableTextColor } from '@lib/color/readableText';
 import type { RolePalette } from '@lib/color/rolePalette';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type SelectionPaletteStripProps = {
   rolePalette: RolePalette;
 };
 
 export function SelectionPaletteStrip({ rolePalette }: SelectionPaletteStripProps) {
+  const tx = useTx();
+  const t = useT();
   const columns = useMemo(() => buildRolePaletteColumns(rolePalette), [rolePalette]);
 
   return (
-    <section aria-label="Paleta por roles">
-      <p className="text-chrome-caption font-semibold text-muted">Roles listos</p>
+    <section aria-label={t('ui.SelectionPaletteStrip.paleta-por-roles')}>
+      <p className="text-chrome-caption font-semibold text-muted">{t('ui.SelectionPaletteStrip.roles-listos')}</p>
       <ul className="mt-1.5 flex flex-wrap gap-1.5">
         {columns.map((column) => {
           const textColor = pickReadableTextColor(column.hex);
@@ -28,7 +31,7 @@ export function SelectionPaletteStrip({ rolePalette }: SelectionPaletteStripProp
                 title={`${column.roleLabel ?? column.name} · ${column.hex}`}
               >
                 <span className="w-full truncate text-chrome-caption font-semibold">
-                  {column.roleLabel ?? column.name}
+                  {tx(column.roleLabel ?? column.name)}
                 </span>
                 <span className="font-mono text-chrome-caption opacity-85">{column.hex.slice(1)}</span>
               </div>

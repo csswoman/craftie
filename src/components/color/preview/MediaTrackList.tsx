@@ -4,8 +4,9 @@ import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTar
 import { MEDIA_MORE_TRACKS, MEDIA_NOW_PLAYING, MEDIA_QUEUE } from './mediaPreviewData';
 import { readableInk } from './previewColor';
 import { PreviewIcon } from './previewIcons';
-import { EqualizerBars } from './previewPrimitives';
+import { EqualizerBars } from './previewMeters';
 import { captionStyle, labelStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 /** Session tracklist: column header, then rows; the playing row carries the action color. */
 export function MediaTrackList({
@@ -21,6 +22,8 @@ export function MediaTrackList({
   primaryFill: string;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   const current = { track: MEDIA_NOW_PLAYING.title, artist: 'Craftie', time: MEDIA_NOW_PLAYING.duration };
   const rows = [current, ...MEDIA_QUEUE, ...MEDIA_MORE_TRACKS];
   const activeInk = readableInk(primaryFill, colors.appBackground);
@@ -35,9 +38,9 @@ export function MediaTrackList({
         style={{ ...captionStyle(fonts, colors.mutedText), borderColor: colors.divider }}
       >
         <span className="text-right">#</span>
-        <span>Título</span>
-        <span>Artista</span>
-        <span className="flex justify-end" aria-label="Duración">
+        <span>{t('ui.MediaTrackList.titulo')}</span>
+        <span>{t('ui.MediaTrackList.artista')}</span>
+        <span className="flex justify-end" aria-label={t('ui.MediaTrackList.duracion')}>
           <PreviewIcon name="activity" size={13} />
         </span>
       </PreviewSlotTarget>
@@ -64,13 +67,13 @@ export function MediaTrackList({
                 className="truncate"
                 style={{ ...titleStyle(fonts), color: active ? activeInk : colors.text }}
               >
-                {row.track}
+                {tx(row.track)}
               </PreviewSlotTarget>
               <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="truncate" style={labelStyle(fonts, colors.mutedText)}>
-                {row.artist}
+                {tx(row.artist)}
               </PreviewSlotTarget>
               <span className="text-right tabular-nums" style={labelStyle(fonts, colors.mutedText)}>
-                {row.time}
+                {tx(row.time)}
               </span>
             </li>
           );

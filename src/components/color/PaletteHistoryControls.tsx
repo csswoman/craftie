@@ -4,16 +4,18 @@ import { Redo2, Undo2 } from 'lucide-react';
 
 import { useRolePalette } from '@/context/RolePaletteContext';
 import { useUndoRedoShortcuts } from '@/lib/browser/useUndoRedoShortcuts';
+import { useT, useTx } from '@/context/I18nContext';
 
 export function PaletteHistoryControls() {
+  const t = useT();
   const { canUndoEdit, canRedoEdit, undoEdit, redoEdit } = useRolePalette();
 
   useUndoRedoShortcuts({ onUndo: undoEdit, onRedo: redoEdit });
 
   return (
-    <div className="flex items-center" role="group" aria-label="Historial de ediciones">
+    <div className="flex items-center" role="group" aria-label={t('ui.PaletteHistoryControls.historial-de-ediciones')}>
       <HistoryButton
-        label="Deshacer"
+        label={t('ui.PaletteHistoryControls.deshacer')}
         shortcut="Ctrl+Z"
         disabled={!canUndoEdit}
         onClick={undoEdit}
@@ -21,7 +23,7 @@ export function PaletteHistoryControls() {
         <Undo2 aria-hidden="true" size={18} strokeWidth={2} />
       </HistoryButton>
       <HistoryButton
-        label="Rehacer"
+        label={t('ui.PaletteHistoryControls.rehacer')}
         shortcut="Ctrl+Shift+Z"
         disabled={!canRedoEdit}
         onClick={redoEdit}
@@ -45,11 +47,12 @@ function HistoryButton({
   onClick: () => void;
   children: React.ReactNode;
 }) {
+  const tx = useTx();
   return (
     <button
       type="button"
       title={`${label} (${shortcut})`}
-      aria-label={label}
+      aria-label={tx(label)}
       aria-keyshortcuts={shortcut}
       disabled={disabled}
       onClick={onClick}

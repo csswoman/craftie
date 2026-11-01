@@ -4,6 +4,7 @@ import { paletteTint } from './previewButtons';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { StatDelta } from './previewPrimitives';
 import { displayStyle, labelStyle, type PreviewFonts } from './previewTypography';
+import { useTx } from '@/context/I18nContext';
 
 export type AnalyticsKpi = {
   label: string;
@@ -29,6 +30,7 @@ export function AnalyticsMetricCard({
   kpi: AnalyticsKpi;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
   const series = colors[kpi.slot] ?? colors.accent;
   const past = paletteTint(series, colors.surface, 0.32);
   const trendColor = kpi.dir === 'up' ? colors.success : colors.error;
@@ -40,13 +42,13 @@ export function AnalyticsMetricCard({
     <PreviewSlotTarget slot="surface" onEditSlot={onEditSlot} className="flex min-w-0 flex-col p-5" style={{ backgroundColor: colors.surface }}>
       <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="flex min-w-0 items-center gap-2" style={labelStyle(fonts, colors.mutedText)}>
         <PreviewSlotTarget slot={kpi.slot} onEditSlot={onEditSlot} className="size-2 shrink-0 rounded-full" style={{ backgroundColor: series }} />
-        <span className="truncate">{kpi.label}</span>
+        <span className="truncate">{tx(kpi.label)}</span>
       </PreviewSlotTarget>
 
       <div className="mt-3 flex items-end justify-between gap-3">
         <div className="min-w-0">
           <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="tabular-nums" style={{ ...displayStyle(fonts), lineHeight: 1 }}>
-            {kpi.value}
+            {tx(kpi.value)}
           </PreviewSlotTarget>
           <div className="mt-2">
             <StatDelta value={kpi.trend} direction={kpi.dir} color={trendColor} slot={trendSlot} surfaceHex={colors.surface} onEditSlot={onEditSlot} />

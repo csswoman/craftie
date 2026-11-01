@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import type { SelectableColor } from '@lib/color/selectableColors';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type PaletteAddGapProps = {
   insertIndex: number;
@@ -12,6 +13,8 @@ export type PaletteAddGapProps = {
 };
 
 export function PaletteAddGap({ insertIndex, options, onInsert, className = '' }: PaletteAddGapProps) {
+  const tx = useTx();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -34,12 +37,12 @@ export function PaletteAddGap({ insertIndex, options, onInsert, className = '' }
     <div
       ref={rootRef}
       className={`group/add z-20 ${className}`}
-      aria-label="Insertar color"
+      aria-label={t('ui.PaletteAddGap.insertar-color')}
     >
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <button
           type="button"
-          aria-label="Añadir color"
+          aria-label={t('ui.PaletteAddGap.anadir-color')}
           aria-expanded={open}
           onClick={() => setOpen((value) => !value)}
           className="pointer-events-auto flex size-11 items-center justify-center rounded-full border-2 border-white bg-surface-raised text-lg font-light text-ink opacity-70 shadow-md transition-opacity hover:bg-bg hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
@@ -49,10 +52,10 @@ export function PaletteAddGap({ insertIndex, options, onInsert, className = '' }
 
         {open ? (
           <div className="pointer-events-auto absolute bottom-[calc(100%+10px)] left-1/2 w-56 -translate-x-1/2 rounded-xl border border-border bg-ink px-3 py-2 text-white shadow-lg">
-            <p className="text-[0.8125rem] font-semibold">Añadir color</p>
-            <p className="mt-0.5 text-[0.6875rem] text-white/70">Mantén pulsado para elegir</p>
+            <p className="text-[0.8125rem] font-semibold">{t('ui.PaletteAddGap.anadir-color')}</p>
+            <p className="mt-0.5 text-[0.6875rem] text-white/70">{t('ui.PaletteAddGap.manten-pulsado-para-elegir')}</p>
             {options.length === 0 ? (
-              <p className="mt-2 text-[0.75rem] text-white/70">No hay más colores disponibles.</p>
+              <p className="mt-2 text-[0.75rem] text-white/70">{t('ui.PaletteAddGap.no-hay-mas-colores-disponibles')}</p>
             ) : (
               <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto">
                 {options.map((color) => (
@@ -70,7 +73,7 @@ export function PaletteAddGap({ insertIndex, options, onInsert, className = '' }
                         style={{ backgroundColor: color.hex }}
                         aria-hidden="true"
                       />
-                      <span className="min-w-0 flex-1 truncate text-[0.75rem]">{color.name}</span>
+                      <span className="min-w-0 flex-1 truncate text-[0.75rem]">{tx(color.name)}</span>
                       <span className="font-mono text-[0.6875rem] text-white/70">{color.hex}</span>
                     </button>
                   </li>

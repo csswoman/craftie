@@ -13,6 +13,7 @@ import type { CustomFontRole } from '@lib/typography/customFonts';
 import { getGoogleFontsCatalog } from '@/lib/browser/googleFontsCatalog';
 
 import { GoogleFontOptionList } from './GoogleFontOptionList';
+import { useT, useTx } from '@/context/I18nContext';
 
 export function GoogleFontAutocomplete({
   label,
@@ -27,6 +28,8 @@ export function GoogleFontAutocomplete({
   onApply: (family: string, role: CustomFontRole) => Promise<void>;
   hideLabel?: boolean;
 }) {
+  const tx = useTx();
+  const t = useT();
   const listboxId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -105,7 +108,7 @@ export function GoogleFontAutocomplete({
     try {
       setFonts(await getGoogleFontsCatalog());
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : 'No se pudo cargar Google Fonts.');
+      setError(loadError instanceof Error ? loadError.message : tx('No se pudo cargar Google Fonts.'));
     } finally {
       setLoadingList(false);
     }
@@ -119,7 +122,7 @@ export function GoogleFontAutocomplete({
     try {
       await onApply(font.family, role);
     } catch (applyError) {
-      setError(applyError instanceof Error ? applyError.message : 'No se pudo aplicar la fuente.');
+      setError(applyError instanceof Error ? applyError.message : tx('No se pudo aplicar la fuente.'));
     } finally {
       setApplyingFont(false);
     }
@@ -158,7 +161,7 @@ export function GoogleFontAutocomplete({
   return (
     <div ref={rootRef} className="relative min-w-0">
       <label htmlFor={listboxId} className={hideLabel ? 'sr-only' : 'mb-1 block text-tools-meta text-muted'}>
-        {label}
+        {tx(label)}
       </label>
       <input
         ref={inputRef}
@@ -180,21 +183,19 @@ export function GoogleFontAutocomplete({
         aria-controls={`${listboxId}-options`}
         aria-activedescendant={activeIndex >= 0 ? `${listboxId}-option-${activeIndex}` : undefined}
         aria-describedby={error ? `${listboxId}-error` : undefined}
-        placeholder="Escribe una fuente"
+        placeholder={t('ui.GoogleFontAutocomplete.escribe-una-fuente')}
         autoComplete="off"
         className="w-full rounded-md border border-border bg-surface-raised px-3 py-2 text-tools-body text-ink transition-opacity placeholder:text-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-wait disabled:opacity-60"
       />
       {applyingFont ? (
-        <p className="mt-1 text-tools-meta text-muted" role="status">
-          Cargando…
-        </p>
+        <p className="mt-1 text-tools-meta text-muted" role="status">{t('ui.GoogleFontAutocomplete.cargando')}</p>
       ) : null}
       {expanded && menuPosition && typeof document !== 'undefined'
         ? createPortal(
           <GoogleFontOptionList
             ref={menuRef}
             listboxId={listboxId}
-            label={label}
+            label={tx(label)}
             suggestions={suggestions}
             activeIndex={activeIndex}
             position={menuPosition}
@@ -208,7 +209,7 @@ export function GoogleFontAutocomplete({
         : null}
       {error ? (
         <p id={`${listboxId}-error`} className="mt-1 text-tools-meta text-fail" role="alert">
-          {error}
+          {tx(error)}
         </p>
       ) : null}
     </div>

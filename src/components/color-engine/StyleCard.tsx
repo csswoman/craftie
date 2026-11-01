@@ -1,6 +1,7 @@
 'use client';
 
 import type { DesignStyle } from '@lib/styles/presets';
+import { useTx } from '@/context/I18nContext';
 
 export type StyleCardProps = {
   style: DesignStyle;
@@ -9,7 +10,10 @@ export type StyleCardProps = {
 };
 
 export function StyleCard({ style, selected, onSelect }: StyleCardProps) {
-  const moodLabel = style.mood.join(' · ');
+  const tx = useTx();
+  const moodLabel = style.mood.map((mood) => tx(mood)).join(' · ');
+  const name = tx(style.name);
+  const description = tx(style.description);
 
   return (
     <button
@@ -19,8 +23,8 @@ export function StyleCard({ style, selected, onSelect }: StyleCardProps) {
       aria-pressed={selected}
       aria-label={
         moodLabel.length > 0
-          ? `${style.name}. ${moodLabel}. ${style.description}`
-          : `${style.name}. ${style.description}`
+          ? `${name}. ${moodLabel}. ${description}`
+          : `${name}. ${description}`
       }
       className={`group flex h-full w-full flex-col overflow-hidden rounded-xl border text-left transition-[box-shadow,background-color,border-color,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 active:scale-[0.985] motion-reduce:transition-colors motion-reduce:active:scale-100 ${
         selected
@@ -40,10 +44,10 @@ export function StyleCard({ style, selected, onSelect }: StyleCardProps) {
 
       <div className="flex min-h-0 flex-1 flex-col gap-0.5 px-3 py-2.5">
         <h3 className="line-clamp-2 text-balance text-[0.875rem] font-semibold leading-snug text-ink">
-          {style.name}
+          {tx(style.name)}
         </h3>
         {moodLabel.length > 0 ? (
-          <p className="line-clamp-1 text-[0.75rem] leading-snug text-muted">{moodLabel}</p>
+          <p className="line-clamp-1 text-[0.75rem] leading-snug text-muted">{tx(moodLabel)}</p>
         ) : null}
       </div>
     </button>

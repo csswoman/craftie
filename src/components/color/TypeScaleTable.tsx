@@ -1,6 +1,7 @@
 'use client';
 
 import type { TypeScalePalette, TypeScaleSpecimenLevel } from '@lib/typography/typeScalePreview';
+import { useT, useTx } from '@/context/I18nContext';
 
 type TypeScaleTableProps = {
   levels: TypeScaleSpecimenLevel[];
@@ -24,14 +25,16 @@ export function TypeScaleTable({
   onActiveChange,
   onSelect,
 }: TypeScaleTableProps) {
+  const tx = useTx();
+  const t = useT();
   return (
-    <table className="w-full border-collapse text-left" aria-label="Niveles de la escala">
+    <table className="w-full border-collapse text-left" aria-label={t('ui.TypeScaleTable.niveles-de-la-escala')}>
       <thead>
         <tr className="text-[0.6875rem]" style={{ color: palette.muted }}>
-          <th scope="col" className="px-3 pb-2 font-normal">Nivel</th>
-          <th scope="col" className="pb-2 pr-2 text-right font-normal">Tamaño</th>
-          <th scope="col" className="pb-2 pr-2 text-right font-normal">Interl.</th>
-          <th scope="col" className="pb-2 pr-3 text-right font-normal">Peso</th>
+          <th scope="col" className="px-3 pb-2 font-normal">{t('ui.TypeScaleTable.nivel')}</th>
+          <th scope="col" className="pb-2 pr-2 text-right font-normal">{t('ui.TypeScaleTable.tamano')}</th>
+          <th scope="col" className="pb-2 pr-2 text-right font-normal">{t('ui.TypeScaleTable.interl')}</th>
+          <th scope="col" className="pb-2 pr-3 text-right font-normal">{t('ui.TypeScaleTable.peso')}</th>
         </tr>
       </thead>
       <tbody>
@@ -41,7 +44,7 @@ export function TypeScaleTable({
           return (
             <tr
               key={level.id}
-              title={level.usage}
+              title={tx(level.usage)}
               onMouseEnter={() => onActiveChange(level.id)}
               onMouseLeave={() => onActiveChange(null)}
               className="transition-colors duration-150"
@@ -50,7 +53,7 @@ export function TypeScaleTable({
               <th scope="row" className="min-w-0 rounded-l-lg p-0 text-left font-normal">
                 <button
                   type="button"
-                  aria-label={`Editar ${level.label}`}
+                  aria-label={t('ui.TypeScaleTable.editar', { label: tx(level.label) })}
                   onClick={(event) => onSelect(level.id, event.currentTarget.getBoundingClientRect())}
                   className="flex min-h-11 w-full items-baseline gap-2.5 rounded-lg px-3 py-2 text-left focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
                 >
@@ -67,8 +70,8 @@ export function TypeScaleTable({
                     Aa
                   </span>
                   <span className="min-w-0">
-                    <span className="block text-xs" style={{ color: palette.ink }}>{level.label}</span>
-                    <span className="block truncate text-[0.6875rem]" style={{ color: palette.muted }}>{level.usage}</span>
+                    <span className="block text-xs" style={{ color: palette.ink }}>{tx(level.label)}</span>
+                    <span className="block truncate text-[0.6875rem]" style={{ color: palette.muted }}>{tx(level.usage)}</span>
                   </span>
                 </button>
               </th>

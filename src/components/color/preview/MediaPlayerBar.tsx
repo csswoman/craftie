@@ -6,8 +6,9 @@ import { MediaCoverArt } from './MediaCoverArt';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { MEDIA_NOW_PLAYING } from './mediaPreviewData';
 import { PreviewIcon } from './previewIcons';
-import { EqualizerBars, ProgressBar } from './previewPrimitives';
+import { EqualizerBars, ProgressBar } from './previewMeters';
 import { labelStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 type MediaPlayerBarProps = {
   colors: ResolvedLayoutColors;
@@ -28,6 +29,8 @@ export function MediaPlayerBar({
   onTogglePlay,
   onEditSlot,
 }: MediaPlayerBarProps) {
+  const tx = useTx();
+  const t = useT();
   return (
     <PreviewSlotTarget
       slot="chrome"
@@ -38,14 +41,14 @@ export function MediaPlayerBar({
         borderColor: colors.divider,
         color: colors.text,
       }}
-      aria-label="Reproductor de Craftie"
+      aria-label={t('ui.MediaPlayerBar.reproductor-de-craftie')}
     >
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 @min-[720px]/media:grid-cols-[minmax(0,1fr)_minmax(12rem,1.1fr)_minmax(0,1fr)]">
         <div className="flex min-w-0 items-center gap-2.5">
           <MediaCoverArt colors={colors} onEditSlot={onEditSlot} className="size-11 shrink-0 rounded-[10px]" />
           <div className="min-w-0">
             <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="block truncate" style={titleStyle(fonts)}>
-              {MEDIA_NOW_PLAYING.title}
+              {tx(MEDIA_NOW_PLAYING.title)}
             </PreviewSlotTarget>
             <PreviewSlotTarget
               slot="mutedText"
@@ -53,7 +56,7 @@ export function MediaPlayerBar({
               className="block truncate"
               style={labelStyle(fonts, colors.mutedText)}
             >
-              {MEDIA_NOW_PLAYING.artist}
+              {tx(MEDIA_NOW_PLAYING.artist)}
             </PreviewSlotTarget>
           </div>
           {playing ? (
@@ -79,7 +82,7 @@ export function MediaPlayerBar({
             </PreviewSlotTarget>
             <button
               type="button"
-              aria-label={playing ? 'Pausar' : 'Reproducir'}
+              aria-label={playing ? t('ui.MediaPlayerBar.pausar') : t('ui.MediaPlayerBar.reproducir')}
               onClick={(event) => {
                 event.stopPropagation();
                 onTogglePlay();
@@ -104,7 +107,7 @@ export function MediaPlayerBar({
             className="hidden w-full max-w-xs items-center gap-2 tabular-nums @min-[720px]/media:flex"
             style={{ ...labelStyle(fonts), color: colors.mutedText }}
           >
-            <span>{MEDIA_NOW_PLAYING.elapsed}</span>
+            <span>{tx(MEDIA_NOW_PLAYING.elapsed)}</span>
             <div className="min-w-0 flex-1">
               <ProgressBar
                 value={MEDIA_NOW_PLAYING.progress}
@@ -114,7 +117,7 @@ export function MediaPlayerBar({
                 knob
               />
             </div>
-            <span>{MEDIA_NOW_PLAYING.duration}</span>
+            <span>{tx(MEDIA_NOW_PLAYING.duration)}</span>
           </div>
         </div>
 

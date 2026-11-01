@@ -26,6 +26,7 @@ import {
   SegmentButton,
   SegmentedField,
 } from './AppliedTypeZoneParts';
+import { useT } from '@/context/I18nContext';
 
 export type AppliedTypeZoneProps = {
   applied: AppliedTypography;
@@ -84,6 +85,7 @@ export function AppliedTypeZone({
   stickToPanelTop = false,
   footer,
 }: AppliedTypeZoneProps) {
+  const t = useT();
   const readout = buildTypeScaleReadout(base, ratio);
   const levels = useMemo(
     () => buildTypeScaleLevels(base, ratio, largerSteps, smallerSteps),
@@ -104,29 +106,27 @@ export function AppliedTypeZone({
           <p
             id="applied-type-heading"
             className="text-chrome-caption font-semibold uppercase tracking-[0.08em] text-primary"
-          >
-            Aplicado
-          </p>
+          >{t('ui.AppliedTypeZone.aplicado')}</p>
           <button
             type="button"
             onClick={() => onConfigOpenChange(!configOpen)}
             aria-pressed={configOpen}
             aria-expanded={configOpen}
-            aria-label={configOpen ? 'Ocultar ajustes de escala' : 'Mostrar ajustes de escala'}
-            title={configOpen ? 'Ocultar ajustes de escala' : 'Ajustes de escala y peso'}
+            aria-label={configOpen ? t('ui.AppliedTypeZone.ocultar-ajustes-de-escala') : t('ui.AppliedTypeZone.mostrar-ajustes-de-escala')}
+            title={configOpen ? t('ui.AppliedTypeZone.ocultar-ajustes-de-escala') : t('ui.AppliedTypeZone.ajustes-de-escala-y-peso')}
             className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border px-2.5 text-chrome-caption transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${configOpen
               ? 'border-primary/45 bg-primary/10 text-primary'
               : 'border-border bg-bg text-muted hover:border-primary/45 hover:text-primary'
               }`}
           >
             <Settings size={13} strokeWidth={1.5} aria-hidden="true" />
-            <span>{configOpen ? 'Ver pares' : 'Ajustes de texto'}</span>
+            <span>{configOpen ? t('ui.AppliedTypeZone.ver-pares') : t('ui.AppliedTypeZone.ajustes-de-texto')}</span>
           </button>
         </div>
 
         <div className="divide-y divide-border/70 bg-bg px-3">
           <RoleRow
-            label="Titular"
+            label={t('ui.AppliedTypeZone.titular')}
             family={applied.headingFamily}
             weight={applied.headingWeight}
             weightOptions={HEADING_WEIGHT_OPTIONS}
@@ -138,7 +138,7 @@ export function AppliedTypeZone({
             onApplyFamily={onApplyGoogleFont}
           />
           <RoleRow
-            label="Cuerpo"
+            label={t('ui.AppliedTypeZone.cuerpo')}
             family={applied.bodyFamily}
             weight={applied.bodyWeight}
             weightOptions={BODY_WEIGHT_OPTIONS}
@@ -157,26 +157,24 @@ export function AppliedTypeZone({
         <p
           role="status"
           className="mt-2 rounded-md border border-primary/30 bg-primary/10 px-2.5 py-1.5 text-chrome-caption leading-[1.4] text-ink"
-        >
-          Ambos roles fijados — desfijá uno para explorar la lista.
-        </p>
+        >{t('ui.AppliedTypeZone.ambos-roles-fijados-desfija-uno')}</p>
       ) : null}
 
       {configOpen ? (
         <>
           <div className="mt-4 grid min-w-0 grid-cols-2 gap-4">
-            <SegmentedField label="Base">
+            <SegmentedField label={t('ui.AppliedTypeZone.base')}>
               {TYPE_SCALE_BASES.map((value) => (
                 <SegmentButton
                   key={value}
                   active={base === value}
                   onClick={() => onBaseChange(value)}
                   label={`${value}`}
-                  ariaLabel={`Base ${value}px`}
+                  ariaLabel={t('ui.AppliedTypeZone.base-px', { value })}
                 />
               ))}
             </SegmentedField>
-            <SegmentedField label="Ratio">
+            <SegmentedField label={t('ui.AppliedTypeZone.ratio')}>
               {TYPE_SCALE_RATIOS.map((value) => {
                 const option = TYPE_SCALE_RATIO_OPTIONS.find((entry) => entry.value === value);
                 return (
@@ -185,7 +183,7 @@ export function AppliedTypeZone({
                     active={ratio === value}
                     onClick={() => onRatioChange(value)}
                     label={`${value}`}
-                    ariaLabel={`Ratio ${option?.label ?? value} (${value})`}
+                    ariaLabel={t('ui.AppliedTypeZone.ratio-2', { value: option?.label ?? value, value2: value })}
                   />
                 );
               })}

@@ -15,6 +15,7 @@ import { pickReadableTextColor } from '@lib/color/readableText';
 
 import { useDialogAccessibility } from '@/lib/browser/useDialogAccessibility';
 import { ColorDetailActionRow } from './ColorDetailActionRow';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type ColorDetailsDrawerProps = {
   colorHex: string | null;
@@ -31,6 +32,8 @@ export function ColorDetailsDrawer({
   onAddColor,
   onReplaceColor,
 }: ColorDetailsDrawerProps) {
+  const tx = useTx();
+  const t = useT();
   const [headerCopied, setHeaderCopied] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const dialogRef = useRef<HTMLElement>(null);
@@ -107,7 +110,7 @@ export function ColorDetailsDrawer({
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-label={`Detalles de ${details.name}`}
+        aria-label={t('ui.ColorDetailsDrawer.detalles-de', { name: tx(details.name) })}
         className="relative z-10 flex max-h-[min(88vh,680px)] w-full max-w-md flex-col overflow-hidden rounded-xl bg-surface shadow-[var(--shadow-float)]"
       >
         <header
@@ -115,29 +118,29 @@ export function ColorDetailsDrawer({
           style={{ backgroundColor: details.hex, color: headerText }}
         >
           <div className="min-w-0">
-            <p className="truncate text-[0.8125rem] font-semibold">{details.name}</p>
+            <p className="truncate text-[0.8125rem] font-semibold">{tx(details.name)}</p>
             <p className="font-mono text-chrome-caption opacity-90">{details.hex}</p>
           </div>
           <div className="flex shrink-0 items-center gap-0.5">
             <HeaderAction onClick={() => void handleCopyHeaderHex()}>
-              {headerCopied ? 'Copiado' : 'Copiar'}
+              {headerCopied ? t('ui.ColorDetailsDrawer.copiado') : t('ui.ColorDetailsDrawer.copiar')}
             </HeaderAction>
             {onAddColor ? (
-              <HeaderAction onClick={() => handleAdd(details.hex)}>Añadir</HeaderAction>
+              <HeaderAction onClick={() => handleAdd(details.hex)}>{t('ui.ColorDetailsDrawer.anadir')}</HeaderAction>
             ) : null}
-            <HeaderAction onClick={onClose} ariaLabel="Cerrar" dataDrawerClose>
+            <HeaderAction onClick={onClose} ariaLabel={t('ui.ColorDetailsDrawer.cerrar')} dataDrawerClose>
               ×
             </HeaderAction>
           </div>
         </header>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
-          <DrawerSection title="Harmonies">
+          <DrawerSection title={t('ui.ColorDetailsDrawer.harmonies')}>
             <div className="space-y-3">
               {details.harmonies.map((harmony) => (
                 <div key={harmony.type}>
                   <p className="mb-1.5 text-[0.8125rem] font-medium text-muted">
-                    {HARMONY_TYPE_LABELS[harmony.type]}
+                    {tx(HARMONY_TYPE_LABELS[harmony.type])}
                   </p>
                   <ul className="flex gap-2">
                     {harmony.colors.map((hex) => (
@@ -158,7 +161,7 @@ export function ColorDetailsDrawer({
             </div>
           </DrawerSection>
 
-          <DrawerSection title="Shades">
+          <DrawerSection title={t('ui.ColorDetailsDrawer.shades')}>
             <ul className="grid grid-cols-2 gap-1.5">
               {namedShades.map((shade) => (
                 <li key={shade.hex}>
@@ -174,7 +177,7 @@ export function ColorDetailsDrawer({
             </ul>
           </DrawerSection>
 
-          <DrawerSection title="Similar colors">
+          <DrawerSection title={t('ui.ColorDetailsDrawer.similar-colors')}>
             <ul className="grid grid-cols-2 gap-1.5">
               {details.similarColors.map((color) => (
                 <li key={color.hex}>
@@ -195,7 +198,7 @@ export function ColorDetailsDrawer({
             className="border-t border-white/8 px-3 py-2 text-[0.75rem] font-medium text-muted dark:border-white/8"
             role="status"
           >
-            {actionMessage}
+            {tx(actionMessage)}
           </p>
         ) : null}
       </aside>
@@ -214,11 +217,12 @@ function HeaderAction({
   ariaLabel?: string;
   dataDrawerClose?: boolean;
 }) {
+  const tx = useTx();
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label={ariaLabel ?? (typeof children === 'string' ? children : undefined)}
+      aria-label={tx(ariaLabel ?? (typeof children === 'string' ? children : undefined))}
       {...(dataDrawerClose ? { 'data-drawer-close': true } : {})}
       className="rounded px-1.5 py-0.5 text-chrome-caption font-semibold opacity-90 transition-colors hover:bg-black/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
     >
@@ -228,9 +232,10 @@ function HeaderAction({
 }
 
 function DrawerSection({ title, children }: { title: string; children: React.ReactNode }) {
+  const tx = useTx();
   return (
     <section className="mb-3.5 last:mb-0">
-      <h3 className="mb-1.5 text-[0.75rem] font-semibold text-ink">{title}</h3>
+      <h3 className="mb-1.5 text-[0.75rem] font-semibold text-ink">{tx(title)}</h3>
       {children}
     </section>
   );

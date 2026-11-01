@@ -3,6 +3,7 @@ import {
   colorLoadVerdict,
   UI_COMPOSITION_SEGMENTS,
 } from '@lib/color/uiColorComposition';
+import { useT, useTx } from '@/context/I18nContext';
 
 export function UiColorComposition({
   tokens,
@@ -11,6 +12,8 @@ export function UiColorComposition({
   tokens: SemanticTokens;
   loadPercent: number;
 }) {
+  const tx = useTx();
+  const t = useT();
   const verdict = colorLoadVerdict(loadPercent);
   const verdictColor = verdict.level === 'balanced'
     ? 'text-[var(--chrome-green)]'
@@ -20,7 +23,7 @@ export function UiColorComposition({
     : verdict.level === 'saturated' ? 'bg-fail' : 'bg-muted';
 
   return (
-    <div className="space-y-3" aria-label="Composición de carga de color">
+    <div className="space-y-3" aria-label={t('ui.UiColorComposition.composicion-de-carga-de-color')}>
       <div className="flex h-4 overflow-hidden rounded-md ring-1 ring-inset ring-ink/10">
         {UI_COMPOSITION_SEGMENTS.map((segment) => (
           <span
@@ -31,7 +34,7 @@ export function UiColorComposition({
               flexBasis: 0,
             }}
             title={`${segment.label} ${Math.round(segment.area * 100)}% · ${tokens[segment.token].hex.toUpperCase()}`}
-            aria-label={`${segment.label}, ${Math.round(segment.area * 100)} por ciento`}
+            aria-label={t('ui.UiColorComposition.por-ciento', { label: tx(segment.label), value: Math.round(segment.area * 100) })}
           />
         ))}
       </div>
@@ -40,7 +43,7 @@ export function UiColorComposition({
         {UI_COMPOSITION_SEGMENTS.map((segment) => (
           <span key={segment.token} className="inline-flex items-center gap-1.5 text-tools-micro text-muted">
             <span className="size-2 shrink-0 rounded-full ring-1 ring-inset ring-ink/10" style={{ backgroundColor: tokens[segment.token].hex }} aria-hidden="true" />
-            {segment.label} {Math.round(segment.area * 100)}%
+            {tx(segment.label)} {Math.round(segment.area * 100)}%
           </span>
         ))}
       </div>
@@ -52,8 +55,8 @@ export function UiColorComposition({
         </div>
         <div className="mt-1.5 flex items-start justify-between gap-3" role="status" aria-live="polite">
           <div>
-            <p className={`text-tools-body-sm font-semibold ${verdictColor}`}>{verdict.label}</p>
-            <p className="text-tools-meta-scale leading-snug text-muted">{verdict.subtitle}</p>
+            <p className={`text-tools-body-sm font-semibold ${verdictColor}`}>{tx(verdict.label)}</p>
+            <p className="text-tools-meta-scale leading-snug text-muted">{tx(verdict.subtitle)}</p>
           </div>
           <span className={`font-mono text-tools-meta font-semibold tabular-nums ${verdictColor}`}>{loadPercent}%</span>
         </div>

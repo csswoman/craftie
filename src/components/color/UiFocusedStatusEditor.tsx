@@ -15,6 +15,7 @@ import {
 import { useRolePalette } from '@/context/RolePaletteContext';
 
 import { UiStatusAdjustmentControls } from './UiStatusAdjustmentControls';
+import { useT, useTx } from '@/context/I18nContext';
 
 const STATUS_LABELS: Record<UiStatusRole, string> = {
   success: 'Éxito',
@@ -50,6 +51,8 @@ export function UiFocusedStatusEditor({
   initialRole: UiStatusRole | null;
   onSelect: (status: UiStatusColor) => void;
 }) {
+  const tx = useTx();
+  const t = useT();
   const { setTokenEditPreview, clearTokenEditPreview } = useRolePalette();
   const [activeRole, setActiveRole] = useState<UiStatusRole | null>(initialRole);
   const [prevInitialRole, setPrevInitialRole] = useState(initialRole);
@@ -83,7 +86,7 @@ export function UiFocusedStatusEditor({
   }
 
   return (
-    <ul className="space-y-2" aria-label="Colores de estado editables">
+    <ul className="space-y-2" aria-label={t('ui.UiFocusedStatusEditor.colores-de-estado-editables')}>
       {STATUS_COLOR_DEFINITIONS.map(({ role }) => {
         const status = statusColors[role];
         const candidateDraft = candidateDrafts[role];
@@ -127,25 +130,23 @@ export function UiFocusedStatusEditor({
                 aria-hidden="true"
               />
               <span className="min-w-0">
-                <span className="block truncate text-tools-role text-ink">{STATUS_LABELS[role]}</span>
+                <span className="block truncate text-tools-role text-ink">{tx(STATUS_LABELS[role])}</span>
                 <span className="block font-mono text-tools-meta-scale tabular-nums text-muted">
                   {status.hex.toUpperCase()}
                 </span>
               </span>
               <span
-                title={origin.detail}
+                title={tx(origin.detail)}
                 className="shrink-0 rounded-full bg-bg px-2.5 py-1 text-tools-meta-scale font-semibold text-muted ring-1 ring-inset ring-line"
               >
-                {origin.short}
+                {tx(origin.short)}
               </span>
             </button>
 
             {active ? (
               <div className="space-y-3 border-t border-line-soft px-2.5 pb-3 pt-3">
-                <section aria-label={`Candidatos para ${STATUS_LABELS[role]}`}>
-                  <p className="mb-2 text-tools-meta-scale font-semibold text-muted">
-                    Candidatos de tu imagen
-                  </p>
+                <section aria-label={t('ui.UiFocusedStatusEditor.candidatos-para', { value: tx(STATUS_LABELS[role]) })}>
+                  <p className="mb-2 text-tools-meta-scale font-semibold text-muted">{t('ui.UiFocusedStatusEditor.candidatos-de-tu-imagen')}</p>
                   <div className="flex flex-wrap gap-2">
                     {candidates.map((candidate) => {
                       const selected = normalizeHex(candidate.hex) === normalizeHex(candidateDraft?.hex ?? status.hex);
@@ -157,7 +158,7 @@ export function UiFocusedStatusEditor({
                           key={candidate.id}
                           type="button"
                           title={`${name} · ${candidate.hex.toUpperCase()}`}
-                          aria-label={`Usar ${name} para ${STATUS_LABELS[role]}`}
+                          aria-label={t('ui.UiFocusedStatusEditor.usar-para', { name: tx(name), value: tx(STATUS_LABELS[role]) })}
                           aria-pressed={selected}
                           onClick={() => {
                             setCandidateDrafts((current) => ({ ...current, [role]: candidate }));

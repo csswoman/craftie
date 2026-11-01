@@ -8,6 +8,7 @@ import {
   PanelCollapseRail,
 } from '@/components/layout/StudioPanelChrome';
 import { STUDIO_TOOLS_SIDEBAR_WIDTH } from '@/components/layout/useStudioPanelLayout';
+import { useT } from '@/context/I18nContext';
 
 type StudioCanvasToolsSidebarProps = {
   sidebar: ReactNode;
@@ -22,6 +23,7 @@ export function StudioCanvasToolsSidebar({
   collapsed,
   onToggleCollapsed,
 }: StudioCanvasToolsSidebarProps) {
+  const t = useT();
   const panelId = useId();
   const toggleRef = useRef<HTMLButtonElement>(null);
   const previousCollapsed = useRef(collapsed);
@@ -38,7 +40,7 @@ export function StudioCanvasToolsSidebar({
   return (
     <aside
       id={panelId}
-      aria-label="Herramientas"
+      aria-label={t('ui.StudioCanvasToolsSidebar.herramientas')}
       className={
         collapsed
           ? 'hidden shrink-0 lg:flex'
@@ -50,7 +52,7 @@ export function StudioCanvasToolsSidebar({
         {collapsed ? (
           <PanelCollapseRail
             ref={toggleRef}
-            label="Expandir herramientas"
+            label={t('ui.StudioCanvasToolsSidebar.expandir-herramientas')}
             direction="right"
             expanded={false}
             onClick={onToggleCollapsed}
@@ -61,7 +63,7 @@ export function StudioCanvasToolsSidebar({
               {headerExtra}
               <PanelCollapseButton
                 ref={toggleRef}
-                label="Comprimir herramientas"
+                label={t('ui.StudioCanvasToolsSidebar.comprimir-herramientas')}
                 direction="left"
                 expanded
                 onClick={onToggleCollapsed}

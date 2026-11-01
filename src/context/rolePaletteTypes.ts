@@ -1,5 +1,6 @@
 import type { ExtractedColor } from '@lib/color/imageExtractor';
 import type { NeutralScale } from '@lib/color/neutralScale';
+import type { ExportDerivedTokensByTheme } from '@lib/export/derivedExportTokens';
 import type { PaletteType } from '@lib/color/paletteClassification';
 import type {
   HexSourceOptions,
@@ -32,6 +33,8 @@ export type RolePaletteContextValue = {
   getColorForUsage: (intent: UsageIntent) => UsageColor | null;
   /** Role palette locked to the `light` theme, independent of `activeTheme`, for stable export. */
   exportRolePalette: RolePalette | null;
+  /** Derived tokens per theme for exports, so dark mode and `on-*` pairs are complete. */
+  exportDerivedTokens: ExportDerivedTokensByTheme | null;
   /** Role palette of the theme that is not active, used to validate both themes at once. */
   counterpartRolePalette: RolePalette | null;
   /** White-to-black UI neutral scale with the palette's tint. */

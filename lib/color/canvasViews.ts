@@ -4,6 +4,7 @@ export type CanvasViewId =
   | 'paint'
   | 'style-guide'
   | 'type-scale'
+  | 'scales'
   | 'colors'
   | 'dashboard'
   | 'landing'
@@ -25,6 +26,7 @@ export const CANVAS_VIEWS: readonly CanvasViewMeta[] = [
   { id: 'paint', group: 'mode', name: 'Pintar', description: 'Paleta actual como pigmento' },
   { id: 'style-guide', group: 'system', name: 'Guía de estilo', description: 'Vista completa del sistema' },
   { id: 'type-scale', group: 'system', name: 'Escala tipográfica', description: 'Roles y tamaños de fuente' },
+  { id: 'scales', group: 'system', name: 'Escalas de tonos', description: 'Rampas 50–900 por color de marca' },
   { id: 'colors', group: 'mode', name: 'Colores', description: 'Roles, derivados, sistema completo' },
   { id: 'dashboard', group: 'layout', name: 'Dashboard', description: 'Panel de control' },
   { id: 'landing', group: 'layout', name: 'Landing', description: 'Página de aterrizaje' },

@@ -8,6 +8,7 @@ import type { SemanticTokenName } from '@lib/color/semanticTokens';
 import { hexToOklchChannels, oklchChannelsToHex } from '@lib/utils/colorMath';
 
 import { useRolePalette } from '@/context/RolePaletteContext';
+import { useT, useTx } from '@/context/I18nContext';
 
 export function InlineTokenDerivationEditor({
   tokenName,
@@ -26,6 +27,8 @@ export function InlineTokenDerivationEditor({
   onApply: (hex: string) => void;
   onDraftChange?: () => void;
 }) {
+  const tx = useTx();
+  const t = useT();
   const { semanticTokens, setTokenEditPreview, clearTokenEditPreview } = useRolePalette();
   const original = useMemo(() => hexToOklchChannels(originalHex), [originalHex]);
   const draftBase = useMemo(
@@ -81,18 +84,18 @@ export function InlineTokenDerivationEditor({
           aria-hidden="true"
         />
         <div className="min-w-0 flex-1">
-          <p className="text-tools-body-sm font-semibold text-ink">Ajuste no destructivo</p>
+          <p className="text-tools-body-sm font-semibold text-ink">{t('ui.InlineTokenDerivationEditor.ajuste-no-destructivo')}</p>
           <p className="truncate font-mono text-tools-meta-scale tabular-nums text-muted">
-            {draftHex.toUpperCase()} · original {originalHex.toUpperCase()}
+            {t('ui.InlineTokenDerivationEditor.original', { value: draftHex.toUpperCase(), value2: originalHex.toUpperCase() })}
           </p>
         </div>
       </div>
 
       <label className="block">
         <span className="mb-1 flex items-center justify-between gap-2 text-tools-meta-scale font-medium text-muted">
-          <span>Luminosidad</span>
+          <span>{t('ui.InlineTokenDerivationEditor.luminosidad')}</span>
           <span className="font-mono tabular-nums text-ink">
-            {draftLightness.toFixed(2)} · Δ{formatDelta(lightnessDelta)}
+            {draftLightness.toFixed(2)} · Δ{tx(formatDelta(lightnessDelta))}
           </span>
         </span>
         <input
@@ -108,9 +111,9 @@ export function InlineTokenDerivationEditor({
 
       <label className="block">
         <span className="mb-1 flex items-center justify-between gap-2 text-tools-meta-scale font-medium text-muted">
-          <span>Chroma</span>
+          <span>{t('ui.InlineTokenDerivationEditor.chroma')}</span>
           <span className="font-mono tabular-nums text-ink">
-            {draftChroma.toFixed(3)} · Δ{formatDelta(chromaDelta, 3)}
+            {draftChroma.toFixed(3)} · Δ{tx(formatDelta(chromaDelta, 3))}
           </span>
         </span>
         <input
@@ -127,26 +130,20 @@ export function InlineTokenDerivationEditor({
       <div className="flex flex-wrap items-center justify-between gap-2 text-tools-meta-scale">
         {contrast ? (
           <>
-            <span className="text-muted">Contraste</span>
+            <span className="text-muted">{t('ui.InlineTokenDerivationEditor.contraste')}</span>
             <span className={`font-mono font-semibold tabular-nums ${passes ? 'text-pass' : 'text-fail'}`}>
-              {contrast.ratio.toFixed(1)}:1 {passes ? '✓' : '⚠'}
+              {contrast.ratio.toFixed(1)}:1 {tx(passes ? '✓' : '⚠')}
             </span>
           </>
         ) : null}
         {candidateHex ? (
-          <p className="w-full text-primary" role="status" aria-live="polite">
-            Preview en la paleta · aplica para guardar
-          </p>
+          <p className="w-full text-primary" role="status" aria-live="polite">{t('ui.InlineTokenDerivationEditor.preview-en-la-paleta-aplica')}</p>
         ) : null}
         {applied ? (
-          <p className="w-full text-pass" role="status" aria-live="polite">
-            Variante aplicada.
-          </p>
+          <p className="w-full text-pass" role="status" aria-live="polite">{t('ui.InlineTokenDerivationEditor.variante-aplicada')}</p>
         ) : null}
         {!passes ? (
-          <p className="w-full leading-relaxed text-fail">
-            Esta variante no alcanza AA. No se aplicará sin tu confirmación explícita.
-          </p>
+          <p className="w-full leading-relaxed text-fail">{t('ui.InlineTokenDerivationEditor.esta-variante-no-alcanza-aa')}</p>
         ) : null}
       </div>
 
@@ -156,9 +153,7 @@ export function InlineTokenDerivationEditor({
           disabled={atOriginal}
           onClick={() => onApply(originalHex)}
           className="min-h-11 rounded-md border border-border bg-bg px-2 text-tools-body-sm font-semibold text-ink hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-        >
-          Revertir al original
-        </button>
+        >{t('ui.InlineTokenDerivationEditor.revertir-al-original')}</button>
         <button
           type="button"
           disabled={unchanged}
@@ -169,7 +164,7 @@ export function InlineTokenDerivationEditor({
               : 'border border-fail bg-bg text-fail hover:bg-fail/5'
           } disabled:cursor-not-allowed disabled:opacity-45`}
         >
-          {passes ? 'Aplicar variante' : 'Aplicar de todos modos'}
+          {passes ? t('ui.InlineTokenDerivationEditor.aplicar-variante') : t('ui.InlineTokenDerivationEditor.aplicar-de-todos-modos')}
         </button>
       </div>
     </div>

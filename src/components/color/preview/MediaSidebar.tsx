@@ -5,6 +5,7 @@ import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTar
 import { MEDIA_NAV, MEDIA_PLAYLISTS } from './mediaPreviewData';
 import { PreviewIcon } from './previewIcons';
 import { brandStyle, captionStyle, labelStyle, ROLE_WEIGHT, type PreviewFonts } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 /** Library rail: wordmark, three destinations and the user's playlists with their covers. */
 export function MediaSidebar({
@@ -16,6 +17,8 @@ export function MediaSidebar({
   fonts: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   return (
     <PreviewSlotTarget
       slot="chrome"
@@ -23,11 +26,9 @@ export function MediaSidebar({
       className="hidden w-56 shrink-0 flex-col gap-7 border-r p-5 @min-[860px]/media:flex"
       style={{ backgroundColor: colors.chrome, borderColor: colors.divider }}
     >
-      <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="px-2" style={brandStyle(fonts)}>
-        Radio Craftie
-      </PreviewSlotTarget>
+      <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="px-2" style={brandStyle(fonts)}>{t('ui.MediaSidebar.radio-craftie')}</PreviewSlotTarget>
 
-      <nav className="space-y-0.5" aria-label="Secciones">
+      <nav className="space-y-0.5" aria-label={t('ui.MediaSidebar.secciones')}>
         {MEDIA_NAV.map((item, index) => (
           <span
             key={item.label}
@@ -39,26 +40,22 @@ export function MediaSidebar({
             }}
           >
             <PreviewIcon name={item.icon} size={16} />
-            {item.label}
+            {tx(item.label)}
           </span>
         ))}
       </nav>
 
       <div>
-        <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mb-2 px-2" style={captionStyle(fonts, colors.mutedText)}>
-          Tus listas
-        </PreviewSlotTarget>
+        <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mb-2 px-2" style={captionStyle(fonts, colors.mutedText)}>{t('ui.MediaSidebar.tus-listas')}</PreviewSlotTarget>
         <ul className="space-y-1">
           {MEDIA_PLAYLISTS.map((name, index) => (
             <li key={name} className="flex items-center gap-3 rounded-lg px-2 py-1.5">
               <MediaCoverArt colors={colors} seed={index + 1} className="size-9 shrink-0 rounded-md" />
               <span className="min-w-0">
                 <span className="block truncate" style={labelStyle(fonts, colors.text)}>
-                  {name}
+                  {tx(name)}
                 </span>
-                <span className="block truncate" style={captionStyle(fonts, colors.mutedText)}>
-                  Lista · {8 + index * 5} pistas
-                </span>
+                <span className="block truncate" style={captionStyle(fonts, colors.mutedText)}>{t('ui.MediaSidebar.lista-pistas', { value: 8 + index * 5 })}</span>
               </span>
             </li>
           ))}

@@ -9,6 +9,7 @@ import { previewStaggerDelay } from './dashboardPreviewData';
 import { HERO_COPY, LANDING_GUTTER_CLASS } from './landingPreviewData';
 import { heroButtonPair } from './previewButtons';
 import { bodyStyle, buttonStyle, heroStyle, type PreviewFonts } from './previewTypography';
+import { useTx } from '@/context/I18nContext';
 
 type LandingHeroProps = {
   colors: ResolvedLayoutColors;
@@ -17,6 +18,7 @@ type LandingHeroProps = {
 };
 
 export function LandingHero({ colors, fonts, onEditSlot }: LandingHeroProps) {
+  const tx = useTx();
   const hero = colors.heroSurface ?? colors.primaryAction;
   const onHero = colors.onHero ?? colors.primaryActionText;
   const button = heroButtonPair(colors);
@@ -31,7 +33,7 @@ export function LandingHero({ colors, fonts, onEditSlot }: LandingHeroProps) {
       <div className="relative grid gap-10 @min-[720px]/landing:grid-cols-[minmax(0,1.1fr)_minmax(14rem,0.9fr)] @min-[720px]/landing:items-center @min-[720px]/landing:gap-12">
         <div className="min-w-0">
           <PreviewSlotTarget slot="onHero" onEditSlot={onEditSlot} className="max-w-[14ch]" style={heroStyle(fonts)}>
-            {HERO_COPY.headline}
+            {tx(HERO_COPY.headline)}
           </PreviewSlotTarget>
 
           <PreviewSlotTarget
@@ -40,7 +42,7 @@ export function LandingHero({ colors, fonts, onEditSlot }: LandingHeroProps) {
             className="mt-4 max-w-[46ch] text-pretty"
             style={bodyStyle(fonts)}
           >
-            {HERO_COPY.body}
+            {tx(HERO_COPY.body)}
           </PreviewSlotTarget>
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -50,7 +52,7 @@ export function LandingHero({ colors, fonts, onEditSlot }: LandingHeroProps) {
               className="inline-flex min-h-11 items-center rounded-[10px] px-5 shadow-[0_10px_22px_-12px_rgb(0_0_0/0.45)] transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
               style={{ ...buttonStyle(fonts), backgroundColor: button.fill, color: button.on }}
             >
-              {HERO_COPY.primaryCta}
+              {tx(HERO_COPY.primaryCta)}
             </PreviewSlotTarget>
             <PreviewSlotTarget
               slot="onHero"
@@ -58,7 +60,7 @@ export function LandingHero({ colors, fonts, onEditSlot }: LandingHeroProps) {
               className="inline-flex min-h-11 items-center rounded-[10px] border bg-transparent px-5 transition-colors duration-150 hover:bg-[color-mix(in_srgb,currentColor_12%,transparent)]"
               style={{ ...buttonStyle(fonts), borderColor: onHero, color: onHero }}
             >
-              {HERO_COPY.secondaryCta}
+              {tx(HERO_COPY.secondaryCta)}
             </PreviewSlotTarget>
           </div>
 

@@ -2,6 +2,7 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { brandStyle, captionStyle, labelStyle, type PreviewFonts } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 /** Quiet closing row for website mockups: wordmark, legal line, a few links. Neutral chrome only. */
 export function PreviewSiteFooter({
@@ -21,6 +22,8 @@ export function PreviewSiteFooter({
   gutterClass: string;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   return (
     <PreviewSlotTarget
       slot="chrome"
@@ -30,16 +33,16 @@ export function PreviewSiteFooter({
     >
       <div className="flex min-w-0 items-baseline gap-4">
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={brandStyle(fonts)}>
-          {brand}
+          {tx(brand)}
         </PreviewSlotTarget>
         <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={captionStyle(fonts, colors.mutedText)}>
-          {legal}
+          {tx(legal)}
         </PreviewSlotTarget>
       </div>
-      <nav className="flex flex-wrap gap-x-6 gap-y-2" aria-label="Pie de página">
+      <nav className="flex flex-wrap gap-x-6 gap-y-2" aria-label={t('ui.PreviewSiteFooter.pie-de-pagina')}>
         {links.map((link) => (
           <span key={link} style={labelStyle(fonts, colors.mutedText)}>
-            {link}
+            {tx(link)}
           </span>
         ))}
       </nav>

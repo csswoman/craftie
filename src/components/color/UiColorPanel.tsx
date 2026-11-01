@@ -22,6 +22,7 @@ import { UI_COLOR_VIEWS, UiColorViewTabs, type UiColorView } from './UiColorView
 import {
   type CompactRoleGroupId,
 } from './uiColorPanelGroups';
+import { useTx } from '@/context/I18nContext';
 
 export function UiColorPanel({
   colors,
@@ -38,6 +39,7 @@ export function UiColorPanel({
   creatingGuide?: boolean;
   onCreateGuide?: () => void;
 }) {
+  const tx = useTx();
   const {
     semanticTokens,
     statusColors,
@@ -103,10 +105,10 @@ export function UiColorPanel({
   function assignSourceToData(hex: string): string {
     const gap = (['data-1', 'data-2', 'data-3', 'data-4', 'data-5', 'data-6'] as const)
       .find((name) => Boolean(resolvedTokens[name].gap));
-    if (!gap) return 'La familia ya tiene seis acentos.';
+    if (!gap) return tx('La familia ya tiene seis acentos.');
     const candidate = buildDataCandidates(resolvedTokens, colors, gap)
       .find((entry) => entry.hex.toUpperCase() === hex.toUpperCase());
-    if (!candidate) return 'Este color ya está usado en los acentos.';
+    if (!candidate) return tx('Este color ya está usado en los acentos.');
     replaceSemanticToken(gap, candidate.hex);
     const label = gap.replace('data-', 'Acento ');
     return candidate.fitness.asData.ok

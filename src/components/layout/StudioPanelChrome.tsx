@@ -1,5 +1,6 @@
 import type { ReactNode, Ref } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTx } from '@/context/I18nContext';
 
 export function PanelCollapseBar({
   align,
@@ -14,6 +15,7 @@ export function PanelCollapseBar({
   children: ReactNode;
   alwaysVisible?: boolean;
 }) {
+  const tx = useTx();
   return (
     <div
       className={`shrink-0 items-center border-b border-border bg-surface px-3 py-2 ${alwaysVisible ? 'flex' : 'hidden lg:flex'
@@ -23,10 +25,10 @@ export function PanelCollapseBar({
         {title || subtitle ? (
           <div className={`min-w-0 ${align === 'end' ? 'text-right' : 'text-left'}`}>
             {title ? (
-              <p className="truncate font-sans text-[1rem] font-semibold leading-none text-forest">{title}</p>
+              <p className="truncate font-sans text-[1rem] font-semibold leading-none text-forest">{tx(title)}</p>
             ) : null}
             {subtitle ? (
-              <p className={`truncate text-[0.75rem] leading-none text-muted ${title ? 'mt-1' : ''}`}>{subtitle}</p>
+              <p className={`truncate text-[0.75rem] leading-none text-muted ${title ? 'mt-1' : ''}`}>{tx(subtitle)}</p>
             ) : null}
           </div>
         ) : null}
@@ -51,14 +53,15 @@ export function PanelCollapseButton({
   onClick: () => void;
   ref?: Ref<HTMLButtonElement>;
 }) {
+  const tx = useTx();
   return (
     <button
       ref={ref}
       type="button"
       data-inspector-close={closeTarget ? '' : undefined}
-      aria-label={label}
+      aria-label={tx(label)}
       aria-expanded={expanded}
-      title={label}
+      title={tx(label)}
       onClick={onClick}
       className="flex size-11 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
     >
@@ -80,13 +83,14 @@ export function PanelCollapseRail({
   onClick: () => void;
   ref?: Ref<HTMLButtonElement>;
 }) {
+  const tx = useTx();
   return (
     <button
       ref={ref}
       type="button"
-      aria-label={label}
+      aria-label={tx(label)}
       aria-expanded={expanded}
-      title={label}
+      title={tx(label)}
       onClick={onClick}
       className="flex h-full min-h-11 w-11 items-center justify-center text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
     >

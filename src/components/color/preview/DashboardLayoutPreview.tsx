@@ -28,6 +28,7 @@ import {
   type PreviewFonts,
   previewRootTypeStyle,
 } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 export const DASHBOARD_VISUAL_SLOTS = [
   'appBackground',
@@ -58,6 +59,8 @@ export function DashboardLayoutPreview({ colors, fonts = DEFAULT_PREVIEW_FONTS, 
   fonts?: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   const [range, setRange] = useState<DashboardRange>('30d');
   const greeting = getStudioGreeting(new Date().getHours());
   const primaryFill = vividFill(colors.primaryAction, colors.surface);
@@ -87,7 +90,7 @@ export function DashboardLayoutPreview({ colors, fonts = DEFAULT_PREVIEW_FONTS, 
           >
             <div className="min-w-0 max-w-[42ch]">
               <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={{ ...displayStyle(fonts), textWrap: 'balance' }}>
-                {greeting}
+                {tx(greeting)}
               </PreviewSlotTarget>
               <PreviewSlotTarget
                 slot="mutedText"
@@ -95,7 +98,7 @@ export function DashboardLayoutPreview({ colors, fonts = DEFAULT_PREVIEW_FONTS, 
                 className="mt-3 text-pretty"
                 style={bodyStyle(fonts, colors.mutedText)}
               >
-                {STUDIO_SUBTITLE}
+                {tx(STUDIO_SUBTITLE)}
               </PreviewSlotTarget>
             </div>
             <div className="flex min-w-0 flex-wrap items-center justify-end gap-3 pt-1">
@@ -115,9 +118,7 @@ export function DashboardLayoutPreview({ colors, fonts = DEFAULT_PREVIEW_FONTS, 
                 onEditSlot={onEditSlot}
                 className="rounded-lg px-4 py-2.5 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgb(0_0_0/0.12)] active:translate-y-0 active:shadow-none motion-reduce:transition-none motion-reduce:hover:translate-y-0"
                 style={{ ...buttonStyle(fonts), backgroundColor: primaryFill, color: onPrimaryFill }}
-              >
-                Nuevo proyecto
-              </PreviewSlotTarget>
+              >{t('ui.DashboardLayoutPreview.nuevo-proyecto')}</PreviewSlotTarget>
             </div>
           </header>
 

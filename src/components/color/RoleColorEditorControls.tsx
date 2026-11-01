@@ -1,5 +1,6 @@
 import type { ActiveRoleContrastInfo } from '@lib/color/roleInspectorContrast';
 import { apcaContrast } from '@lib/color/apca';
+import { useT, useTx } from '@/context/I18nContext';
 
 export function RoleHexInput({
   hex,
@@ -12,11 +13,10 @@ export function RoleHexInput({
   inputId: string;
   onCommit: (raw: string) => void;
 }) {
+  const t = useT();
   return (
     <label className="block">
-      <span className="text-chrome-label font-medium text-muted">
-        HEX
-      </span>
+      <span className="text-chrome-label font-medium text-muted">{t('ui.RoleColorEditorControls.hex')}</span>
       <div className="mt-1 flex items-center overflow-hidden rounded-xl border border-border bg-bg/90 focus-within:ring-[3px] focus-within:ring-primary/20">
         <span className="px-2.5 font-mono text-chrome-label text-muted">#</span>
         <input
@@ -26,7 +26,7 @@ export function RoleHexInput({
           disabled={disabled}
           spellCheck={false}
           maxLength={6}
-          aria-label="Código HEX"
+          aria-label={t('ui.RoleColorEditorControls.codigo-hex')}
           onChange={(event) => onCommit(event.target.value)}
           className="min-w-0 flex-1 bg-transparent py-2.5 pr-3 font-mono text-chrome-label uppercase text-ink placeholder:text-muted focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
         />
@@ -48,11 +48,12 @@ export function RoleOklchSliders({
   disabled: boolean;
   onChange: (patch: Partial<{ l: number; c: number; h: number }>) => void;
 }) {
+  const t = useT();
   return (
     <div className="space-y-4">
       <OklchSlider
         id={`${idPrefix}-l`}
-        label="Luminosidad (L)"
+        label={t('ui.RoleColorEditorControls.luminosidad-l')}
         value={oklch.l}
         min={0}
         max={1}
@@ -63,7 +64,7 @@ export function RoleOklchSliders({
       />
       <OklchSlider
         id={`${idPrefix}-c`}
-        label="Croma (C)"
+        label={t('ui.RoleColorEditorControls.croma-c')}
         value={oklch.c}
         min={0}
         max={chromaMax}
@@ -74,7 +75,7 @@ export function RoleOklchSliders({
       />
       <OklchSlider
         id={`${idPrefix}-h`}
-        label="Matiz (H)"
+        label={t('ui.RoleColorEditorControls.matiz-h')}
         value={oklch.h}
         min={0}
         max={360}
@@ -88,13 +89,14 @@ export function RoleOklchSliders({
 }
 
 export function RoleLockToggle({ locked, onToggle }: { locked: boolean; onToggle: () => void }) {
+  const t = useT();
   return (
     <button
       type="button"
       onClick={onToggle}
       aria-pressed={locked}
-      aria-label={locked ? 'Desbloquear rol' : 'Bloquear rol'}
-      title={locked ? 'Desbloquear' : 'Bloquear'}
+      aria-label={locked ? t('ui.RoleColorEditorControls.desbloquear-rol') : t('ui.RoleColorEditorControls.bloquear-rol')}
+      title={locked ? t('ui.RoleColorEditorControls.desbloquear') : t('ui.RoleColorEditorControls.bloquear')}
       className={`flex size-11 shrink-0 items-center justify-center rounded-xl border transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/20 ${locked
           ? 'border-primary/40 bg-primary/10 text-primary'
           : 'border-border bg-bg text-muted hover:bg-surface-raised hover:text-ink'
@@ -106,6 +108,8 @@ export function RoleLockToggle({ locked, onToggle }: { locked: boolean; onToggle
 }
 
 export function RoleContrastBadge({ contrast }: { contrast: ActiveRoleContrastInfo }) {
+  const tx = useTx();
+  const t = useT();
   const passes = contrast.status === 'pass';
   const fails = contrast.status === 'fail';
   const apca = apcaContrast(contrast.foregroundHex, contrast.backgroundHex);
@@ -124,9 +128,7 @@ export function RoleContrastBadge({ contrast }: { contrast: ActiveRoleContrastIn
       aria-live="polite"
     >
       <div className="flex items-center justify-between gap-2">
-        <p className="text-chrome-label font-medium text-muted">
-          Contraste
-        </p>
+        <p className="text-chrome-label font-medium text-muted">{t('ui.RoleColorEditorControls.contraste')}</p>
         <span
           className={`rounded-full px-2.5 py-0.5 font-mono text-chrome-label font-semibold tabular-nums ${passes ? 'text-pass' : fails ? 'text-fail' : 'text-muted'
             }`}
@@ -134,10 +136,9 @@ export function RoleContrastBadge({ contrast }: { contrast: ActiveRoleContrastIn
           {contrast.ratio.toFixed(2)}:1
         </span>
       </div>
-      <p className="mt-1 text-chrome-label text-ink">{contrast.pairLabel}</p>
-      <p className="mt-1 font-mono text-chrome-caption text-muted">
-        APCA Lc {Math.round(apca)} · {apcaPasses ? 'legible para texto' : 'por debajo de Lc 60'}
-        {standardsDisagree ? ' · ⚠ WCAG y APCA discrepan' : ''}
+      <p className="mt-1 text-chrome-label text-ink">{tx(contrast.pairLabel)}</p>
+      <p className="mt-1 font-mono text-chrome-caption text-muted">{t('ui.RoleColorEditorControls.apca-lc', { value: Math.round(apca) })}{' '}{apcaPasses ? t('ui.RoleColorEditorControls.legible-para-texto') : t('ui.RoleColorEditorControls.por-debajo-de-lc-60')}
+        {standardsDisagree ? t('ui.RoleColorEditorControls.wcag-y-apca-discrepan') : ''}
       </p>
       <div className="mt-2 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
@@ -146,7 +147,7 @@ export function RoleContrastBadge({ contrast }: { contrast: ActiveRoleContrastIn
             style={{ backgroundColor: contrast.foregroundHex }}
             aria-hidden="true"
           />
-          <span className="text-chrome-caption text-muted">sobre</span>
+          <span className="text-chrome-caption text-muted">{t('ui.RoleColorEditorControls.sobre')}</span>
           <span
             className="inline-block size-3.5 shrink-0 rounded-full ring-1 ring-inset ring-ink/10"
             style={{ backgroundColor: contrast.backgroundHex }}
@@ -157,8 +158,8 @@ export function RoleContrastBadge({ contrast }: { contrast: ActiveRoleContrastIn
           className={`text-chrome-caption font-semibold ${passes ? 'text-pass' : fails ? 'text-fail' : 'text-muted'
             }`}
         >
-          {contrast.level === 'fail' ? '✕ No cumple AA (mínimo 4.5:1)' : `✓ WCAG ${contrast.level}`}
-          {contrast.passesAaa ? ' · AAA' : ''}
+          {contrast.level === 'fail' ? t('ui.RoleColorEditorControls.no-cumple-aa-minimo-4') : t('ui.RoleColorEditorControls.wcag', { level: contrast.level })}
+          {contrast.passesAaa ? t('ui.RoleColorEditorControls.aaa') : ''}
         </span>
       </div>
     </div>
@@ -186,6 +187,7 @@ function OklchSlider({
   displayValue: string;
   onChange: (value: number) => void;
 }) {
+  const tx = useTx();
   return (
     <div>
       <div className="mb-1 flex items-baseline justify-between gap-2">
@@ -193,9 +195,9 @@ function OklchSlider({
           htmlFor={id}
           className="text-chrome-label font-medium text-muted"
         >
-          {label}
+          {tx(label)}
         </label>
-        <span className="font-mono text-chrome-label tabular-nums text-muted">{displayValue}</span>
+        <span className="font-mono text-chrome-label tabular-nums text-muted">{tx(displayValue)}</span>
       </div>
       <input
         id={id}

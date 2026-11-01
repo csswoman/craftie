@@ -17,6 +17,7 @@ import { EXPRESSIVE_TOKEN_NAMES } from '@lib/color/uiExpressiveGaps';
 
 import { InlineSystemRolePicker } from './InlineSystemRolePicker';
 import { UiColorComposition } from './UiColorComposition';
+import { useT, useTx } from '@/context/I18nContext';
 
 const SYSTEM_ROLE_GROUPS = [
   { label: 'Fundaciones', roles: UI_SYSTEM_ROLES.slice(0, 3) },
@@ -43,6 +44,8 @@ export function UiSystemSection({
   onToggle: (token: SemanticTokenName) => void;
   onSelect: (token: SemanticTokenName, hex: string) => void;
 }) {
+  const tx = useTx();
+  const t = useT();
   const sourceHexes = useMemo(
     () => new Set(colors.map((color) => normalizeHex(color.hex))),
     [colors],
@@ -64,8 +67,8 @@ export function UiSystemSection({
 
   return (
     <section aria-labelledby="ui-system-title">
-      <h2 id="ui-system-title" className="sr-only">Sistema de color</h2>
-      <PanelSection label="Composición" aside="del sistema" first>
+      <h2 id="ui-system-title" className="sr-only">{t('ui.UiSystemSection.sistema-de-color')}</h2>
+      <PanelSection label={t('ui.UiSystemSection.composicion')} aside="del sistema" first>
         <UiColorComposition tokens={tokens} loadPercent={loadPercent} />
         {unassignedRoles.length > 0 ? (
           <button
@@ -73,18 +76,17 @@ export function UiSystemSection({
             onClick={jumpToFirstGap}
             className="mt-3 min-h-9 w-full rounded-md bg-[#FFF4D6] px-2.5 text-left text-tools-meta-scale font-semibold text-[#6B4700] hover:bg-[#FCE9B6] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 dark:bg-[#4A3A16] dark:text-[#F7D98A]"
           >
-            <span aria-hidden="true">⚠ </span>{unassignedRoles.length} {unassignedRoles.length === 1 ? 'rol sin asignar' : 'roles sin asignar'} · revisar
-          </button>
+            <span aria-hidden="true">⚠ </span>{unassignedRoles.length} {unassignedRoles.length === 1 ? t('ui.UiSystemSection.rol-sin-asignar') : t('ui.UiSystemSection.roles-sin-asignar')}{' '}{t('ui.UiSystemSection.revisar')}</button>
         ) : null}
       </PanelSection>
       {SYSTEM_ROLE_GROUPS.map((group) => (
         <PanelSection
           key={group.label}
-          label={group.label}
+          label={tx(group.label)}
           aside={`${group.roles.length} roles`}
           collapsible
         >
-          <ul aria-label={group.label} className="divide-y divide-border">
+          <ul aria-label={tx(group.label)} className="divide-y divide-border">
               {group.roles.map((role, index) => {
           const token = tokens[role.token];
           const contrast = role.contrast
@@ -122,25 +124,25 @@ export function UiSystemSection({
                     backgroundImage: 'repeating-linear-gradient(135deg, transparent 0 4px, color-mix(in oklch, var(--color-muted) 22%, transparent) 4px 6px)',
                     backgroundColor: 'var(--color-surface-raised)',
                   } : { backgroundColor: token.hex }}
-                  aria-label={unassigned ? 'Rol sin asignar' : undefined}
+                  aria-label={unassigned ? t('ui.UiSystemSection.rol-sin-asignar-2') : undefined}
                   aria-hidden={unassigned ? undefined : true}
                 />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-tools-role text-ink">{role.label}</span>
+                  <span className="block truncate text-tools-role text-ink">{tx(role.label)}</span>
                   <span className={`mt-0.5 block text-tools-meta-scale tracking-[0.02em] text-muted ${unassigned ? 'font-sans' : 'font-mono tabular-nums'}`}>
-                    {unassigned ? 'Sin asignar' : token.hex.toUpperCase()}
+                    {unassigned ? t('ui.UiSystemSection.sin-asignar') : token.hex.toUpperCase()}
                   </span>
                 </span>
                 <span className="flex items-center justify-end gap-2">
                   {!unassigned ? <span className={`whitespace-nowrap rounded-full bg-surface-raised px-[7px] py-[3px] text-tools-micro ${origin === 'fuente' ? 'text-[var(--chrome-green)]' : 'text-muted'}`}>
-                    {origin}
+                    {tx(origin)}
                   </span> : null}
                   {!unassigned ? (
                     <span
                       className={`flex size-[18px] shrink-0 items-center justify-center rounded-full text-tools-micro font-bold ${fitness.result.ok ? 'bg-[var(--chrome-green-soft)] text-[var(--chrome-green)]' : 'bg-surface-raised text-muted'}`}
-                      aria-label={`${fitness.result.ok ? 'Apto' : 'No apto'} para ${useLabel}${fitnessRatio === undefined ? '' : `, contraste ${fitnessRatio.toFixed(1)} a 1`}`}
+                      aria-label={t('ui.UiSystemSection.para', { value: tx(fitness.result.ok ? 'Apto' : 'No apto'), useLabel: tx(useLabel), value2: fitnessRatio === undefined ? '' : `, contraste ${fitnessRatio.toFixed(1)} a 1` })}
                     >
-                      {fitness.result.ok ? '✓' : '×'}<span className="sr-only"> {useLabel}{fitnessRatio === undefined ? '' : ` · ${fitnessRatio.toFixed(1)}:1`}</span>
+                      {tx(fitness.result.ok ? '✓' : '×')}<span className="sr-only"> {tx(useLabel)}{fitnessRatio === undefined ? '' : ` · ${fitnessRatio.toFixed(1)}:1`}</span>
                     </span>
                   ) : null}
                   <Chevron open={isOpen} />
@@ -184,6 +186,7 @@ function PanelSection({
   first?: boolean;
   collapsible?: boolean;
 }) {
+  const tx = useTx();
   const [open, setOpen] = useState(true);
 
   return (
@@ -196,15 +199,15 @@ function PanelSection({
           className="mb-2 flex min-h-8 w-full items-center justify-between gap-3 rounded-md text-left focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
         >
           <span className="flex items-center gap-1.5">
-            <h3 className="text-tools-section-label uppercase text-muted">{label}</h3>
+            <h3 className="text-tools-section-label uppercase text-muted">{tx(label)}</h3>
             <Chevron open={open} />
           </span>
-          {aside ? <span className="text-tools-meta-scale font-semibold text-muted">{aside}</span> : null}
+          {aside ? <span className="text-tools-meta-scale font-semibold text-muted">{tx(aside)}</span> : null}
         </button>
       ) : (
         <div className="mb-2 flex items-baseline justify-between">
-          <h3 className="text-tools-section-label uppercase text-muted">{label}</h3>
-          {aside ? <span className="text-tools-meta-scale font-semibold text-muted">{aside}</span> : null}
+          <h3 className="text-tools-section-label uppercase text-muted">{tx(label)}</h3>
+          {aside ? <span className="text-tools-meta-scale font-semibold text-muted">{tx(aside)}</span> : null}
         </div>
       )}
       {!collapsible || open ? children : null}

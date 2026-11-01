@@ -5,6 +5,7 @@ import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTar
 import { ANALYTICS_DAYS, ANALYTICS_GOALS, ANALYTICS_HEATMAP, ANALYTICS_SPLIT_CLASS } from './analyticsPreviewData';
 import { paletteTint } from './previewButtons';
 import { captionStyle, labelStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 const HEAT_SHARES = [0.08, 0.28, 0.5, 0.74, 1] as const;
 
@@ -24,6 +25,8 @@ export function AnalyticsHabitsRow({
   fonts: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   const heat = colors.data1;
   const activeDays = ANALYTICS_HEATMAP.flat().filter((level) => level > 0).length;
 
@@ -32,24 +35,20 @@ export function AnalyticsHabitsRow({
       <AnalyticsPanel
         colors={colors}
         fonts={fonts}
-        title="Constancia del mes"
-        subtitle={`${activeDays} de 28 días con actividad`}
+        title={t('ui.AnalyticsHabitsRow.constancia-del-mes')}
+        subtitle={t('ui.AnalyticsHabitsRow.de-28-dias-con-actividad', { activeDays })}
         onEditSlot={onEditSlot}
         trailing={
-          <span className="flex items-center gap-1.5" style={captionStyle(fonts, colors.mutedText)}>
-            Menos
-            {HEAT_SHARES.map((share) => (
+          <span className="flex items-center gap-1.5" style={captionStyle(fonts, colors.mutedText)}>{t('ui.AnalyticsHabitsRow.menos')}{HEAT_SHARES.map((share) => (
               <span key={share} aria-hidden="true" className="size-3 rounded-[3px]" style={{ backgroundColor: paletteTint(heat, colors.surface, share) }} />
-            ))}
-            Más
-          </span>
+            ))}{t('ui.AnalyticsHabitsRow.mas')}</span>
         }
       >
-        <div className="mb-5 grid grid-cols-[2.5rem_repeat(7,minmax(0,1fr))] gap-1.5" role="img" aria-label="Actividad por día durante cuatro semanas">
+        <div className="mb-5 grid grid-cols-[2.5rem_repeat(7,minmax(0,1fr))] gap-1.5" role="img" aria-label={t('ui.AnalyticsHabitsRow.actividad-por-dia-durante-cuatro')}>
           <span />
           {ANALYTICS_DAYS.map((day) => (
             <span key={day} className="text-center" style={captionStyle(fonts, colors.mutedText)}>
-              {day}
+              {tx(day)}
             </span>
           ))}
           {ANALYTICS_HEATMAP.map((week, row) => (
@@ -79,17 +78,17 @@ export function AnalyticsHabitsRow({
           {HABIT_STATS.map((stat) => (
             <div key={stat.label} className="min-w-0">
               <span className="block" style={captionStyle(fonts, colors.mutedText)}>
-                {stat.label}
+                {tx(stat.label)}
               </span>
               <span className="mt-0.5 block tabular-nums" style={titleStyle(fonts)}>
-                {stat.value}
+                {tx(stat.value)}
               </span>
             </div>
           ))}
         </PreviewSlotTarget>
       </AnalyticsPanel>
 
-      <AnalyticsPanel colors={colors} fonts={fonts} title="Metas del trimestre" onEditSlot={onEditSlot}>
+      <AnalyticsPanel colors={colors} fonts={fonts} title={t('ui.AnalyticsHabitsRow.metas-del-trimestre')} onEditSlot={onEditSlot}>
         <ul className="flex flex-1 flex-col justify-between gap-4">
           {ANALYTICS_GOALS.map((goal) => {
             const fill = colors[goal.slot];
@@ -98,7 +97,7 @@ export function AnalyticsHabitsRow({
               <li key={goal.label}>
                 <div className="flex items-baseline justify-between gap-3">
                   <span className="min-w-0 truncate" style={labelStyle(fonts, colors.text)}>
-                    {goal.label}
+                    {tx(goal.label)}
                   </span>
                   <span className="shrink-0 tabular-nums" style={titleStyle(fonts)}>
                     {goal.value}%
@@ -108,7 +107,7 @@ export function AnalyticsHabitsRow({
                   <PreviewSlotTarget slot={goal.slot} onEditSlot={onEditSlot} className="h-full rounded-full" style={{ width: `${goal.value}%`, backgroundColor: fill }} />
                 </div>
                 <span className="mt-1 block tabular-nums" style={captionStyle(fonts, colors.mutedText)}>
-                  {goal.total}
+                  {tx(goal.total)}
                 </span>
               </li>
             );

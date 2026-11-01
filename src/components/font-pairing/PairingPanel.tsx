@@ -5,6 +5,7 @@ import type { FontPair } from '@lib/typography/pairings';
 
 import { PairingList } from './PairingList';
 import { TypographyPreview } from './TypographyPreview';
+import { useT } from '@/context/I18nContext';
 
 export type PairingPanelProps = {
   pairings: FontPair[];
@@ -21,21 +22,17 @@ export function PairingPanel({
   onSelectPairing,
   variant = 'default',
 }: PairingPanelProps) {
+  const t = useT();
   const isEmbedded = variant === 'embedded';
 
   return (
     <section
-      aria-label="Parejas tipográficas recomendadas"
+      aria-label={t('ui.PairingPanel.parejas-tipograficas-recomendadas')}
       className={isEmbedded ? 'space-y-4' : 'rounded-lg border border-border bg-bg p-5'}
     >
       <div>
-        <h2 className={`font-semibold text-ink ${isEmbedded ? 'text-[0.9375rem]' : 'text-base'}`}>
-          Tipografía
-        </h2>
-        <p className="mt-1 max-w-prose text-[0.8125rem] leading-relaxed text-muted">
-          Pares curados según el estado de ánimo del estilo. Selecciona uno para la vista previa de
-          marca.
-        </p>
+        <h2 className={`font-semibold text-ink ${isEmbedded ? 'text-[0.9375rem]' : 'text-base'}`}>{t('ui.PairingPanel.tipografia')}</h2>
+        <p className="mt-1 max-w-prose text-[0.8125rem] leading-relaxed text-muted">{t('ui.PairingPanel.pares-curados-segun-el-estado')}</p>
       </div>
 
       <PairingList

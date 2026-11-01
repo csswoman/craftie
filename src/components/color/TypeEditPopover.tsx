@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 
 import { computePopoverPosition } from '@/lib/browser/computePopoverPosition';
 import { useDialogAccessibility } from '@/lib/browser/useDialogAccessibility';
+import { useT, useTx } from '@/context/I18nContext';
 
 const POPOVER_WIDTH = 320;
 const POPOVER_HEIGHT = 520;
@@ -24,6 +25,8 @@ export function TypeEditPopover({
   onClose: () => void;
   children: ReactNode;
 }) {
+  const tx = useTx();
+  const t = useT();
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
   const [mounted, setMounted] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -82,15 +85,15 @@ export function TypeEditPopover({
         <header className="flex shrink-0 items-start justify-between gap-2 border-b border-border px-4 py-3">
           <div className="min-w-0">
             <p id="type-edit-popover-title" className="text-chrome-label font-semibold text-ink">
-              {title}
+              {tx(title)}
             </p>
-            <p className="text-chrome-caption text-muted">{subtitle}</p>
+            <p className="text-chrome-caption text-muted">{tx(subtitle)}</p>
           </div>
           <button
             type="button"
             data-popover-close
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={t('ui.TypeEditPopover.cerrar')}
             className="-mr-2 -mt-1 flex size-11 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           >
             <span aria-hidden="true" className="text-lg leading-none">×</span>
@@ -113,6 +116,8 @@ export function TypeScopeToggle({
   onChange: (checked: boolean) => void;
   label: string;
 }) {
+  const tx = useTx();
+  const t = useT();
   return (
     <div className="mb-4 rounded-md bg-surface-raised px-3 py-2">
       <label className="flex min-h-8 cursor-pointer items-center gap-2 text-chrome-caption text-ink">
@@ -122,12 +127,12 @@ export function TypeScopeToggle({
           onChange={(event) => onChange(event.target.checked)}
           className="size-4 accent-primary"
         />
-        {label}
+        {tx(label)}
       </label>
       <p className="mt-1 text-chrome-caption leading-snug text-muted">
         {checked
-          ? 'Solo cambia este texto. El tipo aplicado no se modifica.'
-          : 'Actualiza también los valores de «Aplicado» y el resto de textos.'}
+          ? t('ui.TypeEditPopover.solo-cambia-este-texto-el')
+          : t('ui.TypeEditPopover.actualiza-tambien-los-valores-de')}
       </p>
     </div>
   );

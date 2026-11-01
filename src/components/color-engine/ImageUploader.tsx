@@ -5,6 +5,7 @@ import { useId } from 'react';
 import type { PaletteType } from '@lib/color/paletteClassification';
 
 import { ImageUploadPreview } from '@/components/color-engine/ImageUploadPreview';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type ImageUploaderProps = {
   fileName: string | null;
@@ -46,6 +47,8 @@ export function ImageUploader({
   paletteTypeOverride = null,
   onPaletteTypeChange,
 }: ImageUploaderProps) {
+  const tx = useTx();
+  const t = useT();
   const isEmbedded = variant === 'embedded';
   const inputId = useId();
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -69,7 +72,7 @@ export function ImageUploader({
 
   return (
     <section
-      aria-label="Subir imagen de inspiración"
+      aria-label={t('ui.ImageUploader.subir-imagen-de-inspiracion')}
       aria-busy={isLoading}
       className={
         isEmbedded
@@ -81,29 +84,26 @@ export function ImageUploader({
     >
       {showHeader ? (
         <div>
-          <h2 className={`font-semibold text-ink ${isEmbedded ? 'text-[0.9375rem]' : 'text-base'}`}>Inspiración desde imagen</h2>
-          <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">
-            Sube una imagen local para extraer colores y armar automáticamente una paleta por roles. El archivo no sale de tu navegador.
-          </p>
+          <h2 className={`font-semibold text-ink ${isEmbedded ? 'text-[0.9375rem]' : 'text-base'}`}>{t('ui.ImageUploader.inspiracion-desde-imagen')}</h2>
+          <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">{t('ui.ImageUploader.sube-una-imagen-local-para')}</p>
         </div>
       ) : null}
 
       {paletteType && onPaletteTypeChange ? (
         <label className="flex items-center justify-between gap-3 font-sans text-tools-meta text-muted">
-          <span>
-            Tipo <strong className="font-semibold text-ink">{PALETTE_TYPE_LABELS[paletteType]}</strong>
-            {paletteTypeOverride ? ' · manual' : ' · detectado'}
+          <span>{t('ui.ImageUploader.tipo')}{' '}<strong className="font-semibold text-ink">{tx(PALETTE_TYPE_LABELS[paletteType])}</strong>
+            {paletteTypeOverride ? t('ui.ImageUploader.manual') : t('ui.ImageUploader.detectado')}
           </span>
           <select
             value={paletteTypeOverride ?? ''}
             disabled={isLoading}
             onChange={(event) => onPaletteTypeChange((event.target.value || null) as PaletteType | null)}
-            aria-label="Sobrescribir tipo de paleta"
+            aria-label={t('ui.ImageUploader.sobrescribir-tipo-de-paleta')}
             className="min-h-10 rounded-[var(--chrome-radius-control)] border border-border bg-bg px-2 text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           >
-            <option value="">Automático</option>
+            <option value="">{t('ui.ImageUploader.automatico')}</option>
             {Object.entries(PALETTE_TYPE_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
+              <option key={value} value={value}>{tx(label)}</option>
             ))}
           </select>
         </label>
@@ -121,9 +121,7 @@ export function ImageUploader({
               <label
                 htmlFor={inputId}
                 className="inline-flex min-h-11 cursor-pointer items-center rounded-[var(--chrome-radius-control)] border border-border bg-surface px-[var(--chrome-space-2)] font-sans text-tools-body font-medium text-[var(--chrome-green)] transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-              >
-                Cambiar
-              </label>
+              >{t('ui.ImageUploader.cambiar')}</label>
             ) : null
           }
         />
@@ -150,15 +148,15 @@ export function ImageUploader({
         >
           <div className="flex flex-col items-center gap-3 text-center">
             <p className="text-[0.9375rem] text-ink">
-              {hasPreview ? 'Arrastra otra imagen o ' : 'Arrastra una imagen aquí o '}
+              {hasPreview ? t('ui.ImageUploader.arrastra-otra-imagen-o') : t('ui.ImageUploader.arrastra-una-imagen-aqui-o')}
               <label
                 htmlFor={inputId}
                 className="cursor-pointer font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
               >
-                {hasPreview ? 'cambia la imagen' : 'selecciona un archivo'}
+                {hasPreview ? t('ui.ImageUploader.cambia-la-imagen') : t('ui.ImageUploader.selecciona-un-archivo')}
               </label>
             </p>
-            {!hasPreview ? <p className="text-[0.8125rem] text-muted">JPG, PNG o WebP · máximo 5 MB</p> : null}
+            {!hasPreview ? <p className="text-[0.8125rem] text-muted">{t('ui.ImageUploader.jpg-png-o-webp-maximo')}</p> : null}
           </div>
         </div>
       ) : null}
@@ -169,9 +167,7 @@ export function ImageUploader({
             htmlFor={inputId}
             className="inline-flex cursor-pointer items-center gap-2 text-[0.8125rem] font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           >
-            <ChangeImageIcon />
-            Cambiar imagen
-          </label>
+            <ChangeImageIcon />{t('ui.ImageUploader.cambiar-imagen')}</label>
         </div>
       ) : null}
 

@@ -4,6 +4,7 @@ import { EDITORIAL_GUTTER_CLASS } from './editorialPreviewData';
 import { paletteTint } from './previewButtons';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { bodyStyle, buttonStyle, displayStyle, labelStyle, type PreviewFonts } from './previewTypography';
+import { useT } from '@/context/I18nContext';
 
 /**
  * The page's one loud moment: a full-bleed band in the primary color with the
@@ -19,6 +20,7 @@ export function EditorialNewsletterBand({
   fonts: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const t = useT();
   const fill = colors.primaryAction;
   const on = colors.primaryActionText;
   const field = paletteTint(on, fill, 0.12);
@@ -31,28 +33,20 @@ export function EditorialNewsletterBand({
       style={{ backgroundColor: fill, color: on }}
     >
       <div className="min-w-0">
-        <PreviewSlotTarget slot="primaryActionText" onEditSlot={onEditSlot} style={{ ...displayStyle(fonts), color: on }}>
-          Una carta al mes
-        </PreviewSlotTarget>
-        <PreviewSlotTarget slot="primaryActionText" onEditSlot={onEditSlot} className="mt-2 max-w-[40ch] text-pretty" style={{ ...bodyStyle(fonts), color: on }}>
-          Un ensayo largo y tres enlaces que merecen la pena. Sin ruido, sin prisa.
-        </PreviewSlotTarget>
+        <PreviewSlotTarget slot="primaryActionText" onEditSlot={onEditSlot} style={{ ...displayStyle(fonts), color: on }}>{t('ui.EditorialNewsletterBand.una-carta-al-mes')}</PreviewSlotTarget>
+        <PreviewSlotTarget slot="primaryActionText" onEditSlot={onEditSlot} className="mt-2 max-w-[40ch] text-pretty" style={{ ...bodyStyle(fonts), color: on }}>{t('ui.EditorialNewsletterBand.un-ensayo-largo-y-tres')}</PreviewSlotTarget>
       </div>
       <div className="flex min-w-0 flex-col gap-3 @min-[480px]/editorial:flex-row">
         <span
           className="flex min-h-12 min-w-0 flex-1 items-center rounded-lg border px-4"
           style={{ ...labelStyle(fonts, on), backgroundColor: field, borderColor: paletteTint(on, fill, 0.3) }}
-        >
-          tu@correo.com
-        </span>
+        >{t('ui.EditorialNewsletterBand.tu-correo-com')}</span>
         <PreviewSlotTarget
           slot="primaryActionText"
           onEditSlot={onEditSlot}
           className="flex min-h-12 items-center justify-center rounded-lg px-5"
           style={{ ...buttonStyle(fonts), backgroundColor: on, color: fill }}
-        >
-          Quiero recibirla
-        </PreviewSlotTarget>
+        >{t('ui.EditorialNewsletterBand.quiero-recibirla')}</PreviewSlotTarget>
       </div>
     </PreviewSlotTarget>
   );

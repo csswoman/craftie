@@ -1,6 +1,7 @@
 'use client';
 
 import type { LocalProject } from '@lib/studio/projectModel';
+import { useT, useTx } from '@/context/I18nContext';
 
 const MAX_RECENT = 3;
 
@@ -11,6 +12,8 @@ export function RecentProjects({
   projects: LocalProject[];
   onOpen: (project: LocalProject) => void;
 }) {
+  const tx = useTx();
+  const t = useT();
   const recent = projects.slice(0, MAX_RECENT);
   if (recent.length === 0) return null;
 
@@ -20,7 +23,7 @@ export function RecentProjects({
         id="recent-projects-title"
         className="text-balance font-display text-[2rem] font-medium leading-[1.1] text-ink"
       >
-        Sigue donde lo dejaste
+        {t('start.recent')}
       </h2>
       <ul className="mt-5 space-y-2">
         {recent.map((project) => (
@@ -36,7 +39,7 @@ export function RecentProjects({
               ) : (
                 <span className="block h-6 w-20 rounded-md bg-surface-raised" aria-hidden="true" />
               )}
-              <span className="truncate text-chrome-body font-medium text-ink">{project.name}</span>
+              <span className="truncate text-chrome-body font-medium text-ink">{tx(project.name)}</span>
             </button>
           </li>
         ))}

@@ -14,6 +14,7 @@ import { PreviewIcon } from './previewIcons';
 import { readableInk } from './previewColor';
 import { Tag } from './previewPrimitives';
 import { compactBodyStyle, captionStyle, headingStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 type DashboardChannelPanelProps = {
   colors: ResolvedLayoutColors;
@@ -28,6 +29,8 @@ export function DashboardChannelPanel({
   range,
   onEditSlot,
 }: DashboardChannelPanelProps) {
+  const tx = useTx();
+  const t = useT();
   const pendingCount = PALETTE_REVIEW_ROLES.filter((role) => role.pending).length;
   const statusLabel = getPaletteReviewStatus(pendingCount);
   const actionInk = readableInk(colors.primaryAction, colors.surface);
@@ -43,14 +46,11 @@ export function DashboardChannelPanel({
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 max-w-[48ch]">
-          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
-            Revisión de paleta
-          </PreviewSlotTarget>
-          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-2" style={compactBodyStyle(fonts, colors.mutedText)}>
-            Atelier Pigmento · últimos {dashboardRangeLabel(range)}
+          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>{t('ui.DashboardChannelPanel.revision-de-paleta')}</PreviewSlotTarget>
+          <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-2" style={compactBodyStyle(fonts, colors.mutedText)}>{t('ui.DashboardChannelPanel.atelier-pigmento-ultimos', { value: tx(dashboardRangeLabel(range)) })}
           </PreviewSlotTarget>
         </div>
-        <Tag label={statusLabel} color={colors.accent} surfaceHex={colors.surface} slot="accent" onEditSlot={onEditSlot} />
+        <Tag label={tx(statusLabel)} color={colors.accent} surfaceHex={colors.surface} slot="accent" onEditSlot={onEditSlot} />
       </div>
 
       <div className="mb-6 mt-5 grid grid-cols-2 gap-4 @min-[480px]/dashmain:grid-cols-4">
@@ -68,7 +68,7 @@ export function DashboardChannelPanel({
             />
             <div className="mt-2.5 flex items-center justify-between gap-2">
               <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="min-w-0 truncate" style={captionStyle(fonts)}>
-                {role.label}
+                {tx(role.label)}
               </PreviewSlotTarget>
               {role.pending ? (
                 <PreviewSlotTarget
@@ -76,9 +76,7 @@ export function DashboardChannelPanel({
                   onEditSlot={onEditSlot}
                   className="shrink-0 whitespace-nowrap"
                   style={{ ...captionStyle(fonts), color: accentInk }}
-                >
-                  Ajustar
-                </PreviewSlotTarget>
+                >{t('ui.DashboardChannelPanel.ajustar')}</PreviewSlotTarget>
               ) : (
                 <PreviewSlotTarget
                   slot="success"
@@ -101,17 +99,13 @@ export function DashboardChannelPanel({
         className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t pt-5"
         style={{ borderColor: colors.divider }}
       >
-        <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={captionStyle(fonts, colors.mutedText)}>
-          12 de 14 pares cumplen AA
-        </PreviewSlotTarget>
+        <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={captionStyle(fonts, colors.mutedText)}>{t('ui.DashboardChannelPanel.12-de-14-pares-cumplen')}</PreviewSlotTarget>
         <PreviewSlotTarget
           slot="primaryAction"
           onEditSlot={onEditSlot}
           className="flex items-center gap-1.5 transition-transform duration-200 ease-out hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:hover:translate-x-0"
           style={{ ...titleStyle(fonts), color: actionInk }}
-        >
-          Revisar contraste
-          <PreviewIcon name="arrowRight" size={13} strokeWidth={2.25} />
+        >{t('ui.DashboardChannelPanel.revisar-contraste')}<PreviewIcon name="arrowRight" size={13} strokeWidth={2.25} />
         </PreviewSlotTarget>
       </PreviewSlotTarget>
     </PreviewSlotTarget>

@@ -1,4 +1,7 @@
+
 'use client';
+
+import { useTx } from '@/context/I18nContext';
 
 export type MockupCardProps = {
   title: string;
@@ -19,6 +22,7 @@ export function MockupCard({
   children,
   onClick,
 }: MockupCardProps) {
+  const tx = useTx();
   return (
     <button
       type="button"
@@ -44,12 +48,12 @@ export function MockupCard({
         </div>
       </div>
       <div className={compact ? 'px-2 py-2' : 'px-3 py-3'}>
-        <p className="text-[0.8125rem] font-semibold text-ink group-hover:text-primary">{title}</p>
+        <p className="text-[0.8125rem] font-semibold text-ink group-hover:text-primary">{tx(title)}</p>
         {description ? (
-          <p className="mt-0.5 text-[0.75rem] leading-relaxed text-muted">{description}</p>
+          <p className="mt-0.5 text-[0.75rem] leading-relaxed text-muted">{tx(description)}</p>
         ) : null}
         {!compact ? (
-          <p className="mt-1 text-[0.6875rem] font-medium text-primary/80">{expandHint}</p>
+          <p className="mt-1 text-[0.6875rem] font-medium text-primary/80">{tx(expandHint)}</p>
         ) : null}
       </div>
     </button>

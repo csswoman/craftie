@@ -13,6 +13,7 @@ import {
   titleStyle,
   type PreviewFonts,
 } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 /** Palette detail: each color as a tall chip that reports its own label contrast, then the text pairs it feeds. */
 export function MobileDetailScreen({
@@ -28,11 +29,13 @@ export function MobileDetailScreen({
   onPrimary: string;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   const palette = MOBILE_PALETTES[0]!;
   const pairs = [
     { label: 'Texto', fg: colors.text, bg: colors.appBackground },
     { label: 'Secundario', fg: colors.mutedText, bg: colors.appBackground },
-    { label: 'Botón', fg: onPrimary, bg: primaryFill },
+    { label: tx('Botón'), fg: onPrimary, bg: primaryFill },
   ];
 
   return (
@@ -42,7 +45,7 @@ export function MobileDetailScreen({
           <PreviewIcon name="arrowRight" size={18} className="rotate-180" />
         </span>
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={titleStyle(fonts)}>
-          {palette.name}
+          {tx(palette.name)}
         </PreviewSlotTarget>
         <span className="grid size-9 place-items-center rounded-full" style={{ color: colors.mutedText }} aria-hidden="true">
           <PreviewIcon name="heart" size={17} />
@@ -63,18 +66,16 @@ export function MobileDetailScreen({
               className="flex h-[3.75rem] items-end justify-between px-4 pb-2.5"
               style={{ backgroundColor: fill, color: ink }}
             >
-              <span style={labelStyle(fonts, ink)}>{MOBILE_DETAIL_ROLES[index]}</span>
+              <span style={labelStyle(fonts, ink)}>{tx(MOBILE_DETAIL_ROLES[index])}</span>
               <span className="tabular-nums" style={captionStyle(fonts, ink)}>
-                {readout.ratio} · {readout.level}
+                {tx(readout.ratio)} · {tx(readout.level)}
               </span>
             </PreviewSlotTarget>
           );
         })}
       </div>
 
-      <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-5" style={headingStyle(fonts)}>
-        Contraste
-      </PreviewSlotTarget>
+      <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-5" style={headingStyle(fonts)}>{t('ui.MobileDetailScreen.contraste')}</PreviewSlotTarget>
       <ul className="mt-2">
         {pairs.map((pair) => {
           const readout = contrastReadout(pair.fg, pair.bg);
@@ -95,13 +96,13 @@ export function MobileDetailScreen({
                 Aa
               </span>
               <span className="min-w-0 flex-1" style={labelStyle(fonts, colors.text)}>
-                {pair.label}
+                {tx(pair.label)}
               </span>
               <span className="w-14 shrink-0 text-right tabular-nums" style={labelStyle(fonts, colors.mutedText)}>
-                {readout.ratio}
+                {tx(readout.ratio)}
               </span>
               <span className="w-10 shrink-0 text-right" style={labelStyle(fonts, colors.text)}>
-                {readout.level}
+                {tx(readout.level)}
               </span>
             </PreviewSlotTarget>
           );
@@ -113,9 +114,7 @@ export function MobileDetailScreen({
         onEditSlot={onEditSlot}
         className="mb-4 mt-auto block rounded-xl py-3 text-center"
         style={{ ...buttonStyle(fonts), backgroundColor: primaryFill, color: onPrimary }}
-      >
-        Exportar guía
-      </PreviewSlotTarget>
+      >{t('ui.MobileDetailScreen.exportar-guia')}</PreviewSlotTarget>
     </div>
   );
 }

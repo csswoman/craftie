@@ -14,6 +14,7 @@ import { pickReadableTextColor } from '@lib/color/readableText';
 
 import { CollapsibleSection } from '@/components/layout/CollapsibleSection';
 import { useRolePalette } from '@/context/RolePaletteContext';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type SourceColorsSectionProps = {
   colors: SelectableColor[];
@@ -21,6 +22,8 @@ export type SourceColorsSectionProps = {
 };
 
 export function SourceColorsSection({ colors, embedded = false }: SourceColorsSectionProps) {
+  const tx = useTx();
+  const t = useT();
   const { rolePalette, activeRole, lockedRoles, replaceRole } = useRolePalette();
   const [pendingHex, setPendingHex] = useState<string | null>(null);
 
@@ -75,9 +78,8 @@ export function SourceColorsSection({ colors, embedded = false }: SourceColorsSe
   const content = (
     <div className="space-y-[var(--chrome-space-3)]">
       <p className="font-sans text-tools-meta font-medium text-muted">
-        {uniqueColors.length} colores fuente
-      </p>
-      <ul className="grid grid-cols-2 gap-[var(--chrome-space-2)]" aria-label="Colores crudos extraídos">
+        {t('ui.SourceColorsSection.colores-fuente', { length: uniqueColors.length })}</p>
+      <ul className="grid grid-cols-2 gap-[var(--chrome-space-2)]" aria-label={t('ui.SourceColorsSection.colores-crudos-extraidos')}>
           {uniqueColors.map((color) => {
             const hex = normalizeHex(color.hex);
             const used = usedHexes.has(hex);
@@ -90,7 +92,7 @@ export function SourceColorsSection({ colors, embedded = false }: SourceColorsSe
                 <button
                   type="button"
                   aria-pressed={used}
-                  aria-label={`Asignar ${name}, ${hex}`}
+                  aria-label={t('ui.SourceColorsSection.asignar', { name: tx(name), hex })}
                   onClick={() => handleColorClick(hex)}
                   className={`flex w-full items-center gap-[var(--chrome-space-2)] rounded-[var(--chrome-radius-control)] border bg-bg px-[var(--chrome-space-2)] py-[var(--chrome-space-2)] text-left transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
                     activePending
@@ -121,7 +123,7 @@ export function SourceColorsSection({ colors, embedded = false }: SourceColorsSe
                   </span>
                   <span className="min-w-0">
                     <span className="block truncate font-sans text-tools-name font-medium text-ink">
-                      {name}
+                      {tx(name)}
                     </span>
                     <span className="block font-mono text-tools-meta text-muted">
                       {hex.toUpperCase()}
@@ -135,7 +137,7 @@ export function SourceColorsSection({ colors, embedded = false }: SourceColorsSe
 
         {pendingHex ? (
           <div className="rounded-[var(--chrome-radius-card)] border border-border bg-surface px-[var(--chrome-space-2)] py-[var(--chrome-space-2)]">
-            <p className="font-sans text-tools-body font-medium text-ink">Asignar a rol</p>
+            <p className="font-sans text-tools-body font-medium text-ink">{t('ui.SourceColorsSection.asignar-a-rol')}</p>
             <div className="mt-[var(--chrome-space-2)] flex flex-wrap gap-[var(--chrome-space-1)]">
               {PALETTE_ROLE_ORDER.map((role) => (
                 <button
@@ -145,7 +147,7 @@ export function SourceColorsSection({ colors, embedded = false }: SourceColorsSe
                   onClick={() => assignToRole(role, pendingHex)}
                   className="rounded-[var(--chrome-radius-control)] border border-border bg-bg px-[var(--chrome-space-2)] py-[var(--chrome-space-1)] font-sans text-tools-chip font-medium text-ink transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
                 >
-                  {ROLE_LABELS[role]}
+                  {tx(ROLE_LABELS[role])}
                 </button>
               ))}
             </div>
@@ -160,7 +162,7 @@ export function SourceColorsSection({ colors, embedded = false }: SourceColorsSe
 
   return (
     <CollapsibleSection
-      title="Colores fuente"
+      title={t('ui.SourceColorsSection.colores-fuente-2')}
       defaultOpen
       variant="neutral"
       icon={<SourceColorsIcon />}

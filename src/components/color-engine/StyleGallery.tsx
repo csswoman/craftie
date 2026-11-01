@@ -11,6 +11,7 @@ import {
 } from '@lib/styles/presets';
 
 import { StyleCard } from './StyleCard';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type StyleGalleryProps = {
   styles: DesignStyle[];
@@ -27,6 +28,8 @@ export function StyleGallery({
   variant = 'default',
   showHeader = true,
 }: StyleGalleryProps) {
+  const tx = useTx();
+  const t = useT();
   const isEmbedded = variant === 'embedded';
   const [activeMood, setActiveMood] = useState<string | null>(null);
   const visibleStyles = useMemo(
@@ -38,7 +41,7 @@ export function StyleGallery({
 
   return (
     <section
-      aria-label="Estilos de diseño"
+      aria-label={t('ui.StyleGallery.estilos-de-diseno')}
       className={
         isEmbedded
           ? 'flex min-h-0 flex-1 flex-col gap-3'
@@ -47,37 +50,30 @@ export function StyleGallery({
     >
       {showHeader ? (
         <div className="shrink-0">
-          <h2 className={`font-semibold text-ink ${isEmbedded ? 'text-[0.9375rem]' : 'text-base'}`}>
-            Elegir inspiración
-          </h2>
-          <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">
-            Selecciona un estilo curado para cargar sus colores semilla. Puedes ajustarlos después a
-            mano.
-          </p>
+          <h2 className={`font-semibold text-ink ${isEmbedded ? 'text-[0.9375rem]' : 'text-base'}`}>{t('ui.StyleGallery.elegir-inspiracion')}</h2>
+          <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">{t('ui.StyleGallery.selecciona-un-estilo-curado-para')}</p>
         </div>
       ) : null}
 
       {styles.length === 0 ? (
-        <p className="rounded-md border border-dashed border-border bg-surface px-4 py-8 text-center text-[0.9375rem] text-muted">
-          Aún no hay estilos de diseño disponibles.
-        </p>
+        <p className="rounded-md border border-dashed border-border bg-surface px-4 py-8 text-center text-[0.9375rem] text-muted">{t('ui.StyleGallery.aun-no-hay-estilos-de')}</p>
       ) : (
         <>
           {showFilters ? (
             <div
               className="relative z-10 flex shrink-0 flex-wrap gap-2 bg-surface pb-0.5"
               role="group"
-              aria-label="Filtrar por vibe"
+              aria-label={t('ui.StyleGallery.filtrar-por-vibe')}
             >
               <MoodChip
-                label="Todas"
+                label={t('ui.StyleGallery.todas')}
                 active={activeMood === null}
                 onClick={() => setActiveMood(null)}
               />
               {INSPIRATION_FILTER_TAGS.map((tag) => (
                 <MoodChip
                   key={tag}
-                  label={formatInspirationFilterLabel(tag)}
+                  label={tx(formatInspirationFilterLabel(tag))}
                   active={activeMood === tag}
                   onClick={() => setActiveMood(tag)}
                 />
@@ -86,9 +82,7 @@ export function StyleGallery({
           ) : null}
 
           {visibleStyles.length === 0 ? (
-            <p className="flex-1 py-8 text-center text-[0.9375rem] text-muted">
-              Ningún estilo coincide con este filtro.
-            </p>
+            <p className="flex-1 py-8 text-center text-[0.9375rem] text-muted">{t('ui.StyleGallery.ningun-estilo-coincide-con-este')}</p>
           ) : (
             <ul
               key={activeMood ?? 'all'}
@@ -110,7 +104,7 @@ export function StyleGallery({
             className="shrink-0 border-t border-border/40 pt-3 text-center text-[0.75rem] leading-snug text-muted"
             aria-live="polite"
           >
-            {countLabel}
+            {tx(countLabel)}
           </p>
         </>
       )}
@@ -127,6 +121,7 @@ function MoodChip({
   active: boolean;
   onClick: () => void;
 }) {
+  const tx = useTx();
   return (
     <button
       type="button"
@@ -138,7 +133,7 @@ function MoodChip({
           : 'border border-border/60 bg-surface-raised text-muted hover:border-border hover:bg-border/40 hover:text-ink'
       }`}
     >
-      {label}
+      {tx(label)}
     </button>
   );
 }

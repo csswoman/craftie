@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom';
 import { computeAnchoredMenuPosition } from '@/lib/browser/computeAnchoredMenuPosition';
 
 import { MoreActionsIcon } from './paletteToolbarIcons';
+import { useTx } from '@/context/I18nContext';
 
 export type PaletteSlotOverflowItem = {
   id: string;
@@ -27,6 +28,7 @@ export function PaletteSlotOverflowMenu({
   lightChrome: boolean;
   items: PaletteSlotOverflowItem[];
 }) {
+  const tx = useTx();
   const [open, setOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
   const menuId = useId();
@@ -108,7 +110,7 @@ export function PaletteSlotOverflowMenu({
             ref={menuRef}
             id={menuId}
             role="menu"
-            aria-label={label}
+            aria-label={tx(label)}
             className="fixed z-dropdown min-w-44 overflow-hidden rounded-lg border border-border bg-bg py-1 text-ink shadow-lg"
             style={{ top: menuPosition.top, left: menuPosition.left }}
           >
@@ -125,7 +127,7 @@ export function PaletteSlotOverflowMenu({
                 }}
                 className="flex min-h-11 w-full items-center px-3 text-left text-chrome-body font-medium text-ink transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:bg-surface-raised"
               >
-                {item.label}
+                {tx(item.label)}
               </button>
             ))}
           </div>,
@@ -138,7 +140,7 @@ export function PaletteSlotOverflowMenu({
       <button
         ref={triggerRef}
         type="button"
-        aria-label={label}
+        aria-label={tx(label)}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}

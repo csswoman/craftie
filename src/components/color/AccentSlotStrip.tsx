@@ -15,6 +15,7 @@ import { useMinWidthQuery } from '@/lib/browser/useMinWidthQuery';
 import { useRolePalette } from '@/context/RolePaletteContext';
 
 import { AccentSlotCell } from './AccentSlotCell';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type AccentSlotStripProps = {
   editable?: boolean;
@@ -22,6 +23,8 @@ export type AccentSlotStripProps = {
 };
 
 export function AccentSlotStrip({ editable = true, onOpenDetails }: AccentSlotStripProps) {
+  const tx = useTx();
+  const t = useT();
   const {
     semanticTokens,
     rolePalette,
@@ -46,10 +49,10 @@ export function AccentSlotStrip({ editable = true, onOpenDetails }: AccentSlotSt
         hex,
         name: hex
           ? nameForHex(hex, palette.filter((entry): entry is { hex: string } => entry.hex !== null))
-          : 'Sin asignar',
+          : tx('Sin asignar'),
       };
     });
-  }, [semanticTokens]);
+  }, [semanticTokens, tx]);
 
   const handleCopyHex = useCallback(async (hex: string) => {
     try {
@@ -57,10 +60,10 @@ export function AccentSlotStrip({ editable = true, onOpenDetails }: AccentSlotSt
       setCopyMessage('HEX copiado');
       window.setTimeout(() => setCopyMessage(null), 1500);
     } catch {
-      setCopyMessage('No se pudo copiar');
+      setCopyMessage(tx('No se pudo copiar'));
       window.setTimeout(() => setCopyMessage(null), 1500);
     }
-  }, []);
+  }, [tx]);
 
   if (!semanticTokens || slots.length === 0) return null;
 
@@ -71,7 +74,7 @@ export function AccentSlotStrip({ editable = true, onOpenDetails }: AccentSlotSt
           role="status"
           className="pointer-events-none absolute left-1/2 top-3 z-30 -translate-x-1/2 rounded-md border border-border bg-ink px-2.5 py-1 text-chrome-caption font-medium text-bg shadow-md"
         >
-          {copyMessage}
+          {tx(copyMessage)}
         </p>
       ) : null}
 
@@ -79,12 +82,12 @@ export function AccentSlotStrip({ editable = true, onOpenDetails }: AccentSlotSt
         className={`flex min-h-0 h-full flex-1 flex-col divide-y divide-white/10 ${
           isWideLayout ? 'min-h-105' : 'min-h-0'
         }`}
-        aria-label="Familia de acentos"
+        aria-label={t('ui.AccentSlotStrip.familia-de-acentos')}
       >
         {slots.map((slot) => (
           <AccentSlotCell
             key={slot.index}
-            label={slot.label}
+            label={tx(slot.label)}
             name={slot.name}
             hex={slot.hex}
             expanded

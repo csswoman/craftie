@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 import { copyHexToClipboard } from '@lib/color/paletteOrder';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type ColorDetailActionRowProps = {
   hex: string;
@@ -23,6 +24,8 @@ export function ColorDetailActionRow({
   isCurrent = false,
   variant = 'row',
 }: ColorDetailActionRowProps) {
+  const tx = useTx();
+  const t = useT();
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -49,26 +52,26 @@ export function ColorDetailActionRow({
           style={{ backgroundColor: hex }}
           aria-label={
             isCurrent
-              ? `${name}, color actual`
+              ? t('ui.ColorDetailActionRow.color-actual', { name: tx(name) })
               : onReplace
-                ? `Usar ${name} para sustituir`
+                ? t('ui.ColorDetailActionRow.usar-para-sustituir', { name: tx(name) })
                 : undefined
           }
         />
         <div className="min-w-0 text-center">
-          <p className="truncate text-[0.75rem] font-semibold leading-tight text-ink">{name}</p>
+          <p className="truncate text-[0.75rem] font-semibold leading-tight text-ink">{tx(name)}</p>
           <p className="font-mono text-chrome-caption leading-tight text-muted">{hex.toUpperCase()}</p>
         </div>
         <div className="flex justify-center gap-1">
           <IconActionButton
-            label={copied ? 'Copiado' : 'Copiar HEX'}
+            label={copied ? t('ui.ColorDetailActionRow.copiado') : t('ui.ColorDetailActionRow.copiar-hex')}
             onClick={() => void handleCopy()}
           >
-            {copied ? '✓' : '#'}
+            {tx(copied ? '✓' : '#')}
           </IconActionButton>
           {onReplace ? (
             <IconActionButton
-              label={isCurrent ? 'Color actual' : 'Sustituir por este color'}
+              label={isCurrent ? t('ui.ColorDetailActionRow.color-actual-2') : t('ui.ColorDetailActionRow.sustituir-por-este-color')}
               disabled={isCurrent}
               onClick={() => onReplace(hex)}
             >
@@ -77,7 +80,7 @@ export function ColorDetailActionRow({
           ) : null}
           {onAdd ? (
             <IconActionButton
-              label="Añadir a la paleta"
+              label={t('ui.ColorDetailActionRow.anadir-a-la-paleta')}
               disabled={!canAdd}
               onClick={() => onAdd(hex)}
             >
@@ -101,26 +104,26 @@ export function ColorDetailActionRow({
         style={{ backgroundColor: hex }}
         aria-label={
           isCurrent
-            ? `${name}, color actual`
+            ? t('ui.ColorDetailActionRow.color-actual', { name: tx(name) })
             : onReplace
-              ? `Usar ${name} para sustituir`
+              ? t('ui.ColorDetailActionRow.usar-para-sustituir', { name: tx(name) })
               : undefined
         }
       />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[0.75rem] font-semibold leading-tight text-ink">{name}</p>
+        <p className="truncate text-[0.75rem] font-semibold leading-tight text-ink">{tx(name)}</p>
         <p className="font-mono text-chrome-caption leading-tight text-muted">{hex.toUpperCase()}</p>
       </div>
       <div className="flex shrink-0 gap-1">
         <IconActionButton
-          label={copied ? 'Copiado' : 'Copiar HEX'}
+          label={copied ? t('ui.ColorDetailActionRow.copiado') : t('ui.ColorDetailActionRow.copiar-hex')}
           onClick={() => void handleCopy()}
         >
-          {copied ? '✓' : '#'}
+          {tx(copied ? '✓' : '#')}
         </IconActionButton>
         {onReplace ? (
           <IconActionButton
-            label={isCurrent ? 'Color actual' : 'Sustituir por este color'}
+            label={isCurrent ? t('ui.ColorDetailActionRow.color-actual-2') : t('ui.ColorDetailActionRow.sustituir-por-este-color')}
             disabled={isCurrent}
             onClick={() => onReplace(hex)}
           >
@@ -129,7 +132,7 @@ export function ColorDetailActionRow({
         ) : null}
         {onAdd ? (
           <IconActionButton
-            label="Añadir a la paleta"
+            label={t('ui.ColorDetailActionRow.anadir-a-la-paleta')}
             disabled={!canAdd}
             onClick={() => onAdd(hex)}
           >
@@ -152,11 +155,12 @@ function IconActionButton({
   disabled?: boolean;
   onClick: () => void;
 }) {
+  const tx = useTx();
   return (
     <button
       type="button"
-      aria-label={label}
-      title={label}
+      aria-label={tx(label)}
+      title={tx(label)}
       disabled={disabled}
       onClick={onClick}
       className="flex size-7 items-center justify-center rounded-md bg-bg/90 text-[0.75rem] font-semibold text-ink transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-40"

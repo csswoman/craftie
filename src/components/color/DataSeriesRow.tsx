@@ -4,6 +4,7 @@ import { useId, useState } from 'react';
 import { ChevronDown, Info } from 'lucide-react';
 
 import type { AxisScore, DataSeries } from '@lib/color/dataSeriesProfile';
+import { useT, useTx } from '@/context/I18nContext';
 
 const AXES = [
   { key: 'text', label: 'Texto' },
@@ -26,6 +27,8 @@ export function DataSeriesRow({
   onLeaveUnassigned?: () => void;
   onDerive?: () => void;
 }) {
+  const tx = useTx();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const detailId = useId();
   const empty = !series.assigned;
@@ -49,8 +52,8 @@ export function DataSeriesRow({
         <button
           type="button"
           aria-label={empty
-            ? `Abrir opciones para ${`Acento ${targetSeries}`} sin asignar`
-            : `Añadir ${series.name} a Acento ${targetSeries}`}
+            ? t('ui.DataSeriesRow.abrir-opciones-para-sin-asignar', { value: `Acento ${targetSeries}` })
+            : t('ui.DataSeriesRow.anadir-a-acento', { name: tx(series.name), targetSeries })}
           aria-expanded={empty ? open : undefined}
           aria-controls={empty ? detailId : undefined}
           onClick={handlePrimaryAction}
@@ -64,22 +67,22 @@ export function DataSeriesRow({
 
           <span className="flex min-w-0 flex-col">
             <span className={`truncate text-[1rem] font-semibold leading-[1.2] ${empty ? 'text-[#8A5F16] dark:text-[#F2C46D]' : 'text-ink'}`}>
-              {empty ? 'Sin asignar' : series.name}
+              {empty ? t('ui.DataSeriesRow.sin-asignar') : series.name}
             </span>
             <span className="mt-1 truncate text-[0.82rem] text-muted">
               {empty
-                ? `acento ${targetSeries} vacío`
-                : `${series.origin} · hue ${series.hue}°`}
+                ? t('ui.DataSeriesRow.acento-vacio', { targetSeries })
+                : t('ui.DataSeriesRow.hue-2', { origin: tx(series.origin), hue: series.hue })}
             </span>
           </span>
 
           <span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-[0.78rem] font-semibold ${verdictClasses(series.verdict)}`}>
-            {empty ? 'Elegir' : series.verdictLabel}
+            {empty ? t('ui.DataSeriesRow.elegir') : series.verdictLabel}
           </span>
         </button>
         <button
           type="button"
-          aria-label={`${open ? 'Ocultar' : 'Ver'} detalles de ${empty ? `Acento ${targetSeries} sin asignar` : series.name}`}
+          aria-label={t('ui.DataSeriesRow.detalles-de', { value: tx(open ? 'Ocultar' : 'Ver'), value2: tx(empty ? `Acento ${targetSeries} sin asignar` : series.name) })}
           aria-expanded={open}
           aria-controls={detailId}
           onClick={toggleDetail}
@@ -106,49 +109,46 @@ export function DataSeriesRow({
 }
 
 function AssignedDetail({ series }: { series: DataSeries }) {
+  const tx = useTx();
+  const t = useT();
   return (
     <>
       <div className="mb-3 flex items-start gap-2 rounded-lg border border-border bg-bg px-3 py-2.5 text-[0.82rem] text-muted">
         <Info aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
         <p>
-          <strong className="font-semibold text-ink">Donde se usa:</strong> esta fila resume si el color funciona para
-          texto, relleno, acento, superficies y gráficos. Aqui se ve mejor que en la vista cerrada.
-        </p>
+          <strong className="font-semibold text-ink">{t('ui.DataSeriesRow.donde-se-usa')}</strong>{' '}{t('ui.DataSeriesRow.esta-fila-resume-si-el')}</p>
       </div>
       <div className="mb-3 grid grid-cols-5 gap-2">
         {AXES.map(({ key, label }) => (
-          <AptCell key={key} label={key === 'surface' ? 'Superf.' : label} value={series.ratios[key]} score={series.axes[key]} />
+          <AptCell key={key} label={key === 'surface' ? t('ui.DataSeriesRow.superf') : label} value={series.ratios[key]} score={series.axes[key]} />
         ))}
       </div>
-      <p className="mb-3 text-[0.84rem] leading-relaxed text-muted">
-        Separación vs otros acentos: <strong className="font-semibold text-ink">Δhue {Math.round(series.separation.deltaHue)}°</strong>
-        {' · '}<strong className="font-semibold text-ink">ΔL {series.separation.deltaL.toFixed(2)}</strong>. {series.separation.note}
+      <p className="mb-3 text-[0.84rem] leading-relaxed text-muted">{t('ui.DataSeriesRow.separacion-vs-otros-acentos')}{' '}<strong className="font-semibold text-ink">{t('ui.DataSeriesRow.hue', { value: Math.round(series.separation.deltaHue) })}</strong>
+        {' · '}<strong className="font-semibold text-ink">ΔL {series.separation.deltaL.toFixed(2)}</strong>. {tx(series.separation.note)}
       </p>
     </>
   );
 }
 
 function UnassignedDetail({ onLeave, onDerive }: { onLeave?: () => void; onDerive?: () => void }) {
+  const t = useT();
   return (
     <>
-      <p className="mb-3 text-[0.84rem] text-muted">Sin candidato asignado. Opciones honestas:</p>
+      <p className="mb-3 text-[0.84rem] text-muted">{t('ui.DataSeriesRow.sin-candidato-asignado-opciones-honestas')}</p>
       <div className="flex gap-2">
-        <button type="button" onClick={onLeave} className="min-h-11 flex-1 rounded-lg border border-[var(--chrome-green)] bg-transparent px-3 text-[0.84rem] font-semibold text-[var(--chrome-green)] hover:bg-[var(--chrome-green-soft)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25">
-          Dejar sin asignar
-        </button>
-        <button type="button" onClick={onDerive} className="min-h-11 flex-1 rounded-lg border border-[var(--chrome-green)] bg-[var(--chrome-green)] px-3 text-[0.84rem] font-semibold text-white hover:brightness-95 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25">
-          Derivar del primario
-        </button>
+        <button type="button" onClick={onLeave} className="min-h-11 flex-1 rounded-lg border border-[var(--chrome-green)] bg-transparent px-3 text-[0.84rem] font-semibold text-[var(--chrome-green)] hover:bg-[var(--chrome-green-soft)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25">{t('ui.DataSeriesRow.dejar-sin-asignar')}</button>
+        <button type="button" onClick={onDerive} className="min-h-11 flex-1 rounded-lg border border-[var(--chrome-green)] bg-[var(--chrome-green)] px-3 text-[0.84rem] font-semibold text-white hover:brightness-95 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25">{t('ui.DataSeriesRow.derivar-del-primario')}</button>
       </div>
     </>
   );
 }
 
 function AptCell({ label, value, score }: { label: string; value: string; score: AxisScore }) {
+  const tx = useTx();
   return (
     <div className={`min-w-0 rounded-lg border px-1.5 py-2 text-center leading-tight ${aptClasses(score)}`}>
-      <span className="block truncate text-[0.68rem] text-muted">{label}</span>
-      <span className="mt-1 block text-[0.86rem] font-semibold tabular-nums">{value}</span>
+      <span className="block truncate text-[0.68rem] text-muted">{tx(label)}</span>
+      <span className="mt-1 block text-[0.86rem] font-semibold tabular-nums">{tx(value)}</span>
     </div>
   );
 }

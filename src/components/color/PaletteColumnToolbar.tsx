@@ -10,6 +10,7 @@ import {
   RandomColorIcon,
   ShadesIcon,
 } from './paletteToolbarIcons';
+import { useT } from '@/context/I18nContext';
 
 type PaletteColumnToolbarProps = {
   locked: boolean;
@@ -54,6 +55,7 @@ export function PaletteColumnToolbar({
   onOpenInfo,
   onRandomizeColor,
 }: PaletteColumnToolbarProps) {
+  const t = useT();
   const slotMode = hoverGroup === 'slot';
   const inlineLayout = layout === 'inline';
   const visibilityClass = alwaysVisible
@@ -81,7 +83,7 @@ export function PaletteColumnToolbar({
       >
         {editable && onRandomizeColor ? (
           <PaletteToolbarIconButton
-            label="Generar color al azar"
+            label={t('ui.PaletteColumnToolbar.generar-color-al-azar')}
             disabled={locked}
             lightChrome={lightChrome}
             compact={inlineLayout}
@@ -93,7 +95,7 @@ export function PaletteColumnToolbar({
         ) : null}
 
         <PaletteToolbarIconButton
-          label={showShades ? 'Ocultar shades' : 'Ver shades'}
+          label={showShades ? t('ui.PaletteColumnToolbar.ocultar-shades') : t('ui.PaletteColumnToolbar.ver-shades')}
           active={showShades}
           lightChrome={lightChrome}
           compact={inlineLayout}
@@ -106,7 +108,7 @@ export function PaletteColumnToolbar({
         {editable && (canMoveLeft || canMoveRight) ? (
           <>
             <PaletteToolbarIconButton
-              label="Mover a la izquierda"
+              label={t('ui.PaletteColumnToolbar.mover-a-la-izquierda')}
               disabled={!canMoveLeft || locked}
               lightChrome={lightChrome}
               compact={inlineLayout}
@@ -116,7 +118,7 @@ export function PaletteColumnToolbar({
               <MoveLeftIcon />
             </PaletteToolbarIconButton>
             <PaletteToolbarIconButton
-              label="Mover a la derecha"
+              label={t('ui.PaletteColumnToolbar.mover-a-la-derecha')}
               disabled={!canMoveRight || locked}
               lightChrome={lightChrome}
               compact={inlineLayout}
@@ -129,7 +131,7 @@ export function PaletteColumnToolbar({
         ) : null}
 
         <PaletteToolbarIconButton
-          label="Copiar HEX"
+          label={t('ui.PaletteColumnToolbar.copiar-hex')}
           lightChrome={lightChrome}
           compact={inlineLayout}
           showTooltip={!alwaysVisible}
@@ -139,7 +141,7 @@ export function PaletteColumnToolbar({
         </PaletteToolbarIconButton>
 
         <PaletteToolbarIconButton
-          label="Ver info del color"
+          label={t('ui.PaletteColumnToolbar.ver-info-del-color')}
           lightChrome={lightChrome}
           compact={inlineLayout}
           showTooltip={!alwaysVisible}
@@ -150,7 +152,7 @@ export function PaletteColumnToolbar({
 
         {editable ? (
           <PaletteToolbarIconButton
-            label={locked ? 'Desbloquear color' : 'Bloquear color'}
+            label={locked ? t('ui.PaletteColumnToolbar.desbloquear-color') : t('ui.PaletteColumnToolbar.bloquear-color')}
             active={locked}
             lightChrome={lightChrome}
             compact={inlineLayout}

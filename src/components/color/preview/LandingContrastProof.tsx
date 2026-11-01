@@ -4,6 +4,7 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { contrastReadout } from './previewButtons';
 import { captionStyle, type PreviewFonts } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 /** Measured contrast of the pairs this hero actually uses: ratio and level, computed, not claimed. */
 export function LandingContrastProof({
@@ -17,16 +18,18 @@ export function LandingContrastProof({
   buttonPair: ButtonPair;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   const hero = colors.heroSurface ?? colors.primaryAction;
   const onHero = colors.onHero ?? colors.primaryActionText;
   const proofs = [
     { label: 'Titular', fg: onHero, bg: hero },
-    { label: 'Botón', fg: buttonPair.on, bg: buttonPair.fill },
+    { label: tx('Botón'), fg: buttonPair.on, bg: buttonPair.fill },
     { label: 'Cuerpo', fg: colors.text, bg: colors.appBackground },
   ];
 
   return (
-    <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-3" aria-label="Contraste medido">
+    <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-3" aria-label={t('ui.LandingContrastProof.contraste-medido')}>
       {proofs.map((proof) => {
         const readout = contrastReadout(proof.fg, proof.bg);
 
@@ -40,9 +43,9 @@ export function LandingContrastProof({
               Aa
             </span>
             <PreviewSlotTarget slot="onHero" onEditSlot={onEditSlot} className="leading-tight" style={captionStyle(fonts, onHero)}>
-              {proof.label}
+              {tx(proof.label)}
               <span className="block tabular-nums">
-                {readout.ratio} · {readout.level}
+                {tx(readout.ratio)} · {tx(readout.level)}
               </span>
             </PreviewSlotTarget>
           </li>

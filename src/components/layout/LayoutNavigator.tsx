@@ -7,6 +7,7 @@ import {
   getStudioViewMeta,
   type StudioView,
 } from '@lib/export/studioViews';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type LayoutNavigatorProps = {
   activeView: StudioView;
@@ -14,6 +15,8 @@ export type LayoutNavigatorProps = {
 };
 
 export function LayoutNavigator({ activeView, onViewChange }: LayoutNavigatorProps) {
+  const tx = useTx();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState<{ top: string; left: string } | null>(null);
   const menuId = useId();
@@ -95,7 +98,7 @@ export function LayoutNavigator({ activeView, onViewChange }: LayoutNavigatorPro
         className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border bg-bg px-3.5 py-2 text-chrome-body font-semibold text-ink shadow-sm transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
       >
         <ViewIcon view={activeView} />
-        <span className="max-w-[9rem] truncate sm:max-w-none">{activeGroupLabel}</span>
+        <span className="max-w-[9rem] truncate sm:max-w-none">{tx(activeGroupLabel)}</span>
         <ChevronDown open={open} />
       </button>
 
@@ -108,7 +111,7 @@ export function LayoutNavigator({ activeView, onViewChange }: LayoutNavigatorPro
           style={{ ...menuPosition, boxShadow: 'var(--shadow-float)' }}
         >
           <MenuSection
-            title="Sistema de diseño"
+            title={t('ui.LayoutNavigator.sistema-de-diseno')}
             views={designSystemViews}
             activeView={activeView}
             onSelect={(view) => {
@@ -117,7 +120,7 @@ export function LayoutNavigator({ activeView, onViewChange }: LayoutNavigatorPro
             }}
           />
           <MenuSection
-            title="Maquetas"
+            title={t('ui.LayoutNavigator.maquetas')}
             views={layoutViews}
             activeView={activeView}
             onSelect={(view) => {
@@ -142,9 +145,10 @@ function MenuSection({
   activeView: StudioView;
   onSelect: (view: StudioView) => void;
 }) {
+  const tx = useTx();
   return (
     <div className="py-1">
-      <p className="px-2.5 py-1.5 text-chrome-caption font-semibold text-muted">{title}</p>
+      <p className="px-2.5 py-1.5 text-chrome-caption font-semibold text-muted">{tx(title)}</p>
       <ul className="space-y-0.5">
         {views.map((view) => (
           <li key={view.id} role="none">
@@ -158,9 +162,9 @@ function MenuSection({
             >
               <ViewIcon view={view.id} />
               <span>
-                <span className="block text-chrome-label font-semibold">{view.label}</span>
+                <span className="block text-chrome-label font-semibold">{tx(view.label)}</span>
                 <span className="mt-0.5 block text-chrome-caption leading-snug text-muted">
-                  {view.description}
+                  {tx(view.description)}
                 </span>
               </span>
             </button>

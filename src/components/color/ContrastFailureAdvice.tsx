@@ -5,6 +5,7 @@ import { AlertTriangle, ArrowRight } from 'lucide-react';
 
 import { buildContrastAdvice, type ContrastFix, type ContrastFixSide } from '@lib/color/contrastAdvice';
 import { CONTRAST_SAMPLE_TEXT } from '@lib/color/contrast';
+import { useT, useTx } from '@/context/I18nContext';
 
 type ContrastFailureAdviceProps = {
   foregroundHex: string;
@@ -27,6 +28,8 @@ export function ContrastFailureAdvice({
   disabled = false,
   onApply,
 }: ContrastFailureAdviceProps) {
+  const tx = useTx();
+  const t = useT();
   const advice = useMemo(
     () => buildContrastAdvice(foregroundHex, backgroundHex),
     [foregroundHex, backgroundHex],
@@ -38,18 +41,14 @@ export function ContrastFailureAdvice({
 
   return (
     <section
-      aria-label="Cómo mejorar el contraste"
+      aria-label={t('ui.ContrastFailureAdvice.como-mejorar-el-contraste')}
       className="space-y-3 rounded-2xl border border-fail/30 bg-bg px-4 py-3"
     >
       <header className="flex items-start gap-2">
         <AlertTriangle size={15} className="mt-0.5 shrink-0 text-fail" aria-hidden="true" />
         <div className="min-w-0 flex-1">
-          <p className="text-chrome-label font-semibold text-ink">
-            Faltan {(advice.required - advice.ratio).toFixed(1)} puntos para AA
-          </p>
-          <p className="text-chrome-caption text-muted">
-            Tienes {advice.ratio.toFixed(2)}:1 y el mínimo para texto normal es {advice.required}:1.
-          </p>
+          <p className="text-chrome-label font-semibold text-ink">{t('ui.ContrastFailureAdvice.faltan-puntos-para-aa', { value: tx((advice.required - advice.ratio).toFixed(1)) })}</p>
+          <p className="text-chrome-caption text-muted">{t('ui.ContrastFailureAdvice.tienes-1-y-el-minimo', { value: tx(advice.ratio.toFixed(2)), required: advice.required })}</p>
         </div>
       </header>
 
@@ -64,7 +63,7 @@ export function ContrastFailureAdvice({
         className="rounded-md border border-border px-3 py-2 text-chrome-label leading-relaxed"
         style={{ color: foregroundHex, backgroundColor: backgroundHex }}
       >
-        {CONTRAST_SAMPLE_TEXT}
+        {tx(CONTRAST_SAMPLE_TEXT)}
       </p>
 
       {advice.fixes.length > 0 ? (
@@ -84,7 +83,7 @@ export function ContrastFailureAdvice({
 
       <ul className="list-disc space-y-1 pl-4 text-chrome-caption text-muted">
         {advice.tips.map((tip) => (
-          <li key={tip}>{tip}</li>
+          <li key={tip}>{tx(tip)}</li>
         ))}
       </ul>
     </section>
@@ -104,6 +103,8 @@ function FixRow({
   canApply: boolean;
   onApply?: (hex: string) => void;
 }) {
+  const tx = useTx();
+  const t = useT();
   const previewForeground = fix.side === 'foreground' ? fix.hex : foregroundHex;
   const previewBackground = fix.side === 'background' ? fix.hex : backgroundHex;
   const currentHex = fix.side === 'foreground' ? foregroundHex : backgroundHex;
@@ -118,8 +119,7 @@ function FixRow({
         Aa
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-chrome-label font-semibold text-ink">
-          Ajustar {SIDE_LABEL[fix.side]}
+        <p className="text-chrome-label font-semibold text-ink">{t('ui.ContrastFailureAdvice.ajustar', { value: tx(SIDE_LABEL[fix.side]) })}
         </p>
         <p className="flex flex-wrap items-center gap-1 font-mono text-chrome-caption tabular-nums text-muted">
           {currentHex.toUpperCase()}
@@ -132,9 +132,7 @@ function FixRow({
           type="button"
           onClick={() => onApply?.(fix.hex)}
           className="min-h-10 shrink-0 rounded-md border border-pass/40 bg-pass/10 px-3 font-sans text-chrome-caption font-semibold text-ink hover:bg-pass/15 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-pass/25"
-        >
-          Aplicar
-        </button>
+        >{t('ui.ContrastFailureAdvice.aplicar')}</button>
       ) : null}
     </li>
   );

@@ -10,6 +10,7 @@ import { useRolePalette } from '@/context/RolePaletteContext';
 
 import { InlineTokenDerivationEditor } from './InlineTokenDerivationEditor';
 import type { CompactRoleDefinition } from './uiColorPanelGroups';
+import { useT, useTx } from '@/context/I18nContext';
 
 export function UiFocusedRoleEditor({
   roles,
@@ -26,6 +27,8 @@ export function UiFocusedRoleEditor({
   onActivate: (token: SemanticTokenName | null) => void;
   onSelect: (token: SemanticTokenName, hex: string) => void;
 }) {
+  const tx = useTx();
+  const t = useT();
   const { setTokenEditPreview, clearTokenEditPreview } = useRolePalette();
   const [originals] = useState<Partial<Record<SemanticTokenName, string>>>(() =>
     Object.fromEntries(roles.map((role) => [role.token, tokens[role.token].hex])),
@@ -55,7 +58,7 @@ export function UiFocusedRoleEditor({
   }
 
   return (
-    <ul className="space-y-2" aria-label="Roles editables">
+    <ul className="space-y-2" aria-label={t('ui.UiFocusedRoleEditor.roles-editables')}>
       {roles.map((role) => {
         const token = tokens[role.token];
         const active = activeToken === role.token;
@@ -100,23 +103,21 @@ export function UiFocusedRoleEditor({
               />
               <span className="min-w-0">
                 <span className={`block truncate text-tools-role ${unassigned ? 'text-attention' : 'text-ink'}`}>
-                  {role.label}
+                  {tx(role.label)}
                 </span>
                 <span className={`block text-tools-meta-scale ${unassigned ? 'text-attention' : 'font-mono tabular-nums text-muted'}`}>
-                  {unassigned ? 'Sin asignar' : token.hex.toUpperCase()}
+                  {unassigned ? t('ui.UiFocusedRoleEditor.sin-asignar') : token.hex.toUpperCase()}
                 </span>
               </span>
               <span className="rounded-full bg-bg px-2 py-1 text-tools-micro font-semibold text-muted ring-1 ring-inset ring-line">
-                {origin}
+                {tx(origin)}
               </span>
             </button>
 
             {active ? (
               <div className="space-y-3 border-t border-line-soft px-2.5 pb-3 pt-3">
-                <section aria-label={`Candidatos para ${role.label}`}>
-                  <p className="mb-2 text-tools-meta-scale font-semibold text-muted">
-                    Candidatos de tu imagen
-                  </p>
+                <section aria-label={t('ui.UiFocusedRoleEditor.candidatos-para', { label: tx(role.label) })}>
+                  <p className="mb-2 text-tools-meta-scale font-semibold text-muted">{t('ui.UiFocusedRoleEditor.candidatos-de-tu-imagen')}</p>
                   <div className="flex flex-wrap gap-2">
                     {uniqueColors.map((color) => {
                       const selected = normalizeHex(color.hex) === normalizeHex(candidateDraft ?? token.hex);
@@ -125,7 +126,7 @@ export function UiFocusedRoleEditor({
                           key={color.id}
                           type="button"
                           title={`${color.name} · ${color.hex.toUpperCase()}`}
-                          aria-label={`Usar ${color.name} como ${role.label}`}
+                          aria-label={t('ui.UiFocusedRoleEditor.usar-como', { name: tx(color.name), label: tx(role.label) })}
                           aria-pressed={selected}
                           onClick={() => {
                             setCandidateDrafts((current) => ({ ...current, [role.token]: color.hex }));

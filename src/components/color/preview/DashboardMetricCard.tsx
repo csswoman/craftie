@@ -8,6 +8,7 @@ import {
   labelStyle,
   type PreviewFonts,
 } from './previewTypography';
+import { useTx } from '@/context/I18nContext';
 
 export type DashboardMetric = {
   label: string;
@@ -30,6 +31,7 @@ export function DashboardMetricCard({
   metric: DashboardMetric;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
   const trendColor = colors[metric.trendSlot] ?? colors.text;
 
   return (
@@ -45,7 +47,7 @@ export function DashboardMetricCard({
         className="min-w-0 truncate"
         style={labelStyle(fonts, colors.mutedText)}
       >
-        {metric.label}
+        {tx(metric.label)}
       </PreviewSlotTarget>
       <div className="mt-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
         <PreviewSlotTarget
@@ -54,7 +56,7 @@ export function DashboardMetricCard({
           className="tabular-nums"
           style={{ ...displayStyle(fonts), lineHeight: 1.1 }}
         >
-          {metric.value}
+          {tx(metric.value)}
         </PreviewSlotTarget>
         <StatDelta value={metric.trend} direction={metric.dir} color={trendColor} slot={metric.trendSlot} surfaceHex={colors.surface} onEditSlot={onEditSlot} />
       </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { DownloadIcon, ImageIcon, LinkIcon } from '@/components/layout/ExportMenuIcons';
+import { useTx } from '@/context/I18nContext';
 
 export function ExportMenuItem({
   id,
@@ -13,6 +14,7 @@ export function ExportMenuItem({
   description: string;
   onSelect: () => void;
 }) {
+  const tx = useTx();
   const icon =
     id === 'share-link' || id === 'copy-css' ? <LinkIcon /> : id === 'image' ? <ImageIcon /> : <DownloadIcon />;
 
@@ -26,8 +28,8 @@ export function ExportMenuItem({
       >
         {icon}
         <span>
-          <span className="block text-chrome-label font-semibold">{label}</span>
-          <span className="mt-0.5 block text-chrome-caption leading-snug text-muted">{description}</span>
+          <span className="block text-chrome-label font-semibold">{tx(label)}</span>
+          <span className="mt-0.5 block text-chrome-caption leading-snug text-muted">{tx(description)}</span>
         </span>
       </button>
     </li>

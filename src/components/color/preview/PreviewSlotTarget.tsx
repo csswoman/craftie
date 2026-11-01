@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 
 import type { UiLayoutSlot } from '@lib/color/layoutModes';
+import { useT } from '@/context/I18nContext';
 
 export type PreviewSlotEditHandler = (slot: UiLayoutSlot, element: HTMLElement) => void;
 
@@ -17,12 +18,13 @@ export function PreviewSlotTarget({
   className?: string;
   style?: CSSProperties;
 }) {
+  const t = useT();
   return (
     <div
       data-layout-slot={slot}
       className={className}
       style={style}
-      title={onEditSlot ? 'Clic para editar token de color' : undefined}
+      title={onEditSlot ? t('ui.PreviewSlotTarget.clic-para-editar-token-de') : undefined}
       onClick={(event) => {
         if (!onEditSlot) {
           return;

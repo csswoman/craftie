@@ -10,6 +10,7 @@ import type { SemanticTokenName, SemanticTokens } from '@lib/color/semanticToken
 
 import { InlineTokenDerivationEditor } from './InlineTokenDerivationEditor';
 import { ColorCandidateList } from './ColorCandidateList';
+import { useT, useTx } from '@/context/I18nContext';
 
 export function InlineSystemRolePicker({
   tokenName,
@@ -36,6 +37,7 @@ export function InlineSystemRolePicker({
   onDeriveFromPrimary: () => void;
   onContinueWithout: () => void;
 }) {
+  const t = useT();
   const [deriving, setDeriving] = useState(false);
   const [derivationBase, setDerivationBase] = useState(currentHex);
   const expressiveCandidates = useMemo(() => buildExpressiveCandidates(colors, tokens), [colors, tokens]);
@@ -51,25 +53,19 @@ export function InlineSystemRolePicker({
     return (
       <div className="space-y-4 bg-surface px-3 pb-4 pt-3">
         <PickerContext roleLabel={roleLabel} currentHex={currentHex} />
-        {unassigned ? <p className="text-tools-meta leading-relaxed text-muted">
-          Craftie no encontró un candidato fuente con suficiente carácter. Los neutrales no pueden ocupar este rol.
-        </p> : null}
+        {unassigned ? <p className="text-tools-meta leading-relaxed text-muted">{t('ui.InlineSystemRolePicker.craftie-no-encontro-un-candidato')}</p> : null}
         {unassigned ? (
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={onContinueWithout}
               className="min-h-11 rounded-md border border-border bg-bg px-2 text-tools-meta font-semibold text-ink hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-            >
-              Dejar sin asignar
-            </button>
+            >{t('ui.InlineSystemRolePicker.dejar-sin-asignar')}</button>
             <button
               type="button"
               onClick={onDeriveFromPrimary}
               className="min-h-11 rounded-md bg-[var(--chrome-green)] px-2 text-tools-meta font-semibold text-white hover:brightness-95 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-            >
-              Derivar del primario
-            </button>
+            >{t('ui.InlineSystemRolePicker.derivar-del-primario')}</button>
           </div>
         ) : null}
         <ColorCandidateList
@@ -86,13 +82,13 @@ export function InlineSystemRolePicker({
     <div className="space-y-4 bg-surface px-3 pb-4 pt-3">
       <PickerContext roleLabel={roleLabel} currentHex={currentHex} />
       <DotGroup
-        label="Colores fuente"
+        label={t('ui.InlineSystemRolePicker.colores-fuente')}
         items={colors.map((color) => ({ hex: color.hex, label: color.name || color.hex }))}
         currentHex={currentHex}
         onSelect={onSelect}
       />
       <DotGroup
-        label="Neutrales teñidos"
+        label={t('ui.InlineSystemRolePicker.neutrales-tenidos')}
         items={neutralSteps.map((step) => ({ hex: step.hex, label: `L ${step.lightness.toFixed(2)}` }))}
         currentHex={currentHex}
         onSelect={onSelect}
@@ -102,9 +98,7 @@ export function InlineSystemRolePicker({
         aria-expanded={deriving}
         onClick={startDerivation}
         className="min-h-11 w-full rounded-md border border-dashed border-border bg-bg px-3 text-tools-meta font-semibold text-ink transition-colors hover:border-primary hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-      >
-        Derivar variante de este color…
-      </button>
+      >{t('ui.InlineSystemRolePicker.derivar-variante-de-este-color')}</button>
         {deriving ? (
           <InlineTokenDerivationEditor
             tokenName={tokenName}
@@ -117,6 +111,8 @@ export function InlineSystemRolePicker({
 }
 
 function PickerContext({ roleLabel, currentHex }: { roleLabel: string; currentHex: string }) {
+  const tx = useTx();
+  const t = useT();
   return (
     <div className="flex items-center gap-2.5 border-b border-border pb-3">
       <span
@@ -125,9 +121,8 @@ function PickerContext({ roleLabel, currentHex }: { roleLabel: string; currentHe
         aria-hidden="true"
       />
       <div className="min-w-0">
-        <h3 className="truncate text-tools-name font-semibold text-ink">Editando {roleLabel}</h3>
-        <p className="font-mono text-tools-meta tabular-nums text-muted">
-          Actual · {currentHex.toUpperCase()}
+        <h3 className="truncate text-tools-name font-semibold text-ink">{t('ui.InlineSystemRolePicker.editando', { roleLabel: tx(roleLabel) })}</h3>
+        <p className="font-mono text-tools-meta tabular-nums text-muted">{t('ui.InlineSystemRolePicker.actual', { value: currentHex.toUpperCase() })}
         </p>
       </div>
     </div>
@@ -145,9 +140,11 @@ function DotGroup({
   currentHex: string;
   onSelect: (hex: string) => void;
 }) {
+  const tx = useTx();
+  const t = useT();
   return (
-    <section aria-label={label}>
-      <p className="mb-2 text-tools-meta font-semibold text-ink">{label}</p>
+    <section aria-label={tx(label)}>
+      <p className="mb-2 text-tools-meta font-semibold text-ink">{tx(label)}</p>
       <div className="flex flex-wrap gap-2.5">
         {items.map((item, index) => {
           const selected = item.hex.toUpperCase() === currentHex.toUpperCase();
@@ -155,7 +152,7 @@ function DotGroup({
             <button
               key={`${item.hex}-${index}`}
               type="button"
-              aria-label={`Elegir ${item.label}, ${item.hex}`}
+              aria-label={t('ui.InlineSystemRolePicker.elegir', { label: tx(item.label), hex: item.hex })}
               aria-pressed={selected}
               title={`${item.label} · ${item.hex.toUpperCase()}`}
               onClick={() => onSelect(item.hex)}

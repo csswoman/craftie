@@ -14,6 +14,7 @@ import { loadGoogleFonts } from '@/lib/browser/googleFonts';
 import { PairingFilterChips } from './PairingFilterChips';
 import { PairGroup } from './PairingListRows';
 import { PairingSearchControl } from './PairingSearchControl';
+import { useT } from '@/context/I18nContext';
 
 const CATALOG_PAGE_SIZE = 12;
 
@@ -38,6 +39,7 @@ export function PairingList({
   onClearPreview,
   variant = 'default',
 }: PairingListProps) {
+  const t = useT();
   const [category, setCategory] = useState<PairingCategoryValue>('all');
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
@@ -106,9 +108,7 @@ export function PairingList({
     return (
       <p
         className={`rounded-md border border-dashed border-border bg-bg px-4 py-8 text-center ${emptyClass} text-muted`}
-      >
-        No hay pares tipográficos disponibles.
-      </p>
+      >{t('ui.PairingList.no-hay-pares-tipograficos-disponibles')}</p>
     );
   }
 
@@ -131,29 +131,26 @@ export function PairingList({
       </div>
 
       <p className="sr-only" aria-live="polite">
-        {filteredPairings.length} pares
-        {pageCount > 1 ? `. Página ${currentPage} de ${pageCount}.` : ''}
-        {listInert ? '. Lista inactiva: ambos roles fijados.' : ''}
+        {t('ui.PairingList.pares', { length: filteredPairings.length })}{pageCount > 1 ? t('ui.PairingList.pagina-de-2', { currentPage, pageCount }) : ''}
+        {listInert ? t('ui.PairingList.lista-inactiva-ambos-roles-fijados') : ''}
       </p>
 
       {filteredPairings.length === 0 ? (
         <div
           className={`rounded-md border border-dashed border-border bg-bg px-4 py-6 text-center ${emptyClass} text-muted`}
         >
-          <p>No hay pares que coincidan.</p>
+          <p>{t('ui.PairingList.no-hay-pares-que-coincidan')}</p>
           <button
             type="button"
             onClick={clearFilters}
             className="mt-2 font-medium text-ink underline-offset-2 hover:underline"
-          >
-            Limpiar filtros
-          </button>
+          >{t('ui.PairingList.limpiar-filtros')}</button>
         </div>
       ) : (
         <div className="min-w-0 space-y-3" aria-disabled={listInert || undefined}>
           {suggested.length > 0 ? (
             <PairGroup
-              heading="Sugeridos"
+              heading={t('ui.PairingList.sugeridos')}
               pairings={suggested}
               selectedCatalogPairId={selectedCatalogPairId}
               inert={listInert}
@@ -164,7 +161,7 @@ export function PairingList({
             />
           ) : null}
           <PairGroup
-            heading={suggested.length > 0 ? 'Catálogo' : null}
+            heading={suggested.length > 0 ? t('ui.PairingList.catalogo') : null}
             pairings={catalogPage}
             selectedCatalogPairId={selectedCatalogPairId}
             inert={listInert}
@@ -176,7 +173,7 @@ export function PairingList({
           {pageCount > 1 ? (
             <nav
               className="flex items-center justify-between gap-2 border-t border-border pt-3"
-              aria-label="Paginación del catálogo tipográfico"
+              aria-label={t('ui.PairingList.paginacion-del-catalogo-tipografico')}
             >
               <button
                 type="button"
@@ -184,20 +181,15 @@ export function PairingList({
                 disabled={listInert || currentPage === 1}
                 className="inline-flex min-h-8 items-center gap-1 rounded-md px-2 text-chrome-caption font-medium text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-45"
               >
-                <ChevronLeft size={14} strokeWidth={1.75} aria-hidden="true" />
-                Anterior
-              </button>
-              <span className="text-tools-meta tabular-nums text-muted">
-                Página {currentPage} de {pageCount}
+                <ChevronLeft size={14} strokeWidth={1.75} aria-hidden="true" />{t('ui.PairingList.anterior')}</button>
+              <span className="text-tools-meta tabular-nums text-muted">{t('ui.PairingList.pagina-de', { currentPage, pageCount })}
               </span>
               <button
                 type="button"
                 onClick={() => setPage(currentPage + 1)}
                 disabled={listInert || currentPage === pageCount}
                 className="inline-flex min-h-8 items-center gap-1 rounded-md px-2 text-chrome-caption font-medium text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-45"
-              >
-                Siguiente
-                <ChevronRight size={14} strokeWidth={1.75} aria-hidden="true" />
+              >{t('ui.PairingList.siguiente')}<ChevronRight size={14} strokeWidth={1.75} aria-hidden="true" />
               </button>
             </nav>
           ) : null}

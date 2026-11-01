@@ -7,6 +7,7 @@ import { ANALYTICS_CONTRAST_ROWS } from './analyticsPreviewData';
 import { paletteTint } from './previewButtons';
 import { PreviewIcon } from './previewIcons';
 import { captionStyle, labelStyle, ROLE_WEIGHT, titleStyle, type PreviewFonts } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 /**
  * Palettes under review as a table: each row shows the palette itself as a
@@ -22,22 +23,24 @@ export function AnalyticsContrastTable({
   fonts: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   const grid = 'grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_6.5rem] items-center gap-4';
   const passing = ANALYTICS_CONTRAST_ROWS.reduce((sum, row) => sum + row.passing, 0);
   const total = ANALYTICS_CONTRAST_ROWS.reduce((sum, row) => sum + row.total, 0);
   const linkInk = readableOn(colors.data1, colors.surface);
 
   return (
-    <AnalyticsPanel colors={colors} fonts={fonts} title="Contraste por paleta" subtitle="Parejas de texto y fondo que cumplen AA" onEditSlot={onEditSlot}>
+    <AnalyticsPanel colors={colors} fonts={fonts} title={t('ui.AnalyticsContrastTable.contraste-por-paleta')} subtitle={t('ui.AnalyticsContrastTable.parejas-de-texto-y-fondo')} onEditSlot={onEditSlot}>
       <PreviewSlotTarget
         slot="divider"
         onEditSlot={onEditSlot}
         className={`${grid} border-b pb-2.5`}
         style={{ ...captionStyle(fonts, colors.mutedText), borderColor: colors.divider }}
       >
-        <span>Paleta</span>
-        <span>Parejas AA</span>
-        <span className="text-right">Estado</span>
+        <span>{t('ui.AnalyticsContrastTable.paleta')}</span>
+        <span>{t('ui.AnalyticsContrastTable.parejas-aa')}</span>
+        <span className="text-right">{t('ui.AnalyticsContrastTable.estado')}</span>
       </PreviewSlotTarget>
 
       <ul className="mb-5">
@@ -66,7 +69,7 @@ export function AnalyticsContrastTable({
                   ))}
                 </span>
                 <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="truncate" style={titleStyle(fonts)}>
-                  {row.name}
+                  {tx(row.name)}
                 </PreviewSlotTarget>
               </span>
 
@@ -87,7 +90,7 @@ export function AnalyticsContrastTable({
                   style={{ ...captionStyle(fonts, chipInk), backgroundColor: chip }}
                 >
                   <PreviewIcon name={ok ? 'check' : 'shield'} size={12} strokeWidth={2.25} />
-                  {ok ? 'Cumple' : warn ? 'Casi' : 'Revisar'}
+                  {ok ? t('ui.AnalyticsContrastTable.cumple') : warn ? t('ui.AnalyticsContrastTable.casi') : t('ui.AnalyticsContrastTable.revisar')}
                 </PreviewSlotTarget>
               </span>
             </PreviewSlotTarget>
@@ -102,11 +105,8 @@ export function AnalyticsContrastTable({
         style={{ borderColor: colors.divider }}
       >
         <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="tabular-nums" style={labelStyle(fonts, colors.mutedText)}>
-          {passing} de {total} parejas cumplen AA
-        </PreviewSlotTarget>
-        <span className="flex items-center gap-1.5" style={{ ...labelStyle(fonts, linkInk), fontWeight: ROLE_WEIGHT.button }}>
-          Revisar pendientes
-          <PreviewIcon name="arrowRight" size={13} strokeWidth={2.25} />
+          {t('ui.AnalyticsContrastTable.de-parejas-cumplen-aa', { passing, total })}</PreviewSlotTarget>
+        <span className="flex items-center gap-1.5" style={{ ...labelStyle(fonts, linkInk), fontWeight: ROLE_WEIGHT.button }}>{t('ui.AnalyticsContrastTable.revisar-pendientes')}<PreviewIcon name="arrowRight" size={13} strokeWidth={2.25} />
         </span>
       </PreviewSlotTarget>
     </AnalyticsPanel>

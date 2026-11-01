@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type WorkspaceShellProps = {
   sidebar: ReactNode;
@@ -25,6 +26,8 @@ export function WorkspaceShell({
   rightPanelAriaLabel = 'Panel lateral',
   rightPanelToggleLabels = { open: 'Ocultar inspector', closed: 'Mostrar inspector' },
 }: WorkspaceShellProps) {
+  const tx = useTx();
+  const t = useT();
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div
@@ -35,21 +38,21 @@ export function WorkspaceShell({
         }`}
       >
         <aside
-          aria-label="Herramientas de paleta"
+          aria-label={t('ui.WorkspaceShell.herramientas-de-paleta')}
           className="flex min-h-0 flex-col border-b border-border bg-surface lg:border-b-0 lg:border-r"
         >
           {sidebar}
         </aside>
 
         <main
-          aria-label="Visor de paleta"
+          aria-label={t('ui.WorkspaceShell.visor-de-paleta')}
           className="relative flex min-h-[min(420px,50vh)] min-w-0 flex-col bg-bg lg:min-h-0"
         >
           {canvas}
         </main>
 
         <aside
-          aria-label={rightPanelAriaLabel}
+          aria-label={tx(rightPanelAriaLabel)}
           className={`min-h-0 flex-col border-t border-border bg-surface lg:border-t-0 lg:border-l ${
             showRightPanel
               ? rightPanelOpen
@@ -70,7 +73,7 @@ export function WorkspaceShell({
             aria-expanded={rightPanelOpen}
             className="rounded-md px-3 py-1.5 text-chrome-label font-semibold text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           >
-            {rightPanelOpen ? rightPanelToggleLabels.open : rightPanelToggleLabels.closed}
+            {tx(rightPanelOpen ? rightPanelToggleLabels.open : rightPanelToggleLabels.closed)}
           </button>
         </div>
       ) : null}

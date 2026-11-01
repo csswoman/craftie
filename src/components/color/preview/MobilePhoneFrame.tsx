@@ -6,6 +6,7 @@ import { PreviewIcon } from './previewIcons';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { MOBILE_TABS } from './mobilePreviewData';
 import { captionStyle, previewRootTypeStyle, ROLE_WEIGHT, type PreviewFonts } from './previewTypography';
+import { useTx } from '@/context/I18nContext';
 
 /**
  * Phone body around one app screen. The bezel uses the app's own ink, not the
@@ -30,8 +31,9 @@ export function MobilePhoneFrame({
   onEditSlot?: PreviewSlotEditHandler;
   children: ReactNode;
 }) {
+  const tx = useTx();
   return (
-    <figure className={`m-0 w-[18rem] shrink-0 ${className}`} aria-label={label}>
+    <figure className={`m-0 w-[18rem] shrink-0 ${className}`} aria-label={tx(label)}>
       <div className="rounded-[2.75rem] bg-ink p-[7px] shadow-[0_30px_50px_-30px_rgb(0_0_0/0.55)]">
         <PreviewSlotTarget
           slot="appBackground"
@@ -72,7 +74,7 @@ export function MobilePhoneFrame({
                   style={{ color: active ? colors.text : colors.mutedText }}
                 >
                   <PreviewIcon name={tab.icon} size={18} style={{ color: active ? tabColor : colors.mutedText }} />
-                  <span style={{ ...captionStyle(fonts), fontWeight: active ? ROLE_WEIGHT.button : ROLE_WEIGHT.caption }}>{tab.label}</span>
+                  <span style={{ ...captionStyle(fonts), fontWeight: active ? ROLE_WEIGHT.button : ROLE_WEIGHT.caption }}>{tx(tab.label)}</span>
                 </span>
               );
             })}
@@ -82,7 +84,7 @@ export function MobilePhoneFrame({
           </div>
         </PreviewSlotTarget>
       </div>
-      <figcaption className="mt-3 text-center text-chrome-caption text-muted">{label}</figcaption>
+      <figcaption className="mt-3 text-center text-chrome-caption text-muted">{tx(label)}</figcaption>
     </figure>
   );
 }

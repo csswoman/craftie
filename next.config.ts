@@ -14,8 +14,14 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Lets a production build run in a separate folder while `next dev` is using .next.
+  distDir: process.env.NEXT_DIST_DIR ?? '.next',
   async headers() {
-    return [{ source: '/:path*', headers: securityHeaders }];
+    return [
+      { source: '/:path*', headers: securityHeaders },
+      // The worker must always be revalidated so updates reach visitors.
+      { source: '/sw.js', headers: [{ key: 'Cache-Control', value: 'no-cache' }] },
+    ];
   },
   async redirects() {
     return [

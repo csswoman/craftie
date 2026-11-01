@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Copy, Trash2 } from 'lucide-react';
 
 import type { LocalProject } from '@lib/studio/projectModel';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type ProjectListItemProps = {
   project: LocalProject;
@@ -30,30 +31,26 @@ export function ProjectListItem({
   onDuplicate,
   onDelete,
 }: ProjectListItemProps) {
+  const tx = useTx();
+  const t = useT();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const swatchCount = project.snapshot.extractedColors.length;
 
   if (confirmingDelete) {
     return (
       <li className="rounded-xl border border-fail/40 bg-bg p-3">
-        <p className="text-chrome-label text-ink">
-          ¿Eliminar «{project.name}»? Esta acción no se puede deshacer.
-        </p>
+        <p className="text-chrome-label text-ink">{t('ui.ProjectListItem.eliminar-esta-accion-no-se', { name: tx(project.name) })}</p>
         <div className="mt-2 flex gap-2">
           <button
             type="button"
             onClick={() => onDelete(project)}
             className="rounded-lg bg-fail px-3 py-1.5 text-chrome-label font-semibold text-white focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-          >
-            Eliminar
-          </button>
+          >{t('ui.ProjectListItem.eliminar')}</button>
           <button
             type="button"
             onClick={() => setConfirmingDelete(false)}
             className="rounded-lg border border-border px-3 py-1.5 text-chrome-label font-semibold text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-          >
-            Cancelar
-          </button>
+          >{t('ui.ProjectListItem.cancelar')}</button>
         </div>
       </li>
     );
@@ -81,22 +78,22 @@ export function ProjectListItem({
         </span>
         <span className="min-w-0">
           <span className="block truncate text-chrome-body font-medium text-ink">
-            {project.name}
-            {isCurrent ? <span className="ml-2 text-chrome-caption font-semibold text-primary">Abierto</span> : null}
+            {tx(project.name)}
+            {isCurrent ? <span className="ml-2 text-chrome-caption font-semibold text-primary">{t('ui.ProjectListItem.abierto')}</span> : null}
           </span>
           <span className="block text-chrome-caption text-muted">
-            {swatchCount} {swatchCount === 1 ? 'color' : 'colores'} · {DATE_FORMAT.format(project.updatedAt)}
+            {swatchCount} {tx(swatchCount === 1 ? 'color' : 'colores')} · {tx(DATE_FORMAT.format(project.updatedAt))}
           </span>
         </span>
       </button>
 
-      <button type="button" onClick={() => onDuplicate(project)} aria-label={`Duplicar ${project.name}`} className={ICON_BUTTON}>
+      <button type="button" onClick={() => onDuplicate(project)} aria-label={t('ui.ProjectListItem.duplicar', { name: tx(project.name) })} className={ICON_BUTTON}>
         <Copy className="size-4" aria-hidden="true" strokeWidth={1.8} />
       </button>
       <button
         type="button"
         onClick={() => setConfirmingDelete(true)}
-        aria-label={`Eliminar ${project.name}`}
+        aria-label={t('ui.ProjectListItem.eliminar-2', { name: tx(project.name) })}
         className={`${ICON_BUTTON} hover:text-fail`}
       >
         <Trash2 className="size-4" aria-hidden="true" strokeWidth={1.8} />

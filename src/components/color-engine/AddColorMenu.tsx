@@ -1,12 +1,15 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type AddColorMenuProps = {
   onSubmit: (hex: string) => string | null;
 };
 
 export function AddColorMenu({ onSubmit }: AddColorMenuProps) {
+  const tx = useTx();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [hexValue, setHexValue] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -48,8 +51,8 @@ export function AddColorMenu({ onSubmit }: AddColorMenuProps) {
         type="button"
         aria-expanded={open}
         aria-controls={panelId}
-        aria-label="Añadir color por HEX"
-        title="Añadir color"
+        aria-label={t('ui.AddColorMenu.anadir-color-por-hex')}
+        title={t('ui.AddColorMenu.anadir-color')}
         onClick={() => {
           setOpen((value) => !value);
           setFeedback(null);
@@ -65,9 +68,7 @@ export function AddColorMenu({ onSubmit }: AddColorMenuProps) {
           onSubmit={handleSubmit}
           className="absolute right-0 top-[calc(100%+6px)] z-dropdown w-52 rounded-lg border border-border bg-bg p-2.5 shadow-[var(--shadow-float)]"
         >
-          <label className="sr-only" htmlFor={`${panelId}-hex`}>
-            Código HEX
-          </label>
+          <label className="sr-only" htmlFor={`${panelId}-hex`}>{t('ui.AddColorMenu.codigo-hex')}</label>
           <input
             ref={inputRef}
             id={`${panelId}-hex`}
@@ -77,20 +78,18 @@ export function AddColorMenu({ onSubmit }: AddColorMenuProps) {
               setHexValue(event.target.value);
               setFeedback(null);
             }}
-            placeholder="#FFFFFF"
+            placeholder={t('ui.AddColorMenu.ffffff')}
             spellCheck={false}
             maxLength={7}
             className="w-full rounded-md border border-border bg-surface px-2.5 py-1.5 font-mono text-[0.8125rem] text-ink placeholder:text-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           />
           <button
             type="submit"
-            className="mt-2 w-full rounded-md bg-primary px-2.5 py-1.5 text-[0.75rem] font-semibold text-white hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
-          >
-            Añadir
-          </button>
+            className="mt-2 w-full rounded-md bg-primary px-2.5 py-1.5 text-[0.75rem] font-semibold text-on-primary hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+          >{t('ui.AddColorMenu.anadir')}</button>
           {feedback ? (
             <p className="mt-1.5 text-chrome-caption font-medium text-fail" role="alert">
-              {feedback}
+              {tx(feedback)}
             </p>
           ) : null}
         </form>

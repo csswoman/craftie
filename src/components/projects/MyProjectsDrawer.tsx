@@ -9,6 +9,7 @@ import type { LocalProject } from '@lib/studio/projectModel';
 import { ProjectListItem } from '@/components/projects/ProjectListItem';
 import type { SaveResult } from '@/components/projects/useLocalProjects';
 import { useDialogAccessibility } from '@/lib/browser/useDialogAccessibility';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type MyProjectsDrawerProps = {
   open: boolean;
@@ -27,7 +28,7 @@ export type MyProjectsDrawerProps = {
 const INPUT_CLASS =
   'min-w-0 flex-1 rounded-lg border border-border bg-bg px-3 py-2 text-chrome-body text-ink placeholder:text-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:opacity-60';
 const PRIMARY_BUTTON =
-  'shrink-0 rounded-lg bg-primary px-4 py-2 text-chrome-label font-semibold text-white transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-50';
+  'shrink-0 rounded-lg bg-primary px-4 py-2 text-chrome-label font-semibold text-on-primary transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-50';
 
 export function MyProjectsDrawer({
   open,
@@ -42,6 +43,8 @@ export function MyProjectsDrawer({
   onOpenProject,
   onDeleteProject,
 }: MyProjectsDrawerProps) {
+  const tx = useTx();
+  const t = useT();
   const dialogRef = useRef<HTMLDivElement>(null);
   const [name, setName] = useState('');
   const [renameDraft, setRenameDraft] = useState<string | null>(null);
@@ -88,19 +91,14 @@ export function MyProjectsDrawer({
       >
         <header className="flex shrink-0 items-start justify-between gap-3 border-b border-border/40 px-4 pb-3 pt-4 sm:px-5 sm:pt-5">
           <div className="min-w-0">
-            <h2 id="my-projects-title" className="text-chrome-title">
-              Mis proyectos
-            </h2>
-            <p className="prose-measure mt-1 text-chrome-label leading-relaxed text-muted">
-              Un proyecto se guarda solo mientras trabajas. Todo queda en este
-              navegador; no se envía nada a ningún servidor.
-            </p>
+            <h2 id="my-projects-title" className="text-chrome-title">{t('ui.MyProjectsDrawer.mis-proyectos')}</h2>
+            <p className="prose-measure mt-1 text-chrome-label leading-relaxed text-muted">{t('ui.MyProjectsDrawer.un-proyecto-se-guarda-solo')}</p>
           </div>
           <button
             type="button"
             data-modal-close
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={t('ui.MyProjectsDrawer.cerrar')}
             className="flex size-10 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           >
             <X className="size-4" aria-hidden="true" />
@@ -110,9 +108,7 @@ export function MyProjectsDrawer({
         <div className="shrink-0 space-y-4 border-b border-border/40 px-4 py-4 sm:px-5">
           {currentProject ? (
             <div>
-              <label htmlFor="project-rename" className="block text-chrome-label font-medium text-ink">
-                Proyecto abierto
-              </label>
+              <label htmlFor="project-rename" className="block text-chrome-label font-medium text-ink">{t('ui.MyProjectsDrawer.proyecto-abierto')}</label>
               <div className="mt-2 flex gap-2">
                 <input
                   id="project-rename"
@@ -131,16 +127,14 @@ export function MyProjectsDrawer({
                       setRenameDraft(null),
                     )
                   }
-                >
-                  Renombrar
-                </button>
+                >{t('ui.MyProjectsDrawer.renombrar')}</button>
               </div>
             </div>
           ) : null}
 
           <div>
             <label htmlFor="project-name" className="block text-chrome-label font-medium text-ink">
-              {currentProject ? 'Guardar como proyecto nuevo' : 'Guardar paleta actual como proyecto'}
+              {currentProject ? t('ui.MyProjectsDrawer.guardar-como-proyecto-nuevo') : t('ui.MyProjectsDrawer.guardar-paleta-actual-como-proyecto')}
             </label>
             <div className="mt-2 flex gap-2">
               <input
@@ -150,7 +144,7 @@ export function MyProjectsDrawer({
                 value={name}
                 maxLength={80}
                 disabled={!canSave}
-                placeholder="Nombre del proyecto"
+                placeholder={t('ui.MyProjectsDrawer.nombre-del-proyecto')}
                 onChange={(event) => setName(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
@@ -166,31 +160,26 @@ export function MyProjectsDrawer({
                 disabled={!canSave || busy || name.trim().length === 0}
                 className={PRIMARY_BUTTON}
               >
-                {busy ? 'Guardando…' : 'Guardar'}
+                {busy ? t('ui.MyProjectsDrawer.guardando') : t('ui.MyProjectsDrawer.guardar')}
               </button>
             </div>
             {!canSave ? (
-              <p className="mt-2 text-chrome-caption text-muted">
-                Elige una paleta primero para poder guardarla.
-              </p>
+              <p className="mt-2 text-chrome-caption text-muted">{t('ui.MyProjectsDrawer.elige-una-paleta-primero-para')}</p>
             ) : null}
           </div>
 
           {feedback ? (
             <p role="status" className="text-chrome-caption text-muted">
-              {feedback}
+              {tx(feedback)}
             </p>
           ) : null}
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">
           {loading ? (
-            <p className="text-chrome-label text-muted">Cargando proyectos…</p>
+            <p className="text-chrome-label text-muted">{t('ui.MyProjectsDrawer.cargando-proyectos')}</p>
           ) : projects.length === 0 ? (
-            <p className="text-chrome-label leading-relaxed text-muted">
-              Aún no has guardado proyectos. Guarda tu paleta actual para
-              empezar tu colección.
-            </p>
+            <p className="text-chrome-label leading-relaxed text-muted">{t('ui.MyProjectsDrawer.aun-no-has-guardado-proyectos')}</p>
           ) : (
             <ul className="space-y-2">
               {projects.map((project) => (

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { RecentProjects } from '@/components/color/RecentProjects';
 import { StartFromColorForm } from '@/components/color/StartFromColorForm';
 import type { LocalProject } from '@lib/studio/projectModel';
+import { useT } from '@/context/I18nContext';
 
 export type EmptyWorkspaceCardProps = {
   fileName: string | null;
@@ -32,6 +33,7 @@ export function EmptyWorkspaceCard({
   recentProjects,
   onOpenProject,
 }: EmptyWorkspaceCardProps) {
+  const t = useT();
   return (
     <section
       aria-labelledby="workspace-empty-title"
@@ -63,10 +65,10 @@ export function EmptyWorkspaceCard({
           id="workspace-empty-title"
           className="text-balance font-display text-[1.375rem] font-medium leading-snug text-ink"
         >
-          Empieza por aquí
+          {t('start.title')}
         </h2>
         <p className="mt-2 text-pretty text-chrome-body leading-relaxed text-muted">
-          Elige un estilo, sube una imagen o escribe un color.
+          {t('start.lead')}
         </p>
 
         <Button
@@ -75,11 +77,11 @@ export function EmptyWorkspaceCard({
           className="mt-5 min-h-11 w-full rounded-lg"
           onClick={onOpenInspiration}
         >
-          Explorar estilos
+          {t('start.exploreStyles')}
         </Button>
 
         <div className="mt-7">
-          <p className="mb-2 text-chrome-label font-semibold text-ink">Subir una imagen</p>
+          <p className="mb-2 text-chrome-label font-semibold text-ink">{t('start.uploadImage')}</p>
           <ImageUploader
             fileName={fileName}
             hasPreview={hasPreview}

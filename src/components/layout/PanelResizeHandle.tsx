@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useRef } from 'react';
+import { useTx } from '@/context/I18nContext';
 
 export type PanelResizeHandleProps = {
   onResize: (deltaX: number) => void;
@@ -25,6 +26,7 @@ export function PanelResizeHandle({
   max,
   controlsId,
 }: PanelResizeHandleProps) {
+  const tx = useTx();
   const draggingRef = useRef(false);
 
   const handlePointerDown = useCallback(
@@ -76,7 +78,7 @@ export function PanelResizeHandle({
     <div
       role="separator"
       aria-orientation="vertical"
-      aria-label={label}
+      aria-label={tx(label)}
       aria-controls={controlsId}
       aria-valuenow={value}
       aria-valuemin={min}

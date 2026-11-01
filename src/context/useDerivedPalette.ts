@@ -6,6 +6,7 @@ import {
   type EditablePaletteState,
 } from '@lib/color/editablePalette';
 import type { ExtractedColor } from '@lib/color/imageExtractor';
+import { pickExportDerivedTokens, type ExportDerivedTokensByTheme } from '@lib/export/derivedExportTokens';
 import { normalizeHex } from '@lib/color/normalizeHex';
 import type { PaletteType } from '@lib/color/paletteClassification';
 import {
@@ -203,6 +204,38 @@ export function useDerivedPalette({
     tokenOverridesByTheme,
   ]);
 
+  // Derived tokens for both themes, so the export carries dark mode and the paired on-* colors.
+  const exportDerivedTokens = useMemo<ExportDerivedTokensByTheme | null>(() => {
+    if (extractedColors.length === 0) {
+      return null;
+    }
+    const derive = (theme: ThemeId) =>
+      pickExportDerivedTokens(
+        applyClearedDataTokens(
+          resolveUiExpressiveGaps(
+            deriveSemanticTokens({
+              extracted: extractedColors,
+              overrides: tokenOverridesByTheme[theme] ?? {},
+              theme,
+              neutralStyle,
+              vibrancy: savedVibrancy,
+              paletteType,
+            }),
+            extractedColors,
+          ),
+          clearedSemanticTokens,
+        ),
+      );
+    return { light: derive('light'), dark: derive('dark') };
+  }, [
+    clearedSemanticTokens,
+    extractedColors,
+    neutralStyle,
+    paletteType,
+    savedVibrancy,
+    tokenOverridesByTheme,
+  ]);
+
   // Role palette of the theme that is not being edited, so contrast can be checked on both.
   const counterpartRolePalette = useMemo(() => {
     if (extractedColors.length === 0) {
@@ -273,6 +306,7 @@ export function useDerivedPalette({
       rolePalette,
       getColorForUsage: getColorForUsageBound,
       exportRolePalette,
+      exportDerivedTokens,
       counterpartRolePalette,
       exportStatusTokenOverrides,
       neutralScale,
@@ -288,6 +322,7 @@ export function useDerivedPalette({
       rolePalette,
       getColorForUsageBound,
       exportRolePalette,
+      exportDerivedTokens,
       counterpartRolePalette,
       exportStatusTokenOverrides,
       semanticTokens,

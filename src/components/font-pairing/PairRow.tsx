@@ -7,6 +7,7 @@ import { buildFontFamilyStack } from '@lib/typography/googleFonts';
 import { specimenForPair } from '@lib/typography/pairSpecimen';
 
 import { TypeWeightBadge } from './AppliedTypeZoneParts';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type PairRowProps = {
   pairing: FontPair;
@@ -34,6 +35,8 @@ export function PairRow({
   onPreview,
   onClearPreview,
 }: PairRowProps) {
+  const tx = useTx();
+  const t = useT();
   const headingFont = buildFontFamilyStack(pairing.heading);
   const bodyFont = buildFontFamilyStack(pairing.body);
   const headingWeight = roleWeight(pairing, 'heading');
@@ -57,7 +60,7 @@ export function PairRow({
           className={`min-w-0 truncate text-chrome-caption ${selected ? 'font-bold text-primary' : 'font-semibold text-ink'
             }`}
         >
-          {pairing.heading.family} · {pairing.body.family}
+          {tx(pairing.heading.family)} · {tx(pairing.body.family)}
         </span>
         <span className="flex shrink-0 items-center gap-1">
           <TypeWeightBadge weight={headingWeight} tone="ink" />
@@ -72,9 +75,9 @@ export function PairRow({
           fontFamily: headingFont,
           fontWeight: headingWeight,
         }}
-        title={specimen.heading}
+        title={tx(specimen.heading)}
       >
-        {specimen.heading}
+        {tx(specimen.heading)}
       </p>
 
       <p
@@ -84,23 +87,21 @@ export function PairRow({
           fontFamily: bodyFont,
           fontWeight: bodyWeight,
         }}
-        title={specimen.body}
+        title={tx(specimen.body)}
       >
-        {specimen.body}
+        {tx(specimen.body)}
       </p>
 
       {pairing.rationale ? (
         <p className="mt-2 min-w-0 text-[11px] leading-snug text-muted">
-          {pairing.rationale}
+          {tx(pairing.rationale)}
         </p>
       ) : null}
 
       {pairing.wcagNote ? (
         <p className="mt-1 min-w-0 text-[11px] leading-snug text-muted/80">
-          <span className="font-semibold uppercase tracking-[0.06em] text-muted">
-            WCAG
-          </span>{' '}
-          {pairing.wcagNote}
+          <span className="font-semibold uppercase tracking-[0.06em] text-muted">{t('ui.PairRow.wcag')}</span>{' '}
+          {tx(pairing.wcagNote)}
         </p>
       ) : null}
     </button>

@@ -13,6 +13,7 @@ import {
   STUDIO_TOOL_FOCUS_EVENT,
   type StudioToolSectionFocusId,
 } from '@/lib/browser/studioToolFocus';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type SelectColorsWorkspaceSidebarProps = StudioToolsInput & {
   activeTab: ToolsTab;
@@ -40,6 +41,8 @@ export function ToolsTabToggle({
   activeTab: ToolsTab;
   onActiveTabChange: (tab: ToolsTab) => void;
 }) {
+  const tx = useTx();
+  const t = useT();
   const { getTabProps } = useTabListKeyboard({
     items: TOOLS_TAB_IDS,
     activeId: activeTab,
@@ -48,7 +51,7 @@ export function ToolsTabToggle({
 
   return (
     <ul
-      aria-label="Secciones de herramientas"
+      aria-label={t('ui.SelectColorsWorkspaceSidebar.secciones-de-herramientas')}
       className="flex min-w-0 flex-1 items-stretch overflow-hidden rounded-lg border border-line-soft bg-surface"
       role="tablist"
     >
@@ -71,7 +74,7 @@ export function ToolsTabToggle({
                   : 'text-muted hover:text-ink'
               }`}
             >
-              {tab.label}
+              {tx(tab.label)}
             </button>
           </li>
         );

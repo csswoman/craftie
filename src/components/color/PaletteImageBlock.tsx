@@ -2,6 +2,7 @@
 
 import { RefreshCw, Upload } from 'lucide-react';
 import { useId } from 'react';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type PaletteImageBlockProps = {
   previewUrl: string;
@@ -20,6 +21,8 @@ export function PaletteImageBlock({
   onFileSelected,
   onRegenerate,
 }: PaletteImageBlockProps) {
+  const tx = useTx();
+  const t = useT();
   const inputId = useId();
   const imageIdentity = imageFingerprint ? `${imageFingerprint.slice(0, 9)}…` : fileName ?? 'Imagen fuente';
 
@@ -36,13 +39,13 @@ export function PaletteImageBlock({
   return (
     <div className="flex items-center gap-2 rounded-[11px] border border-line bg-surface-raised px-2 py-1.5">
       <div
-        title={imageIdentity}
+        title={tx(imageIdentity)}
         className="size-[30px] shrink-0 overflow-hidden rounded-[7px] border border-line bg-surface"
       >
         {/* eslint-disable-next-line @next/next/no-img-element -- Preview uses a local blob URL from the selected file. */}
         <img
           src={previewUrl}
-          alt={fileName ? `Imagen fuente: ${fileName}` : 'Imagen fuente'}
+          alt={fileName ? t('ui.PaletteImageBlock.imagen-fuente', { fileName }) : t('ui.PaletteImageBlock.imagen-fuente-2')}
           width={30}
           height={30}
           className="h-full w-full object-cover"
@@ -51,8 +54,8 @@ export function PaletteImageBlock({
 
       <button
         type="button"
-        title="Regenerar paleta"
-        aria-label="Regenerar paleta"
+        title={t('ui.PaletteImageBlock.regenerar-paleta')}
+        aria-label={t('ui.PaletteImageBlock.regenerar-paleta')}
         disabled={isRegenerating}
         onClick={onRegenerate}
         className="flex size-[30px] shrink-0 items-center justify-center rounded-[7px] bg-transparent text-muted transition-colors hover:bg-surface hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-not-allowed disabled:opacity-50"
@@ -66,8 +69,8 @@ export function PaletteImageBlock({
 
       <label
         htmlFor={inputId}
-        title="Cambiar imagen"
-        aria-label="Cambiar imagen"
+        title={t('ui.PaletteImageBlock.cambiar-imagen')}
+        aria-label={t('ui.PaletteImageBlock.cambiar-imagen')}
         className="flex size-[30px] shrink-0 cursor-pointer items-center justify-center rounded-[7px] bg-transparent text-muted transition-colors hover:bg-surface hover:text-ink focus-within:outline-none focus-within:ring-[3px] focus-within:ring-primary/25"
       >
         <Upload aria-hidden="true" className="size-4" strokeWidth={2} />

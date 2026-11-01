@@ -60,20 +60,25 @@ import { getImageFingerprint } from '@/lib/browser/imageFingerprint';
 import { readSelectedFontPairId, writeSelectedFontPairId } from '@/lib/browser/selectedFontPair';
 import { requestStudioToolFocus } from '@/lib/browser/studioToolFocus';
 import { clearShareHash, readShareHash } from '@/lib/browser/shareUrl';
+import { clearStyleParam, readStyleParam } from '@/lib/browser/styleParam';
+import { findStyleById } from '@lib/styles/presets';
 import { readWorkspaceSnapshot } from '@/lib/browser/workspaceStorage';
 import {
   readOnboardingDismissed,
   writeOnboardingDismissed,
 } from '@/lib/browser/onboardingDismiss';
 import type { LocalProject } from '@lib/studio/projectModel';
+import { useT } from '@/context/I18nContext';
 
 export function useSelectColorsWorkspaceController() {
+  const t = useT();
   const [generatedPalette, setGeneratedPalette] = useState<GeneratedPalette | null>(null);
   const [storedPaletteCatalog, setPaletteCatalog] = useState<SelectableColor[]>([]);
   const {
     rolePalette,
     seeds,
     exportRolePalette,
+    exportDerivedTokens,
     neutralScale,
     exportStatusTokenOverrides,
     tokenOverridesByTheme,
@@ -659,6 +664,23 @@ export function useSelectColorsWorkspaceController() {
     setPaletteCatalog,
     setSelectedStyleId,
   });
+  // /?style=<id> (from the palette gallery) opens that curated style. It runs after
+  // the provider has hydrated any stored snapshot, so the requested style wins.
+  const handleSelectStyleRef = useRef(handleSelectStyle);
+  useEffect(() => {
+    handleSelectStyleRef.current = handleSelectStyle;
+  });
+  useEffect(() => {
+    const style = findStyleById(readStyleParam());
+    if (!style) {
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      handleSelectStyleRef.current(style);
+      clearStyleParam();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   function handleStartFromHex(input: string): string | null {
     let hex: string;
@@ -693,11 +715,14 @@ export function useSelectColorsWorkspaceController() {
     handleCopyCss,
     handleExportDesignMd,
     handleExportFigmaTokens,
+    handleExportTailwind,
+    handleExportShadcn,
     handleExportTokensJson,
     handleExportImage,
     handleCopyShareLink,
   } = useWorkspaceExports({
     rolePalette: exportRolePalette,
+    derivedTokensByTheme: exportDerivedTokens,
     neutralScale,
     tokenOverridesByTheme,
     exportStatusTokenOverrides,
@@ -706,6 +731,7 @@ export function useSelectColorsWorkspaceController() {
     getShareSnapshot,
     setError,
     setStatusMessage,
+    t,
   });
 
   // A palette restored from autosave, a share link or a project has no inspiration
@@ -736,6 +762,8 @@ export function useSelectColorsWorkspaceController() {
     handleCopyCss,
     handleExportDesignMd,
     handleExportFigmaTokens,
+    handleExportTailwind,
+    handleExportShadcn,
     handleExportTokensJson,
     handleExportImage,
     handleCopyShareLink,

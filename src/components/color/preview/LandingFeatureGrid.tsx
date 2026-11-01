@@ -10,6 +10,7 @@ import {
   brandStyle,
   type PreviewFonts,
 } from './previewTypography';
+import { useTx } from '@/context/I18nContext';
 
 /** Each step carries its palette color as a solid tile, with an icon that reads on it. */
 export function LandingFeatureGrid({
@@ -21,6 +22,7 @@ export function LandingFeatureGrid({
   fonts: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
   return (
     <ol className="flex flex-col gap-8 @min-[720px]/landing:flex-row @min-[720px]/landing:gap-10">
       {STUDIO_STEPS.map((item, index) => {
@@ -42,7 +44,7 @@ export function LandingFeatureGrid({
             </PreviewSlotTarget>
             <div className="flex min-w-0 flex-col gap-1.5">
               <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={brandStyle(fonts)}>
-                {item.title}
+                {tx(item.title)}
               </PreviewSlotTarget>
               <PreviewSlotTarget
                 slot="mutedText"
@@ -50,7 +52,7 @@ export function LandingFeatureGrid({
                 className="max-w-[34ch] text-pretty"
                 style={compactBodyStyle(fonts, colors.mutedText)}
               >
-                {item.text}
+                {tx(item.text)}
               </PreviewSlotTarget>
             </div>
           </li>

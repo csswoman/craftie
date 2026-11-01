@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 
 import type { GoogleFontOption } from '@lib/typography/googleFontsCatalog';
+import { useTx } from '@/context/I18nContext';
 
 export type GoogleFontOptionRowProps = {
   font: GoogleFontOption;
@@ -25,6 +26,7 @@ export function GoogleFontOptionRow({
   onRequestPreview,
   onSelect,
 }: GoogleFontOptionRowProps) {
+  const tx = useTx();
   useEffect(() => {
     onRequestPreview(font.family);
   }, [font.family, onRequestPreview]);
@@ -41,12 +43,12 @@ export function GoogleFontOptionRow({
     >
       <span
         className="truncate text-[0.8125rem] leading-[1.3]"
-        title={font.family}
+        title={tx(font.family)}
         style={previewReady ? { fontFamily: `"${font.family}"` } : undefined}
       >
-        {font.family}
+        {tx(font.family)}
       </span>
-      <span className="shrink-0 text-chrome-caption text-muted">{font.category}</span>
+      <span className="shrink-0 text-chrome-caption text-muted">{tx(font.category)}</span>
     </li>
   );
 }

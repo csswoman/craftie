@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type MockupModalProps = {
   open: boolean;
@@ -10,6 +11,8 @@ export type MockupModalProps = {
 };
 
 export function MockupModal({ open, title, onClose, children }: MockupModalProps) {
+  const tx = useTx();
+  const t = useT();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const lastFocusedRef = useRef<HTMLElement | null>(null);
 
@@ -39,7 +42,7 @@ export function MockupModal({ open, title, onClose, children }: MockupModalProps
   return (
     <dialog
       ref={dialogRef}
-      aria-label={title}
+      aria-label={tx(title)}
       onClose={handleDialogClose}
       onCancel={(event) => {
         event.preventDefault();
@@ -57,11 +60,11 @@ export function MockupModal({ open, title, onClose, children }: MockupModalProps
         style={{ boxShadow: 'var(--shadow-float)' }}
       >
         <header className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3">
-          <h2 className="text-[0.9375rem] font-semibold text-ink">{title}</h2>
+          <h2 className="text-[0.9375rem] font-semibold text-ink">{tx(title)}</h2>
           <button
             type="button"
             onClick={handleDialogClose}
-            aria-label="Cerrar"
+            aria-label={t('ui.MockupModal.cerrar')}
             className="rounded-md px-2 py-1 text-lg leading-none text-muted hover:bg-surface hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           >
             ×

@@ -5,13 +5,12 @@ import type { NeutralScale } from '@lib/color/neutralScale';
 import type { RolePalette } from '@lib/color/rolePalette';
 import type { SemanticTokenOverrides } from '@lib/color/semanticTokens';
 import { buildBrandKit, serializeBrandKit } from '@lib/export/brandKit';
-import {
-  buildExportTokenSet,
-  canExportTokenSet,
-  formatMissingCoreLabel,
-} from '@lib/export/exportTokenSet';
+import { buildExportTokenSet, canExportTokenSet } from '@lib/export/exportTokenSet';
+import { createTranslator, type Translate } from '@lib/i18n/translate';
+import type { ExportDerivedTokensByTheme } from '@lib/export/derivedExportTokens';
 import { generateDesignMd } from '@lib/export/generateDesignMd';
 import { toCss, toTokensStudio, toW3cJson } from '@lib/export/serializeExportTokens';
+import { toShadcnTheme, toTailwindTheme } from '@lib/export/serializeFrameworkTokens';
 import type { FontPair } from '@lib/typography/pairings';
 import type { ResolvedTypeRole, TypeRoleId } from '@lib/typography/typeRoles';
 import { encodeShareSnapshot } from '@lib/studio/shareLink';
@@ -26,6 +25,7 @@ import {
 export function useWorkspaceExports({
   rolePalette,
   neutralScale = null,
+  derivedTokensByTheme = null,
   tokenOverridesByTheme,
   exportStatusTokenOverrides = {},
   selectedPairing,
@@ -34,9 +34,12 @@ export function useWorkspaceExports({
   setError,
   setStatusMessage,
   kitName = 'craftie-tokens',
+  t = createTranslator('es'),
 }: {
   rolePalette: RolePalette | null;
   neutralScale?: NeutralScale | null;
+  /** Derived tokens per theme (on-* pairs, status, dark mode). */
+  derivedTokensByTheme?: ExportDerivedTokensByTheme | null;
   tokenOverridesByTheme: {
     light: SemanticTokenOverrides;
     dark: SemanticTokenOverrides;
@@ -51,6 +54,8 @@ export function useWorkspaceExports({
   setError: (error: string | null) => void;
   setStatusMessage: (message: string | null) => void;
   kitName?: string;
+  /** Translator for status and error messages; Spanish when omitted. */
+  t?: Translate;
 }) {
   // Merge confirmed status colors into the light overrides without mutating the source objects.
   const exportOverridesByTheme = {
@@ -60,6 +65,7 @@ export function useWorkspaceExports({
   const tokenSet = buildExportTokenSet({
     rolePalette,
     neutralScale,
+    derivedTokensByTheme,
     tokenOverridesByTheme: exportOverridesByTheme,
     pairing: selectedPairing,
     typeRoles,
@@ -68,7 +74,11 @@ export function useWorkspaceExports({
   const canExport = canExportTokenSet(tokenSet);
   const exportBlockedReason = canExport
     ? null
-    : `Falta: ${formatMissingCoreLabel(tokenSet.meta.missingCore)}`;
+    : t('export.missing', {
+        what: tokenSet.meta.missingCore
+          .map((token) => t(`export.missing.${token}`))
+          .join(', '),
+      });
 
   function download(filename: string, content: string, mime: string, success: string) {
     const result = downloadTextFile(filename, content, mime);
@@ -92,19 +102,29 @@ export function useWorkspaceExports({
 
   function handleExportCss() {
     if (!requireExportable()) return;
-    download('tokens.css', toCss(tokenSet), 'text/css;charset=utf-8', 'tokens.css descargado.');
+    download('tokens.css', toCss(tokenSet), 'text/css;charset=utf-8', t('export.done.css'));
   }
 
   async function handleCopyCss() {
     if (!requireExportable()) return;
     const copied = await copyTextToClipboard(toCss(tokenSet));
     if (!copied) {
-      setError('No se pudo copiar el CSS. Descárgalo desde Exportar.');
+      setError(t('export.error.copyCss'));
       setStatusMessage(null);
       return;
     }
     setError(null);
-    setStatusMessage('CSS copiado al portapapeles.');
+    setStatusMessage(t('export.done.copyCss'));
+  }
+
+  function handleExportTailwind() {
+    if (!requireExportable()) return;
+    download('craftie-tailwind.css', toTailwindTheme(tokenSet), 'text/css;charset=utf-8', t('export.done.tailwind'));
+  }
+
+  function handleExportShadcn() {
+    if (!requireExportable()) return;
+    download('craftie-shadcn.css', toShadcnTheme(tokenSet), 'text/css;charset=utf-8', t('export.done.shadcn'));
   }
 
   function handleExportTokensJson() {
@@ -113,7 +133,7 @@ export function useWorkspaceExports({
       'tokens.json',
       toW3cJson(tokenSet),
       'application/json;charset=utf-8',
-      'tokens.json descargado.',
+      t('export.done.tokens'),
     );
   }
 
@@ -123,7 +143,7 @@ export function useWorkspaceExports({
       'figma-tokens.json',
       toTokensStudio(tokenSet),
       'application/json;charset=utf-8',
-      'figma-tokens.json descargado.',
+      t('export.done.figma'),
     );
   }
 
@@ -133,7 +153,7 @@ export function useWorkspaceExports({
       'DESIGN.md',
       generateDesignMd(tokenSet),
       'text/markdown;charset=utf-8',
-      'DESIGN.md descargado en tu carpeta de descargas.',
+      t('export.done.designMd'),
     );
   }
 
@@ -150,7 +170,7 @@ export function useWorkspaceExports({
       'brand-kit.json',
       serializeBrandKit(kit),
       'application/json;charset=utf-8',
-      'Brand kit (.json) descargado.',
+      t('export.done.brandKit'),
     );
   }
 
@@ -172,7 +192,7 @@ export function useWorkspaceExports({
     }
 
     setError(null);
-    setStatusMessage('Imagen (.png) descargada con tu paleta y tipografía.');
+    setStatusMessage(t('export.done.image'));
   }
 
   async function handleCopyShareLink() {
@@ -180,20 +200,20 @@ export function useWorkspaceExports({
     const url = buildShareUrl(encoded);
 
     if (url === null) {
-      setError('No se pudo generar el enlace para compartir.');
+      setError(t('export.error.shareLink'));
       setStatusMessage(null);
       return;
     }
 
     const copied = await copyTextToClipboard(url);
     if (!copied) {
-      setError('No se pudo copiar el enlace. Cópialo manualmente desde la barra de direcciones.');
+      setError(t('export.error.copyShareLink'));
       setStatusMessage(null);
       return;
     }
 
     setError(null);
-    setStatusMessage('Enlace copiado. Compártelo para abrir esta paleta.');
+    setStatusMessage(t('export.done.shareLink'));
   }
 
   return {
@@ -204,6 +224,8 @@ export function useWorkspaceExports({
     handleCopyCss,
     handleExportDesignMd,
     handleExportFigmaTokens,
+    handleExportTailwind,
+    handleExportShadcn,
     handleExportTokensJson,
     handleExportImage,
     handleCopyShareLink,

@@ -19,6 +19,7 @@ import type { ColorGroupId, SelectableColor } from '@lib/color/selectableColors'
 
 import { ColorGroup } from './ColorGroup';
 import { useRolePalette } from '@/context/RolePaletteContext';
+import { useTx } from '@/context/I18nContext';
 
 export {
   LIGHT_NEUTRAL_LIGHTNESS_MIN,
@@ -58,6 +59,7 @@ export function ColorGroupsPanel({
   colors,
   onRenameColor,
 }: ColorGroupsPanelProps) {
+  const tx = useTx();
   const { rolePalette, activeRole, setRolePalette } = useRolePalette();
 
   const activeHexes = useMemo(
@@ -90,7 +92,7 @@ export function ColorGroupsPanel({
         <ColorGroup
           key={group.id}
           groupId={group.id}
-          title={group.title}
+          title={tx(group.title)}
           requirement={group.requirement}
           selectedCount={
             colors.filter(
@@ -110,8 +112,8 @@ export function ColorGroupsPanel({
             group.id === 'light-neutral'
               ? 'No hay neutros claros disponibles.'
               : group.id === 'bold'
-                ? 'No se detectaron colores intensos en la imagen.'
-                : 'No se detectaron neutros oscuros en la imagen.'
+                ? tx('No se detectaron colores intensos en la imagen.')
+                : tx('No se detectaron neutros oscuros en la imagen.')
           }
         />
       ))}

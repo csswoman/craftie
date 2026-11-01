@@ -4,6 +4,7 @@ import { ChevronDown, LineChart } from 'lucide-react';
 import { useState } from 'react';
 
 import { TYPE_SPACING_LIMITS } from '@lib/typography/typeGlobal';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type TypographySpacing = {
   headingLineHeight: number;
@@ -27,11 +28,12 @@ type SliderFieldProps = {
 };
 
 function SliderField({ label, value, min, max, suffix, onChange }: SliderFieldProps) {
+  const tx = useTx();
   return (
     <label className="block">
       <span className="mb-2 flex items-center justify-between gap-4 text-chrome-label font-medium text-ink">
-        <span>{label}</span>
-        <output className="font-mono text-xs tabular-nums text-muted">{value.toFixed(2)}{suffix}</output>
+        <span>{tx(label)}</span>
+        <output className="font-mono text-xs tabular-nums text-muted">{value.toFixed(2)}{tx(suffix)}</output>
       </span>
       <input
         type="range"
@@ -47,6 +49,7 @@ function SliderField({ label, value, min, max, suffix, onChange }: SliderFieldPr
 }
 
 export function SpacingControls({ value, onChange }: SpacingControlsProps) {
+  const t = useT();
   const [open, setOpen] = useState(true);
 
   return (
@@ -59,7 +62,7 @@ export function SpacingControls({ value, onChange }: SpacingControlsProps) {
       >
         <span className="flex items-center gap-2 text-chrome-label font-semibold text-ink">
           <LineChart size={15} aria-hidden="true" />
-          <span id="spacing-controls-title">Espaciado</span>
+          <span id="spacing-controls-title">{t('ui.SpacingControls.espaciado')}</span>
         </span>
         <ChevronDown size={16} className={`shrink-0 text-muted transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
       </button>
@@ -67,14 +70,14 @@ export function SpacingControls({ value, onChange }: SpacingControlsProps) {
       {open ? (
         <div className="space-y-5 border-t border-border px-4 py-4">
           <fieldset className="space-y-4">
-            <legend className="text-chrome-caption font-semibold uppercase tracking-[0.08em] text-muted">Titulares</legend>
-            <SliderField label="Heading Leading" value={value.headingLineHeight} min={TYPE_SPACING_LIMITS.headingLineHeight.min} max={TYPE_SPACING_LIMITS.headingLineHeight.max} suffix="" onChange={(headingLineHeight) => onChange({ ...value, headingLineHeight })} />
-            <SliderField label="Heading Tracking" value={value.headingLetterSpacing} min={TYPE_SPACING_LIMITS.headingLetterSpacing.min} max={TYPE_SPACING_LIMITS.headingLetterSpacing.max} suffix="em" onChange={(headingLetterSpacing) => onChange({ ...value, headingLetterSpacing })} />
+            <legend className="text-chrome-caption font-semibold uppercase tracking-[0.08em] text-muted">{t('ui.SpacingControls.titulares')}</legend>
+            <SliderField label={t('ui.SpacingControls.heading-leading')} value={value.headingLineHeight} min={TYPE_SPACING_LIMITS.headingLineHeight.min} max={TYPE_SPACING_LIMITS.headingLineHeight.max} suffix="" onChange={(headingLineHeight) => onChange({ ...value, headingLineHeight })} />
+            <SliderField label={t('ui.SpacingControls.heading-tracking')} value={value.headingLetterSpacing} min={TYPE_SPACING_LIMITS.headingLetterSpacing.min} max={TYPE_SPACING_LIMITS.headingLetterSpacing.max} suffix="em" onChange={(headingLetterSpacing) => onChange({ ...value, headingLetterSpacing })} />
           </fieldset>
           <fieldset className="space-y-4 border-t border-border pt-5">
-            <legend className="text-chrome-caption font-semibold uppercase tracking-[0.08em] text-muted">Cuerpo</legend>
-            <SliderField label="Body Leading" value={value.bodyLineHeight} min={TYPE_SPACING_LIMITS.bodyLineHeight.min} max={TYPE_SPACING_LIMITS.bodyLineHeight.max} suffix="" onChange={(bodyLineHeight) => onChange({ ...value, bodyLineHeight })} />
-            <SliderField label="Body Tracking" value={value.bodyLetterSpacing} min={TYPE_SPACING_LIMITS.bodyLetterSpacing.min} max={TYPE_SPACING_LIMITS.bodyLetterSpacing.max} suffix="em" onChange={(bodyLetterSpacing) => onChange({ ...value, bodyLetterSpacing })} />
+            <legend className="text-chrome-caption font-semibold uppercase tracking-[0.08em] text-muted">{t('ui.SpacingControls.cuerpo')}</legend>
+            <SliderField label={t('ui.SpacingControls.body-leading')} value={value.bodyLineHeight} min={TYPE_SPACING_LIMITS.bodyLineHeight.min} max={TYPE_SPACING_LIMITS.bodyLineHeight.max} suffix="" onChange={(bodyLineHeight) => onChange({ ...value, bodyLineHeight })} />
+            <SliderField label={t('ui.SpacingControls.body-tracking')} value={value.bodyLetterSpacing} min={TYPE_SPACING_LIMITS.bodyLetterSpacing.min} max={TYPE_SPACING_LIMITS.bodyLetterSpacing.max} suffix="em" onChange={(bodyLetterSpacing) => onChange({ ...value, bodyLetterSpacing })} />
           </fieldset>
         </div>
       ) : null}

@@ -27,6 +27,7 @@ import {
   type PreviewFonts,
   previewRootTypeStyle,
 } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 export const ANALYTICS_VISUAL_SLOTS = [
   'appBackground',
@@ -73,6 +74,8 @@ export function AnalyticsLayoutPreview({
   fonts?: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   const [range, setRange] = useState<string>('30d');
   const greeting = getAnalyticsGreeting(new Date().getHours());
 
@@ -89,11 +92,9 @@ export function AnalyticsLayoutPreview({
         <header className="preview-rise flex flex-wrap items-end justify-between gap-4" style={{ animationDelay: previewStaggerDelay(0) }}>
           <div className="min-w-0 max-w-[52ch]">
             <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={{ ...displayStyle(fonts), textWrap: 'balance' }}>
-              {greeting}
+              {tx(greeting)}
             </PreviewSlotTarget>
-            <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-2 text-pretty" style={bodyStyle(fonts, colors.mutedText)}>
-              Así avanza el estudio: paletas, contraste, guías y entregas.
-            </PreviewSlotTarget>
+            <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-2 text-pretty" style={bodyStyle(fonts, colors.mutedText)}>{t('ui.AnalyticsLayoutPreview.asi-avanza-el-estudio-paletas')}</PreviewSlotTarget>
           </div>
           <SegmentedControl
             options={ANALYTICS_RANGES}

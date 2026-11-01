@@ -3,11 +3,13 @@ import { ChevronDown, Pin } from 'lucide-react';
 import type { CustomFontRole } from '@lib/typography/customFonts';
 
 import { GoogleFontAutocomplete } from './GoogleFontAutocomplete';
+import { useT, useTx } from '@/context/I18nContext';
 
 export function ScaleToken({ label, value }: { label: string; value: number }) {
+  const tx = useTx();
   return (
     <span className="whitespace-nowrap">
-      <span className="font-semibold text-primary">{label}</span>{' '}
+      <span className="font-semibold text-primary">{tx(label)}</span>{' '}
       <span className="font-normal tabular-nums text-muted">{value}px</span>
     </span>
   );
@@ -41,15 +43,16 @@ export function TypeWeightSelect({
   onChange: (weight: number) => void;
   ariaLabel: string;
 }) {
+  const tx = useTx();
   const choices = options.includes(weight) ? options : [...options, weight].sort((a, b) => a - b);
 
   return (
     <label className="relative inline-flex shrink-0">
-      <span className="sr-only">{ariaLabel}</span>
+      <span className="sr-only">{tx(ariaLabel)}</span>
       <select
         value={weight}
         onChange={(event) => onChange(Number(event.target.value))}
-        aria-label={ariaLabel}
+        aria-label={tx(ariaLabel)}
         className="h-7 min-w-[3.25rem] shrink-0 cursor-pointer appearance-none rounded-md border border-border bg-surface-raised py-0.5 pl-2 pr-5 text-chrome-caption font-medium tabular-nums text-ink transition-colors hover:border-primary/45 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
       >
         {choices.map((value) => (
@@ -91,17 +94,17 @@ export function RoleRow({
   role?: CustomFontRole;
   onApplyFamily?: (family: string, role: CustomFontRole) => Promise<void>;
 }) {
-  const pinHint = pinned
-    ? `Desfijar ${label}: vuelve a cambiar al elegir otro par`
-    : `Fijar ${label}: se mantiene al elegir otro par`;
+  const tx = useTx();
+  const t = useT();
+  const pinHint = t(pinned ? 'typeZone.unpin' : 'typeZone.pin', { label: tx(label) });
 
   return (
     <div className="flex min-w-0 items-center gap-2 py-2.5">
-      <span className="w-[3.25rem] shrink-0 text-chrome-label font-medium text-muted">{label}</span>
+      <span className="w-[3.25rem] shrink-0 text-chrome-label font-medium text-muted">{tx(label)}</span>
       {role && onApplyFamily ? (
         <GoogleFontAutocomplete
           key={`${role}:${family}`}
-          label={label}
+          label={tx(label)}
           role={role}
           initialFamily={family}
           onApply={onApplyFamily}
@@ -111,9 +114,9 @@ export function RoleRow({
         <span
           className="min-w-0 flex-1 truncate text-chrome-title font-medium leading-[1.25] text-ink"
           style={{ fontFamily: stack, fontWeight: weight }}
-          title={family}
+          title={tx(family)}
         >
-          {family}
+          {tx(family)}
         </span>
       )}
       {weightOptions && onWeightChange ? (
@@ -121,7 +124,7 @@ export function RoleRow({
           weight={weight}
           options={weightOptions}
           onChange={onWeightChange}
-          ariaLabel={`Peso de ${label}`}
+          ariaLabel={t('ui.AppliedTypeZoneParts.peso-de', { label: tx(label) })}
         />
       ) : (
         <TypeWeightBadge weight={weight} />
@@ -130,8 +133,8 @@ export function RoleRow({
         type="button"
         onClick={onTogglePin}
         aria-pressed={pinned}
-        aria-label={pinHint}
-        title={pinHint}
+        aria-label={tx(pinHint)}
+        title={tx(pinHint)}
         className={`inline-flex h-7 shrink-0 items-center gap-1 whitespace-nowrap rounded-md border px-1.5 transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${pinned
           ? 'border-primary/45 bg-primary/10 text-primary'
           : 'border-border bg-bg text-muted hover:border-primary/45 hover:text-primary'
@@ -143,16 +146,17 @@ export function RoleRow({
           fill={pinned ? 'currentColor' : 'none'}
           aria-hidden="true"
         />
-        <span className="text-chrome-caption font-medium">{pinned ? 'Fijado' : 'Fijar'}</span>
+        <span className="text-chrome-caption font-medium">{pinned ? t('ui.AppliedTypeZoneParts.fijado') : t('ui.AppliedTypeZoneParts.fijar')}</span>
       </button>
     </div>
   );
 }
 
 export function SegmentedField({ label, children }: { label: string; children: ReactNode }) {
+  const tx = useTx();
   return (
     <div className="min-w-0">
-      <p className="text-chrome-caption font-semibold uppercase tracking-[0.08em] text-primary">{label}</p>
+      <p className="text-chrome-caption font-semibold uppercase tracking-[0.08em] text-primary">{tx(label)}</p>
       <div className="mt-1.5 flex min-w-0 gap-0.5 rounded-lg bg-surface-raised p-0.5">{children}</div>
     </div>
   );
@@ -169,18 +173,19 @@ export function SegmentButton({
   label: string;
   ariaLabel: string;
 }) {
+  const tx = useTx();
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      aria-label={ariaLabel}
+      aria-label={tx(ariaLabel)}
       className={`min-h-7 min-w-0 flex-1 rounded-md px-0.5 text-chrome-caption tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${active
         ? 'bg-primary font-semibold text-bg'
         : 'bg-transparent font-normal text-muted hover:bg-primary/10 hover:text-primary'
         }`}
     >
-      {label}
+      {tx(label)}
     </button>
   );
 }

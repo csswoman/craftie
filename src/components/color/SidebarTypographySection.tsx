@@ -12,6 +12,7 @@ import { CustomFontModal } from '@/components/font-pairing/CustomFontModal';
 import { PairingList } from '@/components/font-pairing/PairingList';
 import type { SizeOverrides } from '@/components/font-pairing/FineTuneSizes';
 import type { TypographySpacing } from '@/components/font-pairing/SpacingControls';
+import { useT } from '@/context/I18nContext';
 
 export type SidebarTypographySectionProps = {
   fontPairings: FontPair[];
@@ -72,6 +73,7 @@ export function SidebarTypographySection({
   onApplyCustomFont,
   embedded = false,
 }: SidebarTypographySectionProps) {
+  const t = useT();
   const [configOpen, setConfigOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
   const listInert = pinHeading && pinBody;
@@ -110,9 +112,7 @@ export function SidebarTypographySection({
             onClick={() => setUploadOpen(true)}
             className="inline-flex min-h-8 items-center gap-1.5 rounded-md text-chrome-caption font-medium text-muted transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           >
-            <Upload size={13} strokeWidth={1.5} aria-hidden="true" />
-            Subir fuente propia
-          </button>
+            <Upload size={13} strokeWidth={1.5} aria-hidden="true" />{t('ui.SidebarTypographySection.subir-fuente-propia')}</button>
         }
       />
       <CustomFontModal

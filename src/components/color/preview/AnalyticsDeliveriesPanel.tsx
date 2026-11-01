@@ -14,6 +14,7 @@ import {
 import { paletteTint } from './previewButtons';
 import { StatDelta } from './previewPrimitives';
 import { captionStyle, displayStyle, labelStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 const GRID_STEPS = [0, 15, 30, 45] as const;
 
@@ -30,6 +31,8 @@ export function AnalyticsDeliveriesPanel({
   fonts: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   const [hovered, setHovered] = useState<string | null>(null);
   const weeks = ANALYTICS_WEEKLY_DELIVERIES;
   const ceiling = GRID_STEPS[GRID_STEPS.length - 1]!;
@@ -44,15 +47,15 @@ export function AnalyticsDeliveriesPanel({
     <AnalyticsPanel
       colors={colors}
       fonts={fonts}
-      title="Entregas por semana"
-      subtitle="Últimas 12 semanas, por tipo de entrega"
+      title={t('ui.AnalyticsDeliveriesPanel.entregas-por-semana')}
+      subtitle={t('ui.AnalyticsDeliveriesPanel.ultimas-12-semanas-por-tipo')}
       onEditSlot={onEditSlot}
       trailing={
-        <ul className="flex flex-wrap gap-x-4 gap-y-1" aria-label="Leyenda">
+        <ul className="flex flex-wrap gap-x-4 gap-y-1" aria-label={t('ui.AnalyticsDeliveriesPanel.leyenda')}>
           {ANALYTICS_DELIVERY_TYPES.map((type) => (
             <li key={type.key} className="flex items-center gap-1.5" style={labelStyle(fonts, colors.mutedText)}>
               <PreviewSlotTarget slot={type.slot} onEditSlot={onEditSlot} className="size-2.5 rounded-[3px]" style={{ backgroundColor: colors[type.slot] }} />
-              {type.label}
+              {tx(type.label)}
             </li>
           ))}
         </ul>
@@ -88,7 +91,7 @@ export function AnalyticsDeliveriesPanel({
                     onMouseLeave={() => setHovered(null)}
                     className="preview-bar-grow flex h-full min-w-0 flex-1 flex-col-reverse gap-[2px] transition-opacity duration-150"
                     style={{ opacity: dimmed ? 0.35 : 1, animationDelay: `${index * 30}ms` }}
-                    aria-label={`${week.week}: ${deliveryWeekTotal(week)} entregas`}
+                    aria-label={t('ui.AnalyticsDeliveriesPanel.entregas', { week: week.week, value: deliveryWeekTotal(week) })}
                   >
                     {ANALYTICS_DELIVERY_TYPES.map((type, layer) => (
                       <PreviewSlotTarget
@@ -121,9 +124,7 @@ export function AnalyticsDeliveriesPanel({
           style={{ borderColor: colors.divider }}
         >
           <div>
-            <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={labelStyle(fonts, colors.mutedText)}>
-              Total del periodo
-            </PreviewSlotTarget>
+            <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={labelStyle(fonts, colors.mutedText)}>{t('ui.AnalyticsDeliveriesPanel.total-del-periodo')}</PreviewSlotTarget>
             <div className="mt-1 flex items-baseline gap-2">
               <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="tabular-nums" style={{ ...displayStyle(fonts), lineHeight: 1 }}>
                 {grand}
@@ -131,8 +132,7 @@ export function AnalyticsDeliveriesPanel({
               <StatDelta value="12%" direction="up" color={colors.success} slot="success" surfaceHex={colors.surface} onEditSlot={onEditSlot} />
             </div>
             <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-1" style={captionStyle(fonts, colors.mutedText)}>
-              {deliveryWeekTotal(latest)} esta semana
-            </PreviewSlotTarget>
+              {t('ui.AnalyticsDeliveriesPanel.esta-semana', { value: deliveryWeekTotal(latest) })}</PreviewSlotTarget>
           </div>
 
           <ul className="space-y-3.5">
@@ -142,7 +142,7 @@ export function AnalyticsDeliveriesPanel({
               return (
                 <li key={type.key}>
                   <div className="flex items-baseline justify-between gap-2">
-                    <span style={labelStyle(fonts, colors.text)}>{type.label}</span>
+                    <span style={labelStyle(fonts, colors.text)}>{tx(type.label)}</span>
                     <span className="tabular-nums" style={titleStyle(fonts)}>
                       {type.value}
                       <span className="ml-1.5" style={captionStyle(fonts, colors.mutedText)}>{share}%</span>

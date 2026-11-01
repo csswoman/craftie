@@ -11,6 +11,7 @@ import { useMinWidthQuery } from '@/lib/browser/useMinWidthQuery';
 import { useRolePalette } from '@/context/RolePaletteContext';
 
 import { RoleSlotCell } from './RoleSlotCell';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type RoleSlotStripProps = {
   columns: PaletteColumnDisplay[];
@@ -31,6 +32,8 @@ export function RoleSlotStrip({
   onSelectRole,
   onOpenDetails,
 }: RoleSlotStripProps) {
+  const tx = useTx();
+  const t = useT();
   const { toggleLock, replaceRole, rolePalette, activeTheme } = useRolePalette();
   const isWideLayout = useMinWidthQuery(1024);
   const lockedSet = new Set(lockedRoles);
@@ -44,10 +47,10 @@ export function RoleSlotStrip({
       setCopyMessage('HEX copiado');
       window.setTimeout(() => setCopyMessage(null), 1500);
     } catch {
-      setCopyMessage('No se pudo copiar');
+      setCopyMessage(tx('No se pudo copiar'));
       window.setTimeout(() => setCopyMessage(null), 1500);
     }
-  }, []);
+  }, [tx]);
 
   return (
     <div className={`relative flex min-h-0 flex-col ${expanded ? 'h-full flex-1' : 'shrink-0'}`}>
@@ -56,7 +59,7 @@ export function RoleSlotStrip({
           role="status"
           className="pointer-events-none absolute left-1/2 top-3 z-30 -translate-x-1/2 rounded-md border border-border bg-ink px-2.5 py-1 text-chrome-caption font-medium text-bg shadow-md"
         >
-          {copyMessage}
+          {tx(copyMessage)}
         </p>
       ) : null}
 
@@ -68,7 +71,7 @@ export function RoleSlotStrip({
               }`
             : 'h-16 shrink-0 border-t border-border'
         }`}
-        aria-label="Roles de la paleta"
+        aria-label={t('ui.RoleSlotStrip.roles-de-la-paleta')}
       >
         {columns.map((column) => {
           if (!isPaletteRoleId(column.id)) {

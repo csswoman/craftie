@@ -21,6 +21,7 @@ import {
   UiSourceDestinationList,
 } from './UiSourceDestinationList';
 import { UiSourceTypeMenu } from './UiSourceTypeMenu';
+import { useT, useTx } from '@/context/I18nContext';
 
 type MenuStep = 'type' | 'role' | 'status';
 
@@ -45,6 +46,8 @@ export function UiSourceColorsSection({
   onAssignStatus: (role: UiStatusRole, hex: string) => void;
   showHeader?: boolean;
 }) {
+  const tx = useTx();
+  const t = useT();
   const [openHex, setOpenHex] = useState<string | null>(null);
   const [step, setStep] = useState<MenuStep>('type');
   const [message, setMessage] = useState<string | null>(null);
@@ -68,10 +71,10 @@ export function UiSourceColorsSection({
 
   return (
     <section aria-labelledby="ui-source-title">
-      {showHeader ? <UiColorSectionHeader title={`Colores fuente · ${uniqueColors.length}`} /> : null}
-      <h2 id="ui-source-title" className="sr-only">Colores fuente</h2>
+      {showHeader ? <UiColorSectionHeader title={t('ui.UiSourceColorsSection.colores-fuente-2', { length: uniqueColors.length })} /> : null}
+      <h2 id="ui-source-title" className="sr-only">{t('ui.UiSourceColorsSection.colores-fuente')}</h2>
       {message ? (
-        <p role="status" className="mb-2 text-tools-meta-scale text-muted">{message}</p>
+        <p role="status" className="mb-2 text-tools-meta-scale text-muted">{tx(message)}</p>
       ) : null}
       <ul className="mt-2 space-y-1.5">
         {uniqueColors.map((color) => {
@@ -100,7 +103,7 @@ export function UiSourceColorsSection({
                   aria-hidden="true"
                 />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-tools-role text-ink">{name}</span>
+                  <span className="block truncate text-tools-role text-ink">{tx(name)}</span>
                   <span className="block font-mono text-tools-meta-scale tabular-nums text-muted">
                     {hex.toUpperCase()}
                   </span>
@@ -112,7 +115,7 @@ export function UiSourceColorsSection({
                         key={chip}
                         className="rounded-full bg-[var(--chrome-green-soft)] px-1.5 py-0.5 text-tools-micro font-medium text-[var(--chrome-green)]"
                       >
-                        {chip}
+                        {tx(chip)}
                       </span>
                     ))}
                     {chips.length > 2 ? (
@@ -129,7 +132,7 @@ export function UiSourceColorsSection({
                   onClick={() => toggleRow(hex)}
                   className="inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-tools-body-sm font-semibold text-forest transition-colors hover:bg-line-soft focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25"
                 >
-                  {assignLabel}
+                  {tx(assignLabel)}
                   <ChevronDown
                     aria-hidden="true"
                     size={16}
@@ -152,7 +155,7 @@ export function UiSourceColorsSection({
 
                   {step === 'role' ? (
                     <UiSourceDestinationList
-                      label={`Asignar ${name} a un rol`}
+                      label={t('ui.UiSourceColorsSection.asignar-a-un-rol', { name: tx(name) })}
                       onBack={() => setStep('type')}
                     >
                       {UI_SYSTEM_ROLES.map((role) => {
@@ -160,7 +163,7 @@ export function UiSourceColorsSection({
                         return (
                           <UiSourceDestinationButton
                             key={role.token}
-                            label={role.label}
+                            label={tx(role.label)}
                             currentHex={current.gap ? null : current.hex}
                             onClick={() => {
                               onAssignRole(role.token, hex);
@@ -174,7 +177,7 @@ export function UiSourceColorsSection({
 
                   {step === 'status' ? (
                     <UiSourceDestinationList
-                      label={`Usar ${name} como estado`}
+                      label={t('ui.UiSourceColorsSection.usar-como-estado', { name: tx(name) })}
                       onBack={() => setStep('type')}
                     >
                       {STATUS_COLOR_DEFINITIONS.map((status) => {
@@ -183,7 +186,7 @@ export function UiSourceColorsSection({
                         return (
                           <UiSourceDestinationButton
                             key={status.role}
-                            label={status.label}
+                            label={tx(status.label)}
                             currentHex={current?.hex ?? null}
                             disabled={!accepted}
                             onClick={() => {

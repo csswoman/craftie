@@ -3,6 +3,7 @@
 import { useRef, type ReactNode } from 'react';
 
 import { useDialogAccessibility } from '@/lib/browser/useDialogAccessibility';
+import { useT } from '@/context/I18nContext';
 
 export type InspirationModalProps = {
   open: boolean;
@@ -11,6 +12,7 @@ export type InspirationModalProps = {
 };
 
 export function InspirationModal({ open, onClose, children }: InspirationModalProps) {
+  const t = useT();
   const dialogRef = useRef<HTMLDivElement>(null);
 
   useDialogAccessibility({
@@ -44,18 +46,14 @@ export function InspirationModal({ open, onClose, children }: InspirationModalPr
             <h2
               id="inspiration-modal-title"
               className="text-balance text-chrome-title"
-            >
-              Elegir inspiración
-            </h2>
-            <p className="prose-measure mt-1 text-chrome-label leading-relaxed text-muted">
-              Elige un estilo para cargar colores semilla en tu paleta.
-            </p>
+            >{t('ui.InspirationModal.elegir-inspiracion')}</h2>
+            <p className="prose-measure mt-1 text-chrome-label leading-relaxed text-muted">{t('ui.InspirationModal.elige-un-estilo-para-cargar')}</p>
           </div>
           <button
             type="button"
             data-modal-close
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={t('ui.InspirationModal.cerrar')}
             className="flex size-10 shrink-0 items-center justify-center rounded-full text-muted transition-[color,background-color,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 active:scale-95 motion-reduce:transition-colors motion-reduce:active:scale-100"
           >
             <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4">

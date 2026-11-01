@@ -12,6 +12,8 @@ export default defineConfig({
   reporter: process.env.CI ? 'github' : 'list',
   use: {
     baseURL: externalBaseUrl ?? 'http://localhost:3100',
+    // The interface follows the browser language; tests are written against Spanish.
+    locale: 'es-ES',
     trace: 'on-first-retry',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],

@@ -7,6 +7,7 @@ import {
   PanelsTopLeft,
   Type,
   BookOpen,
+  Layers,
   Newspaper,
   ShoppingBag,
   Smartphone,
@@ -35,6 +36,7 @@ export function ViewThumbnail({ id, palette }: { id: CanvasViewId; palette: stri
     ),
     'style-guide': <BookOpen className="size-3.5" aria-hidden="true" />,
     'type-scale': <Type className="size-3.5" aria-hidden="true" />,
+    scales: <Layers className="size-3.5" aria-hidden="true" />,
     colors: hasSwatches ? (
       <PaletteSwatches palette={palette} />
     ) : (

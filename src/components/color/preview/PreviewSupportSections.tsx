@@ -5,6 +5,7 @@ import { deriveNavbar } from '@lib/utils/deriveRoles';
 import { SEMANTIC_CHIP_STATES } from '@lib/utils/semanticChips';
 
 import { PreviewRoleTarget, type PreviewRoleEditHandler } from './PreviewRoleTarget';
+import { useT, useTx } from '@/context/I18nContext';
 
 export function PreviewSupportBanner({
   palette,
@@ -15,6 +16,7 @@ export function PreviewSupportBanner({
   tokens: PreviewTokens;
   onEditRole?: PreviewRoleEditHandler;
 }) {
+  const t = useT();
   return (
     <PreviewRoleTarget
       role="secundario"
@@ -26,12 +28,8 @@ export function PreviewSupportBanner({
         color: tokens.supportBanner.color,
       }}
     >
-      <p className="text-[0.75rem] font-semibold uppercase tracking-[0.08em] opacity-75">
-        Sección de apoyo
-      </p>
-      <p className="mt-1 text-[0.875rem] leading-relaxed">
-        El color secundario marca áreas informativas y banners — no compite con acciones primarias.
-      </p>
+      <p className="text-[0.75rem] font-semibold uppercase tracking-[0.08em] opacity-75">{t('ui.PreviewSupportSections.seccion-de-apoyo')}</p>
+      <p className="mt-1 text-[0.875rem] leading-relaxed">{t('ui.PreviewSupportSections.el-color-secundario-marca-areas')}</p>
     </PreviewRoleTarget>
   );
 }
@@ -47,6 +45,8 @@ export function PreviewNavbar({
   activeTheme: ThemeId;
   onEditRole?: PreviewRoleEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   const items = ['Inicio', 'Producto', 'Precios', 'Contacto'];
   const activeItem = 'Producto';
   const navbarBackground = deriveNavbar(palette.fondo.hex, palette.primario.hex, activeTheme);
@@ -65,12 +65,10 @@ export function PreviewNavbar({
       <p
         className="border-b px-4 py-2 text-[0.75rem] font-semibold uppercase tracking-[0.08em] opacity-60"
         style={{ borderColor: palette.borde.hex }}
-      >
-        Barra de navegación
-      </p>
+      >{t('ui.PreviewSupportSections.barra-de-navegacion')}</p>
       <nav
         className="flex flex-wrap items-center gap-1 px-3 py-2.5 sm:gap-2 sm:px-4"
-        aria-label="Vista previa de navegación"
+        aria-label={t('ui.PreviewSupportSections.vista-previa-de-navegacion')}
       >
         {items.map((item) => {
           const isActive = item === activeItem;
@@ -90,7 +88,7 @@ export function PreviewNavbar({
                   : undefined
               }
             >
-              {item}
+              {tx(item)}
             </span>
           );
         })}
@@ -108,6 +106,8 @@ export function PreviewChips({
   tokens: PreviewTokens;
   onEditRole?: PreviewRoleEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   return (
     <PreviewRoleTarget
       role="superficie"
@@ -119,9 +119,7 @@ export function PreviewChips({
         color: palette.texto.hex,
       }}
     >
-      <p className="text-[0.75rem] font-semibold uppercase tracking-[0.08em] opacity-60">
-        Chips de estado
-      </p>
+      <p className="text-[0.75rem] font-semibold uppercase tracking-[0.08em] opacity-60">{t('ui.PreviewSupportSections.chips-de-estado')}</p>
       <div className="mt-3 flex flex-wrap gap-2">
         {SEMANTIC_CHIP_STATES.map((state) => {
           const chip = tokens.chips[state];
@@ -132,7 +130,7 @@ export function PreviewChips({
               className="rounded-full px-3 py-1 text-[0.75rem] font-semibold"
               style={{ backgroundColor: chip.backgroundColor, color: chip.color }}
             >
-              {chip.label}
+              {tx(chip.label)}
             </span>
           );
         })}

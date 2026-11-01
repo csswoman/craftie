@@ -7,6 +7,7 @@ import { resolvePaletteDisplayNames } from '@lib/color/paletteDisplay';
 import type { SelectableColor } from '@lib/color/selectableColors';
 import type { SemanticTokens } from '@lib/color/semanticTokens';
 import { rolesBySourceHex } from '@lib/color/uiColorPanel';
+import { useT } from '@/context/I18nContext';
 
 export function UiSourceColorGrid({
   colors,
@@ -17,13 +18,14 @@ export function UiSourceColorGrid({
   tokens: SemanticTokens;
   onOpen: () => void;
 }) {
+  const t = useT();
   const uniqueColors = useMemo(() => uniqueByHex(colors), [colors]);
   const names = useMemo(() => resolvePaletteDisplayNames(uniqueColors), [uniqueColors]);
   const roleIndex = useMemo(() => rolesBySourceHex(tokens), [tokens]);
 
   return (
     <>
-      <div className="grid grid-cols-6 gap-x-2 gap-y-2.5" aria-label="Colores extraídos">
+      <div className="grid grid-cols-6 gap-x-2 gap-y-2.5" aria-label={t('ui.UiSourceColorGrid.colores-extraidos')}>
         {uniqueColors.map((color) => {
           const hex = normalizeHex(color.hex);
           const name = names.get(color.id) ?? color.name;
@@ -53,9 +55,7 @@ export function UiSourceColorGrid({
         type="button"
         onClick={onOpen}
         className="mt-3 min-h-10 text-left text-tools-body-sm font-semibold text-forest underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25"
-      >
-        Ver detalle y asignar ›
-      </button>
+      >{t('ui.UiSourceColorGrid.ver-detalle-y-asignar')}</button>
     </>
   );
 }

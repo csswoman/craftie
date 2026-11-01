@@ -6,6 +6,7 @@ import { EDITORIAL_GUTTER_CLASS, EDITORIAL_RELATED } from './editorialPreviewDat
 import { paletteTint } from './previewButtons';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { captionStyle, displayStyle, headingStyle, labelStyle, type PreviewFonts } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 /**
  * "En esta edición": a full-bleed band on a wash of the secondary color, with
@@ -20,6 +21,8 @@ export function EditorialEditionBand({
   fonts: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   const wash = paletteTint(colors.brand2, colors.appBackground, 0.12);
   const ink = readableOn(colors.text, wash);
   const muted = readableOn(colors.mutedText, wash);
@@ -32,10 +35,8 @@ export function EditorialEditionBand({
       style={{ backgroundColor: wash, color: ink }}
     >
       <div className="flex items-baseline justify-between gap-4">
-        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={{ ...displayStyle(fonts), color: ink }}>
-          En esta edición
-        </PreviewSlotTarget>
-        <span style={labelStyle(fonts, muted)}>Ver todo</span>
+        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={{ ...displayStyle(fonts), color: ink }}>{t('ui.EditorialEditionBand.en-esta-edicion')}</PreviewSlotTarget>
+        <span style={labelStyle(fonts, muted)}>{t('ui.EditorialEditionBand.ver-todo')}</span>
       </div>
 
       <ul className="mt-6 grid gap-8 @min-[640px]/editorial:grid-cols-3 @min-[640px]/editorial:gap-6">
@@ -47,14 +48,13 @@ export function EditorialEditionBand({
               <EditorialCoverArt colors={colors} seed={index + 1} className="aspect-[3/2] w-full rounded-lg" />
               <PreviewSlotTarget slot={story.slot} onEditSlot={onEditSlot} className="mt-4 flex items-center gap-2" style={labelStyle(fonts, sectionInk)}>
                 <span className="size-2 rounded-full" style={{ backgroundColor: colors[story.slot] }} aria-hidden="true" />
-                {story.section}
+                {tx(story.section)}
               </PreviewSlotTarget>
               <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="mt-1.5 text-balance" style={{ ...headingStyle(fonts), color: ink }}>
-                {story.title}
+                {tx(story.title)}
               </PreviewSlotTarget>
               <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-1.5" style={captionStyle(fonts, muted)}>
-                {story.meta} de lectura
-              </PreviewSlotTarget>
+                {t('ui.EditorialEditionBand.de-lectura', { meta: tx(story.meta) })}</PreviewSlotTarget>
             </li>
           );
         })}

@@ -3,8 +3,11 @@
 import { useId, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
+import { useT, useTx } from '@/context/I18nContext';
 
 export function StartFromColorForm({ onStart }: { onStart: (hex: string) => string | null }) {
+  const tx = useTx();
+  const t = useT();
   const inputId = useId();
   const errorId = useId();
   const [value, setValue] = useState('');
@@ -12,7 +15,7 @@ export function StartFromColorForm({ onStart }: { onStart: (hex: string) => stri
 
   function submit() {
     if (value.trim().length === 0) {
-      setError('Escribe un color, por ejemplo #1F6F54.');
+      setError(t('start.hexRequired'));
       return;
     }
     setError(onStart(value));
@@ -27,7 +30,7 @@ export function StartFromColorForm({ onStart }: { onStart: (hex: string) => stri
     >
       <div className="mb-3 flex items-center justify-between gap-2">
         <label htmlFor={inputId} className="block text-chrome-label font-semibold text-ink">
-          Partir de un color (HEX)
+          {t('start.fromHex')}
         </label>
         <button
           type="button"
@@ -37,7 +40,7 @@ export function StartFromColorForm({ onStart }: { onStart: (hex: string) => stri
           }}
           className="text-chrome-caption font-medium text-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:underline"
         >
-          Ejemplo: <span className="font-mono text-primary">#1F6F54</span>
+          {t('start.example')} <span className="font-mono text-primary">#1F6F54</span>
         </button>
       </div>
       <div className="flex gap-2">
@@ -57,12 +60,12 @@ export function StartFromColorForm({ onStart }: { onStart: (hex: string) => stri
           className="min-h-11 min-w-0 flex-1 rounded-lg border border-border bg-bg px-3 text-chrome-body text-ink placeholder:text-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
         />
         <Button type="submit" variant="ghost" className="min-h-11 shrink-0 rounded-lg">
-          Crear paleta
+          {t('start.createPalette')}
         </Button>
       </div>
       {error ? (
         <p id={errorId} role="alert" className="mt-2 text-chrome-caption font-medium text-fail">
-          {error}
+          {tx(error)}
         </p>
       ) : null}
     </form>

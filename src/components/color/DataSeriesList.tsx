@@ -6,6 +6,7 @@ import type { DataSeries } from '@lib/color/dataSeriesProfile';
 import { groupCandidatesForUse, type UiColorCandidate } from '@lib/color/uiColorCandidates';
 
 import { DataSeriesRow } from './DataSeriesRow';
+import { useT } from '@/context/I18nContext';
 
 const DEFAULT_LIMIT = 5;
 
@@ -24,12 +25,13 @@ export function DataSeriesList({
   onLeaveUnassigned: () => void;
   onDerive: () => void;
 }) {
+  const t = useT();
   const [showAll, setShowAll] = useState(false);
   const representatives = groupCandidatesForUse(candidates, 'data').map((family) => family.representative);
   const visible = showAll ? representatives : representatives.slice(0, DEFAULT_LIMIT);
 
   if (representatives.length === 0 && !unassigned) {
-    return <p className="py-2 text-tools-meta text-muted">No hay candidatos adicionales.</p>;
+    return <p className="py-2 text-tools-meta text-muted">{t('ui.DataSeriesList.no-hay-candidatos-adicionales')}</p>;
   }
 
   const emptySeries = unassigned ? buildEmptySeries(targetSeries) : null;
@@ -61,7 +63,7 @@ export function DataSeriesList({
           onClick={() => setShowAll((value) => !value)}
           className="mt-2 min-h-10 w-full rounded-lg px-3 text-[0.88rem] font-semibold text-muted hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
         >
-          {showAll ? 'Ver menos' : `Ver ${representatives.length - DEFAULT_LIMIT} candidatos más`}
+          {showAll ? t('ui.DataSeriesList.ver-menos') : t('ui.DataSeriesList.ver-candidatos-mas', { value: representatives.length - DEFAULT_LIMIT })}
         </button>
       ) : null}
     </>

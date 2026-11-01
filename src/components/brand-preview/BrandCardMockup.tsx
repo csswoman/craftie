@@ -1,6 +1,7 @@
 import { pickReadableTextColor } from '@lib/color/readableText';
 
 import type { MockupPaletteProps } from './mockupTypes';
+import { useT } from '@/context/I18nContext';
 
 const STRIP_ROLES = [
   'primary',
@@ -12,6 +13,7 @@ const STRIP_ROLES = [
 ] as const;
 
 export function BrandCardMockup({ tokens, variant = 'preview', fonts }: MockupPaletteProps) {
+  const t = useT();
   const spacious = variant === 'expanded';
   const primaryText = pickReadableTextColor(tokens.primary);
 
@@ -24,38 +26,28 @@ export function BrandCardMockup({ tokens, variant = 'preview', fonts }: MockupPa
         <p
           className={`font-semibold ${spacious ? 'text-xs' : 'text-[10px]'}`}
           style={{ color: tokens.accent }}
-        >
-          Identidad de marca
-        </p>
+        >{t('ui.BrandCardMockup.identidad-de-marca')}</p>
         <h2
           className={`mt-1 font-semibold leading-tight ${spacious ? 'text-2xl' : 'text-lg'}`}
           style={{ fontFamily: fonts.headingFamily, color: tokens.primary }}
-        >
-          Craftie Studio
-        </h2>
-        <p className={`mt-1 opacity-85 ${spacious ? 'text-sm' : 'text-[12px]'}`}>
-          Herramientas claras para equipos de producto y marca.
-        </p>
+        >{t('ui.BrandCardMockup.craftie-studio')}</h2>
+        <p className={`mt-1 opacity-85 ${spacious ? 'text-sm' : 'text-[12px]'}`}>{t('ui.BrandCardMockup.herramientas-claras-para-equipos-de')}</p>
       </div>
 
       <span
         className={`inline-flex w-fit items-center rounded font-semibold ${spacious ? 'mt-4 px-4 py-2 text-sm' : 'mt-2 px-2.5 py-1 text-[11px]'}`}
         style={{ backgroundColor: tokens.primary, color: primaryText, fontFamily: fonts.headingFamily }}
-      >
-        Conocer más
-      </span>
+      >{t('ui.BrandCardMockup.conocer-mas')}</span>
 
       <div className={spacious ? 'mt-6' : 'mt-3'}>
         <p
           className={`font-medium ${spacious ? 'mb-2 text-xs' : 'mb-1 text-[10px]'}`}
           style={{ color: tokens.neutralDark }}
-        >
-          Paleta
-        </p>
+        >{t('ui.BrandCardMockup.paleta')}</p>
         <ul
           className={`flex overflow-hidden rounded border ${spacious ? 'h-4' : 'h-2.5'}`}
           style={{ borderColor: tokens.border }}
-          aria-label="Mini paleta de marca"
+          aria-label={t('ui.BrandCardMockup.mini-paleta-de-marca')}
         >
           {STRIP_ROLES.map((role) => (
             <li key={role} className="min-w-0 flex-1" style={{ backgroundColor: tokens[role] }} />

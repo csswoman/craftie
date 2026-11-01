@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { pickReadableTextColor } from '@lib/color/readableText';
 import type { SelectableColor } from '@lib/color/selectableColors';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type ColorSelectionRowProps = {
   color: SelectableColor;
@@ -22,6 +23,8 @@ export function ColorSelectionRow({
   onToggle,
   onRename,
 }: ColorSelectionRowProps) {
+  const tx = useTx();
+  const t = useT();
   const textColor = pickReadableTextColor(color.hex);
   const [isEditing, setIsEditing] = useState(false);
   const [draftName, setDraftName] = useState(displayName);
@@ -88,7 +91,7 @@ export function ColorSelectionRow({
       >
         <ColorSwatch hex={color.hex} selected={selected} />
         <label className="min-w-0 flex-1">
-          <span className="sr-only">Nombre del color</span>
+          <span className="sr-only">{t('ui.ColorSelectionRow.nombre-del-color')}</span>
           <input
             ref={inputRef}
             type="text"
@@ -139,9 +142,9 @@ export function ColorSelectionRow({
         <span
           className={`block truncate text-[0.8125rem] font-semibold ${onRename ? 'cursor-text' : ''}`}
           onDoubleClick={handleNameDoubleClick}
-          title={onRename ? 'Doble clic para renombrar' : undefined}
+          title={onRename ? t('ui.ColorSelectionRow.doble-clic-para-renombrar') : undefined}
         >
-          {displayName}
+          {tx(displayName)}
         </span>
         <span className="block font-mono text-chrome-caption opacity-85">{color.hex.toUpperCase()}</span>
         {activeAssignment ? (
@@ -149,9 +152,7 @@ export function ColorSelectionRow({
             className={`mt-0.5 block text-chrome-caption font-medium ${
               selected ? 'text-ink' : 'text-primary'
             }`}
-          >
-            Rol activo
-          </span>
+          >{t('ui.ColorSelectionRow.rol-activo')}</span>
         ) : null}
       </span>
     </button>

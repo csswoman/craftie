@@ -1,12 +1,6 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import {
-  buildRolePaletteColumnsWithContrast,
-  getRolePaletteContrastWarnings,
-  hasRolePaletteContrastFailure,
-} from '@lib/color/rolePaletteContrast';
-import { PALETTE_ROLE_ORDER } from '@lib/color/rolePalette';
 import type { FontPair } from '@lib/typography/pairings';
 import type { AppliedTypography } from '@lib/typography/typeState';
 import type { TypeScaleBase, TypeScaleRatio } from '@lib/typography/typeScale';
@@ -21,12 +15,15 @@ import { PaletteView } from './PaletteView';
 import type { PreviewEditMode } from './PreviewEditModeToggle';
 import { PreviewView } from './PreviewView';
 import { EmptyCanvas, PaletteCanvasSkeleton } from './PaletteCanvasEmptyStates';
-import { PaletteCanvasNotices, type ThemeContrastReport } from './PaletteCanvasNotices';
-import type { ThemeId } from '@lib/color/themePalette';
+import { PaletteCanvasNotices } from './PaletteCanvasNotices';
+import { usePaletteCanvasModel } from './usePaletteCanvasModel';
 import { PaletteCanvasToolbar } from './PaletteCanvasToolbar';
+import { CanvasVisionFilterDefs, colorVisionStyle } from './CanvasVisionFilter';
 import { CanvasSystemView } from './CanvasSystemView';
 import { PaintPaletteCanvas } from './PaintPaletteCanvas';
+import { TonalScalesView } from './TonalScalesView';
 import { replacePaletteColorFromDrawer } from './replacePaletteColorFromDrawer';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type PaletteCanvasProps = {
   isLoading?: boolean;
@@ -75,63 +72,26 @@ export function PaletteCanvas({
   onImageFileSelected,
   onImageRegenerate,
 }: PaletteCanvasProps) {
+  const tx = useTx();
+  const t = useT();
   const {
     rolePalette,
-    previewRolePalette,
-    counterpartRolePalette,
     activeTheme,
     setActiveTheme,
     lockedRoles,
     replaceRole,
     replaceSemanticToken,
   } = useRolePalette();
-  const { activeView, activeMode, selectView } = useCanvasView();
+  const { activeView, activeMode, selectView, visionMode } = useCanvasView();
 
   const [showAccents, setShowAccents] = useState(false);
   const [previewEditMode, setPreviewEditMode] = useState<PreviewEditMode>('locked');
-  const isMockupView = !['paint', 'colors', 'style-guide', 'type-scale', 'illustration'].includes(activeView);
+  const isMockupView = !['paint', 'colors', 'style-guide', 'type-scale', 'scales', 'illustration'].includes(activeView);
   const [selectedColorHex, setSelectedColorHex] = useState<string | null>(null);
   const [selectedAccentSlot, setSelectedAccentSlot] = useState<number | null>(null);
-  const liveRolePalette = previewRolePalette ?? rolePalette;
-  const columns = useMemo(
-    () => (liveRolePalette ? buildRolePaletteColumnsWithContrast(liveRolePalette) : []),
-    [liveRolePalette],
-  );
-  const paintColors = useMemo<SelectableColor[]>(() => {
-    if (liveRolePalette) {
-      return PALETTE_ROLE_ORDER.map((role) => ({
-        id: `role-${role}`,
-        name: liveRolePalette[role].name,
-        hex: liveRolePalette[role].hex,
-        group: 'bold',
-      }));
-    }
-
-    return paletteCatalog;
-  }, [liveRolePalette, paletteCatalog]);
-
-  const contrastReports = useMemo<ThemeContrastReport[]>(() => {
-    const reports: ThemeContrastReport[] = [];
-    const entries: Array<[ThemeId, typeof liveRolePalette]> = [
-      [activeTheme, liveRolePalette],
-      [activeTheme === 'light' ? 'dark' : 'light', counterpartRolePalette],
-    ];
-
-    for (const [theme, palette] of entries) {
-      if (palette) {
-        reports.push({
-          theme,
-          failure: hasRolePaletteContrastFailure(palette),
-          warnings: getRolePaletteContrastWarnings(palette),
-        });
-      }
-    }
-
-    return reports;
-  }, [activeTheme, counterpartRolePalette, liveRolePalette]);
+  const { columns, paintColors, contrastReports, hasPalette } = usePaletteCanvasModel(paletteCatalog);
   const lockedSet = useMemo(() => new Set(lockedRoles), [lockedRoles]);
   const canReplace = editable && rolePalette !== null;
-  const hasPalette = columns.length > 0 && liveRolePalette !== null;
 
   function handleOpenRoleDetails(hex: string) {
     setSelectedAccentSlot(null);
@@ -150,7 +110,7 @@ export function PaletteCanvas({
 
   function handleReplaceFromDrawer(newHex: string): string | null {
     if (!rolePalette) {
-      return 'No se puede sustituir este color.';
+      return tx('No se puede sustituir este color.');
     }
 
     return replacePaletteColorFromDrawer({
@@ -200,11 +160,13 @@ export function PaletteCanvas({
           <EmptyCanvas />
         ) : (
           <>
+            <CanvasVisionFilterDefs mode={visionMode} />
             <div
               id="canvas-panel"
               role="tabpanel"
-              aria-label="Vista activa del lienzo"
+              aria-label={t('ui.PaletteCanvas.vista-activa-del-lienzo')}
               tabIndex={0}
+              style={colorVisionStyle(visionMode)}
               className={`relative flex min-h-0 flex-1 flex-col transition-opacity duration-150 motion-reduce:transition-none ${isUpdating ? 'opacity-60' : 'opacity-100'
                 }`}
             >
@@ -217,6 +179,8 @@ export function PaletteCanvas({
                   onOpenRoleDetails={handleOpenRoleDetails}
                   onOpenAccentDetails={handleOpenAccentDetails}
                 />
+              ) : activeView === 'scales' ? (
+                <TonalScalesView />
               ) : activeView === 'style-guide' || activeView === 'type-scale' ? (
                 <CanvasSystemView
                   view={activeView}

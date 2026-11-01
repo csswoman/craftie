@@ -4,6 +4,7 @@ import type { CustomFont } from '@lib/typography/customFonts';
 import type { CustomFontSubmitInput } from './CustomFontModal';
 
 import { GoogleFontAutocomplete } from './GoogleFontAutocomplete';
+import { useT } from '@/context/I18nContext';
 
 export type { CustomFontSubmitInput };
 
@@ -20,18 +21,19 @@ export function CustomFontEntry({
   bodyFamily,
   onApply,
 }: CustomFontEntryProps) {
+  const t = useT();
   return (
     <div className="grid min-w-0 grid-cols-2 gap-2 border-t border-border pt-3">
       <GoogleFontAutocomplete
         key={`heading:${headingFamily}`}
-        label="Titular"
+        label={t('ui.CustomFontEntry.titular')}
         role="heading"
         initialFamily={headingFamily}
         onApply={(family, role) => onApply({ family, source: 'google', role })}
       />
       <GoogleFontAutocomplete
         key={`body:${bodyFamily}`}
-        label="Cuerpo"
+        label={t('ui.CustomFontEntry.cuerpo')}
         role="body"
         initialFamily={bodyFamily}
         onApply={(family, role) => onApply({ family, source: 'google', role })}

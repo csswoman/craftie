@@ -7,9 +7,13 @@ import Link from 'next/link';
 import { BookOpen, FolderOpen, Menu, X } from 'lucide-react';
 
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { LanguageToggle } from '@/components/layout/LanguageToggle';
 import { HELP_ITEMS, HintIcon } from '@/components/layout/workspaceHelp';
+import { useT, useTx } from '@/context/I18nContext';
 
 export function WorkspaceMobileMenu({ onOpenMyProjects }: { onOpenMyProjects: () => void }) {
+  const tx = useTx();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -39,7 +43,7 @@ export function WorkspaceMobileMenu({ onOpenMyProjects }: { onOpenMyProjects: ()
         type="button"
         aria-expanded={open}
         aria-controls="workspace-mobile-menu"
-        aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
+        aria-label={open ? t('header.closeMenu') : t('header.openMenu')}
         onClick={() => {
           setOpen((value) => !value);
           setShowHelp(false);
@@ -64,7 +68,7 @@ export function WorkspaceMobileMenu({ onOpenMyProjects }: { onOpenMyProjects: ()
             className="flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-left text-chrome-body font-semibold text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           >
             <FolderOpen className="size-4.5 text-muted" aria-hidden="true" strokeWidth={1.8} />
-            Mis proyectos
+            {t('header.myProjects')}
           </button>
           <Link
             href="/docs"
@@ -72,8 +76,9 @@ export function WorkspaceMobileMenu({ onOpenMyProjects }: { onOpenMyProjects: ()
             className="flex min-h-12 items-center gap-3 rounded-lg px-3 text-chrome-body font-semibold text-ink transition-colors hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
           >
             <BookOpen className="size-4.5 text-muted" aria-hidden="true" strokeWidth={1.8} />
-            Documentación
+            {t('header.documentation')}
           </Link>
+          <LanguageToggle variant="menu" />
           <ThemeToggle variant="menu" />
           <div className="border-t border-border pt-1">
             <button
@@ -85,21 +90,21 @@ export function WorkspaceMobileMenu({ onOpenMyProjects }: { onOpenMyProjects: ()
             >
               <span className="flex items-center gap-3">
                 <HintIcon className="size-4.5" />
-                Guía rápida
+                {t('header.quickGuide')}
               </span>
-              <span className="text-muted" aria-hidden="true">{showHelp ? '−' : '+'}</span>
+              <span className="text-muted" aria-hidden="true">{tx(showHelp ? '−' : '+')}</span>
             </button>
             {showHelp ? (
               <div id="workspace-mobile-help" className="px-3 pb-2 pt-1">
                 <p className="text-chrome-label leading-relaxed text-muted">
-                  Todo lo que puedes hacer en Craftie.
+                  {t('header.quickGuideLead')}
                 </p>
-                <ul className="mt-2 space-y-1.5" aria-label="Funcionalidades del proyecto">
-                  {HELP_ITEMS.map(({ icon: Icon, label, description }) => (
-                    <li key={label} className="flex items-start gap-2 py-1">
+                <ul className="mt-2 space-y-1.5" aria-label={t('header.featuresAria')}>
+                  {HELP_ITEMS.map(({ icon: Icon, labelKey, descriptionKey }) => (
+                    <li key={labelKey} className="flex items-start gap-2 py-1">
                       <Icon className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" strokeWidth={1.8} />
                       <span className="text-chrome-label leading-snug text-muted">
-                        <span className="font-semibold text-ink">{label}:</span> {description}
+                        <span className="font-semibold text-ink">{t(labelKey)}:</span> {t(descriptionKey)}
                       </span>
                     </li>
                   ))}

@@ -1,7 +1,10 @@
 import type { Metadata } from 'next';
 import { Lora, Nunito } from 'next/font/google';
 
+import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
+import { I18nProvider } from '@/context/I18nContext';
+import { SITE_URL } from '@/lib/site';
 
 import './globals.css';
 
@@ -21,6 +24,7 @@ const description =
   'Generate color palettes, validate WCAG accessibility, and explore font pairings.';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: { default: 'Craftie', template: '%s | Craftie' },
   description,
   applicationName: 'Craftie',
@@ -49,7 +53,10 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${lora.variable} ${nunito.variable}`} suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <I18nProvider>{children}</I18nProvider>
+          <ServiceWorkerRegister />
+        </ThemeProvider>
       </body>
     </html>
   );

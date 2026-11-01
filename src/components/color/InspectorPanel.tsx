@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 
 import { useTabListKeyboard } from '@/lib/browser/useTabListKeyboard';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type InspectorSection = 'accessibility' | 'layouts';
 
@@ -26,6 +27,8 @@ export function InspectorPanel({
   accessibilityPanel,
   layoutsPanel,
 }: InspectorPanelProps) {
+  const tx = useTx();
+  const t = useT();
   const { getTabProps } = useTabListKeyboard({
     items: SECTION_IDS,
     activeId: activeSection,
@@ -39,7 +42,7 @@ export function InspectorPanel({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <nav aria-label="Revisión de paleta" className="shrink-0 border-b border-border px-4 pt-3">
+      <nav aria-label={t('ui.InspectorPanel.revision-de-paleta')} className="shrink-0 border-b border-border px-4 pt-3">
         <ul className="flex flex-wrap gap-1.5" role="tablist">
           {SECTIONS.map((section) => (
             <li key={section.id} role="presentation">
@@ -57,7 +60,7 @@ export function InspectorPanel({
                     : 'text-muted hover:bg-surface-raised hover:text-ink'
                 }`}
               >
-                {section.label}
+                {tx(section.label)}
               </button>
             </li>
           ))}

@@ -10,6 +10,7 @@ import type { FontPair } from '@lib/typography/pairings';
 import { pickReadableTextColor } from '@lib/color/readableText';
 
 import { MockupPreviewGrid } from '@/components/brand-preview/MockupPreviewGrid';
+import { useT, useTx } from '@/context/I18nContext';
 
 const COLOR_ROLES: { id: keyof GeneratedPalette; label: string }[] = [
   { id: 'surface', label: 'Fondo' },
@@ -26,6 +27,8 @@ export type StyleGuideViewProps = {
 };
 
 export function StyleGuideView({ palette, pairing }: StyleGuideViewProps) {
+  const tx = useTx();
+  const t = useT();
   const headingFamily = pairing ? buildFontFamilyStack(pairing.heading) : 'var(--font-display)';
   const bodyFamily = pairing ? buildFontFamilyStack(pairing.body) : 'var(--font-body)';
   const headingName = pairing?.heading.family ?? 'Lora';
@@ -40,14 +43,14 @@ export function StyleGuideView({ palette, pairing }: StyleGuideViewProps) {
       <div className="mx-auto flex max-w-5xl flex-col gap-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <TypographyCard
-            label="Titular"
+            label={t('ui.StyleGuideView.titular')}
             fontName={headingName}
             fontFamily={headingFamily}
             sample="Aa"
             color={palette.primary}
           />
           <TypographyCard
-            label="Cuerpo"
+            label={t('ui.StyleGuideView.cuerpo')}
             fontName={bodyName}
             fontFamily={bodyFamily}
             sample="Aa"
@@ -60,7 +63,7 @@ export function StyleGuideView({ palette, pairing }: StyleGuideViewProps) {
             <ColorRoleBar
               key={role.id}
               name={namedColors.get(role.id) ?? role.label}
-              label={role.label}
+              label={tx(role.label)}
               hex={palette[role.id]}
             />
           ))}
@@ -85,23 +88,25 @@ function TypographyCard({
   sample: string;
   color: string;
 }) {
+  const tx = useTx();
   return (
     <article className="rounded-xl border border-border bg-bg px-5 py-6">
-      <p className="text-[0.8125rem] font-semibold text-muted">{label}</p>
+      <p className="text-[0.8125rem] font-semibold text-muted">{tx(label)}</p>
       <p
         className="mt-3 text-[clamp(2.5rem,6vw,4rem)] font-semibold leading-none"
         style={{ fontFamily, color }}
       >
-        {sample}
+        {tx(sample)}
       </p>
       <p className="mt-4 text-[1.125rem] font-semibold text-ink" style={{ fontFamily }}>
-        {fontName}
+        {tx(fontName)}
       </p>
     </article>
   );
 }
 
 function ColorRoleBar({ name, label, hex }: { name: string; label: string; hex: string }) {
+  const tx = useTx();
   const formats = formatColorValues(hex);
   const textColor = pickReadableTextColor(hex);
 
@@ -112,8 +117,8 @@ function ColorRoleBar({ name, label, hex }: { name: string; label: string; hex: 
       aria-label={`${name}, ${formats.hex}, ${label}`}
     >
       <div>
-        <p className="text-[0.8125rem] font-semibold">{name}</p>
-        <p className="text-[0.6875rem] font-medium opacity-85">{label}</p>
+        <p className="text-[0.8125rem] font-semibold">{tx(name)}</p>
+        <p className="text-[0.6875rem] font-medium opacity-85">{tx(label)}</p>
       </div>
       <div className="text-right font-mono text-[0.6875rem] leading-relaxed opacity-90">
         <p>{formats.hex}</p>

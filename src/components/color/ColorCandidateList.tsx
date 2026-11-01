@@ -10,6 +10,7 @@ import {
 } from '@lib/color/uiColorCandidates';
 
 import { ColorCandidateRow } from './ColorCandidateRow';
+import { useT, useTx } from '@/context/I18nContext';
 
 const ORIGIN_SECTIONS: Array<{ origin: CandidateOrigin; label: string }> = [
   { origin: 'source', label: 'De tu imagen' },
@@ -25,11 +26,13 @@ export function ColorCandidateList({ candidates, activeUse, actionLabel, onSelec
   onSelect: (candidate: UiColorCandidate) => void;
   showData?: boolean;
 }) {
+  const tx = useTx();
+  const t = useT();
   const [showAll, setShowAll] = useState(false);
   const [expandedFamilies, setExpandedFamilies] = useState<Set<string>>(() => new Set());
 
   if (candidates.length === 0) {
-    return <p className="py-2 text-tools-meta text-muted">No hay candidatos adicionales.</p>;
+    return <p className="py-2 text-tools-meta text-muted">{t('ui.ColorCandidateList.no-hay-candidatos-adicionales')}</p>;
   }
 
   const families = groupCandidatesForUse(candidates, activeUse);
@@ -50,9 +53,9 @@ export function ColorCandidateList({ candidates, activeUse, actionLabel, onSelec
         const sectionFamilies = visibleFamilies.filter((family) => family.representative.origin === section.origin);
         if (sectionFamilies.length === 0) return null;
         return (
-          <section key={section.origin} aria-label={section.label}>
+          <section key={section.origin} aria-label={tx(section.label)}>
             <h4 className="border-b border-border bg-surface px-2.5 py-1.5 text-[0.625rem] font-semibold text-muted">
-              {section.label}
+              {tx(section.label)}
             </h4>
             <ul className="divide-y divide-border">
               {sectionFamilies.flatMap((family) => {
@@ -95,7 +98,7 @@ export function ColorCandidateList({ candidates, activeUse, actionLabel, onSelec
           onClick={() => setShowAll((value) => !value)}
           className="min-h-10 w-full border-t border-border bg-bg px-3 text-tools-meta font-semibold text-ink hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-primary/25"
         >
-          {showAll ? 'Ver menos' : `Ver ${families.length - DEFAULT_FAMILY_LIMIT} familias más`}
+          {showAll ? t('ui.ColorCandidateList.ver-menos') : t('ui.ColorCandidateList.ver-familias-mas', { value: families.length - DEFAULT_FAMILY_LIMIT })}
         </button>
       ) : null}
     </div>

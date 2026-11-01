@@ -19,7 +19,7 @@ export function DocsShell({ page }: DocsShellProps) {
       <header className="sticky top-0 z-sticky border-b border-border bg-bg/95 backdrop-blur-sm">
         <div className="mx-auto flex min-h-16 max-w-[1440px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <Link href="/" className="flex items-center gap-2.5 rounded-lg text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-white"><BookOpen className="size-4" aria-hidden="true" /></span>
+            <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-on-primary"><BookOpen className="size-4" aria-hidden="true" /></span>
             <span className="font-display text-lg font-semibold">Craftie</span>
             <span className="hidden border-l border-border pl-2.5 text-sm font-semibold text-muted sm:inline">Docs</span>
           </Link>

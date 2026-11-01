@@ -1,12 +1,13 @@
 import { Accessibility, Download, Image, Palette, Type } from 'lucide-react';
+import type { MessageKey } from '@lib/i18n/translate';
 
 export const HELP_ITEMS = [
-  { icon: Image, label: 'Inspiración', description: 'Estilos curados o colores extraídos de una imagen.' },
-  { icon: Palette, label: 'Colores', description: 'Roles semánticos, temas y ajustes en OKLCH.' },
-  { icon: Accessibility, label: 'Accesibilidad', description: 'Contraste WCAG y lectura complementaria APCA.' },
-  { icon: Type, label: 'Tipografía', description: 'Parejas curadas, Google Fonts y fuentes locales.' },
-  { icon: Download, label: 'Exportación', description: 'CSS, design tokens (JSON), Figma, DESIGN.md y brand kit.' },
-] as const;
+  { icon: Image, labelKey: 'help.inspiration', descriptionKey: 'help.inspirationDesc' },
+  { icon: Palette, labelKey: 'help.colors', descriptionKey: 'help.colorsDesc' },
+  { icon: Accessibility, labelKey: 'help.accessibility', descriptionKey: 'help.accessibilityDesc' },
+  { icon: Type, labelKey: 'help.typography', descriptionKey: 'help.typographyDesc' },
+  { icon: Download, labelKey: 'help.export', descriptionKey: 'help.exportDesc' },
+] as const satisfies ReadonlyArray<{ icon: unknown; labelKey: MessageKey; descriptionKey: MessageKey }>;
 
 export function HintIcon({ className = 'size-4' }: { className?: string }) {
   return (

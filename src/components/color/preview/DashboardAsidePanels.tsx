@@ -4,8 +4,10 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { getPaletteProgressNote, previewStaggerDelay } from './dashboardPreviewData';
-import { Avatar, ProgressBar, Tag } from './previewPrimitives';
+import { ProgressBar } from './previewMeters';
+import { Avatar, Tag } from './previewPrimitives';
 import { compactBodyStyle, captionStyle, headingStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 type DashboardActivityItem = {
   label: string;
@@ -28,6 +30,8 @@ export function DashboardAsidePanels({
   activity,
   onEditSlot,
 }: DashboardAsidePanelsProps) {
+  const tx = useTx();
+  const t = useT();
   const paletteProgress = 68;
   const paletteNote = getPaletteProgressNote(paletteProgress);
 
@@ -39,34 +43,28 @@ export function DashboardAsidePanels({
         className="preview-surface rounded-xl border p-5 @min-[800px]/dashboard:p-6"
         style={{ backgroundColor: colors.surfaceElevated, borderColor: colors.border }}
       >
-        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
-          Atelier Pigmento
-        </PreviewSlotTarget>
+        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>{t('ui.DashboardAsidePanels.atelier-pigmento')}</PreviewSlotTarget>
         <PreviewSlotTarget
           slot="mutedText"
           onEditSlot={onEditSlot}
           className="mt-3 max-w-[40ch] text-pretty"
           style={compactBodyStyle(fonts, colors.mutedText)}
-        >
-          El fondo todavía no cumple AA. El resto de la paleta ya está nombrado.
-        </PreviewSlotTarget>
+        >{t('ui.DashboardAsidePanels.el-fondo-todavia-no-cumple')}</PreviewSlotTarget>
         <div className="mt-5 flex flex-wrap gap-2">
-          <Tag label="Nombres" color={colors.brand1} surfaceHex={colors.surfaceElevated} slot="brand1" onEditSlot={onEditSlot} />
-          <Tag label="Color" color={colors.brand2} surfaceHex={colors.surfaceElevated} slot="brand2" onEditSlot={onEditSlot} />
-          <Tag label="Tipografía" color={colors.brand3} surfaceHex={colors.surfaceElevated} slot="brand3" onEditSlot={onEditSlot} />
+          <Tag label={t('ui.DashboardAsidePanels.nombres')} color={colors.brand1} surfaceHex={colors.surfaceElevated} slot="brand1" onEditSlot={onEditSlot} />
+          <Tag label={t('ui.DashboardAsidePanels.color')} color={colors.brand2} surfaceHex={colors.surfaceElevated} slot="brand2" onEditSlot={onEditSlot} />
+          <Tag label={t('ui.DashboardAsidePanels.tipografia')} color={colors.brand3} surfaceHex={colors.surfaceElevated} slot="brand3" onEditSlot={onEditSlot} />
         </div>
         <div className="mt-6">
           <div className="mb-3 flex items-center justify-between gap-3">
-            <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={captionStyle(fonts, colors.mutedText)}>
-              Sistema de marca
-            </PreviewSlotTarget>
+            <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={captionStyle(fonts, colors.mutedText)}>{t('ui.DashboardAsidePanels.sistema-de-marca')}</PreviewSlotTarget>
             <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="tabular-nums" style={titleStyle(fonts)}>
               {paletteProgress}%
             </PreviewSlotTarget>
           </div>
           <ProgressBar value={paletteProgress} color={colors.accent} slot="accent" onEditSlot={onEditSlot} />
           <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-3" style={captionStyle(fonts, colors.mutedText)}>
-            {paletteNote}
+            {tx(paletteNote)}
           </PreviewSlotTarget>
         </div>
       </PreviewSlotTarget>
@@ -77,9 +75,7 @@ export function DashboardAsidePanels({
         className="preview-surface flex-1 rounded-xl border p-5 @min-[800px]/dashboard:p-6"
         style={{ backgroundColor: colors.surface, borderColor: colors.border }}
       >
-        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
-          Actividad
-        </PreviewSlotTarget>
+        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>{t('ui.DashboardAsidePanels.actividad')}</PreviewSlotTarget>
         <div className="mt-5 space-y-4">
           {activity.map((item, index) => (
             <div
@@ -90,10 +86,10 @@ export function DashboardAsidePanels({
               <Avatar initials={item.initials} color={item.color} slot={item.slot} surfaceHex={colors.surface} onEditSlot={onEditSlot} size={28} />
               <div className="min-w-0 pt-0.5">
                 <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={titleStyle(fonts)}>
-                  {item.label}
+                  {tx(item.label)}
                 </PreviewSlotTarget>
                 <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-1" style={captionStyle(fonts, colors.mutedText)}>
-                  {item.detail}
+                  {tx(item.detail)}
                 </PreviewSlotTarget>
               </div>
             </div>

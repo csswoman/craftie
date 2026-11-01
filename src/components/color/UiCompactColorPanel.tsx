@@ -18,6 +18,7 @@ import {
   COMPACT_ROLE_GROUPS,
   type CompactRoleGroupId,
 } from './uiColorPanelGroups';
+import { useT, useTx } from '@/context/I18nContext';
 const GROUP_ICONS: Record<CompactRoleGroupId, LucideIcon> = {
   brand: Palette,
   foundations: Layers,
@@ -53,6 +54,8 @@ export function UiCompactColorPanel({
   onOpenSources: () => void;
   onCreateGuide: () => void;
 }) {
+  const tx = useTx();
+  const t = useT();
   const scrollRef = useAutoHideScrollbar<HTMLDivElement>();
   const missingGuideRoles = Object.values(COMPACT_ROLE_GROUPS)
     .flatMap((group) => group.roles)
@@ -65,18 +68,18 @@ export function UiCompactColorPanel({
         return (
           <PanelSection
             key={groupId}
-            title={group.title}
+            title={tx(group.title)}
             icon={GROUP_ICONS[groupId]}
             collapsible
             trailing={(
               <EditAction onClick={() => onOpenGroup(groupId, group.roles[0].token)} />
             )}
           >
-            <ul aria-label={group.title}>
+            <ul aria-label={tx(group.title)}>
               {group.roles.map((role) => (
                 <UiCompactRoleRow
                   key={role.token}
-                  label={role.label}
+                  label={tx(role.label)}
                   token={tokens[role.token]}
                   colors={colors}
                   onOpen={() => onOpenGroup(groupId, role.token)}
@@ -85,21 +88,19 @@ export function UiCompactColorPanel({
             </ul>
             {groupId === 'foundations' ? <NeutralScaleStrip /> : null}
             {groupId === 'brand' && showCreateGuide && !canCreateGuide && missingGuideRoles.length > 0 ? (
-              <p className="mt-2 rounded-md bg-surface px-3 py-2 text-tools-meta-scale leading-snug text-muted">
-                Para ver la guía, asigna un color a: {missingGuideRoles.join(', ')}.
-              </p>
+              <p className="mt-2 rounded-md bg-surface px-3 py-2 text-tools-meta-scale leading-snug text-muted">{t('ui.UiCompactColorPanel.para-ver-la-guia-asigna', { value: tx(missingGuideRoles.join(', ')) })}</p>
             ) : null}
           </PanelSection>
         );
       })}
 
       <PanelSection
-        title="Colores de estado"
+        title={t('ui.UiCompactColorPanel.colores-de-estado')}
         kicker="Semántico"
         icon={AlertCircle}
         collapsible
         breakBefore
-        trailing={<span className="text-tools-meta-scale font-semibold text-muted">esencial</span>}
+        trailing={<span className="text-tools-meta-scale font-semibold text-muted">{t('ui.UiCompactColorPanel.esencial')}</span>}
       >
         <ul className="space-y-1.5">
           {STATUS_COLOR_DEFINITIONS.map(({ role }) => (
@@ -117,16 +118,14 @@ export function UiCompactColorPanel({
             onClick={onGenerateStatus}
             className="mt-2 inline-flex min-h-9 w-full items-center justify-center gap-1.5 rounded-md border border-line bg-bg px-3 text-tools-meta-scale font-semibold text-ink transition-colors hover:bg-line-soft focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25"
           >
-            <Sparkles size={14} strokeWidth={1.75} aria-hidden="true" />
-            Generar colores de estado
-          </button>
+            <Sparkles size={14} strokeWidth={1.75} aria-hidden="true" />{t('ui.UiCompactColorPanel.generar-colores-de-estado')}</button>
         ) : null}
       </PanelSection>
 
       <PanelSection
-        title="Colores fuente"
+        title={t('ui.UiCompactColorPanel.colores-fuente')}
         icon={Droplets}
-        trailing={<span className="text-tools-meta-scale font-semibold text-muted">{colors.length} extraídos</span>}
+        trailing={<span className="text-tools-meta-scale font-semibold text-muted">{t('ui.UiCompactColorPanel.extraidos', { length: colors.length })}</span>}
       >
         <UiSourceColorGrid colors={colors} tokens={tokens} onOpen={onOpenSources} />
       </PanelSection>
@@ -181,19 +180,20 @@ function PanelSection({
   collapsible?: boolean;
   breakBefore?: boolean;
 }) {
+  const tx = useTx();
   const [open, setOpen] = useState(true);
 
   const titleRow = (
     <>
       <Icon aria-hidden="true" size={18} strokeWidth={2} className="shrink-0 text-muted" />
-      <h2 className="truncate font-sans text-tools-section-label font-semibold text-ink">{title}</h2>
+      <h2 className="truncate font-sans text-tools-section-label font-semibold text-ink">{tx(title)}</h2>
     </>
   );
 
   return (
     <section className={`border-b border-line-soft py-2.5 ${breakBefore ? '-mt-px border-t-2 border-line pt-3.5' : ''}`}>
       {kicker ? (
-        <p className="mb-1 text-tools-meta-scale font-medium text-muted">{kicker}</p>
+        <p className="mb-1 text-tools-meta-scale font-medium text-muted">{tx(kicker)}</p>
       ) : null}
       <div className="mb-1.5 flex min-h-9 items-center justify-between gap-3">
         {collapsible ? (
@@ -217,14 +217,13 @@ function PanelSection({
 }
 
 function EditAction({ onClick }: { onClick: () => void }) {
+  const t = useT();
   return (
     <button
       type="button"
       onClick={onClick}
       className="group inline-flex min-h-9 items-center gap-0.5 text-tools-meta-scale font-semibold text-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest/25"
-    >
-      Editar
-      <ChevronRight size={14} strokeWidth={2.25} aria-hidden="true" className="transition-transform duration-200 ease-out group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" />
+    >{t('ui.UiCompactColorPanel.editar')}<ChevronRight size={14} strokeWidth={2.25} aria-hidden="true" className="transition-transform duration-200 ease-out group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" />
     </button>
   );
 }

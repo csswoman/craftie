@@ -6,6 +6,7 @@ import { PALETTE_ROLE_ORDER } from '../color/roleTypes';
 import type { FontPair } from '../typography/pairings';
 import { TYPE_ROLE_IDS, type ResolvedTypeRole, type TypeRoleId } from '../typography/typeRoles';
 import { NEUTRAL_SCALE_STEPS, type NeutralScale } from '../color/neutralScale';
+import type { ExportDerivedTokensByTheme } from './derivedExportTokens';
 
 export const CORE_EXPORT_TOKENS = ['primary', 'background', 'on-background'] as const;
 
@@ -60,6 +61,8 @@ export type BuildExportTokenSetInput = {
   typeRoles?: Record<TypeRoleId, ResolvedTypeRole> | null;
   /** UI neutral scale, exported as neutral-0 … neutral-1000 for both themes. */
   neutralScale?: NeutralScale | null;
+  /** Tokens derived for each theme; fill what the user has not overridden. */
+  derivedTokensByTheme?: ExportDerivedTokensByTheme | null;
   name?: string;
   exportedAt?: string;
 };
@@ -83,6 +86,14 @@ function setColor(
 
 export function buildExportTokenSet(input: BuildExportTokenSetInput): ExportTokenSet {
   const colors: Record<string, ExportColorValue> = {};
+
+  if (input.derivedTokensByTheme) {
+    for (const theme of ['light', 'dark'] as const) {
+      for (const [token, hex] of Object.entries(input.derivedTokensByTheme[theme])) {
+        if (hex) setColor(colors, token, theme, hex);
+      }
+    }
+  }
 
   if (input.rolePalette) {
     for (const role of PALETTE_ROLE_ORDER) {

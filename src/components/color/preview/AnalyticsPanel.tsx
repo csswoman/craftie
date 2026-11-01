@@ -4,6 +4,7 @@ import type { ResolvedLayoutColors } from '@lib/color/layoutModes';
 
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { compactBodyStyle, headingStyle, type PreviewFonts } from './previewTypography';
+import { useTx } from '@/context/I18nContext';
 
 /** Shared panel for the analytics page: one header layout, one padding, one border. */
 export function AnalyticsPanel({
@@ -25,6 +26,7 @@ export function AnalyticsPanel({
   onEditSlot?: PreviewSlotEditHandler;
   children: ReactNode;
 }) {
+  const tx = useTx();
   return (
     <PreviewSlotTarget
       slot="surface"
@@ -35,11 +37,11 @@ export function AnalyticsPanel({
       <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
         <div className="min-w-0">
           <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
-            {title}
+            {tx(title)}
           </PreviewSlotTarget>
           {subtitle ? (
             <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-1" style={compactBodyStyle(fonts, colors.mutedText)}>
-              {subtitle}
+              {tx(subtitle)}
             </PreviewSlotTarget>
           ) : null}
         </div>

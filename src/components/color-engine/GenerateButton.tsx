@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/Button';
+import { useT } from '@/context/I18nContext';
 
 interface GenerateButtonProps {
   onClick: () => void;
@@ -9,6 +10,7 @@ interface GenerateButtonProps {
 }
 
 export function GenerateButton({ onClick, disabled = false, busy = false }: GenerateButtonProps) {
+  const t = useT();
   return (
     <div className="space-y-1.5">
       <Button
@@ -19,11 +21,9 @@ export function GenerateButton({ onClick, disabled = false, busy = false }: Gene
         aria-busy={busy}
         className="w-full"
       >
-        {busy ? 'Abriendo guía…' : 'Ver guía de marca'}
+        {busy ? t('ui.GenerateButton.abriendo-guia') : t('ui.GenerateButton.ver-guia-de-marca')}
       </Button>
-      <p className="text-center text-chrome-caption leading-relaxed text-muted">
-        Completa los 7 roles para crear la guía y poder exportar.
-      </p>
+      <p className="text-center text-chrome-caption leading-relaxed text-muted">{t('ui.GenerateButton.completa-los-7-roles-para')}</p>
     </div>
   );
 }

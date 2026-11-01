@@ -3,6 +3,8 @@
 import type { CanvasViewId } from '@lib/color/canvasViews';
 
 import { CanvasViewSelector } from './CanvasViewSelector';
+import { CanvasVisionSelect } from './CanvasVisionSelect';
+import { useT } from '@/context/I18nContext';
 import { PaletteHistoryControls } from './PaletteHistoryControls';
 import { PaletteImageBlock } from './PaletteImageBlock';
 import { PaletteRandomizeButton } from './PaletteRandomizeButton';
@@ -40,6 +42,7 @@ export function PaletteCanvasToolbar({
   onImageFileSelected?: (file: File) => void;
   onImageRegenerate?: () => void;
 }) {
+  const t = useT();
   const accentsActive = activeView === 'colors' && showAccents;
   const showAccentsToggle = activeView === 'colors';
 
@@ -48,12 +51,12 @@ export function PaletteCanvasToolbar({
       {showAccentsToggle ? (
         <div className="hidden min-w-0 sm:block">
           <p className="truncate text-chrome-label font-semibold text-ink">
-            {accentsActive ? 'Paleta de acentos' : 'Paleta de roles'}
+            {accentsActive ? t('canvas.accentsTitle') : t('canvas.rolesTitle')}
           </p>
           <p className="truncate text-chrome-caption text-muted">
             {accentsActive
-              ? 'El 1 se usa en UI; 2–6 en gráficos.'
-              : 'Edita colores y revisa el contraste.'}
+              ? t('canvas.accentsHint')
+              : t('canvas.rolesHint')}
           </p>
         </div>
       ) : null}
@@ -77,9 +80,10 @@ export function PaletteCanvasToolbar({
               : 'border-line bg-transparent text-ink hover:bg-surface-raised'
               }`}
           >
-            {accentsActive ? 'Ver roles' : 'Ver acentos'}
+            {accentsActive ? t('canvas.showRoles') : t('canvas.showAccents')}
           </button>
         ) : null}
+        <CanvasVisionSelect />
         <div className="hidden shrink-0 lg:block [&>div]:min-w-0">
           <CanvasViewSelector activeId={activeView} palette={palette} onSelect={onSelectView} />
         </div>

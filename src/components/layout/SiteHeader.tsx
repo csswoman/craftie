@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type WorkspaceTab = 'colors' | 'typography';
 
@@ -30,6 +31,8 @@ export function SiteHeader({
   workspaceTab,
   onWorkspaceTabChange,
 }: SiteHeaderProps) {
+  const tx = useTx();
+  const t = useT();
   const isWorkspace = workspaceTab !== undefined && onWorkspaceTabChange !== undefined;
 
   return (
@@ -39,12 +42,10 @@ export function SiteHeader({
           compact ? 'py-2.5' : 'px-6 py-4'
         }`}
       >
-        <Link href="/" className="font-display text-lg font-semibold text-ink">
-          Craftie
-        </Link>
+        <Link href="/" className="font-display text-lg font-semibold text-ink">{t('ui.SiteHeader.craftie')}</Link>
 
         <div className="flex items-center gap-1">
-          <nav aria-label="Principal">
+          <nav aria-label={t('ui.SiteHeader.principal')}>
             {isWorkspace ? (
               <ul className="flex gap-1" role="tablist">
                 {WORKSPACE_TABS.map((tab) => (
@@ -56,19 +57,15 @@ export function SiteHeader({
                       onClick={() => onWorkspaceTabChange(tab.id)}
                       className={tabClassName(workspaceTab === tab.id)}
                     >
-                      {tab.label}
+                      {tx(tab.label)}
                     </button>
                   </li>
                 ))}
               </ul>
             ) : (
-              <Link href="/" className={tabClassName(activePath === '/')}>
-                Colores
-              </Link>
+              <Link href="/" className={tabClassName(activePath === '/')}>{t('ui.SiteHeader.colores')}</Link>
             )}
-            <Link href="/docs" className={tabClassName(false)}>
-              Docs
-            </Link>
+            <Link href="/docs" className={tabClassName(false)}>{t('ui.SiteHeader.docs')}</Link>
           </nav>
           <ThemeToggle />
         </div>

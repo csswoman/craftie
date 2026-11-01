@@ -4,6 +4,7 @@ import { VIBRANCY_MAX, VIBRANCY_MID, VIBRANCY_MIN } from '@lib/color/vibrancy';
 
 import { useRolePalette } from '@/context/RolePaletteContext';
 import { Button } from '@/components/ui/Button';
+import { useT, useTx } from '@/context/I18nContext';
 
 const TICKS = [
   { value: VIBRANCY_MIN, label: 'Pastel' },
@@ -12,6 +13,8 @@ const TICKS = [
 ] as const;
 
 export function VibrancyCalibrator() {
+  const tx = useTx();
+  const t = useT();
   const {
     previewVibrancy,
     savedVibrancy,
@@ -22,14 +25,13 @@ export function VibrancyCalibrator() {
 
   return (
     <section
-      aria-label="Calibrador de vibrancia"
+      aria-label={t('ui.VibrancyCalibrator.calibrador-de-vibrancia')}
       className="rounded-lg border border-border bg-bg p-3"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="text-tools-section font-semibold text-ink">Vibrancia</h3>
-          <p className="text-tools-meta text-muted">
-            Vista previa {previewVibrancy} · Guardado {savedVibrancy}
+          <h3 className="text-tools-section font-semibold text-ink">{t('ui.VibrancyCalibrator.vibrancia')}</h3>
+          <p className="text-tools-meta text-muted">{t('ui.VibrancyCalibrator.vista-previa-guardado', { previewVibrancy, savedVibrancy })}
           </p>
         </div>
         <Button
@@ -37,9 +39,7 @@ export function VibrancyCalibrator() {
           disabled={!hasUnsavedVibrancy}
           onClick={saveVibrancy}
           className="min-h-11 px-3 py-2 text-tools-body"
-        >
-          Guardar
-        </Button>
+        >{t('ui.VibrancyCalibrator.guardar')}</Button>
       </div>
 
       <div className="mt-3">
@@ -50,7 +50,7 @@ export function VibrancyCalibrator() {
           step={1}
           value={previewVibrancy}
           onChange={(event) => setPreviewVibrancy(Number(event.currentTarget.value))}
-          aria-label="Vibrancia expresiva"
+          aria-label={t('ui.VibrancyCalibrator.vibrancia-expresiva')}
           aria-valuetext={`${previewVibrancy} de 100`}
           className="h-2 w-full cursor-pointer accent-primary"
         />
@@ -60,7 +60,7 @@ export function VibrancyCalibrator() {
               key={tick.value}
               className={index === 1 ? 'text-center' : index === 2 ? 'text-right' : ''}
             >
-              {tick.label}
+              {tx(tick.label)}
             </span>
           ))}
         </div>

@@ -15,6 +15,7 @@ import {
   type PreviewFonts,
   titleStyle,
 } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 export function StoreProductCard({
   product,
@@ -35,6 +36,8 @@ export function StoreProductCard({
   onToggle: () => void;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   const button = buttonPairOn(colors, colors.surface);
   const dots = [colors.brand1, colors.brand2, colors.brand3, colors.brand4];
   const accentFill = vividFill(colors.accent, colors.surface);
@@ -60,18 +63,18 @@ export function StoreProductCard({
             className="absolute right-3 top-3 rounded-full px-2.5 py-0.5"
             style={{ ...captionStyle(fonts), backgroundColor: accentFill, color: onVividFill(accentFill) }}
           >
-            {product.badge}
+            {tx(product.badge)}
           </span>
         ) : null}
       </div>
       <div className="flex flex-1 flex-col gap-1.5 p-4 @min-[900px]/store:p-5">
         <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={brandStyle(fonts)}>
-          {product.name}
+          {tx(product.name)}
         </PreviewSlotTarget>
         <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} style={captionStyle(fonts, colors.mutedText)}>
-          {product.detail}
+          {tx(product.detail)}
         </PreviewSlotTarget>
-        <div className="mt-1 flex items-center gap-1" aria-label="Colores disponibles">
+        <div className="mt-1 flex items-center gap-1" aria-label={t('ui.StoreProductCard.colores-disponibles')}>
           {[0, 1, 2].map((offset) => (
             <span
               key={offset}
@@ -83,7 +86,7 @@ export function StoreProductCard({
         </div>
         <div className="mt-3 flex items-center justify-between gap-3">
           <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="tabular-nums" style={titleStyle(fonts)}>
-            {formatStorePrice(product.price)}
+            {tx(formatStorePrice(product.price))}
           </PreviewSlotTarget>
           <button
             type="button"
@@ -102,11 +105,9 @@ export function StoreProductCard({
           >
             {inCart ? (
               <span className="inline-flex items-center gap-1.5">
-                <PreviewIcon name="check" size={13} />
-                En el carrito
-              </span>
+                <PreviewIcon name="check" size={13} />{t('ui.StoreProductCard.en-el-carrito')}</span>
             ) : (
-              'Añadir'
+              t('ui.StoreProductCard.anadir')
             )}
           </button>
         </div>

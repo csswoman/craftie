@@ -7,6 +7,7 @@ import type { TypeScaleSpecimenLevel } from '@lib/typography/typeScalePreview';
 import { TypeEditPopover, TypeScopeToggle } from '@/components/color/TypeEditPopover';
 import { TypeRoleFields } from '@/components/font-pairing/TypeRoleFields';
 import { useTypeRoles } from '@/context/TypeRolesContext';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type TypeLevelAnchor = {
   levelId: string;
@@ -23,6 +24,8 @@ export function TypeLevelPopover({
   levels: TypeScaleSpecimenLevel[];
   onClose: () => void;
 }) {
+  const tx = useTx();
+  const t = useT();
   const { patchLevel, patchLevelGlobal, resetLevel, weights } = useTypeRoles();
   const [onlyThisLevel, setOnlyThisLevel] = useState(false);
   const level = anchor ? levels.find((entry) => entry.id === anchor.levelId) : undefined;
@@ -31,13 +34,13 @@ export function TypeLevelPopover({
   return (
     <TypeEditPopover
       rect={anchor?.rect ?? null}
-      title={level?.label ?? ''}
-      subtitle={level ? `${level.usage}.` : ''}
+      title={tx(level?.label ?? '')}
+      subtitle={level ? `${tx(level.usage)}.` : ''}
       onClose={onClose}
     >
       {level ? (
         <>
-          <TypeScopeToggle checked={onlyThisLevel} onChange={setOnlyThisLevel} label="Solo este nivel" />
+          <TypeScopeToggle checked={onlyThisLevel} onChange={setOnlyThisLevel} label={t('ui.TypeLevelPopover.solo-este-nivel')} />
         <TypeRoleFields
           role={level}
           defaultWeight={level.overridden.weight ? (baseWeight ?? level.weight) : level.weight}

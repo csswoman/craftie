@@ -8,6 +8,7 @@ import { CRAFTIE_QUOTE, LANDING_GUTTER_CLASS } from './landingPreviewData';
 import { paletteTint } from './previewButtons';
 import { Avatar, Tag } from './previewPrimitives';
 import { captionStyle, headingStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 type LandingTestimonialCardProps = {
   colors: ResolvedLayoutColors;
@@ -17,6 +18,8 @@ type LandingTestimonialCardProps = {
 
 /** Full-bleed band on a wash of the accent: the page ends in color, without a card inside the page. */
 export function LandingTestimonialCard({ colors, fonts, onEditSlot }: LandingTestimonialCardProps) {
+  const tx = useTx();
+  const t = useT();
   const wash = paletteTint(colors.accent, colors.appBackground, 0.14);
   const ink = readableOn(colors.text, wash);
   const muted = readableOn(colors.mutedText, wash);
@@ -30,7 +33,7 @@ export function LandingTestimonialCard({ colors, fonts, onEditSlot }: LandingTes
     >
       <blockquote className="m-0 mx-auto flex max-w-[52ch] flex-col items-center text-center">
         <Tag
-          label={CRAFTIE_QUOTE.badge}
+          label={tx(CRAFTIE_QUOTE.badge)}
           color={colors.success}
           surfaceHex={wash}
           slot="success"
@@ -42,9 +45,7 @@ export function LandingTestimonialCard({ colors, fonts, onEditSlot }: LandingTes
           onEditSlot={onEditSlot}
           className="mt-5 text-balance"
           style={{ ...headingStyle(fonts), color: ink, lineHeight: 1.3 }}
-        >
-          &ldquo;{CRAFTIE_QUOTE.text}&rdquo;
-        </PreviewSlotTarget>
+        >{t('ui.LandingTestimonialCard.ldquo-rdquo', { text: tx(CRAFTIE_QUOTE.text) })}</PreviewSlotTarget>
 
         <footer className="mt-6 flex items-center gap-3 text-left">
           <Avatar
@@ -57,7 +58,7 @@ export function LandingTestimonialCard({ colors, fonts, onEditSlot }: LandingTes
           />
           <div className="min-w-0">
             <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={{ ...titleStyle(fonts), color: ink }}>
-              {CRAFTIE_QUOTE.author}
+              {tx(CRAFTIE_QUOTE.author)}
             </PreviewSlotTarget>
             <PreviewSlotTarget
               slot="mutedText"
@@ -65,7 +66,7 @@ export function LandingTestimonialCard({ colors, fonts, onEditSlot }: LandingTes
               className="truncate"
               style={captionStyle(fonts, muted)}
             >
-              {CRAFTIE_QUOTE.role}
+              {tx(CRAFTIE_QUOTE.role)}
             </PreviewSlotTarget>
           </div>
         </footer>

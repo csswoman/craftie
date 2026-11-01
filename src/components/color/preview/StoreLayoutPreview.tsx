@@ -32,6 +32,7 @@ import {
   type PreviewFonts,
   previewRootTypeStyle,
 } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 export const STORE_VISUAL_SLOTS = [
   'appBackground',
@@ -61,6 +62,8 @@ export function StoreLayoutPreview({
   fonts?: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   const [filter, setFilter] = useState<string>(STORE_FILTERS[0]);
   const [cart, setCart] = useState<string[]>([]);
   const filterButton = buttonPairOn(colors, colors.appBackground);
@@ -96,21 +99,17 @@ export function StoreLayoutPreview({
         className={`preview-rise flex items-center justify-between gap-4 py-4 ${STORE_GUTTER_CLASS}`}
         style={{ backgroundColor: colors.chrome, animationDelay: previewStaggerDelay(0) }}
       >
-        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
-          Casa Barro
-        </PreviewSlotTarget>
-        <nav className="hidden items-center gap-6 @min-[560px]/store:flex" aria-label="Categorías">
+        <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>{t('ui.StoreLayoutPreview.casa-barro')}</PreviewSlotTarget>
+        <nav className="hidden items-center gap-6 @min-[560px]/store:flex" aria-label={t('ui.StoreLayoutPreview.categorias')}>
           {STORE_NAV.map((item) => (
             <span key={item} style={labelStyle(fonts, colors.mutedText)}>
-              {item}
+              {tx(item)}
             </span>
           ))}
         </nav>
         <span className="flex items-center gap-3" style={{ color: colors.mutedText }}>
           <PreviewIcon name="search" size={18} />
-          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="tabular-nums" style={labelStyle(fonts)}>
-            Carrito ({cart.length})
-          </PreviewSlotTarget>
+          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="tabular-nums" style={labelStyle(fonts)}>{t('ui.StoreLayoutPreview.carrito', { length: cart.length })}</PreviewSlotTarget>
         </span>
       </PreviewSlotTarget>
 
@@ -125,7 +124,7 @@ export function StoreLayoutPreview({
         }}
       >
         <PreviewIcon name="check" size={14} />
-        <span role="status">{getShippingNote(cartTotal)}</span>
+        <span role="status">{tx(getShippingNote(cartTotal))}</span>
       </PreviewSlotTarget>
 
       <section className={`preview-rise py-8 ${STORE_GUTTER_CLASS} @min-[720px]/store:py-12`} style={{ animationDelay: previewStaggerDelay(1) }}>
@@ -135,20 +134,14 @@ export function StoreLayoutPreview({
           style={{ backgroundColor: heroWash, color: heroInk }}
         >
           <div className="min-w-0 self-center pb-2 pr-6 @min-[720px]/store:pb-10 @min-[720px]/store:pr-0">
-            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="max-w-[16ch]" style={{ ...heroStyle(fonts), color: heroInk }}>
-              Objetos para la mesa de cada día
-            </PreviewSlotTarget>
-            <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-3 max-w-[44ch] text-pretty" style={bodyStyle(fonts, heroMuted)}>
-              Piezas hechas en pequeñas tiradas, con materiales que envejecen bien.
-            </PreviewSlotTarget>
+            <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} className="max-w-[16ch]" style={{ ...heroStyle(fonts), color: heroInk }}>{t('ui.StoreLayoutPreview.objetos-para-la-mesa-de')}</PreviewSlotTarget>
+            <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="mt-3 max-w-[44ch] text-pretty" style={bodyStyle(fonts, heroMuted)}>{t('ui.StoreLayoutPreview.piezas-hechas-en-pequenas-tiradas')}</PreviewSlotTarget>
             <PreviewSlotTarget
               slot="primaryAction"
               onEditSlot={onEditSlot}
               className="mt-6 inline-flex min-h-11 items-center rounded-[10px] px-5"
               style={{ ...buttonStyle(fonts), backgroundColor: heroButton.fill, color: heroButton.on }}
-            >
-              Ver novedades
-            </PreviewSlotTarget>
+            >{t('ui.StoreLayoutPreview.ver-novedades')}</PreviewSlotTarget>
           </div>
           <div className="ml-auto w-full min-w-0 max-w-[26rem] self-end @min-[720px]/store:max-w-none">
             <StoreHeroArt colors={colors} wash={heroWash} ink={heroInk} onEditSlot={onEditSlot} />
@@ -156,16 +149,14 @@ export function StoreLayoutPreview({
         </div>
 
         <div className="mt-12 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>
-            Recién salido del horno
-          </PreviewSlotTarget>
+          <PreviewSlotTarget slot="text" onEditSlot={onEditSlot} style={headingStyle(fonts)}>{t('ui.StoreLayoutPreview.recien-salido-del-horno')}</PreviewSlotTarget>
           <PreviewSlotTarget slot="mutedText" onEditSlot={onEditSlot} className="tabular-nums" style={labelStyle(fonts, colors.mutedText)}>
             {visible.length} {visible.length === 1 ? 'pieza' : 'piezas'}
           </PreviewSlotTarget>
         </div>
 
         <div className="mt-4">
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar productos">
+          <div className="flex flex-wrap gap-2" role="group" aria-label={t('ui.StoreLayoutPreview.filtrar-productos')}>
             {STORE_FILTERS.map((option) => {
               const active = option === filter;
               return (
@@ -182,7 +173,7 @@ export function StoreLayoutPreview({
                     color: active ? filterButton.on : colors.text,
                   }}
                 >
-                  {option}
+                  {tx(option)}
                 </button>
               );
             })}

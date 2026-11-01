@@ -4,6 +4,7 @@ import {
   GOOGLE_FONT_CATEGORY_FILTERS,
   type GoogleFontCategoryFilter,
 } from '@lib/typography/googleFontsCatalog';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type GoogleFontCategoryChipsProps = {
   value: GoogleFontCategoryFilter;
@@ -14,11 +15,13 @@ export function GoogleFontCategoryChips({
   value,
   onChange,
 }: GoogleFontCategoryChipsProps) {
+  const tx = useTx();
+  const t = useT();
   return (
     <div
       className="flex flex-wrap gap-1.5"
       role="group"
-      aria-label="Filtrar fuentes por categoría"
+      aria-label={t('ui.GoogleFontCategoryChips.filtrar-fuentes-por-categoria')}
     >
       {GOOGLE_FONT_CATEGORY_FILTERS.map((filter) => {
         const active = value === filter.value;
@@ -35,7 +38,7 @@ export function GoogleFontCategoryChips({
               : 'bg-surface-raised text-muted hover:bg-border/60 hover:text-ink'
               }`}
           >
-            {filter.label}
+            {tx(filter.label)}
           </button>
         );
       })}

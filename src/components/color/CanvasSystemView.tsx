@@ -19,6 +19,7 @@ import { useRolePalette } from '@/context/RolePaletteContext';
 import { useTypeRoles } from '@/context/TypeRolesContext';
 import { loadGoogleFonts } from '@/lib/browser/googleFonts';
 import { TypeScalePreview } from '@/components/color/TypeScalePreview';
+import { useT, useTx } from '@/context/I18nContext';
 
 type CanvasSystemViewProps = {
   view: Extract<CanvasViewId, 'style-guide' | 'type-scale'>;
@@ -45,6 +46,8 @@ export function CanvasSystemView({
   appliedTypography,
   recommendedPairings,
 }: CanvasSystemViewProps) {
+  const tx = useTx();
+  const t = useT();
   const { rolePalette } = useRolePalette();
   const activePairing = resolveActiveFontPair(selectedPairing, recommendedPairings);
   const headingFont = useMemo(
@@ -114,19 +117,13 @@ export function CanvasSystemView({
               style={{ backgroundColor: rolePalette.fondo.hex, color: rolePalette.texto.hex }}
             >
               <div className="relative z-10 max-w-2xl">
-                <p className="text-chrome-caption font-semibold uppercase tracking-[0.12em]" style={{ opacity: 0.7 }}>Dirección visual</p>
-                <h1 className="mt-5 text-4xl sm:text-6xl" style={{ ...paletteTextStyle, fontFamily: headingFont, fontWeight: headingWeight, lineHeight: 0.98 }}>
-                  Ideas claras, marcas memorables.
-                </h1>
-                <p className="mt-5 max-w-xl text-base leading-relaxed opacity-80 sm:text-lg" style={{ fontFamily: bodyFont, fontWeight: bodyWeight }}>
-                  Una combinación de color, escala y tipografía pensada para comunicar con intención.
-                </p>
+                <p className="text-chrome-caption font-semibold uppercase tracking-[0.12em]" style={{ opacity: 0.7 }}>{t('ui.CanvasSystemView.direccion-visual')}</p>
+                <h1 className="mt-5 text-4xl sm:text-6xl" style={{ ...paletteTextStyle, fontFamily: headingFont, fontWeight: headingWeight, lineHeight: 0.98 }}>{t('ui.CanvasSystemView.ideas-claras-marcas-memorables')}</h1>
+                <p className="mt-5 max-w-xl text-base leading-relaxed opacity-80 sm:text-lg" style={{ fontFamily: bodyFont, fontWeight: bodyWeight }}>{t('ui.CanvasSystemView.una-combinacion-de-color-escala')}</p>
                 <div className="mt-7 flex flex-wrap items-center gap-3">
-                  <button type="button" className="min-h-11 rounded-md px-5 text-sm font-semibold" style={{ backgroundColor: rolePalette.acento.hex, color: accentForeground, fontFamily: bodyFont }}>
-                    Ver identidad
-                  </button>
+                  <button type="button" className="min-h-11 rounded-md px-5 text-sm font-semibold" style={{ backgroundColor: rolePalette.acento.hex, color: accentForeground, fontFamily: bodyFont }}>{t('ui.CanvasSystemView.ver-identidad')}</button>
                   <span className="rounded-full border px-3 py-2 text-xs font-medium" style={{ borderColor: rolePalette.borde.hex, color: rolePalette.texto.hex }}>
-                    {headingFamily} + {bodyFamily}
+                    {tx(headingFamily)} + {tx(bodyFamily)}
                   </span>
                 </div>
               </div>
@@ -137,26 +134,26 @@ export function CanvasSystemView({
             <div className="grid gap-5 lg:grid-cols-[minmax(0,1.3fr)_minmax(18rem,0.7fr)]">
               <div className="rounded-xl border p-5 sm:p-6" style={paletteSurfaceStyle}>
                 <div className="flex items-end justify-between gap-4">
-                  <div><p className="text-chrome-caption font-semibold uppercase tracking-[0.1em]" style={paletteMutedStyle}>Paleta</p><h2 className="mt-1 text-2xl" style={{ ...paletteTextStyle, fontFamily: headingFont }}>Roles de color</h2></div>
-                  <span className="font-mono text-xs" style={paletteMutedStyle}>{paletteRows.length} roles</span>
+                  <div><p className="text-chrome-caption font-semibold uppercase tracking-[0.1em]" style={paletteMutedStyle}>{t('ui.CanvasSystemView.paleta')}</p><h2 className="mt-1 text-2xl" style={{ ...paletteTextStyle, fontFamily: headingFont }}>{t('ui.CanvasSystemView.roles-de-color')}</h2></div>
+                  <span className="font-mono text-xs" style={paletteMutedStyle}>{t('ui.CanvasSystemView.roles', { length: paletteRows.length })}</span>
                 </div>
                 <div className="mt-5 grid gap-2 sm:grid-cols-2">
                   {paletteRows.map((role) => {
                     const slot = rolePalette[role];
                     const foreground = contrastRatio('#FFFFFF', slot.hex) >= contrastRatio('#111111', slot.hex) ? '#FFFFFF' : '#111111';
-                    return <div key={role} className="flex min-h-20 items-end justify-between rounded-lg p-3" style={{ backgroundColor: slot.hex, color: foreground }}><span className="text-sm font-semibold">{ROLE_LABELS[role]}</span><span className="font-mono text-[0.68rem] opacity-80">{slot.hex.toUpperCase()}</span></div>;
+                    return <div key={role} className="flex min-h-20 items-end justify-between rounded-lg p-3" style={{ backgroundColor: slot.hex, color: foreground }}><span className="text-sm font-semibold">{tx(ROLE_LABELS[role])}</span><span className="font-mono text-[0.68rem] opacity-80">{slot.hex.toUpperCase()}</span></div>;
                   })}
                 </div>
               </div>
 
               <div className="rounded-xl border p-5 sm:p-6" style={paletteSurfaceStyle}>
-                <p className="text-chrome-caption font-semibold uppercase tracking-[0.1em]" style={paletteMutedStyle}>Componentes</p>
-                <h2 className="mt-1 text-2xl" style={{ ...paletteTextStyle, fontFamily: headingFont }}>UI esencial</h2>
+                <p className="text-chrome-caption font-semibold uppercase tracking-[0.1em]" style={paletteMutedStyle}>{t('ui.CanvasSystemView.componentes')}</p>
+                <h2 className="mt-1 text-2xl" style={{ ...paletteTextStyle, fontFamily: headingFont }}>{t('ui.CanvasSystemView.ui-esencial')}</h2>
                 <div className="mt-5 rounded-lg border p-4" style={{ backgroundColor: rolePalette.fondo.hex, borderColor: rolePalette.borde.hex }}>
-                  <div className="flex items-center justify-between"><span className="text-sm font-semibold" style={{ ...paletteTextStyle, fontFamily: bodyFont }}>Estado activo</span><span className="rounded-full px-2 py-1 text-[0.68rem] font-semibold" style={{ backgroundColor: rolePalette.acento.hex, color: accentForeground }}>Nuevo</span></div>
-                  <p className="mt-2 text-xs leading-relaxed" style={{ ...paletteMutedStyle, fontFamily: bodyFont }}>Los elementos comparten la misma voz visual.</p>
+                  <div className="flex items-center justify-between"><span className="text-sm font-semibold" style={{ ...paletteTextStyle, fontFamily: bodyFont }}>{t('ui.CanvasSystemView.estado-activo')}</span><span className="rounded-full px-2 py-1 text-[0.68rem] font-semibold" style={{ backgroundColor: rolePalette.acento.hex, color: accentForeground }}>{t('ui.CanvasSystemView.nuevo')}</span></div>
+                  <p className="mt-2 text-xs leading-relaxed" style={{ ...paletteMutedStyle, fontFamily: bodyFont }}>{t('ui.CanvasSystemView.los-elementos-comparten-la-misma')}</p>
                   <div className="mt-4 h-2 overflow-hidden rounded-full" style={{ backgroundColor: rolePalette.borde.hex }}><div className="h-full w-3/4 rounded-full" style={{ backgroundColor: rolePalette.primario.hex }} /></div>
-                  <div className="mt-4 flex gap-2"><button type="button" className="min-h-10 flex-1 rounded-md px-3 text-xs font-semibold" style={{ backgroundColor: rolePalette.primario.hex, color: primaryForeground, fontFamily: bodyFont }}>Continuar</button><button type="button" className="min-h-10 rounded-md border px-3 text-xs font-semibold" style={{ ...paletteTextStyle, borderColor: rolePalette.borde.hex, fontFamily: bodyFont }}>Más</button></div>
+                  <div className="mt-4 flex gap-2"><button type="button" className="min-h-10 flex-1 rounded-md px-3 text-xs font-semibold" style={{ backgroundColor: rolePalette.primario.hex, color: primaryForeground, fontFamily: bodyFont }}>{t('ui.CanvasSystemView.continuar')}</button><button type="button" className="min-h-10 rounded-md border px-3 text-xs font-semibold" style={{ ...paletteTextStyle, borderColor: rolePalette.borde.hex, fontFamily: bodyFont }}>{t('ui.CanvasSystemView.mas')}</button></div>
                 </div>
                 <div className="mt-4 flex gap-2"><span className="size-8 rounded-full" style={{ backgroundColor: rolePalette.primario.hex }} /><span className="size-8 rounded-full" style={{ backgroundColor: rolePalette.acento.hex }} /><span className="size-8 rounded-full" style={{ backgroundColor: rolePalette.secundario.hex }} /><span className="size-8 rounded-full" style={{ backgroundColor: rolePalette.borde.hex }} /></div>
               </div>

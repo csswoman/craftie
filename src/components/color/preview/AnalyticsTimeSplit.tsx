@@ -9,6 +9,7 @@ import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTar
 import { ANALYTICS_ACTIVITY_MIX } from './analyticsPreviewData';
 import { DonutChart, type ChartSeries } from './previewCharts';
 import { labelStyle, titleStyle, type PreviewFonts } from './previewTypography';
+import { useT, useTx } from '@/context/I18nContext';
 
 /** Where the week's hours went: a thick donut and a legend table that highlights on hover. */
 export function AnalyticsTimeSplit({
@@ -20,6 +21,8 @@ export function AnalyticsTimeSplit({
   fonts: PreviewFonts;
   onEditSlot?: PreviewSlotEditHandler;
 }) {
+  const tx = useTx();
+  const t = useT();
   const [hovered, setHovered] = useState<string | null>(null);
   const series: ChartSeries[] = ANALYTICS_ACTIVITY_MIX.map((item) => ({
     label: item.label,
@@ -31,7 +34,7 @@ export function AnalyticsTimeSplit({
   const focus = series.find((item) => item.label === hovered) ?? series[0]!;
 
   return (
-    <AnalyticsPanel colors={colors} fonts={fonts} title="Reparto del tiempo" subtitle="38 h de trabajo esta semana" onEditSlot={onEditSlot}>
+    <AnalyticsPanel colors={colors} fonts={fonts} title={t('ui.AnalyticsTimeSplit.reparto-del-tiempo')} subtitle={t('ui.AnalyticsTimeSplit.38-h-de-trabajo-esta')} onEditSlot={onEditSlot}>
       <div className="flex flex-1 flex-col items-center gap-5">
         <DonutChart segments={series} centerLabel={focus.label} centerValue={focus.display ?? ''} surfaceHex={colors.surface} size={156} />
         <ul className="w-full">
@@ -45,10 +48,10 @@ export function AnalyticsTimeSplit({
             >
               <PreviewSlotTarget slot={item.slot} onEditSlot={onEditSlot} className="size-2.5 shrink-0 rounded-[3px]" style={{ backgroundColor: item.color }} />
               <span className="min-w-0 flex-1 truncate" style={labelStyle(fonts, colors.text)}>
-                {item.label}
+                {tx(item.label)}
               </span>
               <span className="tabular-nums" style={titleStyle(fonts)}>
-                {item.display}
+                {tx(item.display)}
               </span>
             </li>
           ))}

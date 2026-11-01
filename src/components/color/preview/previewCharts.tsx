@@ -5,6 +5,7 @@ import type { UiLayoutSlot } from '@lib/color/layoutModes';
 import { PreviewSlotTarget, type PreviewSlotEditHandler } from './PreviewSlotTarget';
 import { vividFill } from './previewColor';
 import { tint } from './previewPrimitives';
+import { useTx } from '@/context/I18nContext';
 
 export type ChartSeries = {
   label: string;
@@ -166,6 +167,7 @@ export function DonutChart({
   surfaceHex: string;
   size?: number;
 }) {
+  const tx = useTx();
   const stroke = size * 0.14;
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -199,8 +201,8 @@ export function DonutChart({
         ))}
       </svg>
       <div className="absolute inset-0 grid place-content-center text-center">
-        <span className="text-[0.75rem] uppercase tracking-wide opacity-60">{centerLabel}</span>
-        <span className="text-[1.25rem] leading-none" style={{ fontFamily: 'var(--font-heading)', fontWeight: 'var(--weight-heading)' }}>{centerValue}</span>
+        <span className="text-[0.75rem] uppercase tracking-wide opacity-60">{tx(centerLabel)}</span>
+        <span className="text-[1.25rem] leading-none" style={{ fontFamily: 'var(--font-heading)', fontWeight: 'var(--weight-heading)' }}>{tx(centerValue)}</span>
       </div>
     </div>
   );
@@ -215,6 +217,7 @@ export function DataLegend({
   onEditSlot?: PreviewSlotEditHandler;
   interactive?: boolean;
 }) {
+  const tx = useTx();
   return (
     <div className="space-y-2.5">
       {segments.map((segment) => (
@@ -230,7 +233,7 @@ export function DataLegend({
               className="h-2.5 w-2.5 shrink-0 rounded-full transition-transform duration-200 group-hover:scale-125"
               style={{ backgroundColor: segment.color }}
             />
-            <span className="truncate">{segment.label}</span>
+            <span className="truncate">{tx(segment.label)}</span>
           </span>
           <span className="shrink-0 tabular-nums opacity-70">{segment.display ?? segment.value}</span>
         </div>

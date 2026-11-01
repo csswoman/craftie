@@ -2,6 +2,7 @@
 
 import { useId } from 'react';
 import { Search, X } from 'lucide-react';
+import { useT } from '@/context/I18nContext';
 
 export type PairingSearchControlProps = {
   query: string;
@@ -16,6 +17,7 @@ export function PairingSearchControl({
   disabled = false,
   isTools = false,
 }: PairingSearchControlProps) {
+  const t = useT();
   const inputId = useId();
 
   return (
@@ -24,15 +26,13 @@ export function PairingSearchControl({
       className="flex h-8 min-w-0 items-center gap-1.5 rounded-lg border border-border bg-bg px-2 focus-within:ring-[3px] focus-within:ring-primary/25"
     >
       <Search size={14} strokeWidth={1.75} aria-hidden="true" className="shrink-0 text-muted" />
-      <label className="sr-only" htmlFor={inputId}>
-        Buscar pares tipográficos
-      </label>
+      <label className="sr-only" htmlFor={inputId}>{t('ui.PairingSearchControl.buscar-pares-tipograficos')}</label>
       <input
         id={inputId}
         type="text"
         role="searchbox"
         value={query}
-        placeholder="Buscar pares…"
+        placeholder={t('ui.PairingSearchControl.buscar-pares')}
         autoComplete="off"
         disabled={disabled}
         onChange={(event) => onQueryChange(event.target.value)}
@@ -51,8 +51,8 @@ export function PairingSearchControl({
           type="button"
           onClick={() => onQueryChange('')}
           disabled={disabled}
-          aria-label="Limpiar búsqueda"
-          title="Limpiar búsqueda"
+          aria-label={t('ui.PairingSearchControl.limpiar-busqueda')}
+          title={t('ui.PairingSearchControl.limpiar-busqueda')}
           className="grid size-6 shrink-0 place-items-center rounded-md text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 disabled:cursor-not-allowed"
         >
           <X size={13} strokeWidth={1.75} aria-hidden="true" />

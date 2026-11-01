@@ -14,6 +14,7 @@ import {
   COMPACT_ROLE_GROUPS,
   type CompactRoleGroupId,
 } from './uiColorPanelGroups';
+import { useT, useTx } from '@/context/I18nContext';
 
 export type FocusedView =
   | { kind: 'roles'; group: CompactRoleGroupId; token: SemanticTokenName | null }
@@ -51,13 +52,15 @@ export function UiColorPanelFocused({
   onAssignData: (hex: string) => string;
   onAssignStatus: (role: UiStatusRole, hex: string) => void;
 }) {
+  const tx = useTx();
+  const t = useT();
   if (focus.kind === 'roles') {
     const group = COMPACT_ROLE_GROUPS[focus.group];
     return (
       <div ref={panelRef} className="pb-2">
         <UiFocusedPanelHeader
-          title={group.title}
-          subtitle={group.subtitle}
+          title={tx(group.title)}
+          subtitle={tx(group.subtitle)}
           onBack={onBack}
         />
         <UiFocusedRoleEditor
@@ -77,8 +80,8 @@ export function UiColorPanelFocused({
     return (
       <div ref={panelRef} className="pb-2">
         <UiFocusedPanelHeader
-          title="Colores de estado"
-          subtitle="Ancla el hue, ajusta la textura · piso de chroma garantizado"
+          title={t('ui.UiColorPanelFocused.colores-de-estado')}
+          subtitle={t('ui.UiColorPanelFocused.ancla-el-hue-ajusta-la')}
           onBack={onBack}
         />
         {statusColors ? (
@@ -91,7 +94,7 @@ export function UiColorPanelFocused({
             onSelect={onSelectStatus}
           />
         ) : (
-          <p className="py-6 text-sm text-muted" role="status">Preparando los estados…</p>
+          <p className="py-6 text-sm text-muted" role="status">{t('ui.UiColorPanelFocused.preparando-los-estados')}</p>
         )}
       </div>
     );
@@ -101,8 +104,8 @@ export function UiColorPanelFocused({
     <div ref={panelRef} className="flex h-full min-h-0 flex-col pb-2">
       <div className="shrink-0">
         <UiFocusedPanelHeader
-          title="Colores fuente"
-          subtitle="Elige una fuente y asígnala a un rol, estado o acento"
+          title={t('ui.UiColorPanelFocused.colores-fuente')}
+          subtitle={t('ui.UiColorPanelFocused.elige-una-fuente-y-asignala')}
           onBack={onBack}
         />
       </div>

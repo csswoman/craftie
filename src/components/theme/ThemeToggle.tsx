@@ -6,11 +6,15 @@ import { useTheme } from 'next-themes';
 
 import { resolveActiveThemeFromUi } from '@lib/color/themePalette';
 
+import { useT, useTx } from '@/context/I18nContext';
+
 type ThemeToggleProps = {
   variant?: 'icon' | 'menu';
 };
 
 export function ThemeToggle({ variant = 'icon' }: ThemeToggleProps) {
+  const tx = useTx();
+  const t = useT();
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -24,7 +28,7 @@ export function ThemeToggle({ variant = 'icon' }: ThemeToggleProps) {
   const activeTheme = mounted ? resolveActiveThemeFromUi(resolvedTheme) : 'light';
   const nextTheme = activeTheme === 'light' ? 'dark' : 'light';
   const NextIcon = nextTheme === 'dark' ? Moon : Sun;
-  const nextThemeLabel = nextTheme === 'dark' ? 'oscuro' : 'claro';
+  const nextThemeLabel = nextTheme === 'dark' ? t('theme.toDark') : t('theme.toLight');
 
   function handleToggle() {
     // next-themes is the source of truth; RolePaletteContext derives activeTheme from it.
@@ -34,8 +38,8 @@ export function ThemeToggle({ variant = 'icon' }: ThemeToggleProps) {
   return (
     <button
       type="button"
-      aria-label={`Cambiar a tema ${nextThemeLabel}`}
-      title={`Cambiar a tema ${nextThemeLabel}`}
+      aria-label={tx(nextThemeLabel)}
+      title={tx(nextThemeLabel)}
       disabled={!mounted}
       onClick={handleToggle}
       className={
@@ -45,7 +49,7 @@ export function ThemeToggle({ variant = 'icon' }: ThemeToggleProps) {
       }
     >
       <NextIcon size={variant === 'menu' ? 18 : 16} strokeWidth={1.75} aria-hidden="true" className={variant === 'menu' ? 'text-muted' : undefined} />
-      {variant === 'menu' ? <span>Cambiar a tema {nextThemeLabel}</span> : null}
+      {variant === 'menu' ? <span>{tx(nextThemeLabel)}</span> : null}
     </button>
   );
 }
