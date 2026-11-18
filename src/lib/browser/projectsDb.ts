@@ -23,7 +23,16 @@ function hasIndexedDb(): boolean {
   }
 }
 
+let dbPromise: Promise<IDBDatabase | null> | null = null;
+/** Single shared connection: reopening per call races autosave against reads. */
 function openDb(): Promise<IDBDatabase | null> {
+  dbPromise ??= connect().then((db) => {
+    if (db === null) dbPromise = null;
+    return db;
+  });
+  return dbPromise;
+}
+function connect(): Promise<IDBDatabase | null> {
   return new Promise((resolve) => {
     if (!hasIndexedDb()) {
       resolve(null);
@@ -40,7 +49,18 @@ function openDb(): Promise<IDBDatabase | null> {
         }
       };
 
-      request.onsuccess = () => resolve(request.result);
+      request.onsuccess = () => {
+        const db = request.result;
+        const reset = () => {
+          dbPromise = null;
+        };
+        db.onversionchange = () => {
+          db.close();
+          reset();
+        };
+        db.onclose = reset;
+        resolve(db);
+      };
       request.onerror = () => resolve(null);
       request.onblocked = () => resolve(null);
     } catch {
@@ -59,19 +79,15 @@ export async function putProject(project: LocalProject): Promise<boolean> {
       const tx = db.transaction(STORE_NAME, 'readwrite');
       tx.objectStore(STORE_NAME).put(project);
       tx.oncomplete = () => {
-        db.close();
         resolve(true);
       };
       tx.onerror = () => {
-        db.close();
         resolve(false);
       };
       tx.onabort = () => {
-        db.close();
         resolve(false);
       };
     } catch {
-      db.close();
       resolve(false);
     }
   });
@@ -91,15 +107,12 @@ export async function getAllProjects(): Promise<LocalProject[]> {
         const valid = raw
           .map((entry) => validateProject(entry))
           .filter((entry): entry is LocalProject => entry !== null);
-        db.close();
         resolve(valid);
       };
       request.onerror = () => {
-        db.close();
         resolve([]);
       };
     } catch {
-      db.close();
       resolve([]);
     }
   });
@@ -115,15 +128,12 @@ export async function getProject(id: string): Promise<LocalProject | null> {
       const tx = db.transaction(STORE_NAME, 'readonly');
       const request = tx.objectStore(STORE_NAME).get(id);
       request.onsuccess = () => {
-        db.close();
         resolve(validateProject(request.result));
       };
       request.onerror = () => {
-        db.close();
         resolve(null);
       };
     } catch {
-      db.close();
       resolve(null);
     }
   });
@@ -139,19 +149,15 @@ export async function deleteProject(id: string): Promise<boolean> {
       const tx = db.transaction(STORE_NAME, 'readwrite');
       tx.objectStore(STORE_NAME).delete(id);
       tx.oncomplete = () => {
-        db.close();
         resolve(true);
       };
       tx.onerror = () => {
-        db.close();
         resolve(false);
       };
       tx.onabort = () => {
-        db.close();
         resolve(false);
       };
     } catch {
-      db.close();
       resolve(false);
     }
   });

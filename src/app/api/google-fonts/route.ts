@@ -28,16 +28,17 @@ function normalizeCategory(category: string): GoogleFontCategory | null {
 }
 
 export async function GET() {
-  const response = await fetch(GOOGLE_FONTS_METADATA_URL, { cache: 'no-store' });
-
-  if (!response.ok) {
+  let payload: GoogleFontsMetadataResponse;
+  try {
+    const response = await fetch(GOOGLE_FONTS_METADATA_URL, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`Upstream responded ${response.status}`);
+    payload = (await response.json()) as GoogleFontsMetadataResponse;
+  } catch {
     return NextResponse.json(
       { error: 'No se pudo obtener el catálogo de Google Fonts.' },
       { status: 502 },
     );
   }
-
-  const payload = (await response.json()) as GoogleFontsMetadataResponse;
   const fonts: GoogleFontOption[] = (payload.familyMetadataList ?? []).flatMap((item) => {
     if (typeof item.family !== 'string' || typeof item.category !== 'string') {
       return [];

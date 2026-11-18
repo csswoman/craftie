@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { copyHexToClipboard } from '@lib/color/paletteOrder';
+import { copyTextToClipboard } from '@/lib/browser/shareUrl';
 import { useT, useTx } from '@/context/I18nContext';
 
 export type ColorDetailActionRowProps = {
@@ -29,7 +29,7 @@ export function ColorDetailActionRow({
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
-    const success = await copyHexToClipboard(hex);
+    const success = await copyTextToClipboard(hex);
 
     if (success) {
       setCopied(true);

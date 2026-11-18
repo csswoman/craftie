@@ -42,6 +42,13 @@ export type LocalProjectsController = {
   deleteProject: (id: string) => Promise<void>;
 };
 
+// Reuse the stored thumbnail unless the palette colors changed (canvas draw is costly).
+function thumbnailForUpdate(project: LocalProject, snapshot: WorkspaceSnapshot): string | null {
+  const hexes = (value: WorkspaceSnapshot) => value.extractedColors.map((color) => color.hex).join();
+  if (project.thumbnail && hexes(project.snapshot) === hexes(snapshot)) return project.thumbnail;
+  return thumbnailFor(snapshot);
+}
+
 function thumbnailFor(snapshot: WorkspaceSnapshot): string | null {
   return renderPaletteThumbnail(snapshot.extractedColors.map((color) => color.hex));
 }
@@ -105,7 +112,7 @@ export function useLocalProjects(
       const snapshot = getSnapshot();
       if (serializeWorkspace(snapshot) === serializeWorkspace(project.snapshot)) return;
 
-      const updated = updateProjectSnapshot(project, snapshot, Date.now(), thumbnailFor(snapshot));
+      const updated = updateProjectSnapshot(project, snapshot, Date.now(), thumbnailForUpdate(project, snapshot));
       setSaveStatus('saving');
       void putProject(updated).then((persisted) => {
         if (persisted) {

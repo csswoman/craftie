@@ -78,11 +78,11 @@ export function AccentSlotCell({
 
   const overflowItems = [
     ...(editable
-      ? [{ id: 'vary', label: `Variar ${label}`, onSelect: onVary }]
+      ? [{ id: 'vary', label: tx(`Variar ${label}`), onSelect: onVary }]
       : []),
     ...(assigned
       ? [
-          { id: 'copy', label: 'Copiar HEX', onSelect: onCopyHex },
+          { id: 'copy', label: tx('Copiar HEX'), onSelect: onCopyHex },
           {
             id: 'info',
             label: tx('Info del color'),
@@ -117,7 +117,7 @@ export function AccentSlotCell({
             assigned
               ? mobileExpanded
                 ? t('ui.AccentSlotCell.tocar-para-copiar-hex', { label: tx(label), name: tx(name), hex })
-                : `${label}: ${name}, ${hex}`
+                : `${tx(label)}: ${tx(name)}, ${hex}`
               : t('ui.AccentSlotCell.sin-asignar', { label: tx(label) })
           }
           onClick={() => {

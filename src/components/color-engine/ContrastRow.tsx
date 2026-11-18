@@ -10,7 +10,7 @@ import {
   type ContrastTarget,
   type Palette,
 } from '@lib/color/contrast';
-import { copyHexToClipboard } from '@lib/color/paletteOrder';
+import { copyTextToClipboard } from '@/lib/browser/shareUrl';
 
 import { ContrastBadge } from './ContrastBadge';
 import { ContrastSuggestionPanel } from './ContrastSuggestionPanel';
@@ -57,7 +57,7 @@ export function ContrastRow({
   }, [showSuggestion, result.foreground.hex, result.background.hex, target]);
 
   async function handleCopy(hex: string) {
-    const success = await copyHexToClipboard(hex);
+    const success = await copyTextToClipboard(hex);
 
     if (success) {
       setCopied(true);

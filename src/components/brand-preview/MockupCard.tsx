@@ -27,7 +27,7 @@ export function MockupCard({
     <button
       type="button"
       onClick={onClick}
-      aria-label={`${title}. ${expandHint}`}
+      aria-label={`${tx(title)}. ${tx(expandHint)}`}
       className={`group flex w-full flex-col overflow-hidden rounded-xl border bg-bg text-left transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
         featured
           ? 'border-primary/25 hover:border-primary/40'

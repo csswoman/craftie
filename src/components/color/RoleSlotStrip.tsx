@@ -44,7 +44,7 @@ export function RoleSlotStrip({
   const handleCopyHex = useCallback(async (hex: string) => {
     try {
       await navigator.clipboard.writeText(hex.toUpperCase());
-      setCopyMessage('HEX copiado');
+      setCopyMessage(tx('HEX copiado'));
       window.setTimeout(() => setCopyMessage(null), 1500);
     } catch {
       setCopyMessage(tx('No se pudo copiar'));

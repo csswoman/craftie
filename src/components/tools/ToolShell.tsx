@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { LanguageToggle } from '@/components/layout/LanguageToggle';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { TOOLS } from '@/lib/tools/catalog';
 
 type ToolShellProps = {
@@ -32,6 +34,8 @@ export function ToolShell({ title, lead, children, about, currentPath }: ToolShe
             <Link href="/" className="rounded-lg px-3 py-2 hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25">
               Abrir el estudio
             </Link>
+            <LanguageToggle />
+            <ThemeToggle />
           </nav>
         </div>
       </header>

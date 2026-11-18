@@ -36,6 +36,10 @@ function loadImageElement(file: File): Promise<HTMLImageElement> {
 
     image.onload = () => {
       URL.revokeObjectURL(objectUrl);
+      if (image.naturalWidth === 0 || image.naturalHeight === 0) {
+        reject(new Error('Image has no dimensions.'));
+        return;
+      }
       resolve(image);
     };
 

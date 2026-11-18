@@ -12,7 +12,7 @@ export function downloadTextFile(
     anchor.href = url;
     anchor.download = filename;
     anchor.click();
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
     return { ok: true };
   } catch {
     return { ok: false, error: 'No se pudo iniciar la descarga. Comprueba los permisos del navegador.' };

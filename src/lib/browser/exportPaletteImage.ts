@@ -77,7 +77,7 @@ export function exportPaletteImage({
           anchor.href = url;
           anchor.download = filename;
           anchor.click();
-          URL.revokeObjectURL(url);
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
           resolve({ ok: true });
         } catch {
           resolve({ ok: false, error: FAILURE_MESSAGE });

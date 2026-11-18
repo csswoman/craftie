@@ -8,7 +8,7 @@ import {
   HARMONY_TYPE_LABELS,
   type ColorDetails,
 } from '@lib/color/colorDetails';
-import { copyHexToClipboard } from '@lib/color/paletteOrder';
+import { copyTextToClipboard } from '@/lib/browser/shareUrl';
 import { normalizeHex } from '@lib/color/normalizeHex';
 import { nameForHex } from '@lib/color/naming';
 import { pickReadableTextColor } from '@lib/color/readableText';
@@ -69,7 +69,7 @@ export function ColorDetailsDrawer({
   const headerText = pickReadableTextColor(details.hex);
 
   async function handleCopyHeaderHex() {
-    const success = await copyHexToClipboard(details!.hex);
+    const success = await copyTextToClipboard(details!.hex);
 
     if (success) {
       setHeaderCopied(true);

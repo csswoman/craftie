@@ -9,7 +9,6 @@ import { ConfirmResetWorkspaceDialog } from '@/components/layout/ConfirmResetWor
 import { MyProjectsDrawer } from '@/components/projects/MyProjectsDrawer';
 import { useLocalProjects } from '@/components/projects/useLocalProjects';
 import { InspirationModal } from '@/components/color/InspirationModal';
-import { OnboardingHint } from '@/components/color/OnboardingHint';
 import { SelectColorsWorkspaceMain } from '@/components/color/SelectColorsWorkspaceMain';
 import { EmptyWorkspaceCard } from '@/components/color/EmptyWorkspaceCard';
 import {
@@ -185,6 +184,7 @@ function SelectColorsWorkspaceContent() {
             onImageRegenerate={workspace.handleImageRegenerate}
             onOpenInspiration={() => workspace.setInspirationModalOpen(true)}
             onStartFromHex={workspace.handleStartFromHex}
+            onLoadExample={workspace.handleLoadExample}
             recentProjects={projects.projects}
             onOpenProject={openProject}
           />
@@ -199,10 +199,6 @@ function SelectColorsWorkspaceContent() {
     <TypeRolesContext.Provider value={workspace.typeRoles}>
       <div className="flex min-h-dvh flex-col bg-bg lg:h-dvh lg:min-h-0 lg:overflow-hidden">
         {sharedChrome}
-
-        {workspace.onboardingHintVisible ? (
-          <OnboardingHint onDismiss={workspace.dismissOnboardingHint} />
-        ) : null}
 
         <StudioCanvas
           sidebar={

@@ -63,10 +63,6 @@ import { clearShareHash, readShareHash } from '@/lib/browser/shareUrl';
 import { clearStyleParam, readStyleParam } from '@/lib/browser/styleParam';
 import { findStyleById } from '@lib/styles/presets';
 import { readWorkspaceSnapshot } from '@/lib/browser/workspaceStorage';
-import {
-  readOnboardingDismissed,
-  writeOnboardingDismissed,
-} from '@/lib/browser/onboardingDismiss';
 import type { LocalProject } from '@lib/studio/projectModel';
 import { useT } from '@/context/I18nContext';
 
@@ -104,7 +100,6 @@ export function useSelectColorsWorkspaceController() {
   );
   const { activeView, selectView } = useCanvasView();
   const [catalogSource, setCatalogSource] = useState<'none' | 'curated' | 'image'>('none');
-  const [onboardingHintVisible, setOnboardingHintVisible] = useState(false);
   const [selectedStyleId, setSelectedStyleId] = useState<string | null>(null);
   const [typeUi, setTypeUi] = useState<TypeUiState>(() => createInitialTypeUiState());
   const [typeScaleOverrides, setTypeScaleOverrides] = useState<SizeOverrides>({});
@@ -205,32 +200,12 @@ export function useSelectColorsWorkspaceController() {
     };
   }, []);
 
-  // First-load onboarding: when the visitor arrives with no shared link and no
-  // stored workspace, preload a deterministic example palette so the studio
-  // opens populated instead of empty, and surface a dismissible hint. The
-  // RolePaletteContext still hydrates any stored/shared snapshot on its own; we
-  // only step in when there is genuinely nothing to restore.
-  useEffect(() => {
-    const hasSharedState = readShareHash() !== null;
-    const hasStoredState = readWorkspaceSnapshot() !== null;
-
-    if (hasSharedState || hasStoredState) {
-      return;
-    }
-
+  // First visit: with no shared link and no stored workspace the visitor lands on the
+  // welcome screen and chooses a starting point. The example palette is opt-in.
+  const handleLoadExample = useCallback(() => {
     applySnapshot(buildExampleWorkspaceSnapshot());
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCatalogSource('curated');
-
-    if (!readOnboardingDismissed()) {
-      setOnboardingHintVisible(true);
-    }
   }, [applySnapshot]);
-
-  const dismissOnboardingHint = useCallback(() => {
-    writeOnboardingDismissed(true);
-    setOnboardingHintVisible(false);
-  }, []);
 
   const isImageBusy = isImageExtracting || isImageRegenerating;
 
@@ -742,8 +717,7 @@ export function useSelectColorsWorkspaceController() {
 
   return {
     catalogSource: effectiveCatalogSource,
-    onboardingHintVisible,
-    dismissOnboardingHint,
+    handleLoadExample,
     canExport,
     exportBlockedReason,
     error,
