@@ -7,6 +7,7 @@ import type { SemanticTokenName } from '@lib/color/semanticTokens';
 import { buildDataCandidates } from '@lib/color/uiColorCandidates';
 import type { UiStatusRole } from '@lib/color/uiStatusColors';
 
+import { useCanvasViewOptional } from '@/context/CanvasViewContext';
 import { useRolePalette } from '@/context/RolePaletteContext';
 import { useAutoHideScrollbar } from '@/lib/browser/useAutoHideScrollbar';
 import { useTabListKeyboard } from '@/lib/browser/useTabListKeyboard';
@@ -52,7 +53,13 @@ export function UiColorPanel({
     setActiveRole,
     clearTokenEditPreview,
   } = useRolePalette();
-  const [activeView, setActiveView] = useState<UiColorView>('system');
+  const canvasView = useCanvasViewOptional();
+  const [localView, setLocalView] = useState<UiColorView>('system');
+  const activeView: UiColorView = canvasView ? (canvasView.showAccents ? 'data' : 'system') : localView;
+  function setActiveView(view: UiColorView) {
+    if (canvasView) canvasView.setShowAccents(view === 'data');
+    else setLocalView(view);
+  }
   const [focusedView, setFocusedView] = useState<{ revision: number; view: FocusedView | null }>({
     revision: paletteRevision,
     view: null,

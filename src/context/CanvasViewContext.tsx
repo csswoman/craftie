@@ -22,6 +22,9 @@ export type CanvasViewContextValue = {
   /** View-only color vision simulation; never touches palette data or exports. */
   visionMode: ColorVisionMode;
   setVisionMode: (mode: ColorVisionMode) => void;
+  /** Shared by the sidebar «Acentos» tab and the canvas toggle so both always agree. */
+  showAccents: boolean;
+  setShowAccents: (visible: boolean) => void;
 };
 
 const CanvasViewContext = createContext<CanvasViewContextValue | null>(null);
@@ -30,6 +33,7 @@ export function CanvasViewProvider({ children }: { children: ReactNode }) {
   const [activeView, setActiveView] = useState<CanvasViewId>('colors');
   const [activeMode, setActiveMode] = useState<PreviewActiveMode>('dashboard');
   const [visionMode, setVisionMode] = useState<ColorVisionMode>('none');
+  const [showAccents, setShowAccents] = useState(false);
 
   const selectView = useCallback((view: CanvasViewId) => {
     setActiveView(view);
@@ -49,8 +53,8 @@ export function CanvasViewProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ activeView, activeMode, selectView, visionMode, setVisionMode }),
-    [activeView, activeMode, selectView, visionMode],
+    () => ({ activeView, activeMode, selectView, visionMode, setVisionMode, showAccents, setShowAccents }),
+    [activeView, activeMode, selectView, visionMode, showAccents],
   );
 
   return <CanvasViewContext.Provider value={value}>{children}</CanvasViewContext.Provider>;

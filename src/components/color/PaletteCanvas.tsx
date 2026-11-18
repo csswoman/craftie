@@ -82,9 +82,8 @@ export function PaletteCanvas({
     replaceRole,
     replaceSemanticToken,
   } = useRolePalette();
-  const { activeView, activeMode, selectView, visionMode } = useCanvasView();
+  const { activeView, activeMode, selectView, visionMode, showAccents, setShowAccents } = useCanvasView();
 
-  const [showAccents, setShowAccents] = useState(false);
   const [previewEditMode, setPreviewEditMode] = useState<PreviewEditMode>('locked');
   const isMockupView = !['paint', 'colors', 'style-guide', 'type-scale', 'scales', 'illustration'].includes(activeView);
   const [selectedColorHex, setSelectedColorHex] = useState<string | null>(null);
@@ -139,7 +138,7 @@ export function PaletteCanvas({
           isUpdating={isUpdating}
           previewEditMode={isMockupView ? previewEditMode : undefined}
           onPreviewEditModeChange={setPreviewEditMode}
-          onToggleAccents={() => setShowAccents((visible) => !visible)}
+          onToggleAccents={() => setShowAccents(!showAccents)}
           onSelectView={selectView}
           onImageFileSelected={onImageFileSelected}
           onImageRegenerate={onImageRegenerate}
