@@ -23,7 +23,7 @@ export function PairingFilterChips({
 
   return (
     <div
-      className="flex flex-wrap gap-1"
+      className="-mx-1 flex gap-1 overflow-x-auto px-1 py-1 [scrollbar-width:thin]"
       role="group"
       aria-label={t('ui.PairingFilterChips.filtrar-pares-por-caracter')}
     >

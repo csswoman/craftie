@@ -109,9 +109,9 @@ export function TypeScalePreview({
         </div>
         <p className="mt-5 text-xs leading-relaxed" style={{ color: palette.muted }}>
           <span style={{ color: palette.ink, fontFamily: headingFamily, fontWeight: headingWeight }}>{tx(headingName)}</span>
-          {t('ui.TypeScalePreview.en-titulares')}
+          {' '}{t('ui.TypeScalePreview.en-titulares')}{' '}
           <span style={{ color: palette.ink, fontFamily: bodyFamily, fontWeight: bodyWeight }}>{tx(bodyName)}</span>
-          {t('ui.TypeScalePreview.en-lectura')}</p>
+          {' '}{t('ui.TypeScalePreview.en-lectura')}</p>
       </header>
 
       <div
