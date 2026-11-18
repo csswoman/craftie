@@ -1,4 +1,5 @@
 import { expect, test, type Locator } from '@playwright/test';
+import { openStudio } from './helpers';
 
 /**
  * Typing into a server-rendered input before React hydrates it is lost on the
@@ -14,7 +15,7 @@ async function fillUntil(input: Locator, value: string, reacted: () => Promise<v
 
 test.describe('color vision and framework exports', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await openStudio(page);
     await expect(page.getByRole('button', { name: 'Exportar' })).toBeVisible();
   });
 
@@ -43,7 +44,7 @@ test.describe('color vision and framework exports', () => {
 
 test.describe('language', () => {
   test('switches the interface to English and remembers the choice', async ({ page }) => {
-    await page.goto('/');
+    await openStudio(page);
     await expect(page.getByRole('button', { name: 'Exportar' })).toBeVisible();
     await expect(page.locator('html')).toHaveAttribute('lang', 'es');
 
@@ -59,7 +60,7 @@ test.describe('language', () => {
   test('uses English by default for English browsers', async ({ browser }) => {
     const context = await browser.newContext({ locale: 'en-US' });
     const page = await context.newPage();
-    await page.goto('/');
+    await openStudio(page);
     await expect(page.getByRole('button', { name: 'Export', exact: true })).toBeVisible();
     await context.close();
   });
@@ -101,7 +102,7 @@ test.describe('standalone tools', () => {
 });
 
 test('Alt+R tries another palette and Ctrl+Z restores the previous one', async ({ page }) => {
-  await page.goto('/');
+  await openStudio(page);
   const fondo = page.getByRole('button', { name: /^Primario: / });
   await expect(fondo).toBeVisible();
   const hexOf = async () => (await fondo.getAttribute('aria-label'))!.match(/#[0-9A-F]{6}/i)![0];
@@ -140,7 +141,7 @@ test.describe('palette gallery', () => {
 
 test.describe('tonal scales', () => {
   test('edits a step and exports the full 50–900 ramp', async ({ page }) => {
-    await page.goto('/');
+    await openStudio(page);
     await page.waitForLoadState('networkidle');
 
     await page.locator('button[aria-haspopup="menu"]').filter({ hasText: 'Colores' }).click();

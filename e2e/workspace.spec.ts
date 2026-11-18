@@ -1,8 +1,9 @@
 import { expect, test } from '@playwright/test';
+import { openStudio } from './helpers';
 
 test.describe('workspace', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await openStudio(page);
     await expect(page.getByRole('button', { name: 'Exportar' })).toBeVisible();
   });
 
