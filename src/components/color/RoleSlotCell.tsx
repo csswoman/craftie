@@ -106,7 +106,7 @@ export function RoleSlotCell({
         style={{ backgroundColor: column.hex, color: textColor }}
         data-contrast-fail={hasContrastFail ? 'true' : undefined}
       >
-        {!showShades && isWideLayout ? <PaletteColumnToolbar {...toolbarProps} /> : null}
+        {!showShades && isWideLayout && !expanded ? <PaletteColumnToolbar {...toolbarProps} /> : null}
 
         {showShades ? (
           <PaletteShadesOverlay
@@ -209,15 +209,7 @@ export function RoleSlotCell({
                   </>
                 )}
                 {contrastBadges.length > 0 ? (
-                  <div
-                    className={`${
-                      isWideLayout
-                        ? 'hidden group-hover/slot:flex group-focus-within/slot:flex'
-                        : 'flex'
-                    } flex-wrap items-center ${
-                      mobileExpanded ? 'mt-1 gap-1' : 'mt-2 gap-1.5'
-                    }`}
-                  >
+                  <div className={`flex flex-wrap items-center ${mobileExpanded ? 'mt-1 gap-1' : 'mt-2 gap-1.5'}`}>
                     {contrastBadges.map((badge) => (
                       <ContrastBadge
                         key={badge.label}
@@ -235,6 +227,8 @@ export function RoleSlotCell({
             ) : null}
           </button>
         ) : null}
+
+        {!showShades && isWideLayout && expanded ? <PaletteColumnToolbar {...toolbarProps} layout="inline" /> : null}
 
         {!showShades && mobileExpanded ? (
           <PaletteSlotOverflowMenu

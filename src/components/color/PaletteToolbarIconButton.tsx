@@ -38,7 +38,7 @@ export function PaletteToolbarIconButton({
       <button
         type="button"
         aria-label={tx(label)}
-        title={tx(label)}
+        title={showTooltip ? undefined : tx(label)}
         disabled={disabled}
         onClick={onClick}
         className={`flex items-center justify-center rounded-md text-current transition-[opacity,transform,background-color] focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-35 ${
