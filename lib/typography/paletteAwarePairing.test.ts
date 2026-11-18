@@ -167,6 +167,19 @@ describe('getPaletteAwareRecommendations', () => {
     });
   });
 
+  it('still suggests pairs when no pair carries the style mood', () => {
+    const context: PaletteContext = { mood: ['mood-que-no-existe'], ...STRONG_CONTEXT };
+    expect(getPaletteAwareRecommendations(context, 3)).toHaveLength(3);
+  });
+
+  it('ranks by form contrast, not popularity, when no mood is chosen', () => {
+    const results = getPaletteAwareRecommendations({ mood: [], ...STRONG_CONTEXT }, 3);
+    expect(results).toHaveLength(3);
+    results.forEach((pair) => {
+      expect(pair.heading.classification === 'sans-serif' && pair.body.classification === 'sans-serif').toBe(false);
+    });
+  });
+
   it('returns an empty list for a non-positive limit', () => {
     const context: PaletteContext = { mood: ['editorial'], ...STRONG_CONTEXT };
     expect(getPaletteAwareRecommendations(context, 0)).toEqual([]);

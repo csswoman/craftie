@@ -69,10 +69,19 @@ export function getPairingsForStyle(mood: string[]): FontPair[] {
 }
 
 /**
+ * Candidate pool for recommendations: the pairs matching the mood, or the whole
+ * catalog when no pair carries any of those tags, so a style never gets zero suggestions.
+ */
+export function getRecommendationCandidates(mood: string[]): FontPair[] {
+  const matched = getPairingsForStyle(mood);
+  return matched.length > 0 ? matched : [...FONT_PAIRS];
+}
+
+/**
  * Returns the highest-scoring pairings for a mood list, preserving deterministic order.
  */
 export function getRecommendedPairings(mood: string[], limit = 3): FontPair[] {
-  const candidates = getPairingsForStyle(mood);
+  const candidates = getRecommendationCandidates(mood);
 
   return candidates
     .map((pair) => ({ pair, score: scorePairForMood(pair, mood) }))

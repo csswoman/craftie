@@ -298,8 +298,10 @@ export function useSelectColorsWorkspaceController() {
   }, [selectedStyleId]);
 
   const recommendedPairings = useMemo<FontPair[]>(() => {
-    const paletteTextHex = generatedPalette?.onSurface ?? null;
-    const paletteBackgroundHex = generatedPalette?.surface ?? null;
+    // Before review there is no generated palette yet; the role palette already has
+    // real text/surface colors, so recommendations never fall back to plain popularity.
+    const paletteTextHex = generatedPalette?.onSurface ?? rolePalette?.texto.hex ?? null;
+    const paletteBackgroundHex = generatedPalette?.surface ?? rolePalette?.superficie.hex ?? null;
 
     if (hasPaletteContext(paletteTextHex, paletteBackgroundHex)) {
       return getPaletteAwareRecommendations(
@@ -313,7 +315,7 @@ export function useSelectColorsWorkspaceController() {
     }
 
     return getRecommendedPairings(activeMoods, 3);
-  }, [activeMoods, generatedPalette]);
+  }, [activeMoods, generatedPalette, rolePalette]);
   const fontPairings = FONT_PAIRS;
 
   const isReviewPhase = generatedPalette !== null;

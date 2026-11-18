@@ -1,5 +1,5 @@
 import { contrastRatio, evaluateContrast } from '../color/contrast';
-import { getPairingsForStyle, scorePairForMood } from './pairings';
+import { getRecommendationCandidates, scorePairForMood } from './pairings';
 import type { FontMeta, FontPair } from './fontPairTypes';
 
 /**
@@ -171,7 +171,7 @@ export function getPaletteAwareRecommendations(
   context: PaletteContext,
   limit = 3,
 ): PaletteAwareRecommendation[] {
-  const candidates = getPairingsForStyle(context.mood);
+  const candidates = getRecommendationCandidates(context.mood);
 
   return candidates
     .map((pair) => scorePairForPalette(pair, context))
