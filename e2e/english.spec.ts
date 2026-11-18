@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
+import { openStudio } from './helpers';
+
 test.use({ locale: 'en-US' });
 
 // Spanish-only accented characters. Person names in the sample copy and the
@@ -34,8 +36,9 @@ test('the studio shows no Spanish text in English across the canvas views', asyn
   const leaks = new Set<string>();
   await page.goto('/');
   await page.waitForLoadState('networkidle');
-  await expect(page.getByRole('button', { name: 'Export', exact: true })).toBeVisible();
   for (const text of await collectSpanish(page)) leaks.add(`home: ${text}`);
+  await openStudio(page);
+  await expect(page.getByRole('button', { name: 'Export', exact: true })).toBeVisible();
 
   const selector = page.locator('div.hidden.lg\\:block button[aria-haspopup="menu"]').first();
   for (let index = 0; index < 12; index++) {
@@ -58,8 +61,6 @@ test('the studio shows no Spanish text in English across the canvas views', asyn
 test('the start screen and the style gallery are in English', async ({ page }) => {
   await page.goto('/');
   await page.waitForLoadState('networkidle');
-  await page.getByRole('button', { name: 'Back to start' }).click();
-  await page.getByRole('button', { name: 'Start over', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Start here' })).toBeVisible();
   await page.getByRole('button', { name: 'Explore styles' }).click();
   await expect(page.getByText(/styles available/)).toBeVisible();

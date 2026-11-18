@@ -23,11 +23,13 @@ test.describe('color vision and framework exports', () => {
     const panel = page.locator('#canvas-panel');
     await expect(panel).not.toHaveCSS('filter', /url/);
 
-    await page.getByLabel('Simulación de visión del color').selectOption('deuteranopia');
+    await page.getByRole('button', { name: 'Simulación de visión del color' }).click();
+    await page.getByRole('menuitemradio', { name: /^Deuteranopía/ }).click();
     await expect(panel).toHaveCSS('filter', /url/);
     await expect(page.locator('#craftie-color-vision-filter feColorMatrix')).toHaveCount(1);
 
-    await page.getByLabel('Simulación de visión del color').selectOption('none');
+    await page.getByRole('button', { name: 'Simulación de visión del color' }).click();
+    await page.getByRole('menuitemradio', { name: /^Normal/ }).click();
     await expect(panel).not.toHaveCSS('filter', /url/);
   });
 
@@ -52,8 +54,9 @@ test.describe('language', () => {
     await expect(page.getByRole('button', { name: 'Export', exact: true })).toBeVisible();
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
 
+    // The example palette is not autosaved, so a reload returns to the (English) start screen.
     await page.reload();
-    await expect(page.getByRole('button', { name: 'Export', exact: true })).toBeVisible();
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
     await expect(page.getByRole('button', { name: 'Switch language to Español' })).toBeVisible();
   });
 

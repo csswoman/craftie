@@ -25,7 +25,7 @@ test('the studio and the contrast tool keep working offline', async ({ page, con
 
   await context.setOffline(true);
   await page.goto(`${baseURL}/`);
-  await expect(page.getByRole('button', { name: 'Exportar' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Empieza por aquí' })).toBeVisible();
   await page.goto(`${baseURL}/tools/contrast-checker`);
   await expect(page.getByRole('heading', { level: 1, name: 'Verificador de contraste WCAG' })).toBeVisible();
   await context.setOffline(false);
