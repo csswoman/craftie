@@ -45,6 +45,9 @@ const PAIR_LABELS: Record<RoleContrastPairId, string> = {
   'texto/superficie': 'vs Superficie',
 };
 
+/** Label shown on fondo/superficie rows, where the badge measures the text placed on top. */
+const TEXT_ON_BACKGROUND_LABEL = 'Con texto';
+
 const CHROMATIC_TEXT_LABELS: Record<'claro' | 'oscuro', string> = {
   claro: 'Texto claro',
   oscuro: 'Texto legible',
@@ -141,9 +144,12 @@ export function getRolePaletteContrastWarnings(palette: RolePalette): string[] {
   return [...warnings, ...chromaticWarnings, ...previewWarnings];
 }
 
-function toNeutralBadge(check: RoleContrastCheck): RoleContrastBadgeDisplay {
+function toNeutralBadge(
+  check: RoleContrastCheck,
+  side: 'foreground' | 'background' = 'foreground',
+): RoleContrastBadgeDisplay {
   return {
-    label: PAIR_LABELS[check.pairId],
+    label: side === 'background' ? TEXT_ON_BACKGROUND_LABEL : PAIR_LABELS[check.pairId],
     ratio: check.ratio,
     level: check.normalText,
     status: check.status,
@@ -229,7 +235,10 @@ export function buildRolePaletteColumnsWithContrast(palette: RolePalette): Palet
     if (column.id === 'texto') {
       return {
         ...column,
-        contrastBadges: mergeBadges(neutralChecks.map(toNeutralBadge), previewBadges),
+        contrastBadges: mergeBadges(
+          neutralChecks.map((check) => toNeutralBadge(check)),
+          previewBadges,
+        ),
       };
     }
 
@@ -238,7 +247,10 @@ export function buildRolePaletteColumnsWithContrast(palette: RolePalette): Palet
 
       return {
         ...column,
-        contrastBadges: mergeBadges(check ? [toNeutralBadge(check)] : undefined, previewBadges),
+        contrastBadges: mergeBadges(
+          check ? [toNeutralBadge(check, 'background')] : undefined,
+          previewBadges,
+        ),
       };
     }
 

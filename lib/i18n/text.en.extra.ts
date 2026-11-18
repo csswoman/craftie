@@ -56,7 +56,7 @@ export const enTextExtra: Record<string, string> = {
   'claro': 'light', 'oscuro': 'dark', 'Fundaciones': 'Foundations', 'Ajustar roles': 'Adjust roles',
   'Intenso': 'Intense', 'Apagada': 'Muted', 'Equilibrada': 'Balanced', 'Saturada ⚠': 'Saturated ⚠',
   'Datos ✓': 'Data ✓', 'Mejor: fill': 'Best: fill', 'Elegir': 'Choose', 'Sobre superficie': 'On surface',
-  'vs Fondo': 'vs Background', 'vs Superficie': 'vs Surface', 'Complementaria': 'Complementary',
+  'vs Fondo': 'vs Background', 'vs Superficie': 'vs Surface', 'Con texto': 'With text', 'Complementaria': 'Complementary',
   'Split complementaria': 'Split complementary', 'Etiqueta': 'Label', 'Nota': 'Note', 'Marca': 'Brand',
   'Menor': 'Minor', 'Mayor': 'Major', 'Cuarta': 'Fourth', 'Todas': 'All', 'Populares': 'Popular',
   // Canvas views and design-system views

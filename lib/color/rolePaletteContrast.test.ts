@@ -61,6 +61,7 @@ describe('rolePaletteContrast', () => {
     expect(texto?.contrastBadges?.length).toBe(2);
     expect(texto?.contrastBadges?.[0]?.label).toBe('vs Fondo');
     expect(fondo?.contrastBadges?.length).toBe(1);
+    expect(fondo?.contrastBadges?.[0]?.label).toBe('Con texto');
     expect(fondo?.contrastBadges?.[0]?.level).not.toBe('fail');
     expect(primario?.contrastBadges?.length).toBe(1);
     expect(primario?.contrastBadges?.[0]?.label).toBe('Texto legible');
