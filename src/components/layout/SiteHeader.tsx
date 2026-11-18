@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { LanguageToggle } from '@/components/layout/LanguageToggle';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { useT, useTx } from '@/context/I18nContext';
 
@@ -67,6 +68,7 @@ export function SiteHeader({
             )}
             <Link href="/docs" className={tabClassName(false)}>{t('ui.SiteHeader.docs')}</Link>
           </nav>
+          <LanguageToggle />
           <ThemeToggle />
         </div>
       </div>

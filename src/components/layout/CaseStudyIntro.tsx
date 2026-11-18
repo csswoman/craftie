@@ -8,6 +8,9 @@ const CASE_STUDY_PILLARS = [
   { termKey: 'start.pillar3', detailKey: 'start.pillar3Desc' },
 ] as const;
 
+/** Swatch dots echo the sample palette strip (decorative; never carry meaning). */
+const PILLAR_DOTS = ['#5fb7ab', '#f2b49a', '#f3d98b'] as const;
+
 /**
  * Welcoming intro shown on the empty home screen, beside the dog illustration
  * and the inspiration card. Quiet Gallery aesthetic: Lora display for the
@@ -28,10 +31,17 @@ export function CaseStudyIntro() {
         {t('start.subhead')}
       </p>
 
-      <dl className="mt-6 grid gap-4 sm:grid-cols-3 lg:grid-cols-1 lg:gap-4">
-        {CASE_STUDY_PILLARS.map((pillar) => (
-          <div key={pillar.termKey}>
-            <dt className="font-display text-chrome-section font-medium text-ink">{t(pillar.termKey)}</dt>
+      <dl className="mt-8 grid gap-5 sm:grid-cols-3 lg:grid-cols-1 lg:gap-5">
+        {CASE_STUDY_PILLARS.map((pillar, index) => (
+          <div key={pillar.termKey} className="border-t border-border pt-3">
+            <dt className="flex items-center gap-2.5 font-display text-chrome-section font-medium text-ink">
+              <span
+                aria-hidden="true"
+                className="size-2.5 shrink-0 rounded-full"
+                style={{ backgroundColor: PILLAR_DOTS[index] }}
+              />
+              {t(pillar.termKey)}
+            </dt>
             <dd className="mt-1 text-pretty text-chrome-label leading-relaxed text-muted">
               {t(pillar.detailKey)}
             </dd>

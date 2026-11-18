@@ -60,6 +60,26 @@ describe('translateText', () => {
   });
 
   it('applies patterns for strings with numbers', () => {
+        expect(translateText('en', 'Bloqueado')).toBe('Locked');
+    expect(translateText('en', 'Texto')).toBe('Text');
+    expect(translateText('en', 'Bloquear')).toBe('Lock');
+    expect(translateText('en', 'Desbloquear')).toBe('Unlock');
+    expect(translateText('en', 'Ocultar shades')).toBe('Hide shades');
+    expect(translateText('en', 'Ver shades')).toBe('View shades');
+    expect(translateText('en', 'Visión: Normal')).toBe('Vision: Normal');
+    expect(translateText('en', 'HEX copiado')).toBe('HEX copied');
+    expect(translateText('en', 'Viva')).toBe('Vivid');
+    expect(translateText('en', 'Oscura')).toBe('Dark');
+    expect(translateText('en', 'Ideal como texto')).toBe('Ideal for text');
+    expect(translateText('en', 'Variar Acento 2')).toBe('Vary Accent 2');
+    expect(translateText('en', '8 colores extraídos')).toBe('8 extracted colors');
+    expect(translateText('en', '3 seleccionados')).toBe('3 selected');
+    expect(
+      translateText(
+        'en',
+        'Oscurece el texto unos 14 puntos de luminosidad para llegar a 4.5:1.',
+      ),
+    ).toBe('Darken the text by around 14 lightness points to reach 4.5:1.');
     expect(translateText('en', 'Acento 3')).toBe('Accent 3');
     expect(translateText('en', 'Familia Inter')).toBe('Inter family');
     expect(translateText('en', '20 estilos disponibles · toca cualquiera para cargar')).toBe(

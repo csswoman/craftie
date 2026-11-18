@@ -2,46 +2,8 @@
 
 import { useState } from 'react';
 
-type RoleId = 'primario' | 'superficie' | 'texto' | 'acento';
-
-type DemoRole = {
-  id: RoleId;
-  token: string;
-  visualName: string;
-  label: string;
-  note: string;
-};
-
-const ROLES: DemoRole[] = [
-  {
-    id: 'primario',
-    token: 'primary',
-    visualName: 'verde bosque',
-    label: 'Acción principal',
-    note: 'La acción que quieres que encuentren primero. Si cambias el tono, el token sigue siendo primary.',
-  },
-  {
-    id: 'superficie',
-    token: 'surface',
-    visualName: 'gris menta',
-    label: 'Superficie',
-    note: 'Una capa sobre el fondo. El texto encima usa otro token (on-surface), no el color de la superficie.',
-  },
-  {
-    id: 'texto',
-    token: 'on-background',
-    visualName: 'casi negro',
-    label: 'Texto sobre fondo',
-    note: 'Es el color del texto, no del relleno. Ponerlo como fondo de un botón rompe el contraste.',
-  },
-  {
-    id: 'acento',
-    token: 'accent',
-    visualName: 'azul pizarra',
-    label: 'Acento',
-    note: 'Enlaces y destacados secundarios. Apoya la jerarquía sin competir con el primario.',
-  },
-];
+import { useI18n } from '@/context/I18nContext';
+import { ROLES_EN, ROLES_ES, type DemoRole, type RoleId } from './demoRoles';
 
 const PALETTE = {
   background: '#ffffff',
@@ -58,26 +20,34 @@ function roleLabel(role: DemoRole, mode: 'role' | 'visual') {
 }
 
 export function DocsInteractiveDemo() {
+  const { locale } = useI18n();
+  const roles = locale === 'en' ? ROLES_EN : ROLES_ES;
+  const isEn = locale === 'en';
+
   const [mode, setMode] = useState<'role' | 'visual'>('role');
   const [activeRoleId, setActiveRoleId] = useState<RoleId>('primario');
-  const activeRole = ROLES.find((r) => r.id === activeRoleId) ?? ROLES[0];
+  const activeRole = roles.find((r) => r.id === activeRoleId) ?? roles[0];
 
   return (
     <div
       className="overflow-hidden rounded-xl border border-border bg-surface"
-      aria-label="Demo de roles semánticos"
+      aria-label={isEn ? 'Semantic roles demo' : 'Demo de roles semánticos'}
     >
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3 sm:px-5">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-ink">La misma interfaz, dos formas de nombrar</p>
+          <p className="text-sm font-semibold text-ink">
+            {isEn ? 'The same interface, two ways of naming' : 'La misma interfaz, dos formas de nombrar'}
+          </p>
           <p className="mt-0.5 text-xs leading-relaxed text-muted">
-            El layout no cambia. Solo cambia si el nombre describe función o apariencia.
+            {isEn
+              ? 'The layout does not change. Only whether the name describes function or appearance.'
+              : 'El layout no cambia. Solo cambia si el nombre describe función o apariencia.'}
           </p>
         </div>
         <div
           className="flex shrink-0 rounded-lg border border-border bg-bg p-1"
           role="tablist"
-          aria-label="Modelo de nombre"
+          aria-label={isEn ? 'Naming model' : 'Modelo de nombre'}
         >
           {(['role', 'visual'] as const).map((nextMode) => (
             <button
@@ -92,7 +62,9 @@ export function DocsInteractiveDemo() {
                 mode === nextMode ? 'bg-surface-raised text-ink' : 'text-muted hover:text-ink'
               }`}
             >
-              {nextMode === 'role' ? 'Por función' : 'Por apariencia'}
+              {nextMode === 'role'
+                ? isEn ? 'By function' : 'Por función'
+                : isEn ? 'By appearance' : 'Por apariencia'}
             </button>
           ))}
         </div>
@@ -105,13 +77,15 @@ export function DocsInteractiveDemo() {
         className="grid gap-5 p-4 sm:grid-cols-[minmax(0,1.1fr)_minmax(200px,0.9fr)] sm:items-start sm:p-6"
       >
         <div className="min-w-0">
-          <p className="mb-3 text-xs font-semibold text-muted">Miniatura de producto</p>
+          <p className="mb-3 text-xs font-semibold text-muted">
+            {isEn ? 'Product preview' : 'Miniatura de producto'}
+          </p>
           <div
-            className="rounded-lg border border-border p-4 motion-reduce:transition-none transition-[box-shadow] duration-200"
+            className="rounded-lg border border-border p-4 transition-[box-shadow] duration-200 motion-reduce:transition-none"
             style={{ backgroundColor: PALETTE.background }}
           >
             <div
-              className={`rounded-lg border border-border p-4 motion-reduce:transition-none transition-[box-shadow] duration-200 ${
+              className={`rounded-lg border border-border p-4 transition-[box-shadow] duration-200 motion-reduce:transition-none ${
                 activeRoleId === 'superficie' ? 'ring-2 ring-primary ring-offset-2 ring-offset-bg' : ''
               }`}
               style={{ backgroundColor: PALETTE.surface }}
@@ -119,46 +93,51 @@ export function DocsInteractiveDemo() {
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0">
                   <p
-                    className={`text-sm font-semibold motion-reduce:transition-none transition-[box-shadow] duration-200 ${
+                    className={`text-sm font-semibold transition-[box-shadow] duration-200 motion-reduce:transition-none ${
                       activeRoleId === 'texto' ? 'rounded-sm ring-2 ring-primary ring-offset-2' : ''
                     }`}
                     style={{ color: PALETTE.onBackground }}
                   >
-                    Título de sección
+                    {isEn ? 'Section title' : 'Título de sección'}
                   </p>
                   <p className="mt-1 font-mono text-[0.6875rem] text-muted">
-                    {mode === 'role' ? 'texto → on-background' : 'casi negro'}
+                    {mode === 'role' ? 'texto → on-background' : activeRole.visualName}
                   </p>
                 </div>
                 <span
-                  className={`shrink-0 rounded-md px-2 py-1 font-mono text-[0.6875rem] font-semibold motion-reduce:transition-none transition-[box-shadow] duration-200 ${
+                  className={`shrink-0 rounded-md px-2 py-1 font-mono text-[0.6875rem] font-semibold transition-[box-shadow] duration-200 motion-reduce:transition-none ${
                     activeRoleId === 'primario' ? 'ring-2 ring-primary ring-offset-2' : ''
                   }`}
                   style={{ backgroundColor: PALETTE.primary, color: PALETTE.onPrimary }}
                 >
-                  {roleLabel(ROLES[0], mode)}
+                  {roleLabel(roles[0], mode)}
                 </span>
               </div>
               <p className="mt-3 text-xs leading-relaxed" style={{ color: PALETTE.onSurfaceMuted }}>
-                Texto secundario en la superficie. El contraste se comprueba sobre el fondo real del
-                componente.
+                {isEn
+                  ? 'Secondary text on the surface. Contrast is verified against the actual component background.'
+                  : 'Texto secundario en la superficie. El contraste se comprueba sobre el fondo real del componente.'}
               </p>
               <p className="mt-3 text-sm">
-                <span className="text-muted">¿Dudas? </span>
+                <span className="text-muted">{isEn ? 'Questions? ' : '¿Dudas? '}</span>
                 <span
-                  className={`font-semibold underline-offset-2 hover:underline motion-reduce:transition-none transition-[box-shadow] duration-200 ${
+                  className={`font-semibold underline-offset-2 hover:underline transition-[box-shadow] duration-200 motion-reduce:transition-none ${
                     activeRoleId === 'acento' ? 'rounded-sm ring-2 ring-primary ring-offset-2' : ''
                   }`}
                   style={{ color: PALETTE.accent }}
                 >
-                  {roleLabel(ROLES[3], mode)}
+                  {roleLabel(roles[3], mode)}
                 </span>
               </p>
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Resaltar rol en la miniatura">
-            {ROLES.map((entry) => {
+          <div
+            className="mt-4 flex flex-wrap gap-2"
+            role="group"
+            aria-label={isEn ? 'Highlight role in preview' : 'Resaltar rol en la miniatura'}
+          >
+            {roles.map((entry) => {
               const selected = entry.id === activeRoleId;
               return (
                 <button
@@ -201,8 +180,9 @@ export function DocsInteractiveDemo() {
           <p className="mt-2 text-sm leading-relaxed text-muted">{activeRole.note}</p>
           {mode === 'visual' ? (
             <p className="mt-3 rounded-md bg-surface px-3 py-2 text-xs leading-relaxed text-muted">
-              Con nombres visuales, si el verde pasa a azul hay que renombrar todo. Con tokens, solo
-              cambias el valor.
+              {isEn
+                ? 'With visual names, if green becomes blue you have to rename everything. With tokens, you only change the value.'
+                : 'Con nombres visuales, si el verde pasa a azul hay que renombrar todo. Con tokens, solo cambias el valor.'}
             </p>
           ) : null}
         </div>
