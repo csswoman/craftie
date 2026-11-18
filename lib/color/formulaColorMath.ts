@@ -1,9 +1,11 @@
-import { converter, formatHex } from 'culori';
+import { formatHex } from 'culori';
 
-import { CHROMA_MIN } from './harmony';
 import { normalizeHex } from './normalizeHex';
+import { hueDistance, toOklch } from './oklchMath';
+export { hueDistance };
 
-const toOklch = converter('oklch');
+export const CHROMA_MIN = 0.04;
+
 
 export interface SeedOklch {
   l: number;
@@ -37,11 +39,6 @@ export function parseSeedOklch(seed: string): SeedOklch {
     c: converted.c ?? 0,
     h: converted.h,
   };
-}
-
-export function hueDistance(a: number, b: number): number {
-  const diff = Math.abs(a - b) % 360;
-  return diff > 180 ? 360 - diff : diff;
 }
 
 export function neutralChroma(seedChroma: number): number {

@@ -1,6 +1,6 @@
-import { converter } from 'culori';
 
 import type { RasterData, RgbSample } from './imageTypes';
+import { toOklch } from './oklchMath';
 
 const NEAR_WHITE_L = 0.95;
 const NEAR_BLACK_L = 0.05;
@@ -12,7 +12,6 @@ const ALPHA_MIN = 128;
 /** Bits kept per channel when grouping pixels; 5 bits = 32 levels. */
 const QUANTIZE_BITS = 5;
 
-const toOklch = converter('oklch');
 
 export function samplePixels(raster: RasterData, sampleStep: number, sampleOffset = 0): RgbSample[] {
   const samples: RgbSample[] = [];

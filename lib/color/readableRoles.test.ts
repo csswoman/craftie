@@ -1,13 +1,12 @@
+import { toOklch } from './oklchMath';
 import { describe, expect, it } from 'vitest';
 
-import { converter } from 'culori';
 
 import { assignRolesFromHexes } from '../color/rolePalette';
 import { contrastRatio } from '../utils/colorMath';
 import { deriveReadableRoleVariants } from './readableRoles';
 import { buildPreviewTokens, hasPreviewContrastFailure } from './previewTokens';
 
-const toOklch = converter('oklch');
 
 describe('readableRoles', () => {
   it('derives readable variants that pass AA on their target surfaces', () => {

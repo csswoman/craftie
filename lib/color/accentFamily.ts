@@ -1,4 +1,4 @@
-import { converter } from 'culori';
+import { toOklch } from './oklchMath';
 
 import { getSimilarNamedColors } from './colorDetails';
 import { normalizeHex } from './normalizeHex';
@@ -9,7 +9,6 @@ import type { SemanticTokenName, SemanticTokenOverrides, SemanticTokens } from '
 import { deriveFromPrimary } from './uiColorCandidates';
 import { oklchChannelsToHex } from '../utils/colorMath';
 
-const toOklch = converter('oklch');
 
 export const ACCENT_FAMILY_SIZE = 6;
 

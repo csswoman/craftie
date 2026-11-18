@@ -1,4 +1,4 @@
-import { converter } from 'culori';
+import { toOklch } from './oklchMath';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -7,7 +7,6 @@ import {
   MIN_BG_SURFACE_LIGHTNESS_DELTA,
 } from './semanticTokens';
 
-const toOklch = converter('oklch');
 const MIN_DELTA = 0.035;
 
 describe('background/surface lightness separation', () => {

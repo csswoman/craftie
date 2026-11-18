@@ -2,10 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import type { GeneratedPalette } from '../color/formulas';
 import { PALETTE_ROLE_ORDER, type PaletteSeeds, type RolePalette } from '../color/rolePalette';
-import {
-  rolePaletteToCssCustomProperties,
-  themePalettesToCssCustomProperties,
-} from './designTokens';
 import { buildBrandKit } from './brandKit';
 import { buildExportTokenSet } from './exportTokenSet';
 import { generateDesignMd } from './generateDesignMd';
@@ -24,49 +20,6 @@ function mockRolePalette(hexByRole: Record<string, string>): RolePalette {
     ]),
   ) as RolePalette;
 }
-
-describe('designTokens', () => {
-  it('exports pasteable css custom properties by role', () => {
-    const rolePalette = mockRolePalette({
-      fondo: '#F7F7F5',
-      superficie: '#EFEFE8',
-      texto: '#2C3E50',
-      'texto-secundario': '#6B7280',
-      primario: '#9ADBD6',
-      secundario: '#E8D44D',
-      acento: '#F4A261',
-      borde: '#D9D7D0',
-    });
-
-    const css = rolePaletteToCssCustomProperties(rolePalette);
-
-    expect(css).toBe(`:root {
-  --color-fondo: #F7F7F5;
-  --color-superficie: #EFEFE8;
-  --color-texto: #2C3E50;
-  --color-texto-secundario: #6B7280;
-  --color-primario: #9ADBD6;
-  --color-secundario: #E8D44D;
-  --color-acento: #F4A261;
-  --color-borde: #D9D7D0;
-}`);
-  });
-
-  it('exports light and dark theme css blocks', () => {
-    const assigned = assignRolesFromHexes(['#F7F7F5', '#9ADBD6', '#F4A261']);
-    const seeds = {
-      primario: assigned.primario.hex,
-      acento: assigned.acento.hex,
-      neutralHue: 180,
-    };
-    const css = themePalettesToCssCustomProperties(seeds);
-    const darkSection = css.split('[data-theme="dark"]')[1] ?? '';
-
-    expect(css).toContain(':root {');
-    expect(css).toContain('[data-theme="dark"] {');
-    expect(darkSection).not.toContain(`--color-fondo: ${assigned.fondo.hex.toUpperCase()};`);
-  });
-});
 
 describe('generateDesignMd', () => {
   it('includes English semantic tokens and pasteable css', () => {

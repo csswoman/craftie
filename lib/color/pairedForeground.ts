@@ -1,8 +1,7 @@
-import { converter } from 'culori';
+import { toOklch } from './oklchMath';
 
 import { contrastRatio, oklchChannelsToHex } from '../utils/colorMath';
 
-const toOklch = converter('oklch');
 
 export type DerivedForeground = {
   hex: string;

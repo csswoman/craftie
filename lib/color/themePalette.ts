@@ -1,4 +1,4 @@
-import { converter } from 'culori';
+import { toOklch } from './oklchMath';
 
 import { contrastRatio } from '../utils/colorMath';
 import { deriveFondo } from '../utils/deriveRoles';
@@ -45,7 +45,6 @@ export const EMPTY_THEMES: ThemesConfig = {
 
 const AA_TARGET = 4.5;
 
-const toOklch = converter('oklch');
 
 /** @deprecated Use deriveFondo with neutral hue from seeds */
 export function deriveDarkBackground(primarioHex: string): string {

@@ -3,9 +3,9 @@ import { converter } from 'culori';
 import { remainsDistinctWithColorVisionDeficiency } from './colorVision';
 import { deriveForegroundForBackground } from './pairedForeground';
 import { contrastRatio, readableOn } from '../utils/colorMath';
+import { hueDistance, toOklch } from './oklchMath';
 
 const toOklab = converter('oklab');
-const toOklch = converter('oklch');
 
 export type ColorUse = 'text' | 'fill' | 'accent' | 'surface' | 'data';
 
@@ -30,11 +30,6 @@ export type FitnessScenario = {
 const TEXT_MIN = 4.5;
 const DATA_MIN = 3;
 const ACCENT_MIN_OKLAB_DISTANCE = 0.03;
-
-function hueDistance(left: number, right: number): number {
-  const distance = Math.abs(left - right) % 360;
-  return Math.min(distance, 360 - distance);
-}
 
 function oklabDistance(leftHex: string, rightHex: string): number {
   const left = toOklab(leftHex);

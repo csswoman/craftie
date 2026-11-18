@@ -1,11 +1,10 @@
-import { converter } from 'culori';
+import { toOklch } from './oklchMath';
 import { describe, expect, it } from 'vitest';
 
 import { contrastRatio } from '../utils/colorMath';
 import { classifyPalette } from './paletteClassification';
 import { deriveForegroundForBackground } from './pairedForeground';
 
-const toOklch = converter('oklch');
 
 function hueDistance(left: number, right: number): number {
   const distance = Math.abs(left - right) % 360;

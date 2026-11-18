@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { converter } from 'culori';
 
 import { MATERIALS, transformPalette, type Material } from './paintMaterials';
+import { toOklch } from './oklchMath';
 
-const toOklch = converter('oklch');
 
 function readOklch(hex: string) {
   const color = toOklch(hex);

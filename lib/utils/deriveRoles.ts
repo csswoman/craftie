@@ -1,4 +1,4 @@
-import { clampChroma, converter, formatHex } from 'culori';
+import { clampChroma, formatHex } from 'culori';
 
 import { normalizeHex } from '../color/normalizeHex';
 import { bestTextOn, mixColors, relativeLuminance } from './colorMath';
@@ -6,6 +6,7 @@ import {
   deriveSeparatedHueSurface,
   SURFACE_TINT_MAX,
 } from './surfaceFillSeparation';
+import { hueDistance, toOklch } from '../color/oklchMath';
 
 export type Polarity = 'light' | 'dark';
 export type ThemePolarity = Polarity;
@@ -22,7 +23,6 @@ const LIGHT_ELEVATION_L_DELTA = 0.01;
 const MAX_LIGHT_SURFACE_L = 0.992;
 const DARK_ELEVATION_OVERLAY = 0.06;
 
-const toOklch = converter('oklch');
 
 const NEAR_WHITE = '#FFFFFF';
 const NEAR_BLACK = '#000000';
@@ -55,12 +55,6 @@ function deriveBrandTint(
   const tinted = brandTintOklch(fondoHex, primarioHex, amount);
 
   return deriveElevation(tinted, theme);
-}
-
-function hueDistance(left: number, right: number): number {
-  const diff = Math.abs(left - right) % 360;
-
-  return diff > 180 ? 360 - diff : diff;
 }
 
 /** Near-white or near-black canvas tinted with a reference hue at minimal chroma. */

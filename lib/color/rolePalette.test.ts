@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 
-import { converter } from 'culori';
 
 import {
   assignColorToRolePalette,
@@ -18,8 +17,8 @@ import { normalizeHex } from './normalizeHex';
 import { contrastRatio, relativeLuminance } from '../utils/colorMath';
 import { hasAdequateSurfaceFillSeparation } from '../utils/surfaceFillSeparation';
 import { isTextSafe } from './roleFitness';
+import { toOklch } from './oklchMath';
 
-const toOklch = converter('oklch');
 
 function hueDistance(left: number, right: number): number {
   const distance = Math.abs(left - right) % 360;

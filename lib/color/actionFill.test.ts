@@ -1,10 +1,9 @@
-import { converter } from 'culori';
+import { toOklch } from './oklchMath';
 import { describe, expect, it } from 'vitest';
 
 import { pickActionFillTokens } from './actionFill';
 import { deriveSemanticTokens } from './semanticTokens';
 
-const toOklch = converter('oklch');
 
 describe('pickActionFillTokens', () => {
   it('picks a mid-lightness action step for a dark primary on light chrome', () => {

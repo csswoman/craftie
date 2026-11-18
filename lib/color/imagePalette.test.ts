@@ -1,4 +1,4 @@
-import { converter } from 'culori';
+import { toOklch } from './oklchMath';
 import { describe, expect, it } from 'vitest';
 
 import { contrastRatio } from '../utils/colorMath';
@@ -9,7 +9,6 @@ import {
   classifyHexToGroup,
 } from './imagePalette';
 
-const toOklch = converter('oklch');
 
 describe('imagePalette', () => {  it('classifies colors into light, bold, and dark groups', () => {
     expect(classifyHexToGroup('#F7F7F5')).toBe('light-neutral');

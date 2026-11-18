@@ -1,6 +1,6 @@
+import { toOklch } from '../color/oklchMath';
 import { describe, expect, it } from 'vitest';
 
-import { converter } from 'culori';
 
 import {
   adjustLightnessForContrast,
@@ -14,7 +14,6 @@ import {
   relativeLuminance,
 } from './colorMath';
 
-const toOklch = converter('oklch');
 
 describe('colorMath', () => {
   it('computes WCAG relative luminance', () => {

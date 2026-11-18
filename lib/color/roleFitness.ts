@@ -1,5 +1,6 @@
 import { contrastRatio } from './contrast';
 import { NEUTRAL_CHROMA_MAX } from './colorGroupClassification';
+import { hueDistance } from './oklchMath';
 
 export type FitnessColor = {
   hex: string;
@@ -39,11 +40,6 @@ export function isTextSafe(candidateHex: string, surfaceHex: string): boolean {
 const BRAND_LIGHTNESS_IDEAL = 0.56;
 const BRAND_LIGHTNESS_SPREAD = 0.38;
 const BRAND_CHROMA_CAP = 0.16;
-
-function hueDistance(a: number, b: number): number {
-  const diff = Math.abs(a - b) % 360;
-  return diff > 180 ? 360 - diff : diff;
-}
 
 /** Grayness penalty: 1 for achromatic, near 0 for vivid hues. */
 export function grayness(candidate: Pick<FitnessColor, 'chroma' | 'isNeutral'>): number {

@@ -1,4 +1,4 @@
-import { converter } from 'culori';
+import { toOklch } from './oklchMath';
 
 import type { ExtractedColor } from './imageTypes';
 
@@ -12,7 +12,6 @@ export type PaletteClassification = {
   neutralWeight: number;
 };
 
-const toOklch = converter('oklch');
 /** Same floor the UI uses for an automatically assigned expressive color. */
 const MEANINGFUL_CHROMA_MIN = 0.055;
 /** Area share a chromatic source needs to keep the palette out of `neutral`. */

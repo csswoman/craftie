@@ -1,7 +1,7 @@
-import { converter } from 'culori';
 
 import { oklchChannelsToHex } from '../utils/colorMath';
 import { normalizeHex } from './normalizeHex';
+import { toOklch } from './oklchMath';
 
 export const VIBRANCY_MIN = 0;
 export const VIBRANCY_MID = 50;
@@ -33,7 +33,6 @@ export const VIBRANCY_CURVE = {
   },
 } as const;
 
-const toOklch = converter('oklch');
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));

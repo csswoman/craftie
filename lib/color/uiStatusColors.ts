@@ -1,4 +1,3 @@
-import { converter } from 'culori';
 
 import type { ExtractedColor } from './imageExtractor';
 import { deriveForegroundForBackground } from './pairedForeground';
@@ -8,8 +7,8 @@ import {
   maxOklchChromaForSrgb,
   oklchChannelsToHex,
 } from '../utils/colorMath';
+import { hueDistance, toOklch } from './oklchMath';
 
-const toOklch = converter('oklch');
 
 export const STATUS_COLORS_ON_DEMAND = true;
 
@@ -53,11 +52,6 @@ export type UiStatusColor = {
 export type UiStatusColorSet = Record<UiStatusRole, UiStatusColor>;
 export type UiStatusCandidate = UiStatusColor & { id: string; label: string };
 export type ForcedStatusColor = Pick<UiStatusColor, 'hex' | 'origin' | 'sourceHex'>;
-
-function hueDistance(left: number, right: number): number {
-  const distance = Math.abs(left - right) % 360;
-  return Math.min(distance, 360 - distance);
-}
 
 function closestStatusRole(hex: string): UiStatusRole | null {
   const hue = toOklch(hex)?.h;

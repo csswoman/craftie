@@ -1,12 +1,11 @@
-import { converter } from 'culori';
 
 import { evaluateColorFitness } from './colorFitness';
 import { normalizeHex } from './normalizeHex';
 import { deriveForegroundForBackground } from './pairedForeground';
 import type { SemanticToken, SemanticTokenName, SemanticTokens } from './semanticTokens';
+import { toOklch } from './oklchMath';
 
 export const EXPRESSIVE_TOKEN_NAMES = ['primary', 'secondary', 'accent'] as const satisfies readonly SemanticTokenName[];
-const toOklch = converter('oklch');
 const AUTO_EXPRESSIVE_CHROMA_MIN = 0.055;
 
 function isAssigned(token: SemanticToken): boolean {

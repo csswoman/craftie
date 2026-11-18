@@ -1,6 +1,5 @@
-import { converter } from 'culori';
+import { toOklch } from './oklchMath';
 
-const toOklch = converter('oklch');
 
 /**
  * Formats a hex color as a compact OKLCH summary for display.

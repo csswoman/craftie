@@ -1,6 +1,6 @@
+import { toOklch } from './oklchMath';
 import { describe, expect, it } from 'vitest';
 
-import { converter } from 'culori';
 
 import { contrastRatio } from '../utils/colorMath';
 import { assignRolesFromHexes, extractSeedsFromPalette } from './rolePalette';
@@ -13,7 +13,6 @@ import {
 } from './themePalette';
 import { deriveFondo } from '../utils/deriveRoles';
 
-const toOklch = converter('oklch');
 
 describe('themePalette', () => {
   it('derives a dark fondo tinted with the neutral hue', () => {

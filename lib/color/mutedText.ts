@@ -1,4 +1,4 @@
-import { converter } from 'culori';
+import { toOklch } from './oklchMath';
 
 import {
   adjustLightnessForContrast,
@@ -6,7 +6,6 @@ import {
   oklchChannelsToHex,
 } from '../utils/colorMath';
 
-const toOklch = converter('oklch');
 
 export function deriveMutedTextHex(
   textHex: string,

@@ -1,7 +1,8 @@
 import type { ExtractedColor } from './imageTypes';
 import { normalizeHex } from './normalizeHex';
-import { toOklch } from './oklchMath';
+import { hueDistance, toOklch } from './oklchMath';
 import { brandScore, type FitnessColor } from './roleFitness';
+export { hueDistance };
 
 /**
  * Source color ready for expressive role selection. `rank` is set when the
@@ -39,11 +40,6 @@ const RANKED_MIN_HUE_DISTANCE = 12;
 const RANKED_MIN_LIGHTNESS_DISTANCE = 0.08;
 /** Candidates at or below this chroma count as neutral for fitness scoring. */
 const NEUTRAL_CANDIDATE_CHROMA_MAX = 0.055;
-
-export function hueDistance(left: number, right: number): number {
-  const diff = Math.abs(left - right) % 360;
-  return diff > 180 ? 360 - diff : diff;
-}
 
 function minHueDistance(candidate: FitnessColor, others: FitnessColor[]): number {
   return others.reduce((min, other) => Math.min(min, hueDistance(candidate.hue, other.hue)), 180);

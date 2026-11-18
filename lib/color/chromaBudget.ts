@@ -1,8 +1,7 @@
-import { converter } from 'culori';
+import { toOklch } from './oklchMath';
 
 import type { SemanticTokenName, SemanticTokens } from './semanticTokens';
 
-const toOklch = converter('oklch');
 
 export const CHROMA_BUDGET_THRESHOLD = 0.03;
 

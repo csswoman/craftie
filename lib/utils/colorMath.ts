@@ -1,10 +1,10 @@
+import { toOklch } from '../color/oklchMath';
 import { clampChroma, converter, displayable, formatHex, interpolate, parse } from 'culori';
 import type { Oklch, Rgb } from 'culori';
 
 import { normalizeHex } from '../color/normalizeHex';
 
 const toRgb = converter('rgb');
-const toOklch = converter('oklch');
 
 const LIGHTNESS_SEARCH_EPSILON = 0.002;
 const NEAR_WHITE_L = 0.98;

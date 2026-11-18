@@ -25,3 +25,9 @@ export function deriveChromatic(seedHex: string, hueOffset: number): string {
 
   return oklchToHex(lightness, chroma, hue);
 }
+
+/** Shortest angular distance between two hues on a 360° circle. */
+export function hueDistance(left: number, right: number): number {
+  const diff = Math.abs(left - right) % 360;
+  return diff > 180 ? 360 - diff : diff;
+}

@@ -1,10 +1,10 @@
-import { converter, formatHex } from 'culori';
+import { formatHex } from 'culori';
+import { toOklch } from '../color/oklchMath';
 
 import { normalizeHex } from '../color/normalizeHex';
 import { mixColors } from './colorMath';
 import type { ThemePolarity } from './deriveRoles';
 
-const toOklch = converter('oklch');
 
 export const SURFACE_TINT_MAX = 0.06;
 export const SURFACE_TINT_MIN = 0.01;

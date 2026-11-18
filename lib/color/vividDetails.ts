@@ -1,5 +1,7 @@
 import { toCluster } from './colorClustering';
 import type { ColorCluster, LabSample } from './imageTypes';
+import { hueDistance } from './oklchMath';
+export { hueDistance };
 
 /** Minimum OKLab chroma for a detail to count as a color, not a tinted shade. */
 const DETAIL_CHROMA_MIN = 0.07;
@@ -19,11 +21,6 @@ export function labChroma(lab: [number, number, number]): number {
 
 export function labHue(lab: [number, number, number]): number {
   return ((Math.atan2(lab[2], lab[1]) * 180) / Math.PI + 360) % 360;
-}
-
-export function hueDistance(left: number, right: number): number {
-  const diff = Math.abs(left - right) % 360;
-  return diff > 180 ? 360 - diff : diff;
 }
 
 function weightOf(sample: LabSample): number {

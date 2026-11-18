@@ -1,6 +1,6 @@
+import { toOklch } from '../color/oklchMath';
 import { describe, expect, it } from 'vitest';
 
-import { converter } from 'culori';
 
 import { contrastRatio, relativeLuminance } from './colorMath';
 import {
@@ -18,7 +18,6 @@ import {
   hasAdequateSurfaceFillSeparation,
 } from './surfaceFillSeparation';
 
-const toOklch = converter('oklch');
 
 describe('deriveRoles', () => {
   const fondo = deriveFondo(210, 'light');

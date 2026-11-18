@@ -1,4 +1,4 @@
-import { CURATED_FONT_PAIRS } from './fontPairLibrary';
+import { CURATED_FONT_PAIRS } from './pairs';
 import type { FontPair } from './fontPairTypes';
 
 export type {

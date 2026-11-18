@@ -1,8 +1,8 @@
-import { converter } from 'culori';
+import { toOklch } from './oklchMath';
 import { describe, expect, it } from 'vitest';
 
 import { contrastRatio, evaluateContrast } from './contrast';
-import { CHROMA_MIN } from './harmony';
+import { CHROMA_MIN } from './formulaColorMath';
 import {
   generateAccent,
   generateNeutrals,
@@ -13,7 +13,6 @@ import {
 } from './formulas';
 import { createDefaultSelection } from './selectableColors';
 
-const toOklch = converter('oklch');
 
 const GREEN_SEED = '#2F5644';
 const BLUE_SEED = '#1E4D8C';

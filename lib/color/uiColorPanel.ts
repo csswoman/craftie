@@ -1,4 +1,3 @@
-import { converter } from 'culori';
 
 import { remainsDistinctWithColorVisionDeficiency } from './colorVision';
 import { normalizeHex } from './normalizeHex';
@@ -11,8 +10,8 @@ import {
   type ColorUse,
   type FitnessResult,
 } from './colorFitness';
+import { hueDistance, toOklch } from './oklchMath';
 
-const toOklch = converter('oklch');
 
 export const UI_SYSTEM_ROLES = [
   { token: 'background', label: 'Fondo', contrast: true },
@@ -57,11 +56,6 @@ export const DATA_TOKEN_NAMES = [
 
 export const TINTED_NEUTRAL_LIGHTNESS = [0.98, 0.96, 0.93, 0.88, 0.72, 0.53, 0.33, 0.2] as const;
 const TINTED_NEUTRAL_CHROMA = [0.008, 0.012, 0.016, 0.02, 0.025, 0.03, 0.03, 0.03] as const;
-
-function hueDistance(left: number, right: number): number {
-  const distance = Math.abs(left - right) % 360;
-  return Math.min(distance, 360 - distance);
-}
 
 export function dominantSourceHue(colors: SelectableColor[]): number {
   const chromatic = colors.flatMap((color) => {

@@ -1,4 +1,4 @@
-import { converter } from 'culori';
+import { toOklch } from './oklchMath';
 
 import {
   adjustLightnessForContrast,
@@ -60,7 +60,6 @@ const NORMAL_TEXT_AAA = 7;
 const LARGE_TEXT_AA = 3;
 const LARGE_TEXT_AAA = 4.5;
 
-const toOklch = converter('oklch');
 
 /**
  * Maps a contrast ratio to a WCAG 2.2 level for normal or large text.

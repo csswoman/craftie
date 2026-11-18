@@ -1,10 +1,10 @@
-import { converter, differenceEuclidean, formatHex } from 'culori';
+import { differenceEuclidean, formatHex } from 'culori';
+import { toOklch } from './oklchMath';
 
 import { nameForHex, namePalette } from './naming';
 import { normalizeHex } from './normalizeHex';
 import { SELECTABLE_COLORS } from './selectableColors';
 
-const toOklch = converter('oklch');
 const oklchDifference = differenceEuclidean('oklch');
 
 export type HarmonyType =

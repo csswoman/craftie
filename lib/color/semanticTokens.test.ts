@@ -1,4 +1,3 @@
-import { converter } from 'culori';
 import { describe, expect, it } from 'vitest';
 
 import { contrastRatio, oklchChannelsToHex } from '../utils/colorMath';
@@ -11,8 +10,8 @@ import {
   deriveRolePaletteFromSemanticInput,
   rolePaletteAsSemanticOverrides,
 } from './rolePalette';
+import { toOklch } from './oklchMath';
 
-const toOklch = converter('oklch');
 
 function hueDistance(left: number, right: number): number {
   const diff = Math.abs(left - right) % 360;

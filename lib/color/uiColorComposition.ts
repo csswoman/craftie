@@ -1,8 +1,7 @@
-import { converter } from 'culori';
+import { toOklch } from './oklchMath';
 
 import type { SemanticTokenName, SemanticTokens } from './semanticTokens';
 
-const toOklch = converter('oklch');
 
 export const UI_COMPOSITION_SEGMENTS = [
   { token: 'background', label: 'Fondo', area: 0.55 },

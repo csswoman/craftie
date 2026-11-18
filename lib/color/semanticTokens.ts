@@ -1,4 +1,3 @@
-import { converter } from 'culori';
 
 import type { ExtractedColor } from './imageExtractor';
 import { normalizeHex } from './normalizeHex';
@@ -48,6 +47,7 @@ import {
   dataSeriesChromaFloorForVibrancy,
   normalizeVibrancy,
 } from './vibrancy';
+import { toOklch } from './oklchMath';
 
 export type ExpressiveScaleBase = 'primary' | 'secondary' | 'accent';
 export type TonalTokenName = `${ExpressiveScaleBase}-${TonalScaleStep}`;
@@ -122,7 +122,6 @@ export type SemanticTokenDerivationInput = {
   paletteType?: PaletteType;
 };
 
-const toOklch = converter('oklch');
 
 const AA_RATIO = 4.5;
 export const MIN_BG_SURFACE_LIGHTNESS_DELTA = 0.035;

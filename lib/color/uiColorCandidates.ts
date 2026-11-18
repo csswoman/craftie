@@ -8,8 +8,8 @@ import type { SelectableColor } from './selectableColors';
 import type { SemanticTokenName, SemanticTokens } from './semanticTokens';
 import { DATA_TOKEN_NAMES } from './uiColorPanel';
 import { contrastRatio, oklchChannelsToHex } from '../utils/colorMath';
+import { hueDistance, toOklch } from './oklchMath';
 
-const toOklch = converter('oklch');
 const toOklab = converter('oklab');
 export type CandidateOrigin = 'source' | 'derived' | 'synthetic';
 export type DataSeparation = { minHue: number | null; minLightness: number | null };
@@ -32,11 +32,6 @@ export type CandidateFamily = {
 };
 
 type OccupiedSeries = { index: number; hex: string };
-
-function hueDistance(left: number, right: number): number {
-  const distance = Math.abs(left - right) % 360;
-  return Math.min(distance, 360 - distance);
-}
 
 function dataSeparation(hex: string, occupied: OccupiedSeries[]): DataSeparation {
   const candidate = toOklch(hex);

@@ -302,12 +302,3 @@ export function renamePaletteColor(
     selected: inSelected ? selected.map(applyRename) : selected,
   };
 }
-
-export async function copyHexToClipboard(hex: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(normalizeHex(hex));
-    return true;
-  } catch {
-    return false;
-  }
-}

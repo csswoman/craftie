@@ -1,6 +1,6 @@
+import { toOklch } from '../color/oklchMath';
 import { describe, expect, it } from 'vitest';
 
-import { converter } from 'culori';
 
 import { assignRolesFromHexes } from '../color/rolePalette';
 import { deriveFondo, deriveSuperficie } from './deriveRoles';
@@ -12,7 +12,6 @@ import {
   MIN_SURFACE_FILL_INTENSITY_DELTA,
 } from './surfaceFillSeparation';
 
-const toOklch = converter('oklch');
 
 describe('surfaceFillSeparation', () => {
   const fondo = deriveFondo(260, 'light');

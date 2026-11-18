@@ -1,8 +1,7 @@
-import { converter } from 'culori';
+import { toOklch } from './oklchMath';
 
 import type { ColorGroupId } from './selectableColors';
 
-const toOklch = converter('oklch');
 
 /** OKLCH lightness (0–1) above which a low-chroma color reads as a light neutral. */
 export const LIGHT_NEUTRAL_LIGHTNESS_MIN = 0.78;
