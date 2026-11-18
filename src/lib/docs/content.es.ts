@@ -428,7 +428,7 @@ export const DOCS_GROUPS_ES: DocsGroup[] = [
         'Sobre Craftie',
         'Vistas del canvas',
         'Sistema, siete maquetas, ilustración y Pintar.',
-        'El selector agrupa: Modo de extracción (Colores, Pintar), Sistema de diseño, Maquetas y Vistas previas. Cambia de vista para encontrar conflictos que un swatch aislado no muestra.',
+        'El selector agrupa: Paleta (Colores, Pintar), Sistema de diseño, Maquetas y Exploración (Ilustración). Cambia de vista para encontrar conflictos que un swatch aislado no muestra.',
         [],
         [],
         [],

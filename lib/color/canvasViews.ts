@@ -39,10 +39,10 @@ export const CANVAS_VIEWS: readonly CanvasViewMeta[] = [
 ];
 
 export const CANVAS_VIEW_GROUP_LABEL: Record<CanvasViewGroup, string> = {
-  mode: 'Modo de extracción',
+  mode: 'Paleta',
   system: 'Sistema de diseño',
   layout: 'Maquetas',
-  preview: 'Vistas previas',
+  preview: 'Exploración',
 };
 
 export function getCanvasViewMeta(id: CanvasViewId): CanvasViewMeta {

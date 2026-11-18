@@ -83,7 +83,7 @@ export function CanvasViewPickerList({
                 <ViewThumbnail id={view.id} palette={palette} />
                 <span className="min-w-0 flex-1">
                   <span className="block text-chrome-label font-semibold leading-tight">
-                    {tx(view.id === 'colors' ? 'UI' : view.name)}
+                    {tx(view.name)}
                   </span>
                   <span className="mt-0.5 block truncate text-chrome-caption text-muted">
                     {tx(view.description)}

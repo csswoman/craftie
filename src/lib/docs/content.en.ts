@@ -428,7 +428,7 @@ export const DOCS_GROUPS_EN: DocsGroup[] = [
         'About Craftie',
         'Canvas views',
         'System, seven mockups, illustration, and Paint.',
-        'The view selector groups: Extraction mode (Colors, Paint), Design system, Mockups, and Previews. Switch views to find conflicts an isolated swatch never reveals.',
+        'The view selector groups: Palette (Colors, Paint), Design system, Mockups, and Exploration (Illustration). Switch views to find conflicts an isolated swatch never reveals.',
         [],
         [],
         [],
