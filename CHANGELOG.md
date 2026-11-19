@@ -14,6 +14,7 @@ All notable changes to Craftie are documented here. The format follows [Keep a C
 - Security headers, richer metadata, `robots` and web manifest.
 
 ### Changed
+- Image color extraction (decode, downscale and clustering) runs in a Web Worker with OffscreenCanvas, falling back to the main thread when unavailable. A 4000×3000 JPEG no longer produces main-thread long tasks (dev build: 63–138 ms before, none after) and both paths return identical colors.
 - Package renamed to `craftie`; `engines` and `packageManager` are now declared.
 - `RolePaletteContext` split into focused hooks and pure `lib/color/editablePalette` logic.
 - `check:component-size` now also covers `src/context`.
