@@ -15,14 +15,18 @@ export const MAX_RASTER_DIMENSION = 128;
 type Context2D = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 export type CreateContext = (width: number, height: number) => Context2D;
 
-export function getDrawDimensions(width: number, height: number): { width: number; height: number } {
+export function getDrawDimensions(
+  width: number,
+  height: number,
+  maxDimension = MAX_RASTER_DIMENSION,
+): { width: number; height: number } {
   const largestSide = Math.max(width, height);
 
-  if (largestSide <= MAX_RASTER_DIMENSION) {
+  if (largestSide <= maxDimension) {
     return { width, height };
   }
 
-  const scale = MAX_RASTER_DIMENSION / largestSide;
+  const scale = maxDimension / largestSide;
 
   return {
     width: Math.max(1, Math.round(width * scale)),
@@ -54,8 +58,9 @@ export function rasterizeImage(
   naturalWidth: number,
   naturalHeight: number,
   createContext: CreateContext,
+  maxDimension = MAX_RASTER_DIMENSION,
 ): RasterData {
-  const dimensions = getDrawDimensions(naturalWidth, naturalHeight);
+  const dimensions = getDrawDimensions(naturalWidth, naturalHeight, maxDimension);
   let source: CanvasImageSource = image;
   let width = naturalWidth;
   let height = naturalHeight;
