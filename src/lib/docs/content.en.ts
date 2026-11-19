@@ -339,6 +339,7 @@ export const DOCS_GROUPS_EN: DocsGroup[] = [
               'If a pair falls short of AA, the editor displays "X points needed for AA", a progress bar, and sample text.',
               'Suggests corrections in OKLCH (lighten or darken text or background) with the resulting ratio.',
               'You can only apply the correction for the side you are currently editing; the other side is a hint.',
+              'When two or more roles fail, «Fix all» solves the whole palette: it looks for the smallest combined lightness change, keeps the hue and leaves locked roles alone. One undo reverts it.',
             ],
           },
           {

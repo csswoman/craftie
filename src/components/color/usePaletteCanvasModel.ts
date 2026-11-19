@@ -48,6 +48,7 @@ export function usePaletteCanvasModel(paletteCatalog: SelectableColor[]) {
         const failure = hasRolePaletteContrastFailure(palette);
         reports.push({
           theme,
+          palette,
           failure,
           warnings: getRolePaletteContrastWarnings(palette),
           fixes: failure ? suggestRoleContrastFixes(palette) : [],

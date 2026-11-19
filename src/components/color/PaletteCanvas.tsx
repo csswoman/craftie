@@ -80,7 +80,9 @@ export function PaletteCanvas({
     activeTheme,
     setActiveTheme,
     lockedRoles,
+    lockedRolesByTheme,
     replaceRole,
+    replaceRoles,
     replaceSemanticToken,
   } = useRolePalette();
   const { activeView, activeMode, selectView, visionMode, showAccents, setShowAccents } = useCanvasView();
@@ -92,7 +94,12 @@ export function PaletteCanvas({
   const { columns, paintColors, contrastReports, hasPalette } = usePaletteCanvasModel(paletteCatalog);
   const lockedSet = useMemo(() => new Set(lockedRoles), [lockedRoles]);
   const canReplace = editable && rolePalette !== null;
-  const applyContrastFix = useApplyContrastFix({ activeTheme, setActiveTheme, replaceRole });
+  const contrastFix = useApplyContrastFix({
+    activeTheme,
+    setActiveTheme,
+    replaceRoles,
+    lockedRolesByTheme,
+  });
 
   function handleOpenRoleDetails(hex: string) {
     setSelectedAccentSlot(null);
@@ -152,7 +159,8 @@ export function PaletteCanvas({
           <PaletteCanvasNotices
             activeTheme={activeTheme}
             reports={contrastReports}
-            onApplyFix={canReplace ? applyContrastFix : undefined}
+            onApplyFix={canReplace ? contrastFix.applyFix : undefined}
+            onApplyAll={canReplace ? contrastFix.applyAll : undefined}
           />
         ) : null}
         {isLoading && !hasPalette ? (

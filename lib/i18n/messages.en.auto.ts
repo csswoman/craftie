@@ -145,6 +145,8 @@ export const enAuto: Record<keyof typeof esAuto, string> = {
   "ui.PaletteCanvasNotices.corregir-tono": "Fix tone",
   "ui.PaletteCanvasNotices.sin-correccion": "No lightness reaches AA while keeping this hue. Try another color.",
   "ui.PaletteCanvasNotices.en-edicion": " · editing",
+  "ui.PaletteCanvasNotices.corregir-todo": "Fix all",
+  "ui.PaletteCanvasNotices.corregir-todo-ayuda": "Smallest combined change; locked roles stay as they are.",
   "ui.PaletteColumn.color-bloqueado": "Locked color",
   "ui.PaletteColumn.seleccionar": "Select {name}",
   "ui.PaletteColumnToolbar.generar-color-al-azar": "Generate random color",

@@ -143,6 +143,8 @@ export const esAuto = {
   "ui.PaletteCanvasNotices.corregir-tono": "Corregir tono",
   "ui.PaletteCanvasNotices.sin-correccion": "Ninguna luminosidad alcanza AA manteniendo este matiz. Prueba otro color.",
   "ui.PaletteCanvasNotices.en-edicion": " · en edición",
+  "ui.PaletteCanvasNotices.corregir-todo": "Corregir todo",
+  "ui.PaletteCanvasNotices.corregir-todo-ayuda": "Ajuste mínimo en conjunto; respeta los roles bloqueados.",
   "ui.PaletteColumn.color-bloqueado": "Color bloqueado",
   "ui.PaletteColumn.seleccionar": "Seleccionar {name}",
   "ui.PaletteColumnToolbar.generar-color-al-azar": "Generar color al azar",

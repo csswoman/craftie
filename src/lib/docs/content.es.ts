@@ -339,6 +339,7 @@ export const DOCS_GROUPS_ES: DocsGroup[] = [
               'Si un par no llega a AA, el editor muestra «Faltan X puntos para AA», una barra de progreso y una muestra de texto real.',
               'Propone correcciones en OKLCH (aclarar u oscurecer texto o fondo) con el ratio resultante.',
               'Solo puedes aplicar la corrección del lado que estás editando; la del otro lado es una pista.',
+              'Si fallan dos o más roles, «Corregir todo» resuelve la paleta completa: busca el cambio de luminosidad más pequeño en conjunto, conserva el matiz y no toca los roles bloqueados. Se deshace en un solo paso.',
             ],
           },
           {

@@ -1,16 +1,21 @@
-import { AlertTriangle, ArrowRight, Wand2 } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Sparkles, Wand2 } from 'lucide-react';
 
 import type { RoleContrastFix } from '@lib/color/roleContrastFixes';
+import type { RolePalette } from '@lib/color/roleTypes';
 import { ROLE_LABELS } from '@lib/color/roleTypes';
 import type { ThemeId } from '@lib/color/themePalette';
 import { useT, useTx } from '@/context/I18nContext';
 
 export type ThemeContrastReport = {
   theme: ThemeId;
+  palette: RolePalette;
   failure: boolean;
   warnings: string[];
   fixes: RoleContrastFix[];
 };
+
+const FIX_BUTTON_CLASS =
+  'inline-flex min-h-8 shrink-0 items-center gap-1 rounded-md border border-border bg-surface px-2.5 text-[0.75rem] font-semibold text-ink hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25';
 
 const THEME_LABEL: Record<ThemeId, string> = {
   light: 'Tema claro',
@@ -44,7 +49,7 @@ function FixRow({ fix, onApply }: { fix: RoleContrastFix; onApply?: () => void }
         <button
           type="button"
           onClick={onApply}
-          className="inline-flex min-h-8 shrink-0 items-center gap-1 rounded-md border border-border bg-surface px-2.5 text-[0.75rem] font-semibold text-ink hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25"
+          className={FIX_BUTTON_CLASS}
         >
           <Wand2 size={12} aria-hidden="true" />
           {t('ui.PaletteCanvasNotices.corregir-tono')}
@@ -58,10 +63,13 @@ export function PaletteCanvasNotices({
   activeTheme,
   reports,
   onApplyFix,
+  onApplyAll,
 }: {
   activeTheme: ThemeId;
   reports: ThemeContrastReport[];
   onApplyFix?: (theme: ThemeId, fix: RoleContrastFix) => void;
+  /** Repairs every fixable role of a theme at once; offered when two or more roles fail. */
+  onApplyAll?: (theme: ThemeId, palette: RolePalette) => void;
 }) {
   const tx = useTx();
   const t = useT();
@@ -107,6 +115,21 @@ export function PaletteCanvasNotices({
                 </li>
               ))}
             </ul>
+            {onApplyAll && report.fixes.length >= 2 ? (
+              <div className="mt-2 flex items-center justify-between gap-2 rounded-md bg-surface-raised px-2 py-1.5">
+                <span className="text-[0.75rem] leading-snug text-muted">
+                  {t('ui.PaletteCanvasNotices.corregir-todo-ayuda')}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onApplyAll(report.theme, report.palette)}
+                  className={FIX_BUTTON_CLASS}
+                >
+                  <Sparkles size={12} aria-hidden="true" />
+                  {t('ui.PaletteCanvasNotices.corregir-todo')}
+                </button>
+              </div>
+            ) : null}
             {report.fixes.length > 0 ? (
               <ul className="mt-2 space-y-1.5">
                 {report.fixes.map((fix) => (
