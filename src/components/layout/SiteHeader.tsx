@@ -21,7 +21,7 @@ const WORKSPACE_TABS: { id: WorkspaceTab; label: string }[] = [
 function tabClassName(active: boolean) {
   return `rounded-md px-3 py-2 text-[0.875rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
     active
-      ? 'text-ink underline decoration-primary decoration-2 underline-offset-4'
+      ? 'text-ink underline decoration-clay decoration-2 underline-offset-4'
       : 'text-muted hover:text-ink'
   }`;
 }

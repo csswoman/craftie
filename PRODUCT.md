@@ -1,8 +1,12 @@
 # Product
 
-## Register
+<!-- impeccable:product-schema 1 -->
 
-product
+## Platform
+
+web
+
+
 
 ## Users
 
@@ -13,6 +17,22 @@ Diseñadores, desarrolladores y creadores que construyen sistemas visuales (pale
 Craftie ayuda a generar paletas de color coherentes, evaluar contraste WCAG, recomendar combinaciones tipográficas y exportar guías de marca ligeras. El flujo guía en cinco pasos: inspiración → selección de color → accesibilidad → tipografía → guardar/exportar.
 
 Éxito = decisiones de diseño claras, comprobables y exportables, sin abrumar con jerga innecesaria.
+
+## Positioning
+Craftie es un banco de pruebas: permite probar paletas y tipografías, y verlas aplicadas en distintas vistas, antes de llevarlas a un proyecto real. También genera paletas a partir de imágenes.
+
+## Operating Context
+Uso en escritorio y móvil. No hay cuentas ni backend de usuario: todo vive en el navegador. Formatos de exportación concretos: sin decidir.
+
+## Capabilities and Constraints
+- Paletas desde cero o a partir de una imagen.
+- Vista previa de paletas y pares tipográficos en distintos tipos de vista.
+- Validación WCAG y exportación de guía de marca ligera.
+- Sin cuentas; persistencia local en el navegador.
+- Formatos de exportación: sin decidir.
+
+## Evidence on Hand
+Ninguna: no hay casos de uso, testimonios, capturas ni datos reales. No inventarlos.
 
 ## Brand Personality
 
@@ -28,7 +48,7 @@ La interfaz debe sentirse como una herramienta de trabajo: directa, honesta sobr
 - Demasiados controles o terminología avanzada sin guía práctica.
 - Dark mode por defecto sin relación con el contexto de uso.
 
-## Design Principles
+## Product Principles
 
 1. **Practice what you preach** — una herramienta de accesibilidad debe cumplir WCAG en su propia UI.
 2. **Show, don't tell** — mostrar ratio, nivel AA/AAA y pass/fail con datos, no solo etiquetas vagas.

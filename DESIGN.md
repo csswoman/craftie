@@ -1,76 +1,66 @@
 ---
 name: Craftie
-description: Tema claro y neutro donde las paletas del usuario son el único color protagonista.
+description: Una mesa de muestras en bosque cozy donde las paletas del usuario son lo único con color vivo.
 colors:
-  bg: "#ffffff"
-  surface: "#f7f7f7"
-  surface-raised: "#f0f0f0"
-  ink: "#2a2f2d"
-  muted: "#5c6561"
-  border: "#e3e5e4"
-  primary: "#2f5644"
-  primary-hover: "#244336"
-  accent: "#3d6a8a"
-  focus-ring: "#2f5644"
-  pass: "#1f6b45"
-  fail: "#b42318"
+  bg: "oklch(0.985 0.01 95)"
+  canvas: "oklch(0.94 0.02 110)"
+  surface: "oklch(0.972 0.013 100)"
+  surface-raised: "oklch(0.945 0.02 105)"
+  ink: "#1f2a22"
+  muted: "#596154"
+  faint: "#9ca392"
+  line: "#e4e2d0"
+  line-soft: "#eeeddf"
+  border: "oklch(0.86 0.022 105)"
+  primary: "oklch(0.35 0.077 160)"
+  primary-hover: "oklch(0.28 0.07 160)"
+  on-primary: "oklch(1 0 0)"
+  forest: "#1e4635"
+  forest-deep: "#163728"
+  forest-darker: "#0f2b1e"
+  accent: "oklch(0.52 0.11 230)"
+  attention: "#c47b2a"
+  attention-bg: "#fbf1e4"
+  clay: "oklch(0.58 0.12 45)"
+  pass: "oklch(0.45 0.12 150)"
+  fail: "oklch(0.48 0.18 25)"
 typography:
   display:
     fontFamily: "Lora, Georgia, serif"
-    fontSize: "clamp(1.75rem, 3vw, 2.25rem)"
-    fontWeight: 600
-    lineHeight: 1.15
-    letterSpacing: "-0.01em"
+    fontSize: "1.75rem"
   headline:
     fontFamily: "Lora, Georgia, serif"
-    fontSize: "1.375rem"
-    fontWeight: 600
-    lineHeight: 1.2
-    letterSpacing: "normal"
-  title:
-    fontFamily: "Nunito, system-ui, sans-serif"
-    fontSize: "1rem"
-    fontWeight: 600
-    lineHeight: 1.35
-    letterSpacing: "normal"
+    fontSize: "1.125rem"
   body:
     fontFamily: "Nunito, system-ui, sans-serif"
-    fontSize: "0.9375rem"
-    fontWeight: 400
-    lineHeight: 1.55
-    letterSpacing: "normal"
+    fontSize: "1rem"
   label:
     fontFamily: "Nunito, system-ui, sans-serif"
     fontSize: "0.8125rem"
-    fontWeight: 500
-    lineHeight: 1.35
-    letterSpacing: "0.01em"
+  caption:
+    fontFamily: "Nunito, system-ui, sans-serif"
+    fontSize: "0.75rem"
 rounded:
-  sm: "6px"
-  md: "10px"
-  lg: "14px"
-  full: "9999px"
+  sm: "8px"
+  md: "12px"
+  lg: "16px"
+  control: "10px"
+  card: "16px"
+  pill: "999px"
 spacing:
   xs: "4px"
   sm: "8px"
-  md: "16px"
-  lg: "24px"
-  xl: "32px"
-  2xl: "48px"
+  md: "12px"
+  lg: "16px"
+  xl: "24px"
+  2xl: "32px"
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
-    textColor: "#ffffff"
-    rounded: "{rounded.md}"
-    padding: "10px 16px"
+    textColor: "{colors.on-primary}"
+    rounded: "{rounded.control}"
   button-primary-hover:
     backgroundColor: "{colors.primary-hover}"
-    textColor: "#ffffff"
-  button-ghost:
-    backgroundColor: "transparent"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.md}"
-    padding: "10px 16px"
   swatch:
     rounded: "{rounded.md}"
     size: "48px"
@@ -78,143 +68,115 @@ components:
 
 # Design System: Craftie
 
-## 1. Overview
+## Overview
 
-**Creative North Star: "The Quiet Gallery"**
+**Creative North Star: "La mesa de muestras"**
 
-La interfaz es una sala blanca y silenciosa: marco neutro, tipografía cuidada, controles discretos. **Las paletas del usuario son las obras** — los únicos bloques de color saturado que compiten por atención. La app no compite con el contenido; lo exhibe.
+Craftie es una mesa de trabajo neutra, con un tinte verde de bosque, donde las paletas del usuario se ponen a prueba como muestras sobre un tablero. La interfaz sostiene las muestras y no compite con ellas. El carácter buscado es cozy y natural: verdes de bosque profundos, neutros con un leve tinte verde, serif cálida en los títulos y esquinas suaves.
 
-Densidad moderada, jerarquía clara, cero decoración SaaS. El verde musgo del sistema (`primary`) aparece solo en acciones y foco, nunca como fondo de página ni como gradiente de marca. Rechaza explícitamente clones de herramientas comerciales, cards infinitas, gradientes morados y dark mode por defecto (ver `PRODUCT.md`).
+La densidad es moderada y la jerarquía clara. El tema claro es el predeterminado y existe un tema oscuro por `data-theme='dark'`. La dirección cozy está confirmada, pero el sistema actual es más sobrio que cálido; ese hueco es una decisión abierta (ver Elevation & Depth).
 
 **Key Characteristics:**
+- Fondo de página crema cálido (`oklch(0.985 0.01 95)`); el lienzo de trabajo (`canvas`) lleva un tinte verde-gris muy leve y una cuadrícula de puntos.
+- Color de marca (bosque) reservado a acciones y foco; la saturación es de las paletas del usuario.
+- Lora para títulos, Nunito para todo lo demás.
+- Profundidad sobre todo por tono de superficie y bordes finos.
+- WCAG primero: la herramienta cumple lo que valida.
 
-- Tema **claro** con fondo blanco puro; sin crema, arena ni tintes cálidos en superficies.
-- **Restrained**: cromo UI ≤10% de color de marca; saturación reservada a swatches y previews de paleta.
-- **Serif display + sans body**: Lora para títulos, Nunito para trabajo diario.
-- **Flat by default**: profundidad por borde y tono de superficie, no sombras pesadas.
-- **WCAG-first**: texto legible siempre; la herramienta practica lo que predica.
+## Colors
 
-## 2. Colors
-
-Paleta de interfaz casi acromática; el color vive en el canvas de paletas, no en el chrome.
+Neutros cálidos de musgo y crema (hue 95 a 110) y un solo verde de marca profundo. El ámbar solo avisa.
 
 ### Primary
-
-- **Forest Ink** (`#2f5644` / `oklch(0.35 0.077 160)`): botón primario, anillo de foco, enlaces de acción crítica. Uso escaso — máximo ~10% de cualquier pantalla.
+- **Verde bosque** (`oklch(0.35 0.077 160)`): botón primario, foco y acciones críticas. Hover en `oklch(0.28 0.07 160)`.
+- **Bosque profundo** (`#1e4635`, `#163728`, `#0f2b1e`): variantes de bosque para superficies de marca y énfasis oscuro.
 
 ### Secondary
-
-_Omitido a propósito._ Un solo acento de marca en el chrome; más color roles confunden el foco en las paletas del usuario.
-
-### Tertiary
-
-_Omitido._
+- **Azul de enlace** (`oklch(0.52 0.11 230)`): enlaces secundarios y estados informativos. No se usa como fondo.
 
 ### Neutral
+- **Crema** (`oklch(0.985 0.01 95)`): fondo de página.
+- **Lienzo musgo claro** (`oklch(0.945 0.006 160)`): área de trabajo detrás de las paletas.
+- **Superficie** (`oklch(0.982 0.002 160)`) y **Superficie elevada** (`oklch(0.945 0.004 160)`): paneles, inputs y filas.
+- **Tinta bosque** (`#1a2420`): texto principal.
+- **Tinta suave** (`#5c6561`) y **Neblina** (`#9aa8a0`): texto secundario y metadatos.
+- **Línea** (`#e4eae6`, `#eef2f0`) y borde (`oklch(0.86 0.005 160)`): divisores y bordes de 1px.
 
-- **Pure Paper** (`#ffffff` / `oklch(1 0 0)`): fondo de página y canvas principal.
-- **Soft Surface** (`#f7f7f7` / `oklch(0.975 0 0)`): paneles laterales, barras de herramientas, zonas de apoyo.
-- **Raised Surface** (`#f0f0f0` / `oklch(0.955 0 0)`): hover de filas, fondos de inputs en reposo.
-- **Ink** (`#2a2f2d` / `oklch(0.19 0.008 160)`): texto principal. Contraste ≥7:1 sobre Pure Paper.
-- **Muted Ink** (`#5c6561` / `oklch(0.44 0.012 160)`): texto secundario, metadatos. Contraste ≥4.5:1 sobre Pure Paper.
-- **Hairline** (`#e3e5e4` / `oklch(0.90 0.003 160)`): divisores y bordes de 1px.
-
-### Accent (funcional, no decorativo)
-
-- **Link Blue** (`#3d6a8a` / `oklch(0.52 0.11 230)`): enlaces secundarios y estados informativos. Nunca como fondo de sección.
+### Acento
+- **Terracota** (`oklch(0.58 0.12 45)`; en oscuro `oklch(0.72 0.11 50)`): solo indicadores de pestaña activa. No en fondos ni texto.
+- **Ámbar de aviso** (`#c47b2a` sobre `#fbf1e4`): atención, nunca decoración.
+- **Aprobado** (`oklch(0.45 0.12 150)`) y **Fallo** (`oklch(0.48 0.18 25)`): resultado WCAG. Siempre con texto o icono, no solo color.
 
 ### Named Rules
+**The Palette First Rule.** Los únicos bloques de color saturado son los swatches y previews del usuario. El chrome se queda en neutros verdosos.
+**The One Voice Rule.** El verde bosque aparece en acciones y foco, no como fondo de página ni degradado de marca.
 
-**The Palette First Rule.** El único color saturado protagonista en pantalla son los swatches y previews de la paleta del usuario. El chrome de la app permanece neutro.
+## Typography
 
-**The Paper Room Rule.** Fondo de página siempre blanco puro (`oklch(1 0 0)`). Prohibido crema, arena, beige o `--paper` cálido.
+**Display Font:** Lora (con Georgia, serif)
+**Body Font:** Nunito (con system-ui, sans-serif)
 
-**The One Voice Rule.** `primary` (verde bosque) en ≤10% de la superficie visible. Su rareza es el punto.
-
-## 3. Typography
-
-**Display Font:** Lora (Georgia, serif)  
-**Body Font:** Nunito (system-ui, sans-serif)
-
-**Character:** Lora aporta calidez editorial en títulos; Nunito es la voz de trabajo — legible, amable, invisible en formularios y datos.
+**Character:** Lora da calidez editorial a los títulos; Nunito, redondeada y amable, hace el trabajo diario en controles y datos.
 
 ### Hierarchy
-
-- **Display** (500, `clamp(1.75rem, 3vw, 2.25rem)`, lh 1.15): nombre de pantalla, encabezado de flujo. `text-wrap: balance`.
-- **Headline** (500, 1.375rem, lh 1.2): secciones dentro de un paso del flujo.
-- **Title** (600, 1rem, lh 1.35): etiquetas de panel, nombres de paleta guardada.
-- **Body** (400, 0.9375rem, lh 1.55): copy, ayudas, resultados de contraste. Máx. 65–75ch en prosa.
-- **Label** (500, 0.8125rem, lh 1.35): controles, badges de estado WCAG, metadatos de ratio.
-
-### Named Rules
-
-**The Two Voices Rule.** Lora solo en display/headline. Nunito en todo lo demás. Nunca Lora en botones, inputs o tablas.
-
-**The No Inter Rule.** Inter, system-ui genérico como display, y pares de sans geométricos idénticos están prohibidos.
-
-## 4. Elevation
-
-Sistema **plano por defecto**. La profundidad se comunica con cambio de tono de superficie (`surface` → `surface-raised`) y bordes Hairline de 1px, no con sombras ambientales.
-
-### Shadow Vocabulary
-
-- **Focus lift** (`0 0 0 3px oklch(0.35 0.077 160 / 0.25)`): único uso de sombra — anillo de foco accesible en controles interactivos.
+- **Display** (1.75rem): título de pantalla.
+- **Headline** (1.125rem): secciones dentro de un paso.
+- **Body** (1rem): texto y ayudas. Prosa de 65 a 75ch.
+- **Label** (0.8125rem): controles, badges WCAG, valores hex.
+- **Caption** (0.75rem): conteos y chips.
 
 ### Named Rules
+**The Two Voices Rule.** Lora solo en display y headline; Nunito en el resto, incluidos botones, inputs y tablas.
 
-**The Flat-By-Default Rule.** Sin `box-shadow` decorativo en cards o contenedores. Si parece un dashboard SaaS 2018, la sombra sobra.
+## Layout
 
-## 5. Components
+Espacio base de 4px con pasos de 4, 8, 12, 16, 24 y 32px. Lienzo central con puntos sutiles (`canvas-dot`) y paneles laterales de herramientas. La barra lateral de color usa una escala de cinco tamaños (13 a 17px). Los puntos de ruptura exactos no se documentaron.
+
+## Elevation & Depth
+
+Suave y con tinte bosque. Las superficies cambian de tono (`surface`, `surface-raised`) y llevan bordes de 1px. Las sombras existen pero son suaves: `shadow-float` en elementos flotantes, y `shadow-sm/md/lg` en popovers y paneles.
+
+- **Float** (`0 1px 2px oklch(0.3 0.04 150 / 0.06), 0 4px 14px -4px oklch(0.3 0.04 150 / 0.12)`): elementos que flotan sobre el lienzo. `shadow-sm/md/lg` siguen la misma receta.
+
+Dirección cozy aplicada en tokens (neutros cálidos, radios blandos, sombras con tinte bosque). Pendiente: acento cálido, íconos redondeados y estados vacíos con personalidad.
+
+## Shapes
+
+Esquinas blandas. Controles de 10px, tarjetas de 16px, escala general de 8, 12, 16 y 20px, y píldoras de 999px. Los swatches usan 10px.
+
+## Components
 
 ### Buttons
-
-- **Shape:** esquinas suaves (10px).
-- **Primary:** fondo Forest Ink, texto blanco, padding 10×16px. Hover → `#244336`.
-- **Ghost:** sin fondo, texto Ink, hover con Raised Surface.
-- **Focus:** anillo Focus lift; nunca solo `outline: none`.
+- **Shape:** 8px de radio.
+- **Primary:** fondo verde bosque, texto blanco; hover más oscuro.
+- **Ghost:** sin fondo, texto tinta; hover con superficie elevada.
+- **Focus:** anillo visible siempre.
 
 ### Swatches (componente firma)
-
-- **Shape:** 10px radius, tamaño mínimo 48×48px táctil.
-- **Background:** el color de la paleta del usuario — **sin borde de acento de marca**.
-- **Selected:** borde 2px Ink + offset 2px; no side-stripe.
-- **Internal:** sin iconos decorativos encima del color.
+- **Shape:** 10px de radio, mínimo 48px.
+- **Background:** el color del usuario, sin borde de marca.
+- **Selected:** contorno interior de 2px (`inset 0 0 0 2px`).
 
 ### Cards / Containers
-
-- **Corner Style:** 10px.
-- **Background:** Soft Surface o Pure Paper.
-- **Border:** 1px Hairline cuando hace falta separación; sin sombra.
-- **Internal Padding:** 16–24px según densidad.
+- **Corner Style:** 12px.
+- **Background:** Superficie o Papel, con borde de 1px.
+- **Shadow Strategy:** ver Elevation & Depth.
 
 ### Inputs / Fields
+- **Style:** fondo Superficie elevada, borde de 1px, radio de 8 a 10px.
+- **Focus:** borde de color primario y anillo.
 
-- **Style:** fondo Raised Surface, borde Hairline 1px, radius 10px.
-- **Focus:** borde primary + anillo Focus lift.
-- **Placeholder:** Muted Ink (≥4.5:1 verificado).
-
-### Navigation
-
-- **Style:** barra superior o lateral en Soft Surface, Hairline inferior/derecho.
-- **Typography:** Title (Nunito 600).
-- **Active:** texto Ink + indicador 2px primary inferior; sin pill de color saturado.
-
-## 6. Do's and Don'ts
+## Do's and Don'ts
 
 ### Do:
-
-- **Do** dejar que los swatches de paleta ocupen el centro visual de cada pantalla.
-- **Do** usar Lora + Nunito como par display/body del chrome de la app.
-- **Do** mantener fondo blanco puro y texto Ink con contraste verificado.
-- **Do** mostrar ratios WCAG y niveles AA/AAA con datos explícitos (Show, don't tell).
-- **Do** usar `primary` solo para acciones y foco, nunca como decoración de fondo.
+- **Do** dejar que los swatches sean el centro visual de cada pantalla.
+- **Do** mostrar ratio y nivel AA/AAA con datos.
+- **Do** usar neutros cálidos de crema y musgo, no grises fríos.
+- **Do** acompañar pass/fail con texto o icono.
 
 ### Don't:
-
-- **Don't** imitar Coolors, Adobe Color u otras herramientas comerciales.
-- **Don't** usar SaaS genérico: Inter por defecto, gradientes morados, grids de cards idénticas, hero-metrics.
-- **Don't** esconder problemas de contraste detrás de grises "elegantes" en texto secundario.
-- **Don't** saturar la UI con controles o jerga de diseño innecesaria.
-- **Don't** usar dark mode por defecto sin motivo contextual.
-- **Don't** poner bordes laterales de color en cards, alerts o listas (side-stripe).
-- **Don't** usar gradient text, glassmorphism decorativo ni eyebrows en mayúsculas en cada sección.
+- **Don't** imitar Coolors, Adobe Color ni otras herramientas comerciales.
+- **Don't** usar Inter por defecto, gradientes morados ni grids de tarjetas idénticas.
+- **Don't** poner bordes laterales de color en tarjetas, alertas o listas.
+- **Don't** usar texto con degradado ni glassmorphism decorativo.
+- **Don't** esconder problemas de contraste detrás de grises elegantes.
