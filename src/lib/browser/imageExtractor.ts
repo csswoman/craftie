@@ -80,5 +80,6 @@ export async function extractPaletteColorsFromImage(
     sampleStep: 1,
     centroidSeed: regenerateIndex,
     publication: mode === 'paint' ? 'medoid' : 'centroid',
+    swatches: true,
   });
 }
