@@ -66,6 +66,11 @@ export type RolePaletteContextValue = {
   redoEdit: () => void;
   setRolePalette: (palette: RolePalette | null) => void;
   assignFromExtracted: (extracted: ExtractedColor[], paletteType?: PaletteType) => void;
+  /**
+   * Swaps the source colors (picked from the image) and keeps every manual
+   * edit, so roles re-derive from the new sources around the user's choices.
+   */
+  replaceSourceColors: (extracted: ExtractedColor[]) => void;
   setPreviewVibrancy: (value: number) => void;
   saveVibrancy: () => void;
   regenerateIllustrationSeed: () => void;

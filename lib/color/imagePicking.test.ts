@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { RasterData } from './imageTypes';
-import { clampPoint, locateColorsInRaster, sampleRasterColor } from './imagePicking';
+import { clampPoint, findDistinctPoint, locateColorsInRaster, sampleRasterColor } from './imagePicking';
 
 function createRaster(
   width: number,
@@ -57,6 +57,13 @@ describe('locateColorsInRaster', () => {
   it('falls back to the center when the image is fully transparent', () => {
     const clear = createRaster(4, 4, () => [0, 0, 0, 0]);
     expect(locateColorsInRaster(clear, ['#FFFFFF'])).toEqual([{ x: 0.5, y: 0.5 }]);
+  });
+});
+
+describe('findDistinctPoint', () => {
+  it('lands on the area unlike the colors already picked', () => {
+    expect(sampleRasterColor(halves, findDistinctPoint(halves, ['#FF0000']))).toBe('#0000FF');
+    expect(sampleRasterColor(halves, findDistinctPoint(halves, ['#0000FF']))).toBe('#FF0000');
   });
 });
 

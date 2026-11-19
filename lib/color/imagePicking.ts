@@ -115,13 +115,10 @@ export function sampleRasterColor(
   return rgb ? rgbToHex(rgb) : null;
 }
 
-/**
- * For each color, the point of the image whose neighborhood is closest to it
- * in OKLab. Neighborhoods are averaged, so flat areas win over single pixels
- * on an edge. Falls back to the center when the image has no opaque pixels.
- */
-export function locateColorsInRaster(raster: RasterData, hexes: readonly string[]): ImagePoint[] {
-  const grid: { point: ImagePoint; lab: Lab }[] = [];
+type GridCell = { point: ImagePoint; lab: Lab };
+
+function buildGrid(raster: RasterData): GridCell[] {
+  const grid: GridCell[] = [];
 
   for (let py = 0; py < raster.height; py += LOCATE_STEP) {
     for (let px = 0; px < raster.width; px += LOCATE_STEP) {
@@ -135,9 +132,22 @@ export function locateColorsInRaster(raster: RasterData, hexes: readonly string[
     }
   }
 
+  return grid;
+}
+
+const CENTER: ImagePoint = { x: 0.5, y: 0.5 };
+
+/**
+ * For each color, the point of the image whose neighborhood is closest to it
+ * in OKLab. Neighborhoods are averaged, so flat areas win over single pixels
+ * on an edge. Falls back to the center when the image has no opaque pixels.
+ */
+export function locateColorsInRaster(raster: RasterData, hexes: readonly string[]): ImagePoint[] {
+  const grid = buildGrid(raster);
+
   return hexes.map((hex) => {
     const target = rgbToOklab(hexToRgb(hex));
-    let best: ImagePoint = { x: 0.5, y: 0.5 };
+    let best = CENTER;
     let bestDistance = Number.POSITIVE_INFINITY;
 
     for (const cell of grid) {
@@ -150,4 +160,28 @@ export function locateColorsInRaster(raster: RasterData, hexes: readonly string[
 
     return best;
   });
+}
+
+/**
+ * The point whose color differs most from every given color: where a new
+ * pick adds the most to the palette. The center when nothing is opaque.
+ */
+export function findDistinctPoint(raster: RasterData, hexes: readonly string[]): ImagePoint {
+  const grid = buildGrid(raster);
+  const targets = hexes.map((hex) => rgbToOklab(hexToRgb(hex)));
+  let best = CENTER;
+  let bestDistance = Number.NEGATIVE_INFINITY;
+
+  for (const cell of grid) {
+    const nearest = targets.reduce(
+      (min, target) => Math.min(min, labDistanceSq(cell.lab, target)),
+      Number.POSITIVE_INFINITY,
+    );
+    if (nearest > bestDistance) {
+      bestDistance = nearest;
+      best = cell.point;
+    }
+  }
+
+  return best;
 }
