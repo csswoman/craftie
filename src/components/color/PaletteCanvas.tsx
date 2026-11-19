@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import type { FontPair } from '@lib/typography/pairings';
 import type { AppliedTypography } from '@lib/typography/typeState';
 import type { TypeScaleBase, TypeScaleRatio } from '@lib/typography/typeScale';
+import type { ExtractedColor } from '@lib/color/imageTypes';
 import type { SelectableColor } from '@lib/color/selectableColors';
 import type { SizeOverrides } from '@/components/font-pairing/FineTuneSizes';
 import type { TypographySpacing } from '@/components/font-pairing/SpacingControls';
@@ -23,8 +24,9 @@ import { CanvasVisionFilterDefs, colorVisionStyle } from './CanvasVisionFilter';
 import { CanvasSystemView } from './CanvasSystemView';
 import { PaintPaletteCanvas } from './PaintPaletteCanvas';
 import { TonalScalesView } from './TonalScalesView';
-import { replacePaletteColorFromDrawer } from './replacePaletteColorFromDrawer';
-import { useT, useTx } from '@/context/I18nContext';
+import { ImageColorPicker } from './image-picker/ImageColorPicker';
+import { useCanvasColorDetails } from './useCanvasColorDetails';
+import { useT } from '@/context/I18nContext';
 
 export type PaletteCanvasProps = {
   isLoading?: boolean;
@@ -48,6 +50,8 @@ export type PaletteCanvasProps = {
   imageFingerprint?: string | null;
   onImageFileSelected?: (file: File) => void;
   onImageRegenerate?: () => void;
+  /** Set when the image colors can be picked by hand; opens the picker from the thumbnail. */
+  onImageSourceColorsChange?: (colors: ExtractedColor[]) => void;
 };
 
 export function PaletteCanvas({
@@ -72,8 +76,8 @@ export function PaletteCanvas({
   imageFingerprint = null,
   onImageFileSelected,
   onImageRegenerate,
+  onImageSourceColorsChange,
 }: PaletteCanvasProps) {
-  const tx = useTx();
   const t = useT();
   const {
     rolePalette,
@@ -89,8 +93,7 @@ export function PaletteCanvas({
 
   const [previewEditMode, setPreviewEditMode] = useState<PreviewEditMode>('locked');
   const isMockupView = !['paint', 'colors', 'style-guide', 'type-scale', 'scales', 'illustration'].includes(activeView);
-  const [selectedColorHex, setSelectedColorHex] = useState<string | null>(null);
-  const [selectedAccentSlot, setSelectedAccentSlot] = useState<number | null>(null);
+  const [imagePickerOpen, setImagePickerOpen] = useState(false);
   const { columns, paintColors, contrastReports, hasPalette } = usePaletteCanvasModel(paletteCatalog);
   const lockedSet = useMemo(() => new Set(lockedRoles), [lockedRoles]);
   const canReplace = editable && rolePalette !== null;
@@ -101,37 +104,9 @@ export function PaletteCanvas({
     lockedRolesByTheme,
   });
 
-  function handleOpenRoleDetails(hex: string) {
-    setSelectedAccentSlot(null);
-    setSelectedColorHex(hex);
-  }
-
-  function handleOpenAccentDetails(hex: string, slotIndex: number) {
-    setSelectedAccentSlot(slotIndex);
-    setSelectedColorHex(hex);
-  }
-
-  function handleCloseDetails() {
-    setSelectedColorHex(null);
-    setSelectedAccentSlot(null);
-  }
-
-  function handleReplaceFromDrawer(newHex: string): string | null {
-    if (!rolePalette) {
-      return tx('No se puede sustituir este color.');
-    }
-
-    return replacePaletteColorFromDrawer({
-      newHex,
-      selectedColorHex,
-      selectedAccentSlot,
-      columns,
-      lockedSet,
-      replaceRole,
-      replaceSemanticToken,
-      setSelectedColorHex,
-    });
-  }
+  const details = useCanvasColorDetails({ rolePalette, columns, lockedSet, replaceRole, replaceSemanticToken });
+  const canPickFromImage = imagePreviewUrl !== null && onImageSourceColorsChange !== undefined;
+  const showImagePicker = imagePickerOpen && canPickFromImage;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -151,6 +126,8 @@ export function PaletteCanvas({
           onSelectView={selectView}
           onImageFileSelected={onImageFileSelected}
           onImageRegenerate={onImageRegenerate}
+          imagePickerOpen={showImagePicker}
+          onToggleImagePicker={canPickFromImage ? () => setImagePickerOpen(!showImagePicker) : undefined}
         />
       ) : null}
 
@@ -179,14 +156,21 @@ export function PaletteCanvas({
               className={`relative flex min-h-0 flex-1 flex-col transition-opacity duration-150 motion-reduce:transition-none ${isUpdating ? 'opacity-60' : 'opacity-100'
                 }`}
             >
-              {activeView === 'paint' ? (
+              {showImagePicker ? (
+                <ImageColorPicker
+                  previewUrl={imagePreviewUrl}
+                  fileName={imageFileName}
+                  onChange={onImageSourceColorsChange}
+                  onClose={() => setImagePickerOpen(false)}
+                />
+              ) : activeView === 'paint' ? (
                 <PaintPaletteCanvas colors={paintColors} />
               ) : activeView === 'colors' ? (
                 <PaletteView
                   editable={editable}
                   showAccents={showAccents}
-                  onOpenRoleDetails={handleOpenRoleDetails}
-                  onOpenAccentDetails={handleOpenAccentDetails}
+                  onOpenRoleDetails={details.openRoleDetails}
+                  onOpenAccentDetails={details.openAccentDetails}
                 />
               ) : activeView === 'scales' ? (
                 <TonalScalesView />
@@ -228,11 +212,11 @@ export function PaletteCanvas({
       </div>
 
       <ColorDetailsDrawer
-        colorHex={selectedColorHex}
-        open={selectedColorHex !== null}
-        onClose={handleCloseDetails}
+        colorHex={details.selectedColorHex}
+        open={details.selectedColorHex !== null}
+        onClose={details.closeDetails}
         onAddColor={!canReplace ? onAddColorByHex : undefined}
-        onReplaceColor={canReplace ? handleReplaceFromDrawer : undefined}
+        onReplaceColor={canReplace ? details.replaceFromDrawer : undefined}
       />
     </div>
   );

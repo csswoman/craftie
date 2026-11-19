@@ -232,6 +232,7 @@ function SelectColorsWorkspaceContent() {
               imageFingerprint={workspace.imageFingerprint}
               onImageFileSelected={workspace.handleImageFileSelected}
               onImageRegenerate={workspace.handleImageRegenerate}
+              onImageSourceColorsChange={workspace.handleImageSourceColorsChange}
             />
           }
         />

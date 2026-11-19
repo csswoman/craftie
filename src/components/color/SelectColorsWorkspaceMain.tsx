@@ -1,6 +1,7 @@
 import type { FontPair } from '@lib/typography/pairings';
 import type { AppliedTypography } from '@lib/typography/typeState';
 import type { TypeScaleBase, TypeScaleRatio } from '@lib/typography/typeScale';
+import type { ExtractedColor } from '@lib/color/imageTypes';
 import type { SelectableColor } from '@lib/color/selectableColors';
 import type { SizeOverrides } from '@/components/font-pairing/FineTuneSizes';
 import type { TypographySpacing } from '@/components/font-pairing/SpacingControls';
@@ -27,6 +28,7 @@ export function SelectColorsWorkspaceMain({
   imageFingerprint,
   onImageFileSelected,
   onImageRegenerate,
+  onImageSourceColorsChange,
 }: {
   isImageExtracting: boolean;
   isImageRegenerating: boolean;
@@ -48,6 +50,7 @@ export function SelectColorsWorkspaceMain({
   imageFingerprint: string | null;
   onImageFileSelected: (file: File) => void;
   onImageRegenerate: () => void;
+  onImageSourceColorsChange: (colors: ExtractedColor[]) => void;
 }) {
   return (
     <PaletteCanvas
@@ -72,6 +75,7 @@ export function SelectColorsWorkspaceMain({
       imageFingerprint={imageFingerprint}
       onImageFileSelected={onImageFileSelected}
       onImageRegenerate={onImageRegenerate}
+      onImageSourceColorsChange={onImageSourceColorsChange}
     />
   );
 }

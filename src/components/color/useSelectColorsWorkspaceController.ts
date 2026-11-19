@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { GeneratedPalette } from '@lib/color/formulas';
 import { normalizeHex } from '@lib/color/normalizeHex';
-import { buildImagePalette } from '@lib/color/imagePalette';
+import { buildImagePalette, buildSelectableColorsFromExtracted } from '@lib/color/imagePalette';
+import type { ExtractedColor } from '@lib/color/imageTypes';
 import type { PaletteType } from '@lib/color/paletteClassification';
 import { validateImageFile } from '@lib/color/imageExtractor';
 import {
@@ -84,6 +85,7 @@ export function useSelectColorsWorkspaceController() {
     renameRole,
     assignFromHexes,
     assignFromExtracted,
+    replaceSourceColors,
     getShareSnapshot,
     applySnapshot,
     setSnapshotExtras,
@@ -279,6 +281,12 @@ export function useSelectColorsWorkspaceController() {
     }
 
     void processImageFile(imageFile, imageRegenerateIndex + 1, true);
+  }
+
+  // Picking colors on the photo swaps the sources in place: manual role edits stay.
+  function handleImageSourceColorsChange(colors: ExtractedColor[]) {
+    replaceSourceColors(colors);
+    setPaletteCatalog(buildSelectableColorsFromExtracted(colors));
   }
 
   function handlePaletteTypeChange(type: PaletteType | null) {
@@ -731,6 +739,7 @@ export function useSelectColorsWorkspaceController() {
     imagePreviewUrl,
     handleImageFileSelected,
     handleImageRegenerate,
+    handleImageSourceColorsChange,
     handlePaletteTypeChange,
     generatedPalette,
     handleAddColorByHex,
