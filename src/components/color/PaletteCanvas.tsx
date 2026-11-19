@@ -17,6 +17,7 @@ import { PreviewView } from './PreviewView';
 import { EmptyCanvas, PaletteCanvasSkeleton } from './PaletteCanvasEmptyStates';
 import { PaletteCanvasNotices } from './PaletteCanvasNotices';
 import { usePaletteCanvasModel } from './usePaletteCanvasModel';
+import { useApplyContrastFix } from './useApplyContrastFix';
 import { PaletteCanvasToolbar } from './PaletteCanvasToolbar';
 import { CanvasVisionFilterDefs, colorVisionStyle } from './CanvasVisionFilter';
 import { CanvasSystemView } from './CanvasSystemView';
@@ -91,6 +92,7 @@ export function PaletteCanvas({
   const { columns, paintColors, contrastReports, hasPalette } = usePaletteCanvasModel(paletteCatalog);
   const lockedSet = useMemo(() => new Set(lockedRoles), [lockedRoles]);
   const canReplace = editable && rolePalette !== null;
+  const applyContrastFix = useApplyContrastFix({ activeTheme, setActiveTheme, replaceRole });
 
   function handleOpenRoleDetails(hex: string) {
     setSelectedAccentSlot(null);
@@ -150,7 +152,7 @@ export function PaletteCanvas({
           <PaletteCanvasNotices
             activeTheme={activeTheme}
             reports={contrastReports}
-            onSwitchTheme={setActiveTheme}
+            onApplyFix={canReplace ? applyContrastFix : undefined}
           />
         ) : null}
         {isLoading && !hasPalette ? (

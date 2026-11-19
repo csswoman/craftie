@@ -168,13 +168,13 @@ function validatePaintPairs(pairs: PreviewPaintPair[]): {
   return { contrast, warnings };
 }
 
-export function buildPreviewTokens(palette: RolePalette): PreviewTokens {
+function buildPaintTokens(palette: RolePalette): Omit<PreviewTokens, 'contrast' | 'warnings'> {
   const readable = deriveReadableRoleVariants(palette);
   const buttons = buildButtons(palette);
   const supportBanner = buildSupportBanner(palette);
   const neutralFilled = neutralFilledButton(palette);
 
-  const partial = {
+  return {
     readable,
     buttons,
     neutralFilled,
@@ -191,7 +191,15 @@ export function buildPreviewTokens(palette: RolePalette): PreviewTokens {
       SEMANTIC_CHIP_STATES.map((state) => [state, semanticChipStyle(palette, state)]),
     ) as PreviewTokens['chips'],
   };
+}
 
+/** Paint pairs exactly as rendered, before any readableOn correction. */
+export function getRawPreviewPaintPairs(palette: RolePalette): PreviewPaintPair[] {
+  return collectPaintPairs(palette, buildPaintTokens(palette));
+}
+
+export function buildPreviewTokens(palette: RolePalette): PreviewTokens {
+  const partial = buildPaintTokens(palette);
   const pairs = collectPaintPairs(palette, partial);
   const { contrast, warnings } = validatePaintPairs(pairs);
 
