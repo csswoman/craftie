@@ -23,6 +23,8 @@ const SAVE_STATUS_KEY: Record<ProjectSaveStatus, MessageKey> = {
 export type WorkspaceHeaderProps = {
   canExport: boolean;
   projectName: string | null;
+  /** False on the empty home: there is no project to name or save yet. */
+  showProject: boolean;
   saveStatus: ProjectSaveStatus;
   onCraftieHome: () => void;
   onOpenMyProjects: () => void;
@@ -42,6 +44,7 @@ export type WorkspaceHeaderProps = {
 export function WorkspaceHeader({
   canExport,
   projectName,
+  showProject,
   saveStatus,
   onCraftieHome,
   onOpenMyProjects,
@@ -87,17 +90,19 @@ export function WorkspaceHeader({
           <h1 className="font-display text-(--chrome-text-display) font-medium leading-none">{t('ui.WorkspaceHeader.craftie')}</h1>
         </button>
 
-        <button
-          type="button"
-          onClick={onOpenMyProjects}
-          title={projectName ? t('header.openProjects') : t('header.saveAsProject')}
-          className="flex min-h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-lg px-2 text-chrome-label text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 sm:flex-none sm:justify-start"
-        >
-          <span className="truncate font-semibold text-ink">{projectName ?? t('header.untitled')}</span>
-          <span role="status" className={`shrink-0 ${saveStatus === 'error' ? 'font-semibold text-fail' : ''}`}>
-            · {projectName ? t(SAVE_STATUS_KEY[saveStatus]) : t('header.draft')}
-          </span>
-        </button>
+        {showProject ? (
+          <button
+            type="button"
+            onClick={onOpenMyProjects}
+            title={projectName ? t('header.openProjects') : t('header.saveAsProject')}
+            className="flex min-h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-lg px-2 text-chrome-label text-muted transition-colors hover:bg-surface-raised hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 sm:flex-none sm:justify-start"
+          >
+            <span className="truncate font-semibold text-ink">{projectName ?? t('header.untitled')}</span>
+            <span role="status" className={`shrink-0 ${saveStatus === 'error' ? 'font-semibold text-fail' : ''}`}>
+              · {projectName ? t(SAVE_STATUS_KEY[saveStatus]) : t('header.draft')}
+            </span>
+          </button>
+        ) : null}
 
         <div className="flex min-w-0 items-center justify-end gap-1">
           <nav aria-label={t('header.actionsAria')} className="hidden min-w-0 items-center justify-end gap-1 sm:flex">

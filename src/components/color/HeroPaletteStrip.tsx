@@ -26,14 +26,14 @@ function pickForeground(bg: string): { fg: string; ratio: number } {
 
 export function HeroPaletteStrip() {
   return (
-    <div aria-hidden="true" className="flex h-24 w-full gap-2 sm:h-32 lg:h-36">
-      {SAMPLE_SWATCHES.map(({ hex, grow }) => {
+    <div aria-hidden="true" className="flex h-24 w-full gap-2 sm:h-28 lg:h-32">
+      {SAMPLE_SWATCHES.map(({ hex, grow }, index) => {
         const { fg, ratio } = pickForeground(hex);
         return (
           <div
             key={hex}
-            style={{ backgroundColor: hex, color: fg, flexGrow: grow }}
-            className="flex min-w-0 basis-0 flex-col justify-end rounded-lg p-2.5 sm:p-3"
+            style={{ backgroundColor: hex, color: fg, flexGrow: grow, '--swatch-i': index } as React.CSSProperties}
+            className="swatch-paint flex min-w-0 basis-0 flex-col justify-end rounded-lg p-2.5 sm:p-3"
           >
             <span className="font-body text-chrome-label font-semibold uppercase tabular-nums">
               {hex.slice(1)}

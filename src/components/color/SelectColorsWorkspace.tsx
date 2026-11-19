@@ -132,6 +132,7 @@ function SelectColorsWorkspaceContent() {
 
       <WorkspaceHeader
         projectName={projects.currentProject?.name ?? null}
+        showProject={hasInspirationSource}
         saveStatus={projects.saveStatus}
         onCraftieHome={workspace.requestCraftieHome}
         onOpenMyProjects={() => setMyProjectsOpen(true)}
@@ -174,7 +175,7 @@ function SelectColorsWorkspaceContent() {
       <div className="flex h-dvh flex-col overflow-hidden bg-bg">
         {sharedChrome}
 
-        <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <div className="flex min-h-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <EmptyWorkspaceCard
             fileName={workspace.imageFileName}
             hasPreview={workspace.imagePreviewUrl !== null}

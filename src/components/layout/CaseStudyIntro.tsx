@@ -23,26 +23,26 @@ export function CaseStudyIntro() {
     <section aria-labelledby="case-study-title" className="w-full">
       <h2
         id="case-study-title"
-        className="max-w-[16ch] text-balance font-display text-[2.25rem] font-medium leading-[1.1] text-ink"
+        className="max-w-[22ch] text-balance font-display text-[clamp(2rem,3.4vw,2.75rem)] font-medium leading-[1.08] tracking-[-0.01em] text-ink"
       >
         {t('start.headline')}
       </h2>
-      <p className="mt-4 max-w-[52ch] text-pretty text-chrome-section leading-relaxed text-muted">
+      <p className="mt-3 max-w-[52ch] text-pretty text-chrome-section leading-snug text-muted">
         {t('start.subhead')}
       </p>
 
-      <dl className="mt-8 grid gap-5 sm:grid-cols-3 lg:grid-cols-1 lg:gap-5">
+      <dl className="mt-7 grid gap-5 text-left sm:grid-cols-3 lg:grid-cols-1 lg:gap-4">
         {CASE_STUDY_PILLARS.map((pillar, index) => (
-          <div key={pillar.termKey} className="border-t border-border pt-3">
-            <dt className="flex items-center gap-2.5 font-display text-chrome-section font-medium text-ink">
+          <div key={pillar.termKey}>
+            <dt className="flex items-center text-left gap-2.5 font-body text-chrome-body font-semibold text-ink">
               <span
                 aria-hidden="true"
-                className="size-2.5 shrink-0 rounded-full"
+                className="size-3 shrink-0 rounded-[3px]"
                 style={{ backgroundColor: PILLAR_DOTS[index] }}
               />
               {t(pillar.termKey)}
             </dt>
-            <dd className="mt-1 text-pretty text-chrome-label leading-relaxed text-muted">
+            <dd className="mt-0.5 text-pretty text-[0.875rem] leading-snug text-muted pl-5 text-left">
               {t(pillar.detailKey)}
             </dd>
           </div>
