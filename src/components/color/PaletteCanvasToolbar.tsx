@@ -25,6 +25,8 @@ export function PaletteCanvasToolbar({
   onSelectView,
   onImageFileSelected,
   onImageRegenerate,
+  imagePickerOpen = false,
+  onToggleImagePicker,
 }: {
   /** Set only on mockup views: shows the "what a click edits" toggle. */
   previewEditMode?: PreviewEditMode;
@@ -41,6 +43,8 @@ export function PaletteCanvasToolbar({
   onSelectView: (view: CanvasViewId) => void;
   onImageFileSelected?: (file: File) => void;
   onImageRegenerate?: () => void;
+  imagePickerOpen?: boolean;
+  onToggleImagePicker?: () => void;
 }) {
   const t = useT();
   const accentsActive = activeView === 'colors' && showAccents;
@@ -97,6 +101,8 @@ export function PaletteCanvasToolbar({
               isRegenerating={isUpdating}
               onFileSelected={onImageFileSelected}
               onRegenerate={onImageRegenerate}
+              pickerOpen={imagePickerOpen}
+              onTogglePicker={onToggleImagePicker}
             />
           </>
         ) : null}

@@ -17,6 +17,7 @@ import { encodeShareSnapshot } from '@lib/studio/shareLink';
 import type { WorkspaceSnapshot } from '@lib/studio/workspaceSnapshot';
 import { downloadTextFile } from '@/lib/browser/download';
 import { exportPaletteImage } from '@/lib/browser/exportPaletteImage';
+import { openThemeTester } from '@/lib/browser/themeTesterHandoff';
 import {
   buildShareUrl,
   copyTextToClipboard,
@@ -127,6 +128,11 @@ export function useWorkspaceExports({
     download('craftie-shadcn.css', toShadcnTheme(tokenSet), 'text/css;charset=utf-8', t('export.done.shadcn'));
   }
 
+  function handleTestShadcn() {
+    if (!requireExportable()) return;
+    openThemeTester(toShadcnTheme(tokenSet));
+  }
+
   function handleExportTokensJson() {
     if (!requireExportable()) return;
     download(
@@ -226,6 +232,7 @@ export function useWorkspaceExports({
     handleExportFigmaTokens,
     handleExportTailwind,
     handleExportShadcn,
+    handleTestShadcn,
     handleExportTokensJson,
     handleExportImage,
     handleCopyShareLink,

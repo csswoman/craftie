@@ -15,6 +15,7 @@ import {
 import { validateImageFile } from './imageValidation';
 import { filterNeutralSamples, quantizeSamples, samplePixels } from './rasterSampling';
 import { normalizeHex } from './normalizeHex';
+import { detectSwatchColors } from './swatchDetection';
 import { reserveToneVariants } from './toneCoverage';
 
 export {
@@ -169,6 +170,14 @@ export function extractColorsFromRaster(
   const resolved = resolveImageExtractionOptions(options);
   const sampleOffset = options?.sampleOffset ?? 0;
   const centroidSeed = options?.centroidSeed ?? 0;
+
+  if (options?.swatches) {
+    const swatches = detectSwatchColors(raster);
+    if (swatches) {
+      return swatches;
+    }
+  }
+
   const rgbSamples = samplePixels(raster, resolved.sampleStep, sampleOffset);
 
   if (rgbSamples.length === 0) {

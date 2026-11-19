@@ -80,6 +80,8 @@ export const en: Record<MessageKey, string> = {
   'export.tailwindDesc': 'A ready-to-paste @theme block with dark mode and text roles.',
   'export.shadcn': 'shadcn/ui',
   'export.shadcnDesc': ':root and .dark variables for your globals.css.',
+  'export.testShadcn': 'Test the shadcn/ui theme',
+  'export.testShadcnDesc': 'Opens the exported theme on a real page with its contrast audit.',
   'export.designMd': 'DESIGN.md',
   'export.designMdDesc': 'A Markdown design guide for documentation.',
   'export.brandKit': 'Brand kit (.json)',

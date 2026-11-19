@@ -38,7 +38,7 @@ test.describe('color vision and framework exports', () => {
     await expect(page.getByRole('menuitem', { name: /Tailwind CSS v4/ })).toBeVisible();
 
     const downloadPromise = page.waitForEvent('download');
-    await page.getByRole('menuitem', { name: /shadcn\/ui/ }).click();
+    await page.getByRole('menuitem', { name: /^shadcn\/ui/ }).click();
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toBe('craftie-shadcn.css');
   });

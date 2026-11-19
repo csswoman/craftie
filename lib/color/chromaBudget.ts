@@ -20,6 +20,11 @@ const AREA_ESTIMATES: Partial<Record<SemanticTokenName, number>> = {
   'data-6': 0.02 / 6,
 };
 
+/** Estimated share of a typical UI covered by the token (0-1), or null when not budgeted. */
+export function estimatedTokenArea(tokenName: SemanticTokenName): number | null {
+  return AREA_ESTIMATES[tokenName] ?? null;
+}
+
 export type ChromaBudgetAssessment = {
   score: number;
   threshold: number;

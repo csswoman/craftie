@@ -339,6 +339,7 @@ export const DOCS_GROUPS_ES: DocsGroup[] = [
               'Si un par no llega a AA, el editor muestra «Faltan X puntos para AA», una barra de progreso y una muestra de texto real.',
               'Propone correcciones en OKLCH (aclarar u oscurecer texto o fondo) con el ratio resultante.',
               'Solo puedes aplicar la corrección del lado que estás editando; la del otro lado es una pista.',
+              'Si fallan dos o más roles, «Corregir todo» resuelve la paleta completa: busca el cambio de luminosidad más pequeño en conjunto, conserva el matiz y no toca los roles bloqueados. Se deshace en un solo paso.',
             ],
           },
           {
@@ -355,6 +356,7 @@ export const DOCS_GROUPS_ES: DocsGroup[] = [
               'C — intensidad (croma).',
               'H — matiz; mantener familia entre roles relacionados.',
               'HEX como referencia y para copiar.',
+              '«¿Por qué este color?» en el editor del rol explica el color con datos medidos: origen, matiz respecto al primario, luminosidad respecto a su capa, croma según el área que cubre, contraste exigido y ajustes aplicados.',
             ],
           },
           {
@@ -584,6 +586,7 @@ export const DOCS_GROUPS_ES: DocsGroup[] = [
             bullets: [
               'Mensaje de confirmación (ej. «tokens.css descargado»).',
               'Versiona el archivo junto al código que lo consume.',
+              '«Probar el tema shadcn/ui» abre el tema exportado en el probador (/tools/theme-tester): una página de ejemplo pintada solo con esas variables y la auditoría WCAG de cada par, en claro y oscuro.',
             ],
           },
           {

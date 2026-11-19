@@ -8,7 +8,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    'bg-primary text-on-primary hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25',
+    'bg-primary text-on-primary shadow-sm hover:bg-primary-hover hover:shadow-md focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25',
   ghost:
     'bg-transparent text-ink hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25',
 };
@@ -22,7 +22,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={`inline-flex items-center justify-center rounded-md px-4 py-2.5 text-[0.9375rem] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${variantClasses[variant]} ${className}`}
+      className={`inline-flex items-center justify-center rounded-md px-4 py-2.5 text-[0.9375rem] font-semibold transition-[background-color,transform,box-shadow] duration-200 ease-out active:translate-y-px motion-reduce:transition-none motion-reduce:active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 ${variantClasses[variant]} ${className}`}
       {...props}
     />
   );

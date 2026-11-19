@@ -16,6 +16,11 @@ export type ImageExtractionOptions = {
   sampleOffset?: number;
   centroidSeed?: number;
   publication?: 'centroid' | 'medoid';
+  /**
+   * Read flat swatches (palette cards, stripes) as exact colors when the
+   * image looks like a palette, before falling back to clustering.
+   */
+  swatches?: boolean;
 };
 
 export type ResolvedImageExtractionOptions = {

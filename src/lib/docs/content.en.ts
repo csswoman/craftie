@@ -339,6 +339,7 @@ export const DOCS_GROUPS_EN: DocsGroup[] = [
               'If a pair falls short of AA, the editor displays "X points needed for AA", a progress bar, and sample text.',
               'Suggests corrections in OKLCH (lighten or darken text or background) with the resulting ratio.',
               'You can only apply the correction for the side you are currently editing; the other side is a hint.',
+              'When two or more roles fail, «Fix all» solves the whole palette: it looks for the smallest combined lightness change, keeps the hue and leaves locked roles alone. One undo reverts it.',
             ],
           },
           {
@@ -355,6 +356,7 @@ export const DOCS_GROUPS_EN: DocsGroup[] = [
               'C — chroma (saturation/intensity).',
               'H — hue; keep related roles in the same family.',
               'HEX as reference and for copying.',
+              '"Why this color?" in the role editor explains the color with measured facts: origin, hue relative to the primary, lightness relative to its layer, chroma against the area it covers, required contrast and applied adjustments.',
             ],
           },
           {
@@ -584,6 +586,7 @@ export const DOCS_GROUPS_EN: DocsGroup[] = [
             bullets: [
               'Confirmation toast (e.g. "tokens.css downloaded").',
               'Commit the file alongside code that consumes it.',
+              '"Test the shadcn/ui theme" opens the exported theme in the tester (/tools/theme-tester): a sample page painted only with those variables, plus the WCAG audit of each pair in light and dark.',
             ],
           },
           {

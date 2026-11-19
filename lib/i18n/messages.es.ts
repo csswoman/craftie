@@ -80,6 +80,8 @@ export const es = {
   'export.tailwindDesc': 'Bloque @theme listo para pegar, con modo oscuro y roles de texto.',
   'export.shadcn': 'shadcn/ui',
   'export.shadcnDesc': 'Variables :root y .dark para tu globals.css.',
+  'export.testShadcn': 'Probar el tema shadcn/ui',
+  'export.testShadcnDesc': 'Abre el tema exportado en una página real con su auditoría de contraste.',
   'export.designMd': 'DESIGN.md',
   'export.designMdDesc': 'Guía de diseño en Markdown para documentación.',
   'export.brandKit': 'Brand kit (.json)',

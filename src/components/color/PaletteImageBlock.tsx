@@ -11,6 +11,9 @@ export type PaletteImageBlockProps = {
   isRegenerating: boolean;
   onFileSelected: (file: File) => void;
   onRegenerate: () => void;
+  /** Open state of the «pick colors from the image» view, toggled by the thumbnail. */
+  pickerOpen?: boolean;
+  onTogglePicker?: () => void;
 };
 
 export function PaletteImageBlock({
@@ -20,6 +23,8 @@ export function PaletteImageBlock({
   isRegenerating,
   onFileSelected,
   onRegenerate,
+  pickerOpen = false,
+  onTogglePicker,
 }: PaletteImageBlockProps) {
   const tx = useTx();
   const t = useT();
@@ -36,21 +41,44 @@ export function PaletteImageBlock({
     event.target.value = '';
   }
 
+  function thumbnail(insideLabelledButton: boolean) {
+    const alt = fileName ? t('ui.PaletteImageBlock.imagen-fuente', { fileName }) : t('ui.PaletteImageBlock.imagen-fuente-2');
+
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- Preview uses a local blob URL from the selected file.
+      <img
+        src={previewUrl}
+        alt={insideLabelledButton ? '' : alt}
+        width={30}
+        height={30}
+        className="h-full w-full object-cover"
+      />
+    );
+  }
+
   return (
     <div className="flex items-center gap-2 rounded-[11px] border border-line bg-surface-raised px-2 py-1.5">
-      <div
-        title={tx(imageIdentity)}
-        className="size-[30px] shrink-0 overflow-hidden rounded-[7px] border border-line bg-surface"
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element -- Preview uses a local blob URL from the selected file. */}
-        <img
-          src={previewUrl}
-          alt={fileName ? t('ui.PaletteImageBlock.imagen-fuente', { fileName }) : t('ui.PaletteImageBlock.imagen-fuente-2')}
-          width={30}
-          height={30}
-          className="h-full w-full object-cover"
-        />
-      </div>
+      {onTogglePicker ? (
+        <button
+          type="button"
+          title={t('ui.PaletteImageBlock.elegir-colores')}
+          aria-label={t('ui.PaletteImageBlock.elegir-colores')}
+          aria-pressed={pickerOpen}
+          onClick={onTogglePicker}
+          className={`size-[30px] shrink-0 overflow-hidden rounded-[7px] border bg-surface transition-shadow focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/25 ${
+            pickerOpen ? 'border-primary ring-2 ring-primary/40' : 'border-line hover:ring-2 hover:ring-line'
+          }`}
+        >
+          {thumbnail(true)}
+        </button>
+      ) : (
+        <div
+          title={tx(imageIdentity)}
+          className="size-[30px] shrink-0 overflow-hidden rounded-[7px] border border-line bg-surface"
+        >
+          {thumbnail(false)}
+        </div>
+      )}
 
       <button
         type="button"

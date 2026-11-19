@@ -16,6 +16,7 @@ export function workspaceExportProps(
   | 'onExportFigmaTokens'
   | 'onExportTailwind'
   | 'onExportShadcn'
+  | 'onTestShadcn'
   | 'onExportDesignMd'
   | 'onExportBrandKit'
   | 'onExportImage'
@@ -29,6 +30,7 @@ export function workspaceExportProps(
     onExportFigmaTokens: workspace.handleExportFigmaTokens,
     onExportTailwind: workspace.handleExportTailwind,
     onExportShadcn: workspace.handleExportShadcn,
+    onTestShadcn: workspace.handleTestShadcn,
     onExportDesignMd: workspace.handleExportDesignMd,
     onExportBrandKit: workspace.handleExportBrandKit,
     onExportImage: workspace.handleExportImage,

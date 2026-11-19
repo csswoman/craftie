@@ -6,6 +6,7 @@ import {
   getRolePaletteContrastWarnings,
   hasRolePaletteContrastFailure,
 } from '@lib/color/rolePaletteContrast';
+import { suggestRoleContrastFixes } from '@lib/color/roleContrastFixes';
 import { PALETTE_ROLE_ORDER } from '@lib/color/rolePalette';
 import type { SelectableColor } from '@lib/color/selectableColors';
 import type { ThemeId } from '@lib/color/themePalette';
@@ -44,10 +45,13 @@ export function usePaletteCanvasModel(paletteCatalog: SelectableColor[]) {
     ];
     for (const [theme, palette] of entries) {
       if (palette) {
+        const failure = hasRolePaletteContrastFailure(palette);
         reports.push({
           theme,
-          failure: hasRolePaletteContrastFailure(palette),
+          palette,
+          failure,
           warnings: getRolePaletteContrastWarnings(palette),
+          fixes: failure ? suggestRoleContrastFixes(palette) : [],
         });
       }
     }

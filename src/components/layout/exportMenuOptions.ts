@@ -9,6 +9,7 @@ export const EXPORT_OPTIONS = [
   { id: 'figma', labelKey: 'export.figma', descriptionKey: 'export.figmaDesc' },
   { id: 'tailwind', labelKey: 'export.tailwind', descriptionKey: 'export.tailwindDesc' },
   { id: 'shadcn', labelKey: 'export.shadcn', descriptionKey: 'export.shadcnDesc' },
+  { id: 'test-shadcn', labelKey: 'export.testShadcn', descriptionKey: 'export.testShadcnDesc' },
   { id: 'design-md', labelKey: 'export.designMd', descriptionKey: 'export.designMdDesc' },
   { id: 'brand-kit', labelKey: 'export.brandKit', descriptionKey: 'export.brandKitDesc' },
   { id: 'image', labelKey: 'export.image', descriptionKey: 'export.imageDesc' },

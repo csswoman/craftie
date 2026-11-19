@@ -165,7 +165,8 @@ function toChromaticBadge(check: ChromaticReadableTextCheck): RoleContrastBadgeD
   };
 }
 
-function previewPairRole(pairId: string): PaletteRoleId | null {
+/** Role whose hex drives a preview paint pair, or null when the pair is not tied to one role. */
+export function previewPairRole(pairId: string): PaletteRoleId | null {
   if (pairId.startsWith('button-brand-')) {
     return 'primario';
   }

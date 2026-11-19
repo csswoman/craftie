@@ -23,7 +23,7 @@ export type NeutralTint = {
 /** Below this OKLCH chroma a color carries no reliable hue. */
 export const ACHROMATIC_CHROMA_MAX = 0.01;
 /** Above this chroma a color is expressive, not a tinted neutral. */
-const TINTED_NEUTRAL_CHROMA_MAX = 0.055;
+export const TINTED_NEUTRAL_CHROMA_MAX = 0.055;
 /** Tinted neutrals only drive the ramp when they look like a background or ink. */
 const TINTED_NEUTRAL_LIGHT_L_MIN = 0.8;
 const TINTED_NEUTRAL_DARK_L_MAX = 0.3;
