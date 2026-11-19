@@ -32,6 +32,7 @@ export type WorkspaceHeaderProps = {
   onExportFigmaTokens: () => void;
   onExportTailwind: () => void;
   onExportShadcn: () => void;
+  onTestShadcn: () => void;
   onExportDesignMd: () => void;
   onExportBrandKit: () => void;
   onExportImage: () => void;
@@ -50,6 +51,7 @@ export function WorkspaceHeader({
   onExportFigmaTokens,
   onExportTailwind,
   onExportShadcn,
+  onTestShadcn,
   onExportDesignMd,
   onExportBrandKit,
   onExportImage,
@@ -65,6 +67,7 @@ export function WorkspaceHeader({
       onExportFigmaTokens={onExportFigmaTokens}
       onExportTailwind={onExportTailwind}
       onExportShadcn={onExportShadcn}
+      onTestShadcn={onTestShadcn}
       onExportDesignMd={onExportDesignMd}
       onExportBrandKit={onExportBrandKit}
       onExportImage={onExportImage}

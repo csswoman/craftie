@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import { openStudio } from './helpers';
 
-const PAGES = ['/', '/docs', '/docs/export', '/tools/contrast-checker', '/tools/palette-from-image', '/palettes'];
+const PAGES = ['/', '/docs', '/docs/export', '/tools/contrast-checker', '/tools/palette-from-image', '/tools/theme-tester', '/palettes'];
 
 for (const path of PAGES) {
   test(`has no serious or critical axe violations on ${path}`, async ({ page }) => {

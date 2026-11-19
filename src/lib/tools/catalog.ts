@@ -17,6 +17,11 @@ export const TOOLS: readonly ToolEntry[] = [
     description: 'Extrae los colores dominantes de una foto, sin subirla a ningún servidor.',
   },
   {
+    path: '/tools/theme-tester',
+    name: 'Probador de temas shadcn/ui',
+    description: 'Pega un tema, míralo en una página real y audita el contraste de sus variables.',
+  },
+  {
     path: '/palettes',
     name: 'Galería de paletas',
     description: 'Paletas originales filtradas por estilo, listas para abrir en el estudio.',

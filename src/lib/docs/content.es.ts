@@ -586,6 +586,7 @@ export const DOCS_GROUPS_ES: DocsGroup[] = [
             bullets: [
               'Mensaje de confirmación (ej. «tokens.css descargado»).',
               'Versiona el archivo junto al código que lo consume.',
+              '«Probar el tema shadcn/ui» abre el tema exportado en el probador (/tools/theme-tester): una página de ejemplo pintada solo con esas variables y la auditoría WCAG de cada par, en claro y oscuro.',
             ],
           },
           {

@@ -16,6 +16,7 @@ export type ExportMenuProps = {
   onExportFigmaTokens: () => void;
   onExportTailwind: () => void;
   onExportShadcn: () => void;
+  onTestShadcn: () => void;
   onExportDesignMd: () => void;
   onExportBrandKit: () => void;
   onExportImage: () => void;
@@ -45,6 +46,7 @@ export function ExportMenu({
   onExportFigmaTokens,
   onExportTailwind,
   onExportShadcn,
+  onTestShadcn,
   onExportDesignMd,
   onExportBrandKit,
   onExportImage,
@@ -140,6 +142,9 @@ export function ExportMenu({
         return;
       case 'shadcn':
         onExportShadcn();
+        return;
+      case 'test-shadcn':
+        onTestShadcn();
         return;
       case 'design-md':
         onExportDesignMd();

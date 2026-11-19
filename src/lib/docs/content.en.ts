@@ -586,6 +586,7 @@ export const DOCS_GROUPS_EN: DocsGroup[] = [
             bullets: [
               'Confirmation toast (e.g. "tokens.css downloaded").',
               'Commit the file alongside code that consumes it.',
+              '"Test the shadcn/ui theme" opens the exported theme in the tester (/tools/theme-tester): a sample page painted only with those variables, plus the WCAG audit of each pair in light and dark.',
             ],
           },
           {
