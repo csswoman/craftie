@@ -5,6 +5,7 @@ All notable changes to Craftie are documented here. The format follows [Keep a C
 ## [Unreleased]
 
 ### Added
+- «¿Por qué este color?» in the role editor: `lib/color/roleDerivation.ts` explains each role with measured facts (origin, hue relative to the primary, lightness relative to its layer, chroma against the area it covers, required contrast and corrections).
 - «Corregir todo» in the contrast notice: a whole-palette solver (`lib/color/systemContrastSolver.ts`) that repairs every failing role with the smallest combined OKLCH lightness change, respects locked roles and applies as one undo step.
 - `LICENSE` (MIT), `CONTRIBUTING.md`, issue and pull request templates, `.editorconfig`, `.nvmrc`.
 - Coverage reporting (`pnpm test:coverage`) with thresholds enforced in CI.

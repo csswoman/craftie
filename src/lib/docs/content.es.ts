@@ -356,6 +356,7 @@ export const DOCS_GROUPS_ES: DocsGroup[] = [
               'C — intensidad (croma).',
               'H — matiz; mantener familia entre roles relacionados.',
               'HEX como referencia y para copiar.',
+              '«¿Por qué este color?» en el editor del rol explica el color con datos medidos: origen, matiz respecto al primario, luminosidad respecto a su capa, croma según el área que cubre, contraste exigido y ajustes aplicados.',
             ],
           },
           {

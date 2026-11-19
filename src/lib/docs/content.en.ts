@@ -356,6 +356,7 @@ export const DOCS_GROUPS_EN: DocsGroup[] = [
               'C — chroma (saturation/intensity).',
               'H — hue; keep related roles in the same family.',
               'HEX as reference and for copying.',
+              '"Why this color?" in the role editor explains the color with measured facts: origin, hue relative to the primary, lightness relative to its layer, chroma against the area it covers, required contrast and applied adjustments.',
             ],
           },
           {
