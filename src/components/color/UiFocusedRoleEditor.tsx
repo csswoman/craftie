@@ -3,12 +3,14 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { normalizeHex } from '@lib/color/normalizeHex';
+import { paletteRoleForTokenName } from '@lib/color/semanticRoleProjection';
 import type { SelectableColor } from '@lib/color/selectableColors';
 import type { SemanticTokenName, SemanticTokens } from '@lib/color/semanticTokens';
 
 import { useRolePalette } from '@/context/RolePaletteContext';
 
 import { InlineTokenDerivationEditor } from './InlineTokenDerivationEditor';
+import { RoleDerivationDetails } from './RoleDerivationDetails';
 import type { CompactRoleDefinition } from './uiColorPanelGroups';
 import { useT, useTx } from '@/context/I18nContext';
 
@@ -29,7 +31,7 @@ export function UiFocusedRoleEditor({
 }) {
   const tx = useTx();
   const t = useT();
-  const { setTokenEditPreview, clearTokenEditPreview } = useRolePalette();
+  const { rolePalette, setTokenEditPreview, clearTokenEditPreview } = useRolePalette();
   const [originals] = useState<Partial<Record<SemanticTokenName, string>>>(() =>
     Object.fromEntries(roles.map((role) => [role.token, tokens[role.token].hex])),
   );
@@ -68,6 +70,7 @@ export function UiFocusedRoleEditor({
           : 'sintético';
         const originalHex = originals[role.token] ?? token.hex;
         const candidateDraft = candidateDrafts[role.token];
+        const paletteRole = paletteRoleForTokenName(role.token);
 
         return (
           <li
@@ -164,6 +167,10 @@ export function UiFocusedRoleEditor({
                     return next;
                   })}
                 />
+
+                {rolePalette && paletteRole ? (
+                  <RoleDerivationDetails palette={rolePalette} role={paletteRole} />
+                ) : null}
               </div>
             ) : null}
           </li>

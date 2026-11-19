@@ -15,8 +15,6 @@ import { ContrastFailureAdvice } from './ContrastFailureAdvice';
 import type { ContrastFixSide } from '@lib/color/contrastAdvice';
 import { hexToOklchChannels } from '@lib/utils/colorMath';
 import { useT, useTx } from '@/context/I18nContext';
-import { useRolePalette } from '@/context/RolePaletteContext';
-import { RoleDerivationDetails } from './RoleDerivationDetails';
 
 /** Which side of its contrast pair each role controls; derived roles have none. */
 const EDITABLE_SIDE: Partial<Record<PaletteRoleId, ContrastFixSide>> = {
@@ -45,7 +43,6 @@ export function RoleColorEditor({
   const tx = useTx();
   const t = useT();
   const editor = useRoleColorEditor(role);
-  const { rolePalette } = useRolePalette();
   const [acceptedFailure, setAcceptedFailure] = useState(false);
 
   if (!editor.ready || !editor.slot || !editor.oklch || !editor.contrast) {
@@ -129,8 +126,6 @@ export function RoleColorEditor({
         <p className="rounded-[var(--chrome-radius-card)] border border-border bg-surface p-3 font-sans text-tools-meta text-ink">
           {t('ui.RoleColorEditor.puedes-elegir-uno-manualmente', { gap: tx(slot.gap) })}</p>
       ) : null}
-
-      {rolePalette ? <RoleDerivationDetails palette={rolePalette} role={role} /> : null}
 
       {showContrast ? <RoleContrastBadge contrast={contrast} /> : null}
       {showContrast && contrast.status === 'fail' ? (
